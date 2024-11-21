@@ -13,7 +13,7 @@ class OqcReport extends StatefulWidget {
   State<OqcReport> createState() => _OqcReportState();
 }
 
-class _OqcReportState extends State<OqcReport> with PdfMixin{
+class _OqcReportState extends State<OqcReport> with PdfMixin {
   late pw.Document _pdf;
   late Future<pw.Font> _tableCellFont;
   String _exportPath = "";
@@ -52,42 +52,31 @@ class _OqcReportState extends State<OqcReport> with PdfMixin{
 
     _pdf = pw.Document();
 
-    _pdf.addPage(_homePage());
-    _pdf.addPage(_modelInfoPage(tableCellFont));
-    _pdf.addPage(_buildAppearanceStructureInspectionPage(tableCellFont));
-    _pdf.addPage(
-      _buildPage((context) {
-        return Section(title: "b. Input & Output Characteristics", table:
-        pw.TableHelper.fromTextArray(
-          border: pw.TableBorder.all(
-            color: PdfColors.black,
-          ),
-          headerStyle: pw.TextStyle(
-            fontWeight: pw.FontWeight.bold,
-            fontSize: 8,
-          ),
-          cellStyle: pw.TextStyle(
-            font: tableCellFont,
-            fontSize: 8,
-          ),
-          // columnWidths: {
-          //
-          // },
-          cellAlignments: {
-            0: pw.Alignment.centerLeft,
-            1: pw.Alignment.center,
-            2: pw.Alignment.centerLeft,
-            3: pw.Alignment.centerLeft,
-          },
-          headers: [pw.Column(children: [pw.Text("Item"),pw.Text("Spec")]), "Vin","Iin","Pin","Vout","Iout","Pout"],
-          data: [["L","R"]],
-        ),
-        );
-      })
-    );
+    _pdf.addPage(_coverSection());
+    _pdf.addPage(_modelInfoSection(tableCellFont));
+    _pdf.addPage(_buildAppearanceStructureInspectionSection(tableCellFont));
+    _pdf.addPage(_buildPage((context) => pw.Column(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          children: [
+            InputOutputCharacteristicsSection(tableCellFont),
+            BasicFunctionTestSection(tableCellFont),
+            ProtectionFunctionTest(tableCellFont),
+            InsulationTestSection(tableCellFont),
+          ],
+        )));
+    _pdf.addPage(_buildPage((context) => pw.Column(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          children: [
+            BurnInTestSection(tableCellFont),
+            PackagingChecklist(tableCellFont),
+          ],
+        )));
+    _pdf.addPage(_buildPage((context) => pw.Column(
+          children: [AttachmentSection(), SignatureSection()],
+        )));
   }
 
-  pw.Page _buildAppearanceStructureInspectionPage(pw.Font tableCellFont) {
+  pw.Page _buildAppearanceStructureInspectionSection(pw.Font tableCellFont) {
     return _buildPage((context) {
       return pw.Column(children: [
         AppearanceStructureInspection(tableCellFont: tableCellFont),
@@ -95,7 +84,7 @@ class _OqcReportState extends State<OqcReport> with PdfMixin{
     });
   }
 
-  pw.Page _modelInfoPage(pw.Font tableCellFont) {
+  pw.Page _modelInfoSection(pw.Font tableCellFont) {
     return _buildPage((context) {
       return pw.Padding(
         padding: const pw.EdgeInsets.symmetric(horizontal: 100),
@@ -110,7 +99,7 @@ class _OqcReportState extends State<OqcReport> with PdfMixin{
     });
   }
 
-  pw.Page _homePage() {
+  pw.Page _coverSection() {
     return _buildPage((context) {
       return pw.Column(
           mainAxisAlignment: pw.MainAxisAlignment.center,
@@ -146,12 +135,6 @@ class _OqcReportState extends State<OqcReport> with PdfMixin{
     );
   }
 
-  pw.Center _buildPdfCenter(String data) {
-    return pw.Center(
-      child: pw.Text(data),
-    );
-  }
-
   Future<void> export() async {
     // On Flutter, use the [path_provider](https://pub.dev/packages/path_provider) library:
     final output = await getTemporaryDirectory();
@@ -160,6 +143,324 @@ class _OqcReportState extends State<OqcReport> with PdfMixin{
     await file.writeAsBytes(await _pdf.save());
     setState(() {});
   }
+}
+
+class BasicFunctionTestSection extends pw.StatelessWidget {
+  final pw.Font tableCellFont;
+
+  BasicFunctionTestSection(this.tableCellFont);
+
+  @override
+  pw.Widget build(pw.Context context) {
+    return AutoTestSection(tableCellFont,
+        title: "c. Basic Function Test",
+        data: [
+          ["1", "Efficiency", "Spec: >94%\nEfficiency: ______ %", "  "],
+          ["2", "Power Factor (PF)", "Spec: ≧ 0.99 ±1%\nPF: _______", "  "],
+          ["3", "Harmonic", "Spec: <5 %\nTHD: ______ %", "  "],
+          ["4", "Standby Power", "Spec: <100W\nStandby Power: ______ W", "  "],
+        ]);
+  }
+}
+
+class ProtectionFunctionTest extends pw.StatelessWidget {
+  final pw.Font tableCellFont;
+
+  ProtectionFunctionTest(this.tableCellFont);
+
+  @override
+  pw.Widget build(pw.Context context) {
+    return AutoTestSection(tableCellFont,
+        title: "d. Protection Function Test",
+        data: [
+          [
+            "1",
+            "Emergency Stop Function",
+            "Spec: ≧ 0.99 ±1%\nPF: _______",
+            "  "
+          ],
+          ["2", "Door Open Function", "Spec: <5 %\nTHD: ______ %", "  "],
+          [
+            "3",
+            "Ground Fault Function",
+            "Spec: <100W\nStandby Power: ______ W",
+            "  "
+          ],
+        ]);
+  }
+}
+
+class InsulationTestSection extends pw.StatelessWidget {
+  final pw.Font tableCellFont;
+
+  InsulationTestSection(this.tableCellFont);
+
+  @override
+  pw.Widget build(pw.Context context) {
+    return AutoTestSection(tableCellFont,
+        columnWidths: {
+          0: pw.FlexColumnWidth(1),
+          1: pw.FlexColumnWidth(2),
+          2: pw.FlexColumnWidth(6),
+          3: pw.FlexColumnWidth(1),
+        },
+        title: "e. Insulation Test",
+        data: [
+          [
+            "1",
+            "Insulation Impedance Test.\n\nApply a DC Voltage:\n  a) Between each circuit.  \nb) Between each of the independent circuits and the ground (case).",
+            buildGanSection("Insulation impedance >10MΩ"),
+            "  "
+          ],
+          [
+            "2",
+            "Insulation Impedance Test.\n\nApply a DC Voltage:\n  a) Between each circuit.  \nb) Between each of the independent circuits and the ground (case).",
+            buildGanSection("Leakage current <10mA"),
+            "  "
+          ],
+        ]);
+  }
+
+  pw.Column buildGanSection(String title) {
+    return pw.Column(
+      children: [
+        pw.Text(title),
+        pw.Row(
+          children: [
+            pw.Text(
+                "Left Plug\nInput/Output : ______MΩ\nInput/Ground : ______MΩ\nOutput/Ground : ______MΩ"),
+            pw.Text(
+                "Right Plug\nInput/Output : ______MΩ\nInput/Ground : ______MΩ\nOutput/Ground : ______MΩ"),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class AutoTestSection extends pw.StatelessWidget {
+  final pw.Font tableCellFont;
+  final String title;
+  final List<List<dynamic>> data;
+  final Map<int, pw.TableColumnWidth>? columnWidths;
+
+  AutoTestSection(this.tableCellFont,
+      {required this.title, required this.data, this.columnWidths});
+
+  @override
+  pw.Widget build(pw.Context context) {
+    return Section(
+        title: title,
+        table: pw.TableHelper.fromTextArray(
+          border: pw.TableBorder.all(
+            color: PdfColors.black,
+          ),
+          headerStyle: pw.TextStyle(
+            fontWeight: pw.FontWeight.bold,
+            fontSize: 8,
+          ),
+          cellStyle: pw.TextStyle(
+            font: tableCellFont,
+            fontSize: 8,
+          ),
+          // columnWidths: {
+          //
+          // },
+          cellAlignments: {
+            0: pw.Alignment.centerLeft,
+            1: pw.Alignment.center,
+            2: pw.Alignment.centerLeft,
+            3: pw.Alignment.centerLeft,
+          },
+          columnWidths: columnWidths,
+          headers: [
+            "No.",
+            "Inspection Item",
+            "Inspection Details",
+            "Judgement",
+          ],
+          data: data,
+        ));
+  }
+}
+
+class BurnInTestSection extends pw.StatelessWidget {
+  final pw.Font tableCellFont;
+
+  BurnInTestSection(this.tableCellFont);
+
+  @override
+  pw.Widget build(pw.Context context) {
+    return AutoTestSection(tableCellFont, title: "f. Burn-in Test", data: [
+      [
+        "1",
+        "Burn-in",
+        "Charging current should be the highest value of a single charge plug could withstand.\n\nL :  __________ V   __________ A\nR : __________ V   __________ ",
+        "  "
+      ],
+      ["2", "Door Open Function", "Spec: <5 %\nTHD: ______ %", "  "],
+      [
+        "3",
+        "Ground Fault Function",
+        "Spec: <100W\nStandby Power: ______ W",
+        "  "
+      ],
+    ]);
+  }
+}
+
+class PackagingChecklist extends pw.StatelessWidget with PdfMixin {
+  final pw.Font tableCellFont;
+
+  PackagingChecklist(this.tableCellFont);
+
+  @override
+  pw.Widget build(pw.Context context) {
+    return Section(
+        title: "g. Packaging Checklist",
+        table: _buildTable(tableCellFont: tableCellFont, headers: [
+          "No.",
+          "Items",
+          "Q'ty",
+          "Check"
+        ], rows: [
+          ["1", "Certificate Card", "Q'ty:   ", "v"],
+          ["2", "RFID Card", "Q'ty:   ", "v"],
+          ["3", "Bolts Cover", "Q'ty:   ", "v"],
+          ["4", "Cabinet's key", "Q'ty:   ", "v"],
+          ["5", "AC Breaker's key", "Q'ty:   ", "v"],
+          ["6", "Others: ___________", "Q'ty:   ", "v"],
+          ["7", "Others: ___________", "Q'ty:   ", "v"],
+          ["8", "Others: ___________", "Q'ty:   ", "v"],
+          ["9", "Others: ___________", "Q'ty:   ", "v"],
+        ]));
+  }
+}
+
+class AttachmentSection extends pw.StatelessWidget {
+  final List<String> titles = ["Fornt", "Rear", "Right", "Left"];
+
+  @override
+  pw.Widget build(pw.Context context) {
+    return pw.Column(children: [
+      pw.Row(children: [
+        buildField(titles[0]),
+        buildField(titles[1]),
+      ]),
+      pw.Row(children: [
+        buildField(titles[2]),
+        buildField(titles[3]),
+      ]),
+    ]);
+  }
+
+  pw.Column buildField(String title) {
+    return pw.Column(
+      children: [
+        pw.Text(title),
+        pw.SizedBox(width: 200, height: 200),
+      ],
+    );
+  }
+}
+
+class SignatureSection extends pw.StatelessWidget with PdfMixin {
+  @override
+  pw.Widget build(pw.Context context) {
+    return pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          _buildText("Tester : ", 16, pw.FontWeight.bold),
+          _buildText("Approval : ", 16, pw.FontWeight.bold),
+          _buildText("Date : ", 16, pw.FontWeight.bold),
+          pw.SizedBox(height: 6),
+          pw.Row(
+            children: [
+              _buildText("Doc No.：", 16, pw.FontWeight.normal),
+              _buildText("Version：", 16, pw.FontWeight.normal),
+            ],
+          )
+        ]);
+  }
+
+  pw.Text _buildText(String data, double fontSize, pw.FontWeight fontWeight) {
+    return pw.Text(data,
+        textAlign: pw.TextAlign.center,
+        style: pw.TextStyle(
+          fontSize: fontSize,
+          fontWeight: fontWeight,
+        ));
+  }
+}
+
+class InputOutputCharacteristicsSection extends pw.StatelessWidget {
+  final pw.Font tableCellFont;
+
+  InputOutputCharacteristicsSection(this.tableCellFont);
+
+  @override
+  pw.Widget build(pw.Context context) {
+    return Section(
+      title: "b. Input & Output Characteristics",
+      table: pw.TableHelper.fromTextArray(
+        border: pw.TableBorder.all(
+          color: PdfColors.black,
+        ),
+        headerStyle: pw.TextStyle(
+          fontWeight: pw.FontWeight.bold,
+          fontSize: 8,
+        ),
+        cellStyle: pw.TextStyle(
+          font: tableCellFont,
+          fontSize: 8,
+        ),
+        // columnWidths: {
+        //
+        // },
+        cellAlignments: {
+          0: pw.Alignment.centerLeft,
+          1: pw.Alignment.center,
+          2: pw.Alignment.centerLeft,
+          3: pw.Alignment.centerLeft,
+        },
+        headers: [
+          _buildTwoColRow("Item", "Spec"),
+          _buildTwoColRow("Vin", "220V±15%"),
+          _buildTwoColRow("Vin", "<295A"),
+          _buildTwoColRow("Item", "<195 kW"),
+          _buildTwoColRow("Item", "950V±2%"),
+          _buildTwoColRow("Item", "189A±2%"),
+          _buildTwoColRow("Item", "180kW"),
+          "Judgement",
+        ],
+        data: [
+          [
+            "L",
+            "___V\n___V\n___V",
+            "___A\n___A\n___A",
+            "___kW\n",
+            "___V\n",
+            "___A\n",
+            "___kW\n",
+            "    "
+          ],
+          [
+            "R",
+            "___V\n___V\n___V",
+            "___A\n___A\n___A",
+            "___kW\n",
+            "___V\n",
+            "___A\n",
+            "___kW\n",
+            "    "
+          ],
+        ],
+      ),
+    );
+  }
+
+  pw.Column _buildTwoColRow(String data1, String data2) => pw.Column(
+      children: [pw.Text(data1), pw.Divider(thickness: 1), pw.Text(data2)]);
 }
 
 class PsuSection extends pw.StatelessWidget with PdfMixin {
