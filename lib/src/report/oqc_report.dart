@@ -6,8 +6,12 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
+import 'model/oqc_report_model.dart';
+
 class OqcReport extends StatefulWidget {
-  OqcReport({super.key});
+  final OqcReportModel model;
+
+  OqcReport({super.key, required this.model});
 
   @override
   State<OqcReport> createState() => _OqcReportState();
@@ -53,12 +57,12 @@ class _OqcReportState extends State<OqcReport> with PdfMixin {
     _pdf = pw.Document();
 
     _pdf.addPage(_coverSection());
-    _pdf.addPage(_modelInfoSection(tableCellFont));
+    _pdf.addPage(_modelInfoSection(tableCellFont, widget.model));
     _pdf.addPage(_buildAppearanceStructureInspectionSection(tableCellFont));
     _pdf.addPage(_buildPage((context) => pw.Column(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           children: [
-            InputOutputCharacteristicsSection(tableCellFont),
+            InputOutputCharacteristicsSection(tableCellFont, widget.model),
             BasicFunctionTestSection(tableCellFont),
             ProtectionFunctionTest(tableCellFont),
             InsulationTestSection(tableCellFont),
@@ -84,15 +88,15 @@ class _OqcReportState extends State<OqcReport> with PdfMixin {
     });
   }
 
-  pw.Page _modelInfoSection(pw.Font tableCellFont) {
+  pw.Page _modelInfoSection(pw.Font tableCellFont, OqcReportModel model) {
     return _buildPage((context) {
       return pw.Padding(
         padding: const pw.EdgeInsets.symmetric(horizontal: 100),
         child: pw.Column(children: [
           pw.Spacer(flex: 2),
-          PsuSection(),
+          PsuSection(model),
           pw.Spacer(flex: 1),
-          EvSoftwareVersionSection(tableCellFont: tableCellFont),
+          EvSoftwareVersionSection(model, tableCellFont: tableCellFont),
           pw.Spacer(flex: 2),
         ]),
       );
@@ -395,8 +399,9 @@ class SignatureSection extends pw.StatelessWidget with PdfMixin {
 
 class InputOutputCharacteristicsSection extends pw.StatelessWidget {
   final pw.Font tableCellFont;
+  final OqcReportModel model;
 
-  InputOutputCharacteristicsSection(this.tableCellFont);
+  InputOutputCharacteristicsSection(this.tableCellFont, this.model);
 
   @override
   pw.Widget build(pw.Context context) {
@@ -426,33 +431,69 @@ class InputOutputCharacteristicsSection extends pw.StatelessWidget {
         headers: [
           _buildTwoColRow("Item", "Spec"),
           _buildTwoColRow("Vin", "220V±15%"),
-          _buildTwoColRow("Vin", "<295A"),
-          _buildTwoColRow("Item", "<195 kW"),
-          _buildTwoColRow("Item", "950V±2%"),
-          _buildTwoColRow("Item", "189A±2%"),
-          _buildTwoColRow("Item", "180kW"),
+          _buildTwoColRow("Iin", "<295A"),
+          _buildTwoColRow("Pin", "<195 kW"),
+          _buildTwoColRow("Vout", "950V±2%"),
+          _buildTwoColRow("Iout", "189A±2%"),
+          _buildTwoColRow("Pout", "180kW"),
           "Judgement",
         ],
         data: [
           [
             "L",
-            "___V\n___V\n___V",
-            "___A\n___A\n___A",
-            "___kW\n",
-            "___V\n",
-            "___A\n",
-            "___kW\n",
-            "    "
+            model.ioCharacteristicsFilteredData
+                .where((c) => c.keys.first == "L_Input_V")
+                .map((c) => "${c.values.first}V")
+                .join("\n"),
+            model.ioCharacteristicsFilteredData
+                .where((c) => c.keys.first == "L_Input_A")
+                .map((c) => "${c.values.first}A")
+                .join("\n"),
+            model.ioCharacteristicsFilteredData
+                .where((c) => c.keys.first == "L_Total_Input_P")
+                .map((c) => "${c.values.first}kW")
+                .join("\n"),
+            model.ioCharacteristicsFilteredData
+                .where((c) => c.keys.first == "L_Output_V")
+                .map((c) => "${c.values.first}V")
+                .join("\n"),
+            model.ioCharacteristicsFilteredData
+                .where((c) => c.keys.first == "L_Output_A")
+                .map((c) => "${c.values.first}A")
+                .join("\n"),
+            model.ioCharacteristicsFilteredData
+                .where((c) => c.keys.first == "L_Output_P")
+                .map((c) => "${c.values.first}kW")
+                .join("\n"),
+            " S/F  "
           ],
           [
             "R",
-            "___V\n___V\n___V",
-            "___A\n___A\n___A",
-            "___kW\n",
-            "___V\n",
-            "___A\n",
-            "___kW\n",
-            "    "
+            model.ioCharacteristicsFilteredData
+                .where((c) => c.keys.first == "R_Input_V")
+                .map((c) => "${c.values.first}V")
+                .join("\n"),
+            model.ioCharacteristicsFilteredData
+                .where((c) => c.keys.first == "R_Input_A")
+                .map((c) => "${c.values.first}A")
+                .join("\n"),
+            model.ioCharacteristicsFilteredData
+                .where((c) => c.keys.first == "R_Total_Input_P")
+                .map((c) => "${c.values.first}kW")
+                .join("\n"),
+            model.ioCharacteristicsFilteredData
+                .where((c) => c.keys.first == "R_Output_V")
+                .map((c) => "${c.values.first}V")
+                .join("\n"),
+            model.ioCharacteristicsFilteredData
+                .where((c) => c.keys.first == "R_Output_A")
+                .map((c) => "${c.values.first}A")
+                .join("\n"),
+            model.ioCharacteristicsFilteredData
+                .where((c) => c.keys.first == "R_Output_P")
+                .map((c) => "${c.values.first}kW")
+                .join("\n"),
+            " S/F  "
           ],
         ],
       ),
@@ -464,6 +505,10 @@ class InputOutputCharacteristicsSection extends pw.StatelessWidget {
 }
 
 class PsuSection extends pw.StatelessWidget with PdfMixin {
+  final OqcReportModel model;
+
+  PsuSection(this.model);
+
   @override
   pw.Widget build(pw.Context context) {
     return Section(
@@ -475,12 +520,10 @@ class PsuSection extends pw.StatelessWidget with PdfMixin {
         },
         headers: ["No.", "S/N"],
         rows: [
-          ["1.", ""],
-          ["2.", ""],
-          ["3.", ""],
-          ["4.", ""],
-          ["5.", ""],
-          ["6.", ""],
+          ...model.chargeModules
+              .asMap()
+              .map((i, c) => MapEntry(i, ["$i.", c.snId]))
+              .values,
         ],
       ),
     );
@@ -489,8 +532,9 @@ class PsuSection extends pw.StatelessWidget with PdfMixin {
 
 class EvSoftwareVersionSection extends pw.StatelessWidget with PdfMixin {
   final pw.Font tableCellFont;
+  final OqcReportModel model;
 
-  EvSoftwareVersionSection({required this.tableCellFont});
+  EvSoftwareVersionSection(this.model, {required this.tableCellFont});
 
   @override
   pw.Widget build(pw.Context context) {
@@ -501,14 +545,10 @@ class EvSoftwareVersionSection extends pw.StatelessWidget with PdfMixin {
           "Item",
           "Version"
         ], rows: [
-          ["1", "CSU", "1234"],
-          ["2", "Fan Board", "5667"],
-          ["3", "Relay Board", "8901"],
-          ["4", "DCM 407", "2345"],
-          ["5", "CCS", "68798"],
-          ["6", "UI", "04678"],
-          ["7", "LED", "97325"],
-          ["8", "", ""],
+          ...model.softwareVersions
+              .asMap()
+              .map((i, s) => MapEntry(i, ["$i.", s.key, s.version]))
+              .values,
         ]));
   }
 }
