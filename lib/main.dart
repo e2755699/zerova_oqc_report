@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:excel/excel.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:zerova_oqc_report/src/report/model/charge_module.dart';
-import 'package:zerova_oqc_report/src/report/model/oqc_report_model.dart';
-import 'package:zerova_oqc_report/src/report/model/software_version.dart';
+import 'package:zerova_oqc_report/src/report/model/old_charge_module.dart';
+import 'package:zerova_oqc_report/src/report/model/old_oqc_report_model.dart';
+import 'package:zerova_oqc_report/src/report/model/old_software_version.dart';
 
 // import 'package:pdf_text/pdf_text.dart';
 import 'package:zerova_oqc_report/src/report/oqc_report.dart';

@@ -1,6 +1,6 @@
-import 'package:zerova_oqc_report/src/report/model/charge_module.dart';
+import 'package:zerova_oqc_report/src/report/model/old_charge_module.dart';
 
-import 'software_version.dart';
+import 'old_software_version.dart';
 
 class OqcReportModel {
   final List<ChargeModule> chargeModules = List.empty(growable: true);

@@ -6,7 +6,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
-import 'model/oqc_report_model.dart';
+import 'model/old_oqc_report_model.dart';
 
 class OqcReport extends StatefulWidget {
   final OqcReportModel model;
