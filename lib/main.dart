@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:excel/excel.dart';
 import 'package:file_picker/file_picker.dart';
@@ -6,6 +7,12 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:zerova_oqc_report/src/report/model/old_charge_module.dart';
 import 'package:zerova_oqc_report/src/report/model/old_oqc_report_model.dart';
 import 'package:zerova_oqc_report/src/report/model/old_software_version.dart';
+import 'package:zerova_oqc_report/src/report/model/PSUSerialNumber.dart';
+import 'package:zerova_oqc_report/src/report/model/ProtectionFunctionTestresult.dart';
+import 'package:zerova_oqc_report/src/report/model/SoftWareVersion.dart';
+import 'package:zerova_oqc_report/src/report/model/TestFunction.dart';
+import 'package:zerova_oqc_report/src/report/model/InputOutputCharacteristics.dart';
+import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 
 // import 'package:pdf_text/pdf_text.dart';
 import 'package:zerova_oqc_report/src/report/oqc_report.dart';
@@ -22,1070 +29,301 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: ExcelReaderScreen(),
+      //home: ExcelReaderScreen(),
+      home: JSONReaderScreen(),
     );
   }
 }
 
-class ExcelReaderScreen extends StatefulWidget {
+class JSONReaderScreen extends StatefulWidget {
   @override
-  _ExcelReaderScreenState createState() => _ExcelReaderScreenState();
+  _JSONReaderScreenState createState() => _JSONReaderScreenState();
 }
 
-class _ExcelReaderScreenState extends State<ExcelReaderScreen> {
-  List<Map<String, dynamic>> _filteredData = []; // 用於存儲 Module ID 篩選結果
-  List<Map<String, dynamic>> _swvFilteredData =
-      []; // 用於存儲 SoftWare Version 篩選結果
-  List<Map<String, dynamic>> _IOCharacteristicsFilteredData =
-      []; // 用於存儲 IO Data 篩選結果
-  List<Map<String, dynamic>> _ProtectionFunctionTestResultData =
-      []; // 用於存儲 Protection Function Test 結果
-  String? _extractedVoltage = ""; // 用來存儲從PDF提取的Present Charging Voltage
-
-  // 選擇並讀取 Excel 檔案
-  Future<void> _pickAndReadExcelFile() async {
+class _JSONReaderScreenState extends State<JSONReaderScreen> {
+  softwareversion? _softwareVersion;
+  psuserialnumber? _psuSerialNumbers; // 添加存儲 PSU Serial Number 的變量
+  InputOutputCharacteristics? _inputOutputCharacteristics;
+  ProtectionFunctionTestResult?
+  _testResults; // 添加存儲 Protection Function Test 結果的變量
+  testfunction? _testfunction; // 添加存儲 Protection Function Test 結果的變量
+  /// 選擇並讀取 JSON 檔案
+  Future<void> _pickAndReadJsonFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.any,
     );
 
     if (result != null) {
-      File file = File(result.files.single.path!);
-      var bytes = file.readAsBytesSync();
-      var excel = Excel.decodeBytes(bytes);
-      var oqcReportModel = OqcReportModel();
-      // 找到 "Keypart" 工作表並篩選 PSU S/N
-      var keypartSheet = excel.tables['Keypart'];
-      _filteredData.clear();
-      if (keypartSheet != null) {
-        for (int rowIndex = 1; rowIndex < keypartSheet.maxRows; rowIndex++) {
-          var row = keypartSheet.row(rowIndex);
-          if (row.any((cell) =>
-              cell?.value?.toString().contains("CHARGING MODULE") ?? false)) {
-            var row2 = row[0];
-            if (row2 != null &&
-                row2.value != null &&
-                row2.value.toString().isNotEmpty) {
-              var chargeModule = ChargeModule.fromExcel(row2.value.toString());
-              oqcReportModel.setChargeModule(chargeModule);
-              Map<String, dynamic> rowData = {
-                "PSUSN": chargeModule.snId,
-              };
-              _filteredData.add(rowData);
-              print("PSU S/N ${chargeModule.snId}");
-            }
-          }
-        }
-      }
+      String jsonContent = await File(result.files.single.path!).readAsString();
+      String testFunctionJsonContent = await File(
+          "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\T2433A031A0_oqc.json")
+          .readAsString();
+      String moduleJsonContent = await File(
+          "C:\\Users\\USER\\Downloads\\1234keypart.json")
+          .readAsString();
+      List<dynamic> data = jsonDecode(jsonContent);
+      List<dynamic> testFuncionData = jsonDecode(testFunctionJsonContent);
+      List<dynamic> moduleData = jsonDecode(moduleJsonContent);
 
-      // 找到 "Test_value" 工作表並篩選 SW ver
-      var testValueSheet = excel.tables['Test_value'];
-      _swvFilteredData.clear();
-      if (testValueSheet != null) {
-        for (int rowIndex = 1; rowIndex < testValueSheet.maxRows; rowIndex++) {
-          var row = testValueSheet.row(rowIndex);
-          if (row.any(
-              (cell) => cell?.value?.toString() == "CSU Rootfs" ?? false)) {
-            var row2 = row[6];
-            if (row2 != null &&
-                row2.value != null &&
-                row2.value.toString().isNotEmpty) {
-              var softwareVersion =
-                  SoftwareVersion.fromExcel("CSU Rootfs", row2.value.toString());
-              oqcReportModel.setSoftwareVersion(softwareVersion);
-
-              Map<String, dynamic> rowData = {
-                "CSURootfs": softwareVersion.version,
-              };
-              _swvFilteredData.add(rowData);
-              print("CSU Rootfs: ${softwareVersion.version}");
-            }
-          }
-          if (row.any(
-              (cell) => cell?.value?.toString() == "FAN Module" ?? false)) {
-            var row2 = row[6];
-            if (row2 != null &&
-                row2.value != null &&
-                row2.value.toString().isNotEmpty) {
-              var softwareVersion = SoftwareVersion.fromExcel(
-                  "FAN Board", row2.value.toString());
-              oqcReportModel.setSoftwareVersion(softwareVersion);
-              Map<String, dynamic> rowData = {
-                "FANModule": softwareVersion.version,
-              };
-              _swvFilteredData.add(rowData);
-              print("FAN Module: ${softwareVersion.version}");
-            }
-          }
-          if (row.any(
-              (cell) => cell?.value?.toString() == "Relay Module" ?? false)) {
-            var row2 = row[6];
-            if (row2 != null &&
-                row2.value != null &&
-                row2.value.toString().isNotEmpty) {
-              var softwareVersion = SoftwareVersion.fromExcel(
-                  "Relay Board", row2.value.toString());
-              oqcReportModel.setSoftwareVersion(softwareVersion);
-              Map<String, dynamic> rowData = {
-                "RelayModule": softwareVersion.version,
-              };
-              _swvFilteredData.add(rowData);
-              print("Relay Module: ${softwareVersion.version}");
-            }
-          }
-          if (row.any(
-              (cell) => cell?.value?.toString() == "Primary MCU" ?? false)) {
-            var row2 = row[6];
-            if (row2 != null &&
-                row2.value != null &&
-                row2.value.toString().isNotEmpty) {
-              //todo Primary MCU是對的嗎？
-              var softwareVersion = SoftwareVersion.fromExcel(
-                  "Primary MCU", row2.value.toString());
-              oqcReportModel.setSoftwareVersion(softwareVersion);
-              Map<String, dynamic> rowData = {
-                "PrimaryMCU": softwareVersion.version,
-              };
-              _swvFilteredData.add(rowData);
-              print("Primary MCU: ${softwareVersion.version}");
-            }
-          }
-          if ((row.any((cell) =>
-                  cell?.value?.toString() == "Connector 1" ?? false)) ||
-              (row.any((cell) =>
-                  cell?.value?.toString() == "Connector 2" ?? false))) {
-            var row2 = row[6];
-            if (row2 != null &&
-                row2.value != null &&
-                row2.value.toString().isNotEmpty) {
-              if ((row.any((cell) =>
-                  cell?.value?.toString() == "Connector 1" ?? false))) {
-                var softwareVersion = SoftwareVersion.fromExcel(
-                    "Connector 1", row2.value.toString());
-                oqcReportModel.setSoftwareVersion(softwareVersion);
-                Map<String, dynamic> rowData = {
-                  "Connector1": softwareVersion.version,
-                };
-                _swvFilteredData.add(rowData);
-                print("Connector 1: ${softwareVersion.version}");
-              }
-              if ((row.any((cell) =>
-                  cell?.value?.toString() == "Connector 2" ?? false))) {
-                var softwareVersion = SoftwareVersion.fromExcel(
-                    "Connector 2", row2.value.toString());
-                oqcReportModel.setSoftwareVersion(softwareVersion);
-                Map<String, dynamic> rowData = {
-                  "Connector2": softwareVersion.version,
-                };
-                _swvFilteredData.add(rowData);
-                print("Connector 2: ${softwareVersion.version}");
-              }
-            }
-          }
-          if (row.any((cell) => cell?.value?.toString() == "LCM UI" ?? false)) {
-            var row2 = row[6];
-            if (row2 != null &&
-                row2.value != null &&
-                row2.value.toString().isNotEmpty) {
-              var softwareVersion =
-                  SoftwareVersion.fromExcel("UI", row2.value.toString());
-              oqcReportModel.setSoftwareVersion(softwareVersion);
-              Map<String, dynamic> rowData = {
-                "LCMUI": softwareVersion.version,
-              };
-              _swvFilteredData.add(rowData);
-              print("LCM UI: ${softwareVersion.version}");
-            }
-          }
-          if (row.any(
-              (cell) => cell?.value?.toString() == "LED Module" ?? false)) {
-            var row2 = row[6];
-            if (row2 != null &&
-                row2.value != null &&
-                row2.value.toString().isNotEmpty) {
-              var softwareVersion =
-                  SoftwareVersion.fromExcel("LED", row2.value.toString());
-              oqcReportModel.setSoftwareVersion(softwareVersion);
-              Map<String, dynamic> rowData = {
-                "LEDModule": softwareVersion.version,
-              };
-              _swvFilteredData.add(rowData);
-              print("LED Module: ${softwareVersion.version}");
-            }
-          }
-        }
-      }
-
-      // 找到 "Test_value" 工作表並篩選 IO Data
-      var ioSheet = excel.tables['Test_value'];
-      _IOCharacteristicsFilteredData.clear();
-      if (ioSheet != null) {
-        int L_Input_Voltage = 0, R_Input_Voltage = 0;
-        int L_Input_Current = 0, R_Input_Current = 0;
-        int L_Total_Input_Power = 0, R_Total_Input_Power = 0;
-        int L_Output_Voltage = 0, R_Output_Voltage = 0;
-        int L_Output_Current = 0, R_Output_Current = 0;
-        int L_Output_Power = 0, R_Output_Power = 0;
-        int Eff = 0, PowerFactor = 0, THD = 0, StandbyTotalInputPower = 0;
-        for (int rowIndex = 1; rowIndex < ioSheet.maxRows; rowIndex++) {
-          var row = ioSheet.row(rowIndex);
-          if (row.any((cell) =>
-              cell?.value?.toString().contains("Input_Voltage") ?? false)) {
-            var row2 = row[6];
-            if (row2 != null &&
-                row2.value != null &&
-                row2.value.toString().isNotEmpty) {
-              var ioValue = IOCharacteristics.fromExcel(row2.value.toString());
-
-              if (row.any((cell) =>
-                      cell?.value?.toString().contains("[6]") ?? false) &&
-                  L_Input_Voltage < 3) {
-                Map<String, dynamic> rowData = {
-                  "L_Input_V": ioValue.IOData,
-                };
-                _IOCharacteristicsFilteredData.add(rowData);
-                L_Input_Voltage++;
-                print("L_Input_Voltage$L_Input_Voltage: ${ioValue.IOData}");
-              } else if (row.any((cell) =>
-                      cell?.value?.toString().contains("[13]") ?? false) &&
-                  R_Input_Voltage < 3) {
-                Map<String, dynamic> rowData = {
-                  "R_Input_V": ioValue.IOData,
-                };
-                R_Input_Voltage++;
-                _IOCharacteristicsFilteredData.add(rowData);
-                print("R_Input_Voltage$R_Input_Voltage: ${ioValue.IOData}");
-              }
-            }
-          }
-          if (row.any((cell) =>
-              cell?.value?.toString().contains("Input_Current") ?? false)) {
-            var row2 = row[6];
-            if (row2 != null &&
-                row2.value != null &&
-                row2.value.toString().isNotEmpty) {
-              var ioValue = IOCharacteristics.fromExcel(row2.value.toString());
-
-              if (row.any((cell) =>
-                      cell?.value?.toString().contains("[6]") ?? false) &&
-                  L_Input_Current < 3) {
-                Map<String, dynamic> rowData = {
-                  "L_Input_A": ioValue.IOData,
-                };
-                _IOCharacteristicsFilteredData.add(rowData);
-                L_Input_Current++;
-                print("L_Input_Current$L_Input_Current: ${ioValue.IOData}");
-              } else if (row.any((cell) =>
-                      cell?.value?.toString().contains("[13]") ?? false) &&
-                  R_Input_Current < 3) {
-                Map<String, dynamic> rowData = {
-                  "R_Input_A": ioValue.IOData,
-                };
-                R_Input_Current++;
-                _IOCharacteristicsFilteredData.add(rowData);
-                print("R_Input_Current$R_Input_Current: ${ioValue.IOData}");
-              }
-            }
-          }
-          if (row.any((cell) =>
-              cell?.value?.toString().contains("Total_Input_Power") ?? false)) {
-            var row2 = row[6];
-            if (row2 != null &&
-                row2.value != null &&
-                row2.value.toString().isNotEmpty) {
-              var ioValue = IOCharacteristics.fromExcel(row2.value.toString());
-
-              if (row.any((cell) =>
-                      cell?.value?.toString().contains("[6]") ?? false) &&
-                  L_Total_Input_Power == 0) {
-                Map<String, dynamic> rowData = {
-                  "L_Total_Input_P": ioValue.IOData,
-                };
-                _IOCharacteristicsFilteredData.add(rowData);
-                L_Total_Input_Power = 1;
-                print("L_Total_Input_Power ${ioValue.IOData}");
-              } else if (row.any((cell) =>
-                      cell?.value?.toString().contains("[13]") ?? false) &&
-                  R_Total_Input_Power == 0) {
-                Map<String, dynamic> rowData = {
-                  "R_Total_Input_P": ioValue.IOData,
-                };
-                _IOCharacteristicsFilteredData.add(rowData);
-                R_Total_Input_Power = 1;
-                print("R_Total_Input_Power ${ioValue.IOData}");
-              }
-            }
-          }
-          if (row.any((cell) =>
-              cell?.value?.toString().contains("Output_Voltage") ?? false)) {
-            var row2 = row[6];
-            if (row2 != null &&
-                row2.value != null &&
-                row2.value.toString().isNotEmpty) {
-              var ioValue = IOCharacteristics.fromExcel(row2.value.toString());
-
-              if (row.any((cell) =>
-                      cell?.value?.toString().contains("[6]") ?? false) &&
-                  L_Output_Voltage == 0) {
-                Map<String, dynamic> rowData = {
-                  "L_Output_V": ioValue.IOData,
-                };
-                _IOCharacteristicsFilteredData.add(rowData);
-                L_Output_Voltage = 1;
-                print("L_Output_Voltage ${ioValue.IOData}");
-              } else if (row.any((cell) =>
-                      cell?.value?.toString().contains("[13]") ?? false) &&
-                  R_Output_Voltage == 0) {
-                Map<String, dynamic> rowData = {
-                  "R_Output_V": ioValue.IOData,
-                };
-                _IOCharacteristicsFilteredData.add(rowData);
-                R_Output_Voltage = 1;
-                print("R_Output_Voltage ${ioValue.IOData}");
-              }
-            }
-          }
-          if (row.any((cell) =>
-              cell?.value?.toString().contains("Output_Current") ?? false)) {
-            var row2 = row[6];
-            if (row2 != null &&
-                row2.value != null &&
-                row2.value.toString().isNotEmpty) {
-              var ioValue = IOCharacteristics.fromExcel(row2.value.toString());
-
-              if (row.any((cell) =>
-                      cell?.value?.toString().contains("[6]") ?? false) &&
-                  L_Output_Current == 0) {
-                Map<String, dynamic> rowData = {
-                  "L_Output_A": ioValue.IOData,
-                };
-                _IOCharacteristicsFilteredData.add(rowData);
-                L_Output_Current = 1;
-                print("L_Output_Current ${ioValue.IOData}");
-              } else if (row.any((cell) =>
-                      cell?.value?.toString().contains("[13]") ?? false) &&
-                  R_Output_Current == 0) {
-                Map<String, dynamic> rowData = {
-                  "R_Output_A": ioValue.IOData,
-                };
-                _IOCharacteristicsFilteredData.add(rowData);
-                R_Output_Current = 1;
-                print("R_Output_Current ${ioValue.IOData}");
-              }
-            }
-          }
-          if (row.any((cell) =>
-              cell?.value?.toString().contains("Output_Power") ?? false)) {
-            var row2 = row[6];
-            if (row2 != null &&
-                row2.value != null &&
-                row2.value.toString().isNotEmpty) {
-              var ioValue = IOCharacteristics.fromExcel(row2.value.toString());
-
-              if (row.any((cell) =>
-                      cell?.value?.toString().contains("[6]") ?? false) &&
-                  L_Output_Power == 0) {
-                Map<String, dynamic> rowData = {
-                  "L_Output_P": ioValue.IOData,
-                };
-                _IOCharacteristicsFilteredData.add(rowData);
-                L_Output_Power = 1;
-                print("L_Output_Power ${ioValue.IOData}");
-              } else if (row.any((cell) =>
-                      cell?.value?.toString().contains("[13]") ?? false) &&
-                  R_Output_Power == 0) {
-                Map<String, dynamic> rowData = {
-                  "R_Output_P": ioValue.IOData,
-                };
-                _IOCharacteristicsFilteredData.add(rowData);
-                R_Output_Power = 1;
-                print("R_Output_Power ${ioValue.IOData}");
-              }
-            }
-          }
-          if ((row.any((cell) => cell?.value?.toString() == "Eff") ?? false) ||
-              (row.any((cell) => cell?.value?.toString() == "EFF") ?? false)) {
-            var row2 = row[6];
-            if (row2 != null &&
-                row2.value != null &&
-                row2.value.toString().isNotEmpty) {
-              var ioValue = IOCharacteristics.fromExcel(row2.value.toString());
-              Map<String, dynamic> rowData = {
-                "EFF": ioValue.IOData,
-              };
-              if (Eff == 0) {
-                _IOCharacteristicsFilteredData.add(rowData);
-                Eff = 1;
-                print("Eff ${ioValue.IOData}");
-              }
-            }
-          }
-          if (row.any((cell) =>
-              cell?.value?.toString().contains("PowerFactor") ?? false)) {
-            var row2 = row[6];
-            if (row2 != null &&
-                row2.value != null &&
-                row2.value.toString().isNotEmpty) {
-              var ioValue = IOCharacteristics.fromExcel(row2.value.toString());
-              Map<String, dynamic> rowData = {
-                "PowerFactor": ioValue.IOData,
-              };
-              if (PowerFactor < 3) {
-                _IOCharacteristicsFilteredData.add(rowData);
-                PowerFactor++;
-                print("PowerFactor$PowerFactor ${ioValue.IOData}");
-              }
-            }
-          }
-          if (row.any(
-              (cell) => cell?.value?.toString().contains("THD") ?? false)) {
-            var row2 = row[6];
-            if (row2 != null &&
-                row2.value != null &&
-                row2.value.toString().isNotEmpty) {
-              var ioValue = IOCharacteristics.fromExcel(row2.value.toString());
-              Map<String, dynamic> rowData = {
-                "THD": ioValue.IOData,
-              };
-              if (THD < 3) {
-                _IOCharacteristicsFilteredData.add(rowData);
-                THD++;
-                print("THD$THD ${ioValue.IOData}");
-              }
-            }
-          }
-          if ((row.any((cell) =>
-                  cell?.value
-                      ?.toString()
-                      .contains("Standby_Total_Input_Power") ??
-                  false)) ||
-              (row.any((cell) =>
-                  cell?.value
-                      ?.toString()
-                      .contains("Standby Total Input Power") ??
-                  false))) {
-            var row2 = row[6];
-            if (row2 != null &&
-                row2.value != null &&
-                row2.value.toString().isNotEmpty) {
-              var ioValue = IOCharacteristics.fromExcel(row2.value.toString());
-              Map<String, dynamic> rowData = {
-                "StandbyTotalInputPower": ioValue.IOData,
-              };
-              if (StandbyTotalInputPower == 0) {
-                _IOCharacteristicsFilteredData.add(rowData);
-                StandbyTotalInputPower = 1;
-                print("StandbyTotalInputPower ${ioValue.IOData}");
-              }
-            }
-          }
-        }
-      }
-
-      // 找到 "Test_value" 工作表並篩選 Test
-      var pftSheet = excel.tables['Test_value'];
-      _ProtectionFunctionTestResultData.clear();
-      if (pftSheet != null) {
-        int Emergency_Stop_Fail = 0,
-            Door_Open_Fail = 0,
-            Ground_Fault_Fail = 0,
-            Insulation_Fault_Fail = 0;
-        int L_IO = 0, R_IO = 0;
-        int L_IG = 0, R_IG = 0;
-        int L_OG = 0, R_OG = 0;
-        int L_GroundOhm = 0, R_GroundOhm = 0;
-        for (int rowIndex = 1; rowIndex < pftSheet.maxRows; rowIndex++) {
-          var row = pftSheet.row(rowIndex);
-          if (row.any((cell) =>
-              cell?.value?.toString().contains("Emergency Test") ?? false)) {
-            var row2 = row[7];
-            if (row2 != null &&
-                row2.value != null &&
-                row2.value.toString().isNotEmpty &&
-                row2.value.toString() == "FAIL") {
-              Emergency_Stop_Fail++;
-            }
-          }
-          if (row.any((cell) =>
-              cell?.value?.toString().contains("Door Open Test") ?? false)) {
-            var row2 = row[7];
-            if (row2 != null &&
-                row2.value != null &&
-                row2.value.toString().isNotEmpty &&
-                row2.value.toString() == "FAIL") {
-              Door_Open_Fail++;
-            }
-          }
-          if (row.any((cell) =>
-              cell?.value?.toString().contains("Ground Fault Test") ?? false)) {
-            var row2 = row[7];
-            if (row2 != null &&
-                row2.value != null &&
-                row2.value.toString().isNotEmpty &&
-                row2.value.toString() == "FAIL") {
-              Ground_Fault_Fail++;
-            }
-          }
-          if (row.any(
-              (cell) => cell?.value?.toString().contains("Seq.2") ?? false)) {
-            var row2 = row[6];
-            var row3 = row[7];
-            if (row2 != null &&
-                row2.value != null &&
-                row2.value.toString().isNotEmpty) {
-              var iogValue =
-                  ProtectionFunctionTestResult.fromExcel(row2.value.toString());
-
-              if (row.any((cell) =>
-                  cell?.value?.toString().contains("Data_1") ?? false)) {
-                Map<String, dynamic> rowData = {
-                  "L_IO": iogValue.PFTResult,
-                };
-                _ProtectionFunctionTestResultData.add(rowData);
-                L_IO++;
-                print("L_IO$L_IO: ${iogValue.PFTResult}");
-              }
-              if (row.any((cell) =>
-                  cell?.value?.toString().contains("Data_2") ?? false)) {
-                Map<String, dynamic> rowData = {
-                  "L_IG": iogValue.PFTResult,
-                };
-                _ProtectionFunctionTestResultData.add(rowData);
-                L_IG++;
-                print("L_IG$L_IG: ${iogValue.PFTResult}");
-              }
-              if (row.any((cell) =>
-                  cell?.value?.toString().contains("Data_3") ?? false)) {
-                Map<String, dynamic> rowData = {
-                  "L_OG": iogValue.PFTResult,
-                };
-                _ProtectionFunctionTestResultData.add(rowData);
-                L_OG++;
-                print("L_OG$L_OG: ${iogValue.PFTResult}");
-              }
-              if (row.any((cell) =>
-                  cell?.value?.toString().contains("Data_7") ?? false)) {
-                Map<String, dynamic> rowData = {
-                  "L_GroundOhm": iogValue.PFTResult,
-                };
-                _ProtectionFunctionTestResultData.add(rowData);
-                L_GroundOhm++;
-                print("L_GroundOhm$L_GroundOhm: ${iogValue.PFTResult}");
-              }
-            }
-            if (row3 != null &&
-                row3.value != null &&
-                row3.value.toString().isNotEmpty &&
-                row3.value.toString() == "FAIL") {
-              Insulation_Fault_Fail++;
-            }
-          }
-          if (row.any(
-              (cell) => cell?.value?.toString().contains("Seq.4") ?? false)) {
-            var row2 = row[6];
-            var row3 = row[7];
-            if (row2 != null &&
-                row2.value != null &&
-                row2.value.toString().isNotEmpty) {
-              var iogValue =
-                  ProtectionFunctionTestResult.fromExcel(row2.value.toString());
-
-              if (row.any((cell) =>
-                  cell?.value?.toString().contains("Data_1") ?? false)) {
-                Map<String, dynamic> rowData = {
-                  "R_IO": iogValue.PFTResult,
-                };
-                _ProtectionFunctionTestResultData.add(rowData);
-                R_IO++;
-                print("R_IO$R_IO: ${iogValue.PFTResult}");
-              }
-              if (row.any((cell) =>
-                  cell?.value?.toString().contains("Data_2") ?? false)) {
-                Map<String, dynamic> rowData = {
-                  "R_IG": iogValue.PFTResult,
-                };
-                _ProtectionFunctionTestResultData.add(rowData);
-                R_IG++;
-                print("R_IG$R_IG: ${iogValue.PFTResult}");
-              }
-              if (row.any((cell) =>
-                  cell?.value?.toString().contains("Data_3") ?? false)) {
-                Map<String, dynamic> rowData = {
-                  "R_OG": iogValue.PFTResult,
-                };
-                _ProtectionFunctionTestResultData.add(rowData);
-                R_OG++;
-                print("R_OG$R_OG: ${iogValue.PFTResult}");
-              }
-              if (row.any((cell) =>
-                  cell?.value?.toString().contains("Data_7") ?? false)) {
-                Map<String, dynamic> rowData = {
-                  "R_GroundOhm": iogValue.PFTResult,
-                };
-                _ProtectionFunctionTestResultData.add(rowData);
-                R_GroundOhm++;
-                print("R_GroundOhm$R_GroundOhm: ${iogValue.PFTResult}");
-              }
-            }
-            if (row3 != null &&
-                row3.value != null &&
-                row3.value.toString().isNotEmpty &&
-                row3.value.toString() == "FAIL") {
-              Insulation_Fault_Fail++;
-            }
-          }
-        }
-        if (Emergency_Stop_Fail >= 3) {
-          var pftValue = ProtectionFunctionTestResult.fromExcel("FAIL");
-          Map<String, dynamic> rowData = {
-            "EmergencyTest": pftValue.PFTResult,
-          };
-          _ProtectionFunctionTestResultData.add(rowData);
-          print("Emergency Test: ${pftValue.PFTResult}");
-          print("Emergency FAIL: $Emergency_Stop_Fail");
-        } else {
-          var pftValue = ProtectionFunctionTestResult.fromExcel("PASS");
-          Map<String, dynamic> rowData = {
-            "EmergencyTest": pftValue.PFTResult,
-          };
-          _ProtectionFunctionTestResultData.add(rowData);
-          print("Emergency Test: ${pftValue.PFTResult}");
-          print("Emergency PASS: $Emergency_Stop_Fail");
-        }
-        if (Door_Open_Fail >= 3) {
-          var pftValue = ProtectionFunctionTestResult.fromExcel("FAIL");
-          Map<String, dynamic> rowData = {
-            "DoorTest": pftValue.PFTResult,
-          };
-          _ProtectionFunctionTestResultData.add(rowData);
-          print("Door Open Test: ${pftValue.PFTResult}");
-          print("Door Open FAIL: $Door_Open_Fail");
-        } else {
-          var pftValue = ProtectionFunctionTestResult.fromExcel("PASS");
-          Map<String, dynamic> rowData = {
-            "DoorTest": pftValue.PFTResult,
-          };
-          _ProtectionFunctionTestResultData.add(rowData);
-          print("Door Open Test: ${pftValue.PFTResult}");
-          print("Door Open PASS: $Door_Open_Fail");
-        }
-        if (Ground_Fault_Fail >= 3) {
-          var pftValue = ProtectionFunctionTestResult.fromExcel("FAIL");
-          Map<String, dynamic> rowData = {
-            "GroundTest": pftValue.PFTResult,
-          };
-          _ProtectionFunctionTestResultData.add(rowData);
-          print("Ground Fault Test: ${pftValue.PFTResult}");
-          print("Ground Fault FAIL: $Ground_Fault_Fail");
-        } else {
-          var pftValue = ProtectionFunctionTestResult.fromExcel("PASS");
-          Map<String, dynamic> rowData = {
-            "GroundTest": pftValue.PFTResult,
-          };
-          _ProtectionFunctionTestResultData.add(rowData);
-          print("Ground Fault Test: ${pftValue.PFTResult}");
-          print("Ground Fault PASS: $Ground_Fault_Fail");
-        }
-        if (Insulation_Fault_Fail >= 3) {
-          var pftValue = ProtectionFunctionTestResult.fromExcel("FAIL");
-          Map<String, dynamic> rowData = {
-            "InsulationTest": pftValue.PFTResult,
-          };
-          _ProtectionFunctionTestResultData.add(rowData);
-          print("Insulation Fault Test: ${pftValue.PFTResult}");
-          print("Insulation Fault FAIL: $Ground_Fault_Fail");
-        } else {
-          var pftValue = ProtectionFunctionTestResult.fromExcel("PASS");
-          Map<String, dynamic> rowData = {
-            "InsulationTest": pftValue.PFTResult,
-          };
-          _ProtectionFunctionTestResultData.add(rowData);
-          print("Insulation Fault Test: ${pftValue.PFTResult}");
-          print("Insulation Fault PASS: $Ground_Fault_Fail");
-        }
-      }
-
-      oqcReportModel.setIOCharacteristicsFilteredData(_IOCharacteristicsFilteredData);
-      oqcReportModel.setProtectionFunctionTestResultData(_ProtectionFunctionTestResultData);
-      setState(() {}); // 更新UI
+      // 使用 `softwareversion`, `psuserialnumber` 和 `protectionfunctiontestresult` 的方法處理數據
+      setState(() {
+        _softwareVersion = softwareversion.fromJsonList(data);
+        _psuSerialNumbers =
+            psuserialnumber.fromJsonList(moduleData); // 提取多筆 PSU Serial Number
+        _inputOutputCharacteristics = InputOutputCharacteristics.fromJsonList(data);
+        _testResults =
+            ProtectionFunctionTestResult.fromJsonList(data); // 提取測試結果
+        _testfunction = testfunction.fromJsonList(testFuncionData);
+      });
     }
   }
 
-  // 生成並儲存 PDF
-  Future<void> _generatePdf() async {
-    final pdf = pw.Document();
+  String result = '';
+  String Model = '';
+  String SN = '';
 
-    // 添加 Keypart 資料到 PDF
-    pdf.addPage(
-      pw.MultiPage(
-        build: (pw.Context context) => [
-          pw.Text("PSU S/N :", style: pw.TextStyle(fontSize: 16)),
-          ..._filteredData.map((data) {
-            return pw.Text(
-              "PSUSN: ${data['PSUSN']}",
-              style: pw.TextStyle(fontSize: 12),
-            );
-          }).toList(),
-          pw.SizedBox(height: 20),
-          pw.Text("Software Version :", style: pw.TextStyle(fontSize: 16)),
-          ..._swvFilteredData.map((data) {
-            return pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                if (data["CSU"] != null)
-                  pw.Text("CSU: ${data['CSU']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["FANModule"] != null)
-                  pw.Text("FANModule: ${data['FANModule']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["RelayModule"] != null)
-                  pw.Text("RelayModule: ${data['RelayModule']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["PrimaryMCU"] != null)
-                  pw.Text("PrimaryMCU: ${data['PrimaryMCU']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["Connector1"] != null)
-                  pw.Text("Connector1: ${data['Connector1']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["Connector2"] != null)
-                  pw.Text("Connector2: ${data['Connector2']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["LCMUI"] != null)
-                  pw.Text("LCMUI: ${data['LCMUI']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["LEDModule"] != null)
-                  pw.Text("LEDModule: ${data['LEDModule']}",
-                      style: pw.TextStyle(fontSize: 12)),
-              ],
-            );
-          }).toList(),
-          pw.SizedBox(height: 20),
-          pw.Text("IO Data :", style: pw.TextStyle(fontSize: 16)),
-          ..._IOCharacteristicsFilteredData.map((data) {
-            return pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                if (data["L_Input_V"] != null)
-                  pw.Text("L_Input_V: ${data['L_Input_V']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["L_Input_A"] != null)
-                  pw.Text("L_Input_A: ${data['L_Input_A']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["L_Total_Input_P"] != null)
-                  pw.Text("L_Total_Input_P: ${data['L_Total_Input_P']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["L_Output_V"] != null)
-                  pw.Text("L_Output_V: ${data['L_Output_V']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["L_Output_A"] != null)
-                  pw.Text("L_Output_A: ${data['L_Output_A']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["L_Output_P"] != null)
-                  pw.Text("L_Output_P: ${data['L_Output_P']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["R_Input_V"] != null)
-                  pw.Text("R_Input_V: ${data['R_Input_V']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["R_Input_A"] != null)
-                  pw.Text("R_Input_A: ${data['R_Input_A']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["R_Total_Input_P"] != null)
-                  pw.Text("R_Total_Input_P: ${data['R_Total_Input_P']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["R_Output_V"] != null)
-                  pw.Text("R_Output_V: ${data['R_Output_V']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["R_Output_A"] != null)
-                  pw.Text("R_Output_A: ${data['R_Output_A']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["R_Output_P"] != null)
-                  pw.Text("R_Output_P: ${data['R_Output_P']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["EFF"] != null)
-                  pw.Text("EFF: ${data['EFF']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["PowerFactor"] != null)
-                  pw.Text("PowerFactor: ${data['PowerFactor']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["THD"] != null)
-                  pw.Text("THD: ${data['THD']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["StandbyTotalInputPower"] != null)
-                  pw.Text(
-                      "StandbyTotalInputPower: ${data['StandbyTotalInputPower']}",
-                      style: pw.TextStyle(fontSize: 12)),
-              ],
-            );
-          }).toList(),
-          pw.SizedBox(height: 20),
-          pw.Text("Protection Function Test :",
-              style: pw.TextStyle(fontSize: 16)),
-          ..._ProtectionFunctionTestResultData.map((data) {
-            return pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                if (data["EmergencyTest"] != null)
-                  pw.Text("EmergencyTest: ${data['EmergencyTest']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["DoorTest"] != null)
-                  pw.Text("DoorTest: ${data['DoorTest']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["GroundTest"] != null)
-                  pw.Text("GroundTest: ${data['GroundTest']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["InsulationTest"] != null)
-                  pw.Text("InsulationTest: ${data['InsulationTest']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["L_IO"] != null)
-                  pw.Text("L_IO: ${data['L_IO']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["L_IG"] != null)
-                  pw.Text("L_IG: ${data['L_IG']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["L_OG"] != null)
-                  pw.Text("L_OG: ${data['L_OG']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["L_GroundOhm"] != null)
-                  pw.Text("L_GroundOhm: ${data['L_GroundOhm']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["R_IO"] != null)
-                  pw.Text("R_IO: ${data['R_IO']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["R_IG"] != null)
-                  pw.Text("R_IG: ${data['R_IG']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["R_OG"] != null)
-                  pw.Text("R_OG: ${data['R_OG']}",
-                      style: pw.TextStyle(fontSize: 12)),
-                if (data["R_GroundOhm"] != null)
-                  pw.Text("R_GroundOhm: ${data['R_GroundOhm']}",
-                      style: pw.TextStyle(fontSize: 12)),
-              ],
-            );
-          }).toList(),
-        ],
+  Future<void> _qr() async {
+    /*String? res = await SimpleBarcodeScanner.scanBarcode(
+      context,
+      barcodeAppBar: const BarcodeAppBar(
+        appBarTitle: 'Test',
+        centerTitle: false,
+        enableBackButton: true,
+        backButtonIcon: Icon(Icons.arrow_back_ios),
       ),
-    );
-
-    // 讓使用者選擇儲存 PDF 的路徑
-    String? path = await FilePicker.platform.saveFile(
-      dialogTitle: '選擇儲存路徑',
-      fileName: 'filtered_data.pdf',
-      allowedExtensions: ['pdf'],
-    );
-
-    if (path != null) {
-      File file = File(path);
-      await file.writeAsBytes(await pdf.save());
-
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('PDF已儲存至: ${file.path}'),
-      ));
-    }
+      isShowFlashIcon: true,
+      delayMillis: 500,
+      cameraFace: CameraFace.back,
+      scanFormat: ScanFormat.ONLY_BARCODE,
+    );*/
+    setState(() {
+      //result = res as String;
+      result="T1234567 SN8765432";
+      // 將 result 拆成兩部分
+      List<String> parts = result.split(' ');
+      if (parts.length >= 2) {
+        Model = parts[0];
+        SN = parts[1];
+      } else {
+        Model = result;
+        SN = ''; // 若分割後不足兩部分，則 part2 保持空字串
+      }
+      // 將 Model 和 SN 打印到 console
+      print('Model: $Model');
+      print('SN: $SN');
+    });
   }
-
-  // 讀取並提取 PDF 中 Present Charging Voltage 下一行資料
-  // Future<void> _readPdfAndExtractVoltage() async {
-  //   FilePickerResult? result = await FilePicker.platform.pickFiles(
-  //     type: FileType.custom,
-  //     allowedExtensions: ['pdf'],
-  //   );
-  //
-  //   if (result != null) {
-  //     File file = File(result.files.single.path!);
-  //     var doc = await PDFDoc.fromFile(file);
-  //
-  //     String? extractedText = await doc.text;
-  //
-  //     // 查找 Present Charging Voltage 並提取其後的一行
-  //     final regex = RegExp(r"Present Charging Voltage[^\n]*\n([^\n]*)");
-  //     final match = regex.firstMatch(extractedText!);
-  //
-  //     if (match != null) {
-  //       setState(() {
-  //         _extractedVoltage = match.group(1); // 提取並顯示下一行的資料
-  //       });
-  //     } else {
-  //       setState(() {
-  //         _extractedVoltage = "未找到 Present Charging Voltage 資料";
-  //       });
-  //     }
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Excel Reader & PDF Generator'),
+        title: Text('Software Version Reader'),
       ),
-      body: Center(
-        child: Column(
-          children: [
-            ElevatedButton(
-              onPressed: _pickAndReadExcelFile,
-              child: Text('讀取Excel檔案'),
-            ),
-            ElevatedButton(
-              onPressed: _generatePdf,
-              child: Text('生成並儲存 PDF 檔案'),
-            ),
-            ElevatedButton(
-              // onPressed: _readPdfAndExtractVoltage,
-              onPressed: () {},
-              child: Text('讀取Burn-in PDF'),
-            ),
-            if (_extractedVoltage != null)
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text('Extracted Voltage: $_extractedVoltage'),
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            children: [
+              ElevatedButton(
+                onPressed: _qr,
+                child: Text('掃描QR-Code'),
               ),
-            Expanded(
-              child: ListView(
-                children: [
-                  if (_filteredData.isNotEmpty) ...[
-                    Text('PSU S/N :', style: TextStyle(fontSize: 16)),
-                    ..._filteredData.map((data) {
-                      return ListTile(
-                        title: Text('PSUSN: ${data["PSUSN"]}'),
-                      );
-                    }).toList(),
-                  ],
-                  if (_swvFilteredData.isNotEmpty) ...[
-                    Text('Software Version :', style: TextStyle(fontSize: 16)),
-                    ..._swvFilteredData.map((data) {
-                      return ListTile(
-                        title: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (data["CSU"] != null)
-                              Text('CSU: ${data["CSU"]}'),
-                            if (data["FANModule"] != null)
-                              Text('FANModule: ${data["FANModule"]}'),
-                            if (data["RelayModule"] != null)
-                              Text('RelayModule: ${data["RelayModule"]}'),
-                            if (data["Connector1"] != null)
-                              Text('Connector1: ${data["Connector1"]}'),
-                            if (data["Connector2"] != null)
-                              Text('Connector2: ${data["Connector2"]}'),
-                            if (data["LCMUI"] != null)
-                              Text('LCMUI: ${data["LCMUI"]}'),
-                            if (data["LEDModule"] != null)
-                              Text('LEDModule: ${data["LEDModule"]}'),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ],
-                  if (_IOCharacteristicsFilteredData.isNotEmpty) ...[
-                    Text('IO Data :', style: TextStyle(fontSize: 16)),
-                    ..._IOCharacteristicsFilteredData.map((data) {
-                      return ListTile(
-                        title: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (data["L_Input_V"] != null)
-                              Text('L_Input_V: ${data["L_Input_V"]}'),
-                            if (data["L_Input_A"] != null)
-                              Text('L_Input_A: ${data["L_Input_A"]}'),
-                            if (data["L_Total_Input_P"] != null)
-                              Text(
-                                  'L_Total_Input_P: ${data["L_Total_Input_P"]}'),
-                            if (data["L_Output_V"] != null)
-                              Text('L_Output_V: ${data["L_Output_V"]}'),
-                            if (data["L_Output_A"] != null)
-                              Text('L_Output_A: ${data["L_Output_A"]}'),
-                            if (data["L_Output_P"] != null)
-                              Text('L_Output_P: ${data["L_Output_P"]}'),
-                            if (data["R_Input_V"] != null)
-                              Text('R_Input_V: ${data["R_Input_V"]}'),
-                            if (data["R_Input_A"] != null)
-                              Text('R_Input_A: ${data["R_Input_A"]}'),
-                            if (data["R_Total_Input_P"] != null)
-                              Text(
-                                  'R_Total_Input_P: ${data["R_Total_Input_P"]}'),
-                            if (data["R_Output_V"] != null)
-                              Text('R_Output_V: ${data["R_Output_V"]}'),
-                            if (data["R_Output_A"] != null)
-                              Text('R_Output_A: ${data["R_Output_A"]}'),
-                            if (data["R_Output_P"] != null)
-                              Text('R_Output_P: ${data["R_Output_P"]}'),
-                            if (data["EFF"] != null)
-                              Text('EFF: ${data["EFF"]}'),
-                            if (data["PowerFactor"] != null)
-                              Text('PowerFactor: ${data["PowerFactor"]}'),
-                            if (data["THD"] != null)
-                              Text('THD: ${data["THD"]}'),
-                            if (data["StandbyTotalInputPower"] != null)
-                              Text(
-                                  'StandbyTotalInputPower: ${data["StandbyTotalInputPower"]}'),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ],
-                  if (_ProtectionFunctionTestResultData.isNotEmpty) ...[
-                    Text('Protection Function Test Result :',
-                        style: TextStyle(fontSize: 16)),
-                    ..._ProtectionFunctionTestResultData.map((data) {
-                      return ListTile(
-                        title: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (data["EmergencyTest"] != null)
-                              Text('EmergencyTest: ${data["EmergencyTest"]}'),
-                            if (data["DoorTest"] != null)
-                              Text('DoorTest: ${data["DoorTest"]}'),
-                            if (data["GroundTest"] != null)
-                              Text('GroundTest: ${data["GroundTest"]}'),
-                            if (data["InsulationTest"] != null)
-                              Text('InsulationTest: ${data["InsulationTest"]}'),
-                            if (data["L_IO"] != null)
-                              Text('L_IO: ${data["L_IO"]}'),
-                            if (data["L_IG"] != null)
-                              Text('L_IG: ${data["L_IG"]}'),
-                            if (data["L_OG"] != null)
-                              Text('L_OG: ${data["L_OG"]}'),
-                            if (data["L_GroundOhm"] != null)
-                              Text('L_GroundOhm: ${data["L_GroundOhm"]}'),
-                            if (data["R_IO"] != null)
-                              Text('R_IO: ${data["R_IO"]}'),
-                            if (data["R_IG"] != null)
-                              Text('R_IG: ${data["R_IG"]}'),
-                            if (data["R_OG"] != null)
-                              Text('R_OG: ${data["R_OG"]}'),
-                            if (data["R_GroundOhm"] != null)
-                              Text('R_GroundOhm: ${data["R_GroundOhm"]}'),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ],
-                ],
+              ElevatedButton(
+                onPressed: _pickAndReadJsonFile,
+                child: Text('讀取 JSON 檔案'),
               ),
-            ),
-          ],
+              ElevatedButton(
+                /*onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => OqcReport(model: _softwareVersion!),
+                    ),
+                  );
+                },*/
+                onPressed: _pickAndReadJsonFile,
+                child: Text('生成並儲存 PDF 檔案'),
+              ),
+
+              // 顯示軟體版本
+              if (_softwareVersion != null)
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("CSU: ${_softwareVersion!.csuRootfs.value}"),
+                      Text("FAN Module: ${_softwareVersion!.fanModule.value}"),
+                      Text("Relay Board: ${_softwareVersion!.relayModule.value}"),
+                      Text("MCU: ${_softwareVersion!.primaryMCU.value}"),
+                      Text("CCS 1: ${_softwareVersion!.connector1.value}"),
+                      Text("CCS 2: ${_softwareVersion!.connector2.value}"),
+                      Text("UI: ${_softwareVersion!.lcmUI.value}"),
+                      Text("LED: ${_softwareVersion!.ledModule.value}"),
+                    ],
+                  ),
+                ),
+              // 顯示 PSU Serial Numbers
+              if (_psuSerialNumbers != null)
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "PSU Serial Numbers:",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      ..._psuSerialNumbers!.psuSN.map((serial) {
+                        return Text("Serial Number: ${serial.value}");
+                      }).toList(),
+                    ],
+                  ),
+                ),
+              // 顯示 Protection Function Test 結果
+              if (_inputOutputCharacteristics != null)
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Left Input Voltage 顯示
+                      Text(
+                        "Left Input Voltage:",
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      ..._inputOutputCharacteristics!.leftInputVoltage.map((measurement) {
+                        return Text(
+                          "${measurement.name}: ${measurement.value} (Spec: ${measurement.spec})",
+                        );
+                      }).toList(),
+
+                      SizedBox(height: 16),
+
+                      // Left Input Current 顯示
+                      Text(
+                        "Left Input Current:",
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      ..._inputOutputCharacteristics!.leftInputCurrent.map((measurement) {
+                        return Text(
+                          "${measurement.name}: ${measurement.value} (Spec: ${measurement.spec})",
+                        );
+                      }).toList(),
+
+                      SizedBox(height: 16),
+
+                      // Right Input Voltage 顯示
+                      Text(
+                        "Right Input Voltage:",
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      ..._inputOutputCharacteristics!.rightInputVoltage.map((measurement) {
+                        return Text(
+                          "${measurement.name}: ${measurement.value} (Spec: ${measurement.spec})",
+                        );
+                      }).toList(),
+
+                      SizedBox(height: 16),
+
+                      // Right Input Current 顯示
+                      Text(
+                        "Right Input Current:",
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      ..._inputOutputCharacteristics!.rightInputCurrent.map((measurement) {
+                        return Text(
+                          "${measurement.name}: ${measurement.value} (Spec: ${measurement.spec})",
+                        );
+                      }).toList(),
+
+                      SizedBox(height: 16),
+
+                      // 總結數據
+                      Text(
+                        "Summary Data:",
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      Text("Left Total Input Power: ${_inputOutputCharacteristics!.leftTotalInputPower.value}"),
+                      Text("Right Total Input Power: ${_inputOutputCharacteristics!.rightTotalInputPower.value}"),
+                      Text("Left Output Voltage: ${_inputOutputCharacteristics!.leftOutputVoltage.value}"),
+                      Text("Left Output Current: ${_inputOutputCharacteristics!.leftOutputCurrent.value}"),
+                      Text("Left Total Output Power: ${_inputOutputCharacteristics!.leftTotalOutputPower.value}"),
+                      Text("Right Output Voltage: ${_inputOutputCharacteristics!.rightOutputVoltage.value}"),
+                      Text("Right Output Current: ${_inputOutputCharacteristics!.rightOutputCurrent.value}"),
+                      Text("Right Total Output Power: ${_inputOutputCharacteristics!.rightTotalOutputPower.value}"),
+                      Text("Efficiency: ${_inputOutputCharacteristics!.eff.value}"),
+                      Text("Power Factor: ${_inputOutputCharacteristics!.powerFactor.value}"),
+                      Text("THD: ${_inputOutputCharacteristics!.thd.value}"),
+                      Text("Standby Total Input Power: ${_inputOutputCharacteristics!.standbyTotalInputPower.value}"),
+                    ],
+                  ),
+                ),
+              if (_testResults != null)
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Protection Function Test Results:",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      // 第一表：Fail Counts 顯示
+                      Text(
+                          "Emergency Test: ${_testResults!.emergencyStopFailCount.value}, Status: ${_testResults!.emergencyStopFailCount.judgment}"),
+                      Text(
+                          "Door Open Test: ${_testResults!.doorOpenFailCount.value}, Status: ${_testResults!.doorOpenFailCount.judgment}"),
+                      Text(
+                          "Ground Fault Test: ${_testResults!.groundFaultFailCount.value}, Status: ${_testResults!.groundFaultFailCount.judgment}"),
+                      SizedBox(height: 16),
+
+                      // 第二表：左槍結果顯示
+                      Text(
+                        "Left Gun Results:",
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      ..._testResults!.leftGunResults.entries.map((entry) {
+                        final key = entry.key;
+                        final measurement = entry.value;
+                        return Text(
+                            "$key: ${measurement.value}, Status: ${measurement.judgment}");
+                      }).toList(),
+                      SizedBox(height: 16),
+
+                      // 第二表：右槍結果顯示
+                      Text(
+                        "Right Gun Results:",
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      ..._testResults!.rightGunResults.entries.map((entry) {
+                        final key = entry.key;
+                        final measurement = entry.value;
+                        return Text(
+                            "$key: ${measurement.value}, Status: ${measurement.judgment}");
+                      }).toList(),
+                    ],
+                  ),
+                ),
+              if (_testfunction != null)
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("機櫃: ${_testfunction!.cabinet.value}"),
+                      Text("銅排: ${_testfunction!.copper.value}"),
+                    ],
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
   }
-}
-
-class IOCharacteristics {
-  final String IOData;
-
-  factory IOCharacteristics.fromExcel(String IOData) {
-    return IOCharacteristics(IOData);
-  }
-
-  IOCharacteristics(this.IOData);
-}
-
-class ProtectionFunctionTestResult {
-  final String PFTResult;
-
-  factory ProtectionFunctionTestResult.fromExcel(String PFTResult) {
-    return ProtectionFunctionTestResult(PFTResult);
-  }
-
-  ProtectionFunctionTestResult(this.PFTResult);
 }

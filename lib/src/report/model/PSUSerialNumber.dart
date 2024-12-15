@@ -8,10 +8,10 @@ class psuserialnumber {
     List<Serialnumber> serialNumbers = [];
 
     for (var item in data) {
-      String? spcDesc = item['SPC_DESC'];
-      String? spcValue = item['SPC_VALUE']; // 確保 spcValue 是 String 類型
+      String? spcDesc = item['ITEM_PART_SPECS'];
+      String? spcValue = item['ITEM_PART_SN']; // 確保 spcValue 是 String 類型
 
-      if (spcDesc != null && spcValue != null && spcDesc.contains("PSU SN")) {
+      if (spcDesc != null && spcValue != null && spcDesc.contains("CHARGING MODULE")) {
         serialNumbers.add(Serialnumber(
           value: spcValue,
           key: "PSU SN",

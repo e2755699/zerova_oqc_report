@@ -5,7 +5,6 @@ class ProtectionFunctionTestResult {
   final Measurement doorOpenFailCount;
   final Measurement groundFaultFailCount;
 
-  // 测试类型与描述的映射
   static const Map<String, String> results = {
     "Emergency Test": "未找到",
     "Door Open Test": "未找到",
