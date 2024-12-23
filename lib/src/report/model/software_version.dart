@@ -1,4 +1,4 @@
-class softwareversion {
+class Softwareversion {
   final Version csuRootfs;
   final Version fanModule;
   final Version relayModule;
@@ -8,7 +8,7 @@ class softwareversion {
   final Version lcmUI;
   final Version ledModule;
 
-  softwareversion({
+  Softwareversion({
     required this.csuRootfs,
     required this.fanModule,
     required this.relayModule,
@@ -20,8 +20,8 @@ class softwareversion {
   });
 
   /// 從單個 JSON 對象創建 `softwareversion`
-  factory softwareversion.fromJson(Map<String, dynamic> json) {
-    return softwareversion(
+  factory Softwareversion.fromJson(Map<String, dynamic> json) {
+    return Softwareversion(
       csuRootfs: Version(
         value: json["CSU Rootfs"] ?? "未找到",
         key: "CSU Rootfs",
@@ -66,7 +66,7 @@ class softwareversion {
   }
 
   /// 從 JSON 數據清單提取並生成 `softwareversion`
-  static softwareversion fromJsonList(List<dynamic> data) {
+  static Softwareversion fromJsonList(List<dynamic> data) {
     Map<String, String> results = {
       "CSU Rootfs": "未找到",
       "FAN Module": "未找到",
@@ -92,8 +92,10 @@ class softwareversion {
     }
 
     // 生成並返回 `softwareversion` 實例
-    return softwareversion.fromJson(results);
+    return Softwareversion.fromJson(results);
   }
+
+  static fromExcel(String string) {}
 }
 
 class Version {

@@ -2,10 +2,10 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:zerova_oqc_report/src/report/model/PSUSerialNumber.dart';
-import 'package:zerova_oqc_report/src/report/model/ProtectionFunctionTestresult.dart';
-import 'package:zerova_oqc_report/src/report/model/SoftWareVersion.dart';
-import 'package:zerova_oqc_report/src/report/model/TestFunction.dart';
+import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
+import 'package:zerova_oqc_report/src/report/model/protection_function_testresult.dart';
+import 'package:zerova_oqc_report/src/report/model/software_version.dart';
+import 'package:zerova_oqc_report/src/report/model/test_function.dart';
 
 void main() {
   runApp(MyApp());
@@ -30,11 +30,11 @@ class JSONReaderScreen extends StatefulWidget {
 }
 
 class _JSONReaderScreenState extends State<JSONReaderScreen> {
-  softwareversion? _softwareVersion;
-  psuserialnumber? _psuSerialNumbers; // 添加存儲 PSU Serial Number 的變量
+  Softwareversion? _softwareVersion;
+  Psuserialnumber? _psuSerialNumbers; // 添加存儲 PSU Serial Number 的變量
   ProtectionFunctionTestResult?
       _testResults; // 添加存儲 Protection Function Test 結果的變量
-  testfunction? _testfunction; // 添加存儲 Protection Function Test 結果的變量
+  Testfunction? _testfunction; // 添加存儲 Protection Function Test 結果的變量
   /// 選擇並讀取 JSON 檔案
   Future<void> _pickAndReadJsonFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -56,12 +56,12 @@ class _JSONReaderScreenState extends State<JSONReaderScreen> {
 
       // 使用 `softwareversion`, `psuserialnumber` 和 `protectionfunctiontestresult` 的方法處理數據
       setState(() {
-        _softwareVersion = softwareversion.fromJsonList(data);
+        _softwareVersion = Softwareversion.fromJsonList(data);
         _psuSerialNumbers =
-            psuserialnumber.fromJsonList(data); // 提取多筆 PSU Serial Number
+            Psuserialnumber.fromJsonList(data); // 提取多筆 PSU Serial Number
         _testResults =
             ProtectionFunctionTestResult.fromJsonList(data); // 提取測試結果
-        _testfunction = testfunction.fromJsonList(data2);
+        _testfunction = Testfunction.fromJsonList(data2);
       });
     }
   }

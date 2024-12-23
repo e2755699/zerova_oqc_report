@@ -143,6 +143,8 @@ class ProtectionFunctionTestResult {
       ),
     );
   }
+
+  static fromExcel(String string) {}
 }
 
 class Measurement {

@@ -1,10 +1,10 @@
-class psuserialnumber {
+class Psuserialnumber {
   final List<Serialnumber> psuSN; // 確保這裡是 List<Serialnumber>
 
-  psuserialnumber({required this.psuSN});
+  Psuserialnumber({required this.psuSN});
 
   /// 從 JSON 數據清單提取並生成多筆 PSU SN
-  static psuserialnumber fromJsonList(List<dynamic> data) {
+  static Psuserialnumber fromJsonList(List<dynamic> data) {
     List<Serialnumber> serialNumbers = [];
 
     for (var item in data) {
@@ -21,7 +21,7 @@ class psuserialnumber {
     }
 
     // 返回包含多筆 PSU SN 的 psuserialnumber 實例
-    return psuserialnumber(psuSN: serialNumbers);
+    return Psuserialnumber(psuSN: serialNumbers);
   }
 }
 

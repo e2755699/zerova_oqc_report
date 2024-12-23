@@ -5,6 +5,10 @@ import 'package:file_picker/file_picker.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf_text/pdf_text.dart';
+import 'package:zerova_oqc_report/src/report/model/input_output_characteristics.dart';
+import 'package:zerova_oqc_report/src/report/model/protection_function_testresult.dart';
+import 'package:zerova_oqc_report/src/report/model/software_version.dart';
+import 'package:zerova_oqc_report/src/report/model/old_charge_module.dart';
 
 void main() {
   runApp(MyApp());
@@ -79,7 +83,7 @@ class _ExcelReaderScreenState extends State<ExcelReaderScreen> {
             if (row2 != null &&
                 row2.value != null &&
                 row2.value.toString().isNotEmpty) {
-              var swvData = SWVerData.fromExcel(row2.value.toString());
+              var swvData = Softwareversion.fromExcel(row2.value.toString());
               Map<String, dynamic> rowData = {
                 "CSU": swvData.keyword,
               };
@@ -92,7 +96,7 @@ class _ExcelReaderScreenState extends State<ExcelReaderScreen> {
             if (row2 != null &&
                 row2.value != null &&
                 row2.value.toString().isNotEmpty) {
-              var swvData = SWVerData.fromExcel(row2.value.toString());
+              var swvData = Softwareversion.fromExcel(row2.value.toString());
               Map<String, dynamic> rowData = {
                 "FANModule": swvData.keyword,
               };
@@ -105,7 +109,7 @@ class _ExcelReaderScreenState extends State<ExcelReaderScreen> {
             if (row2 != null &&
                 row2.value != null &&
                 row2.value.toString().isNotEmpty) {
-              var swvData = SWVerData.fromExcel(row2.value.toString());
+              var swvData = Softwareversion.fromExcel(row2.value.toString());
               Map<String, dynamic> rowData = {
                 "RelayModule": swvData.keyword,
               };
@@ -118,7 +122,7 @@ class _ExcelReaderScreenState extends State<ExcelReaderScreen> {
             if (row2 != null &&
                 row2.value != null &&
                 row2.value.toString().isNotEmpty) {
-              var swvData = SWVerData.fromExcel(row2.value.toString());
+              var swvData = Softwareversion.fromExcel(row2.value.toString());
               Map<String, dynamic> rowData = {
                 "PrimaryMCU": swvData.keyword,
               };
@@ -132,7 +136,7 @@ class _ExcelReaderScreenState extends State<ExcelReaderScreen> {
             if (row2 != null &&
                 row2.value != null &&
                 row2.value.toString().isNotEmpty) {
-              var swvData = SWVerData.fromExcel(row2.value.toString());
+              var swvData = Softwareversion.fromExcel(row2.value.toString());
 
               if ((row.any((cell) => cell?.value?.toString() == "Connector 1" ?? false))){
                 Map<String, dynamic> rowData = {
@@ -155,7 +159,7 @@ class _ExcelReaderScreenState extends State<ExcelReaderScreen> {
             if (row2 != null &&
                 row2.value != null &&
                 row2.value.toString().isNotEmpty) {
-              var swvData = SWVerData.fromExcel(row2.value.toString());
+              var swvData = Softwareversion.fromExcel(row2.value.toString());
               Map<String, dynamic> rowData = {
                 "LCMUI": swvData.keyword,
               };
@@ -168,7 +172,7 @@ class _ExcelReaderScreenState extends State<ExcelReaderScreen> {
             if (row2 != null &&
                 row2.value != null &&
                 row2.value.toString().isNotEmpty) {
-              var swvData = SWVerData.fromExcel(row2.value.toString());
+              var swvData = Softwareversion.fromExcel(row2.value.toString());
               Map<String, dynamic> rowData = {
                 "LEDModule": swvData.keyword,
               };
@@ -199,7 +203,7 @@ class _ExcelReaderScreenState extends State<ExcelReaderScreen> {
                 row2.value
                     .toString()
                     .isNotEmpty) {
-              var ioValue = IOCharacteristics.fromExcel(
+              var ioValue = InputOutputCharacteristics.fromExcel(
                   row2.value.toString());
 
               if (row.any((cell) => cell?.value?.toString().contains("[6]") ?? false) && L_Input_Voltage < 3) {
@@ -227,7 +231,7 @@ class _ExcelReaderScreenState extends State<ExcelReaderScreen> {
                 row2.value
                     .toString()
                     .isNotEmpty) {
-              var ioValue = IOCharacteristics.fromExcel(
+              var ioValue = InputOutputCharacteristics.fromExcel(
                   row2.value.toString());
 
               if (row.any((cell) => cell?.value?.toString().contains("[6]") ?? false) && L_Input_Current < 3) {
@@ -255,7 +259,7 @@ class _ExcelReaderScreenState extends State<ExcelReaderScreen> {
                 row2.value
                     .toString()
                     .isNotEmpty) {
-              var ioValue = IOCharacteristics.fromExcel(
+              var ioValue = InputOutputCharacteristics.fromExcel(
                   row2.value.toString());
 
               if (row.any((cell) => cell?.value?.toString().contains("[6]") ?? false) && L_Total_Input_Power == 0) {
@@ -283,7 +287,7 @@ class _ExcelReaderScreenState extends State<ExcelReaderScreen> {
                 row2.value
                     .toString()
                     .isNotEmpty) {
-              var ioValue = IOCharacteristics.fromExcel(
+              var ioValue = InputOutputCharacteristics.fromExcel(
                   row2.value.toString());
 
               if (row.any((cell) => cell?.value?.toString().contains("[6]") ?? false) && L_Output_Voltage == 0) {
@@ -311,7 +315,7 @@ class _ExcelReaderScreenState extends State<ExcelReaderScreen> {
                 row2.value
                     .toString()
                     .isNotEmpty) {
-              var ioValue = IOCharacteristics.fromExcel(
+              var ioValue = InputOutputCharacteristics.fromExcel(
                   row2.value.toString());
 
               if (row.any((cell) => cell?.value?.toString().contains("[6]") ?? false) && L_Output_Current == 0) {
@@ -339,7 +343,7 @@ class _ExcelReaderScreenState extends State<ExcelReaderScreen> {
                 row2.value
                     .toString()
                     .isNotEmpty) {
-              var ioValue = IOCharacteristics.fromExcel(
+              var ioValue = InputOutputCharacteristics.fromExcel(
                   row2.value.toString());
 
               if (row.any((cell) => cell?.value?.toString().contains("[6]") ?? false) && L_Output_Power == 0) {
@@ -367,7 +371,7 @@ class _ExcelReaderScreenState extends State<ExcelReaderScreen> {
                 row2.value
                     .toString()
                     .isNotEmpty) {
-              var ioValue = IOCharacteristics.fromExcel(
+              var ioValue = InputOutputCharacteristics.fromExcel(
                   row2.value.toString());
               Map<String, dynamic> rowData = {
                 "EFF": ioValue.IOData,
@@ -386,7 +390,7 @@ class _ExcelReaderScreenState extends State<ExcelReaderScreen> {
                 row2.value
                     .toString()
                     .isNotEmpty) {
-              var ioValue = IOCharacteristics.fromExcel(
+              var ioValue = InputOutputCharacteristics.fromExcel(
                   row2.value.toString());
               Map<String, dynamic> rowData = {
                 "PowerFactor": ioValue.IOData,
@@ -405,7 +409,7 @@ class _ExcelReaderScreenState extends State<ExcelReaderScreen> {
                 row2.value
                     .toString()
                     .isNotEmpty) {
-              var ioValue = IOCharacteristics.fromExcel(
+              var ioValue = InputOutputCharacteristics.fromExcel(
                   row2.value.toString());
               Map<String, dynamic> rowData = {
                 "THD": ioValue.IOData,
@@ -424,7 +428,7 @@ class _ExcelReaderScreenState extends State<ExcelReaderScreen> {
                 row2.value
                     .toString()
                     .isNotEmpty) {
-              var ioValue = IOCharacteristics.fromExcel(
+              var ioValue = InputOutputCharacteristics.fromExcel(
                   row2.value.toString());
               Map<String, dynamic> rowData = {
                 "StandbyTotalInputPower": ioValue.IOData,
