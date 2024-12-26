@@ -83,7 +83,7 @@ class _ExcelReaderScreenState extends State<ExcelReaderScreen> {
             if (row2 != null &&
                 row2.value != null &&
                 row2.value.toString().isNotEmpty) {
-              var swvData = Softwareversion.fromExcel(row2.value.toString());
+              var swvData = SoftwareVersion.fromExcel(row2.value.toString());
               Map<String, dynamic> rowData = {
                 "CSU": swvData.keyword,
               };
@@ -96,7 +96,7 @@ class _ExcelReaderScreenState extends State<ExcelReaderScreen> {
             if (row2 != null &&
                 row2.value != null &&
                 row2.value.toString().isNotEmpty) {
-              var swvData = Softwareversion.fromExcel(row2.value.toString());
+              var swvData = SoftwareVersion.fromExcel(row2.value.toString());
               Map<String, dynamic> rowData = {
                 "FANModule": swvData.keyword,
               };
@@ -109,7 +109,7 @@ class _ExcelReaderScreenState extends State<ExcelReaderScreen> {
             if (row2 != null &&
                 row2.value != null &&
                 row2.value.toString().isNotEmpty) {
-              var swvData = Softwareversion.fromExcel(row2.value.toString());
+              var swvData = SoftwareVersion.fromExcel(row2.value.toString());
               Map<String, dynamic> rowData = {
                 "RelayModule": swvData.keyword,
               };
@@ -122,7 +122,7 @@ class _ExcelReaderScreenState extends State<ExcelReaderScreen> {
             if (row2 != null &&
                 row2.value != null &&
                 row2.value.toString().isNotEmpty) {
-              var swvData = Softwareversion.fromExcel(row2.value.toString());
+              var swvData = SoftwareVersion.fromExcel(row2.value.toString());
               Map<String, dynamic> rowData = {
                 "PrimaryMCU": swvData.keyword,
               };
@@ -136,7 +136,7 @@ class _ExcelReaderScreenState extends State<ExcelReaderScreen> {
             if (row2 != null &&
                 row2.value != null &&
                 row2.value.toString().isNotEmpty) {
-              var swvData = Softwareversion.fromExcel(row2.value.toString());
+              var swvData = SoftwareVersion.fromExcel(row2.value.toString());
 
               if ((row.any((cell) => cell?.value?.toString() == "Connector 1" ?? false))){
                 Map<String, dynamic> rowData = {
@@ -159,7 +159,7 @@ class _ExcelReaderScreenState extends State<ExcelReaderScreen> {
             if (row2 != null &&
                 row2.value != null &&
                 row2.value.toString().isNotEmpty) {
-              var swvData = Softwareversion.fromExcel(row2.value.toString());
+              var swvData = SoftwareVersion.fromExcel(row2.value.toString());
               Map<String, dynamic> rowData = {
                 "LCMUI": swvData.keyword,
               };
@@ -172,7 +172,7 @@ class _ExcelReaderScreenState extends State<ExcelReaderScreen> {
             if (row2 != null &&
                 row2.value != null &&
                 row2.value.toString().isNotEmpty) {
-              var swvData = Softwareversion.fromExcel(row2.value.toString());
+              var swvData = SoftwareVersion.fromExcel(row2.value.toString());
               Map<String, dynamic> rowData = {
                 "LEDModule": swvData.keyword,
               };

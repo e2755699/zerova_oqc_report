@@ -17,6 +17,9 @@ import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 
 // import 'package:pdf_text/pdf_text.dart';
 import 'package:zerova_oqc_report/src/report/oqc_report.dart';
+import 'package:zerova_oqc_report/src/widget/oqc/appearance_structure_inspection.dart';
+import 'package:zerova_oqc_report/src/widget/oqc/psu_serial_numbers_table.dart';
+import 'package:zerova_oqc_report/src/widget/oqc/software_version.dart';
 
 void main() {
   runApp(MyApp());
@@ -42,12 +45,12 @@ class JSONReaderScreen extends StatefulWidget {
 }
 
 class _JSONReaderScreenState extends State<JSONReaderScreen> {
-  Softwareversion? _softwareVersion;
+  SoftwareVersion? _softwareVersion;
   Psuserialnumber? _psuSerialNumbers; // 添加存儲 PSU Serial Number 的變量
   InputOutputCharacteristics? _inputOutputCharacteristics;
   ProtectionFunctionTestResult?
       _testResults; // 添加存儲 Protection Function Test 結果的變量
-  Testfunction? _testfunction; // 添加存儲 Protection Function Test 結果的變量
+  TestFunction? _testfunction; // 添加存儲 Protection Function Test 結果的變量
   /// 選擇並讀取 JSON 檔案
   Future<void> _pickAndReadJsonFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -55,18 +58,21 @@ class _JSONReaderScreenState extends State<JSONReaderScreen> {
     );
 
     if (result != null) {
-      String jsonContent = await File(result.files.single.path!).readAsString();
+      // String jsonContent = await File(result.files.single.path!).readAsString();
       /*String testFunctionJsonContent = await File(
               "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\T2433A031A0_oqc.json")
           .readAsString();
       String moduleJsonContent =
           await File("C:\\Users\\USER\\Downloads\\1234keypart.json")
               .readAsString();*/
-      String testFunctionJsonContent = await File(
-          "C:\\Users\\60040\\Downloads\\T2433A031A0_oqc.json")
+      String jsonContent = await File(
+              "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\T2437A011A0_test.json")
           .readAsString();
-      String moduleJsonContent =
-      await File("C:\\Users\\60040\\Downloads\\1234keypart.json")
+      String testFunctionJsonContent = await File(
+              "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\T2433A031A0_oqc.json")
+          .readAsString();
+      String moduleJsonContent = await File(
+              "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\1234keypart.json")
           .readAsString();
       List<dynamic> data = jsonDecode(jsonContent);
       List<dynamic> testFuncionData = jsonDecode(testFunctionJsonContent);
@@ -74,14 +80,14 @@ class _JSONReaderScreenState extends State<JSONReaderScreen> {
 
       // 使用 `softwareversion`, `psuserialnumber` 和 `protectionfunctiontestresult` 的方法處理數據
       setState(() {
-        _softwareVersion = Softwareversion.fromJsonList(data);
+        _softwareVersion = SoftwareVersion.fromJsonList(data);
         _psuSerialNumbers =
             Psuserialnumber.fromJsonList(moduleData); // 提取多筆 PSU Serial Number
         _inputOutputCharacteristics =
             InputOutputCharacteristics.fromJsonList(data);
         _testResults =
             ProtectionFunctionTestResult.fromJsonList(data); // 提取測試結果
-        _testfunction = Testfunction.fromJsonList(testFuncionData);
+        _testfunction = TestFunction.fromJson(testFuncionData);
       });
     }
   }
@@ -127,12 +133,11 @@ class _JSONReaderScreenState extends State<JSONReaderScreen> {
       ]).then((res) {
         setState(() {
           _psuSerialNumbers = Psuserialnumber.fromJsonList(res[0]);
-          _testfunction =  Testfunction.fromJsonList(res[1]);
-          _softwareVersion = Softwareversion.fromJsonList(res[2]);
+          _testfunction = TestFunction.fromJson(res[1]);
+          _softwareVersion = SoftwareVersion.fromJsonList(res[2]);
           _inputOutputCharacteristics =
               InputOutputCharacteristics.fromJsonList(res[2]);
-          _testResults =
-              ProtectionFunctionTestResult.fromJsonList(res[2]);
+          _testResults = ProtectionFunctionTestResult.fromJsonList(res[2]);
         });
       });
 
@@ -174,23 +179,24 @@ class _JSONReaderScreenState extends State<JSONReaderScreen> {
 
               // 顯示軟體版本
               if (_softwareVersion != null)
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("CSU: ${_softwareVersion!.csuRootfs.value}"),
-                      Text("FAN Module: ${_softwareVersion!.fanModule.value}"),
-                      Text(
-                          "Relay Board: ${_softwareVersion!.relayModule.value}"),
-                      Text("MCU: ${_softwareVersion!.primaryMCU.value}"),
-                      Text("CCS 1: ${_softwareVersion!.connector1.value}"),
-                      Text("CCS 2: ${_softwareVersion!.connector2.value}"),
-                      Text("UI: ${_softwareVersion!.lcmUI.value}"),
-                      Text("LED: ${_softwareVersion!.ledModule.value}"),
-                    ],
-                  ),
-                ),
+                SoftwareVersionTable(_softwareVersion!),
+                // Padding(
+                //   padding: const EdgeInsets.all(16.0),
+                //   child: Column(
+                //     crossAxisAlignment: CrossAxisAlignment.start,
+                //     children: [
+                //       Text("CSU: ${_softwareVersion!.csuRootfs.value}"),
+                //       Text("FAN Module: ${_softwareVersion!.fanModule.value}"),
+                //       Text(
+                //           "Relay Board: ${_softwareVersion!.relayModule.value}"),
+                //       Text("MCU: ${_softwareVersion!.primaryMCU.value}"),
+                //       Text("CCS 1: ${_softwareVersion!.connector1.value}"),
+                //       Text("CCS 2: ${_softwareVersion!.connector2.value}"),
+                //       Text("UI: ${_softwareVersion!.lcmUI.value}"),
+                //       Text("LED: ${_softwareVersion!.ledModule.value}"),
+                //     ],
+                //   ),
+                // ),
               // 顯示 PSU Serial Numbers
               if (_psuSerialNumbers != null)
                 Padding(
@@ -198,14 +204,9 @@ class _JSONReaderScreenState extends State<JSONReaderScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        "PSU Serial Numbers:",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      ..._psuSerialNumbers!.psuSN.map((serial) {
-                        return Text("Serial Number: ${serial.value}");
-                      }).toList(),
+
+                      if (_psuSerialNumbers != null)
+                      PsuSerialNumbersTable(_psuSerialNumbers!),
                     ],
                   ),
                 ),
@@ -358,16 +359,7 @@ class _JSONReaderScreenState extends State<JSONReaderScreen> {
                   ),
                 ),
               if (_testfunction != null)
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("機櫃: ${_testfunction!.cabinet.value}"),
-                      Text("銅排: ${_testfunction!.copper.value}"),
-                    ],
-                  ),
-                ),
+                AppearanceStructureInspection(_testfunction!),
             ],
           ),
         ),

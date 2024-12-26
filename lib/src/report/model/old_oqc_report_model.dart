@@ -4,7 +4,7 @@ import 'old_software_version.dart';
 
 class OqcReportModel {
   final List<ChargeModule> chargeModules = List.empty(growable: true);
-  final List<SoftwareVersion> softwareVersions = List.empty(growable: true);
+  final List<OldSoftwareVersion> softwareVersions = List.empty(growable: true);
   final List<Map<String, dynamic>> ioCharacteristicsFilteredData =
       List.empty(growable: true);
   final List<Map<String, dynamic>> protectionFunctionTestResultData =
@@ -14,7 +14,7 @@ class OqcReportModel {
     chargeModules.add(chargeModule);
   }
 
-  void setSoftwareVersion(SoftwareVersion softwareVersion) {
+  void setSoftwareVersion(OldSoftwareVersion softwareVersion) {
     softwareVersions.add(softwareVersion);
   }
 

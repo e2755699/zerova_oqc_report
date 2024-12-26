@@ -1,10 +1,10 @@
-class SoftwareVersion {
+class OldSoftwareVersion {
   final String key;
   final String version;
 
-  factory SoftwareVersion.fromExcel(String key, String version) {
-    return SoftwareVersion(key, version);
+  factory OldSoftwareVersion.fromExcel(String key, String version) {
+    return OldSoftwareVersion(key, version);
   }
 
-  SoftwareVersion(this.key, this.version);
+  OldSoftwareVersion(this.key, this.version);
 }

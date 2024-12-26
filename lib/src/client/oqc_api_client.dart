@@ -100,7 +100,7 @@ class OqcApiClient {
 }
 
 class OQCTestData {
-  final Softwareversion softwareversion;
+  final SoftwareVersion softwareversion;
   final InputOutputCharacteristics inputOutputCharacteristics;
   final ProtectionFunctionTestResult protectionFunctionTestResult;
 

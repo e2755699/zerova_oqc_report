@@ -83,7 +83,7 @@ class _OqcReportState extends State<OqcReport> with PdfMixin {
   pw.Page _buildAppearanceStructureInspectionSection(pw.Font tableCellFont) {
     return _buildPage((context) {
       return pw.Column(children: [
-        AppearanceStructureInspection(tableCellFont: tableCellFont),
+        AppearanceStructureInspectionPdf(tableCellFont: tableCellFont),
       ]);
     });
   }
@@ -553,10 +553,10 @@ class EvSoftwareVersionSection extends pw.StatelessWidget with PdfMixin {
   }
 }
 
-class AppearanceStructureInspection extends pw.StatelessWidget with PdfMixin {
+class AppearanceStructureInspectionPdf extends pw.StatelessWidget with PdfMixin {
   final pw.Font tableCellFont;
 
-  AppearanceStructureInspection({required this.tableCellFont});
+  AppearanceStructureInspectionPdf({required this.tableCellFont});
 
   @override
   pw.Widget build(pw.Context context) {
