@@ -4,10 +4,10 @@ import 'package:printing/printing.dart';
 import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/report/model/test_function.dart';
 
-class AppearanceStructureInspection extends StatelessWidget {
+class AppearanceStructureInspectionTable extends StatelessWidget {
   final TestFunction testFunction;
 
-  const AppearanceStructureInspection(this.testFunction, {super.key});
+  const AppearanceStructureInspectionTable(this.testFunction, {super.key});
 
   List<String> get headers =>
       ['No.', 'Inspection Item', 'Inspection Details', 'Judgement'];

@@ -17,7 +17,8 @@ import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 
 // import 'package:pdf_text/pdf_text.dart';
 import 'package:zerova_oqc_report/src/report/oqc_report.dart';
-import 'package:zerova_oqc_report/src/widget/oqc/appearance_structure_inspection.dart';
+import 'package:zerova_oqc_report/src/widget/oqc/appearance_structure_inspection_table.dart';
+import 'package:zerova_oqc_report/src/widget/oqc/power_table.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/psu_serial_numbers_table.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/software_version.dart';
 
@@ -33,7 +34,6 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      //home: ExcelReaderScreen(),
       home: JSONReaderScreen(),
     );
   }
@@ -164,151 +164,23 @@ class _JSONReaderScreenState extends State<JSONReaderScreen> {
                 onPressed: _pickAndReadJsonFile,
                 child: Text('讀取 JSON 檔案'),
               ),
-              ElevatedButton(
-                /*onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => OqcReport(model: _softwareVersion!),
-                    ),
-                  );
-                },*/
-                onPressed: _pickAndReadJsonFile,
-                child: Text('生成並儲存 PDF 檔案'),
-              ),
-
-              // 顯示軟體版本
-              if (_softwareVersion != null)
-                SoftwareVersionTable(_softwareVersion!),
-                // Padding(
-                //   padding: const EdgeInsets.all(16.0),
-                //   child: Column(
-                //     crossAxisAlignment: CrossAxisAlignment.start,
-                //     children: [
-                //       Text("CSU: ${_softwareVersion!.csuRootfs.value}"),
-                //       Text("FAN Module: ${_softwareVersion!.fanModule.value}"),
-                //       Text(
-                //           "Relay Board: ${_softwareVersion!.relayModule.value}"),
-                //       Text("MCU: ${_softwareVersion!.primaryMCU.value}"),
-                //       Text("CCS 1: ${_softwareVersion!.connector1.value}"),
-                //       Text("CCS 2: ${_softwareVersion!.connector2.value}"),
-                //       Text("UI: ${_softwareVersion!.lcmUI.value}"),
-                //       Text("LED: ${_softwareVersion!.ledModule.value}"),
-                //     ],
-                //   ),
-                // ),
-              // 顯示 PSU Serial Numbers
               if (_psuSerialNumbers != null)
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-
                       if (_psuSerialNumbers != null)
-                      PsuSerialNumbersTable(_psuSerialNumbers!),
+                        PsuSerialNumbersTable(_psuSerialNumbers!),
                     ],
                   ),
                 ),
-              // 顯示 Protection Function Test 結果
+              if (_softwareVersion != null)
+                SoftwareVersionTable(_softwareVersion!),
+              if (_testfunction != null)
+                AppearanceStructureInspectionTable(_testfunction!),
               if (_inputOutputCharacteristics != null)
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Left Input Voltage 顯示
-                      Text(
-                        "Left Input Voltage:",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      ..._inputOutputCharacteristics!.leftInputVoltage
-                          .map((measurement) {
-                        return Text(
-                          "${measurement.name}: ${measurement.value} (Spec: ${measurement.spec})",
-                        );
-                      }).toList(),
-
-                      SizedBox(height: 16),
-
-                      // Left Input Current 顯示
-                      Text(
-                        "Left Input Current:",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      ..._inputOutputCharacteristics!.leftInputCurrent
-                          .map((measurement) {
-                        return Text(
-                          "${measurement.name}: ${measurement.value} (Spec: ${measurement.spec})",
-                        );
-                      }).toList(),
-
-                      SizedBox(height: 16),
-
-                      // Right Input Voltage 顯示
-                      Text(
-                        "Right Input Voltage:",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      ..._inputOutputCharacteristics!.rightInputVoltage
-                          .map((measurement) {
-                        return Text(
-                          "${measurement.name}: ${measurement.value} (Spec: ${measurement.spec})",
-                        );
-                      }).toList(),
-
-                      SizedBox(height: 16),
-
-                      // Right Input Current 顯示
-                      Text(
-                        "Right Input Current:",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      ..._inputOutputCharacteristics!.rightInputCurrent
-                          .map((measurement) {
-                        return Text(
-                          "${measurement.name}: ${measurement.value} (Spec: ${measurement.spec})",
-                        );
-                      }).toList(),
-
-                      SizedBox(height: 16),
-
-                      // 總結數據
-                      Text(
-                        "Summary Data:",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                          "Left Total Input Power: ${_inputOutputCharacteristics!.leftTotalInputPower.value}"),
-                      Text(
-                          "Right Total Input Power: ${_inputOutputCharacteristics!.rightTotalInputPower.value}"),
-                      Text(
-                          "Left Output Voltage: ${_inputOutputCharacteristics!.leftOutputVoltage.value}"),
-                      Text(
-                          "Left Output Current: ${_inputOutputCharacteristics!.leftOutputCurrent.value}"),
-                      Text(
-                          "Left Total Output Power: ${_inputOutputCharacteristics!.leftTotalOutputPower.value}"),
-                      Text(
-                          "Right Output Voltage: ${_inputOutputCharacteristics!.rightOutputVoltage.value}"),
-                      Text(
-                          "Right Output Current: ${_inputOutputCharacteristics!.rightOutputCurrent.value}"),
-                      Text(
-                          "Right Total Output Power: ${_inputOutputCharacteristics!.rightTotalOutputPower.value}"),
-                      Text(
-                          "Efficiency: ${_inputOutputCharacteristics!.eff.value}"),
-                      Text(
-                          "Power Factor: ${_inputOutputCharacteristics!.powerFactor.value}"),
-                      Text("THD: ${_inputOutputCharacteristics!.thd.value}"),
-                      Text(
-                          "Standby Total Input Power: ${_inputOutputCharacteristics!.standbyTotalInputPower.value}"),
-                    ],
-                  ),
-                ),
+                PowerTable(_inputOutputCharacteristics!),
               if (_testResults != null)
                 Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -358,8 +230,6 @@ class _JSONReaderScreenState extends State<JSONReaderScreen> {
                     ],
                   ),
                 ),
-              if (_testfunction != null)
-                AppearanceStructureInspection(_testfunction!),
             ],
           ),
         ),

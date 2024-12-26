@@ -1,34 +1,20 @@
 class InputOutputCharacteristics {
-  final List<Measurement> leftInputVoltage;
-  final List<Measurement> leftInputCurrent;
-  final List<Measurement> rightInputVoltage;
-  final List<Measurement> rightInputCurrent;
-  final Measurement leftTotalInputPower;
-  final Measurement rightTotalInputPower;
-  final Measurement leftOutputVoltage;
-  final Measurement leftOutputCurrent;
-  final Measurement leftTotalOutputPower;
-  final Measurement rightOutputVoltage;
-  final Measurement rightOutputCurrent;
-  final Measurement rightTotalOutputPower;
+  final InputOutputCharacteristicsSide leftSideInputOutputCharacteristics;
+  final InputOutputCharacteristicsSide rightSideInputOutputCharacteristics;
+
   final Measurement eff;
   final Measurement powerFactor;
   final Measurement thd;
   final Measurement standbyTotalInputPower;
 
+  List<InputOutputCharacteristicsSide> get inputOutputCharacteristicsSide => [
+        leftSideInputOutputCharacteristics,
+        rightSideInputOutputCharacteristics,
+      ];
+
   InputOutputCharacteristics({
-    required this.leftInputVoltage,
-    required this.leftInputCurrent,
-    required this.rightInputVoltage,
-    required this.rightInputCurrent,
-    required this.leftTotalInputPower,
-    required this.rightTotalInputPower,
-    required this.leftOutputVoltage,
-    required this.leftOutputCurrent,
-    required this.leftTotalOutputPower,
-    required this.rightOutputVoltage,
-    required this.rightOutputCurrent,
-    required this.rightTotalOutputPower,
+    required this.rightSideInputOutputCharacteristics,
+    required this.leftSideInputOutputCharacteristics,
     required this.eff,
     required this.powerFactor,
     required this.thd,
@@ -72,8 +58,6 @@ class InputOutputCharacteristics {
     double thdCount = 0;
     double standbyTotalInputPowerCount = 0;
 
-
-
     for (var item in data) {
       String? spcDesc = item['SPC_DESC'];
       String? spcValueStr = item['SPC_VALUE'];
@@ -93,7 +77,8 @@ class InputOutputCharacteristics {
               key: spcDesc,
               name: "Vin",
             ));
-          } else if (spcItem.contains("Right Plug") && rightInputVoltageCount < 3) {
+          } else if (spcItem.contains("Right Plug") &&
+              rightInputVoltageCount < 3) {
             rightInputVoltageCount++;
             rightInputVoltage.add(Measurement(
               spec: 220,
@@ -103,8 +88,7 @@ class InputOutputCharacteristics {
               name: "Vin",
             ));
           }
-        }
-        else if (spcDesc.contains("Input_Current")) {
+        } else if (spcDesc.contains("Input_Current")) {
           if (spcItem.contains("Left  Plug") && leftInputCurrentCount < 3) {
             leftInputCurrentCount++;
             leftInputCurrent.add(Measurement(
@@ -115,7 +99,8 @@ class InputOutputCharacteristics {
               name: "Iin",
             ));
             print("加入 Left Input Current: $spcValue");
-          } else if (spcItem.contains("Right Plug") && rightInputCurrentCount < 3) {
+          } else if (spcItem.contains("Right Plug") &&
+              rightInputCurrentCount < 3) {
             rightInputCurrentCount++;
             rightInputCurrent.add(Measurement(
               spec: 295,
@@ -126,94 +111,188 @@ class InputOutputCharacteristics {
             ));
             print("加入 Right Input Current: $spcValue");
           }
-        }
-        else if (spcDesc.contains("Total_Input_Power")) {
+        } else if (spcDesc.contains("Total_Input_Power")) {
           if (spcItem.contains("Left  Plug") && leftTotalInputPowerCount < 1) {
             leftTotalInputPowerCount++;
-            leftTotalInputPower = Measurement(spec: 196, value: spcValue, count:leftTotalInputPowerCount, key: spcDesc, name: "Pin");
-          } else if (spcItem.contains("Right Plug") && rightTotalInputPowerCount < 1) {
+            leftTotalInputPower = Measurement(
+                spec: 196,
+                value: spcValue,
+                count: leftTotalInputPowerCount,
+                key: spcDesc,
+                name: "Pin");
+          } else if (spcItem.contains("Right Plug") &&
+              rightTotalInputPowerCount < 1) {
             rightTotalInputPowerCount++;
-            rightTotalInputPower = Measurement(spec: 196, value: spcValue, count:leftTotalInputPowerCount, key: spcDesc, name: "Pin");
+            rightTotalInputPower = Measurement(
+                spec: 196,
+                value: spcValue,
+                count: leftTotalInputPowerCount,
+                key: spcDesc,
+                name: "Pin");
           }
-        }
-        else if (spcDesc.contains("Output_Voltage")) {
+        } else if (spcDesc.contains("Output_Voltage")) {
           if (spcItem.contains("Left  Plug") && leftOutputVoltageCount < 1) {
             leftOutputVoltageCount++;
-            leftOutputVoltage = Measurement(spec: 935, value: spcValue, count:leftOutputVoltageCount, key: spcDesc, name: "Vout");
-          } else if (spcItem.contains("Right Plug") && rightOutputVoltageCount < 1) {
+            leftOutputVoltage = Measurement(
+                spec: 935,
+                value: spcValue,
+                count: leftOutputVoltageCount,
+                key: spcDesc,
+                name: "Vout");
+          } else if (spcItem.contains("Right Plug") &&
+              rightOutputVoltageCount < 1) {
             rightOutputVoltageCount++;
-            rightOutputVoltage = Measurement(spec: 935, value: spcValue, count:rightOutputVoltageCount, key: spcDesc, name: "Vout");
+            rightOutputVoltage = Measurement(
+                spec: 935,
+                value: spcValue,
+                count: rightOutputVoltageCount,
+                key: spcDesc,
+                name: "Vout");
           }
-        }
-        else if (spcDesc.contains("Output_Current")) {
+        } else if (spcDesc.contains("Output_Current")) {
           if (spcItem.contains("Left  Plug") && leftOutputCurrentCount < 1) {
             leftOutputCurrentCount++;
-            leftOutputCurrent = Measurement(spec: 189, value: spcValue, count:leftOutputCurrentCount, key: spcDesc, name: "Iout");
-          } else if (spcItem.contains("Right Plug") && rightOutputCurrentCount < 1) {
+            leftOutputCurrent = Measurement(
+                spec: 189,
+                value: spcValue,
+                count: leftOutputCurrentCount,
+                key: spcDesc,
+                name: "Iout");
+          } else if (spcItem.contains("Right Plug") &&
+              rightOutputCurrentCount < 1) {
             rightOutputCurrentCount++;
-            rightOutputCurrent = Measurement(spec: 189, value: spcValue, count:rightOutputCurrentCount, key: spcDesc, name: "Iout");
+            rightOutputCurrent = Measurement(
+                spec: 189,
+                value: spcValue,
+                count: rightOutputCurrentCount,
+                key: spcDesc,
+                name: "Iout");
           }
-        }
-        else if (spcDesc.contains("Output_Power")) {
+        } else if (spcDesc.contains("Output_Power")) {
           if (spcItem.contains("Left  Plug") && leftTotalOutputPowerCount < 1) {
             leftTotalOutputPowerCount++;
-            leftTotalOutputPower = Measurement(spec: 180, value: spcValue, count:leftTotalOutputPowerCount, key: spcDesc, name: "Pout");
-          } else if (spcItem.contains("Right Plug") && rightTotalOutputPowerCount < 1) {
+            leftTotalOutputPower = Measurement(
+                spec: 180,
+                value: spcValue,
+                count: leftTotalOutputPowerCount,
+                key: spcDesc,
+                name: "Pout");
+          } else if (spcItem.contains("Right Plug") &&
+              rightTotalOutputPowerCount < 1) {
             rightTotalOutputPowerCount++;
-            rightTotalOutputPower = Measurement(spec: 180, value: spcValue, count:rightTotalOutputPowerCount, key: spcDesc, name: "Pout");
+            rightTotalOutputPower = Measurement(
+                spec: 180,
+                value: spcValue,
+                count: rightTotalOutputPowerCount,
+                key: spcDesc,
+                name: "Pout");
           }
-        }
-        else if (spcDesc.contains("EFF")) {
+        } else if (spcDesc.contains("EFF")) {
           if (effCount < 1) {
             effCount++;
-            eff = Measurement(spec: 94, value: spcValue, count:effCount, key: spcDesc, name: "EFF");
+            eff = Measurement(
+                spec: 94,
+                value: spcValue,
+                count: effCount,
+                key: spcDesc,
+                name: "EFF");
           }
-        }
-        else if (spcDesc.contains("PowerFactor")) {
+        } else if (spcDesc.contains("PowerFactor")) {
           if (powerFactorCount < 1) {
             powerFactorCount++;
-            powerFactor = Measurement(spec: 0.99, value: spcValue, count:effCount, key: spcDesc, name: "PF");
+            powerFactor = Measurement(
+                spec: 0.99,
+                value: spcValue,
+                count: effCount,
+                key: spcDesc,
+                name: "PF");
           }
-        }
-        else if (spcDesc.contains("THD")) {
+        } else if (spcDesc.contains("THD")) {
           if (thdCount < 1) {
             thdCount++;
-            thd = Measurement(spec: 5, value: spcValue, count:thdCount, key: spcDesc, name: "THD");
+            thd = Measurement(
+                spec: 5,
+                value: spcValue,
+                count: thdCount,
+                key: spcDesc,
+                name: "THD");
           }
-        }
-        else if (spcDesc.contains("Standby_Total_Input_Power")) {
+        } else if (spcDesc.contains("Standby_Total_Input_Power")) {
           if (standbyTotalInputPowerCount < 1) {
             standbyTotalInputPowerCount++;
-            standbyTotalInputPower = Measurement(spec: 100, value: spcValue, count:standbyTotalInputPowerCount, key: spcDesc, name: "STIP");
+            standbyTotalInputPower = Measurement(
+                spec: 100,
+                value: spcValue,
+                count: standbyTotalInputPowerCount,
+                key: spcDesc,
+                name: "STIP");
           }
         }
       }
     }
 
+    var leftSideInputOutputCharacteristicsSide = InputOutputCharacteristicsSide(
+        "L",
+        leftInputVoltage,
+        leftInputCurrent,
+        leftTotalInputPower ??
+            Measurement(spec: 0, value: 0, count: 0, key: "", name: ""),
+        leftOutputVoltage ??
+            Measurement(spec: 0, value: 0, count: 0, key: "", name: ""),
+        leftOutputCurrent ??
+            Measurement(spec: 0, value: 0, count: 0, key: "", name: ""),
+        leftTotalOutputPower ??
+            Measurement(spec: 0, value: 0, count: 0, key: "", name: ""));
+    var rightSideInputOutputCharacteristicsSide =
+        InputOutputCharacteristicsSide(
+            "R",
+            rightInputVoltage,
+            rightInputCurrent,
+            rightTotalInputPower ??
+                Measurement(spec: 0, value: 0, count: 0, key: "", name: ""),
+            rightOutputVoltage ??
+                Measurement(spec: 0, value: 0, count: 0, key: "", name: ""),
+            rightOutputCurrent ??
+                Measurement(spec: 0, value: 0, count: 0, key: "", name: ""),
+            rightTotalOutputPower ??
+                Measurement(spec: 0, value: 0, count: 0, key: "", name: ""));
     return InputOutputCharacteristics(
-      leftInputVoltage: leftInputVoltage,
-      leftInputCurrent: leftInputCurrent,
-      rightInputVoltage: rightInputVoltage,
-      rightInputCurrent: rightInputCurrent,
-      leftTotalInputPower: leftTotalInputPower ?? Measurement(spec: 0, value: 0, count: 0, key: "", name: ""),
-      rightTotalInputPower: rightTotalInputPower ?? Measurement(spec: 0, value: 0, count: 0, key: "", name: ""),
-      leftOutputVoltage: leftOutputVoltage ?? Measurement(spec: 0, value: 0, count: 0, key: "", name: ""),
-      leftOutputCurrent: leftOutputCurrent ?? Measurement(spec: 0, value: 0, count: 0, key: "", name: ""),
-      leftTotalOutputPower: leftTotalOutputPower ?? Measurement(spec: 0, value: 0, count: 0, key: "", name: ""),
-      rightOutputVoltage: rightOutputVoltage ?? Measurement(spec: 0, value: 0, count: 0, key: "", name: ""),
-      rightOutputCurrent: rightOutputCurrent ?? Measurement(spec: 0, value: 0, count: 0, key: "", name: ""),
-      rightTotalOutputPower: rightTotalOutputPower ?? Measurement(spec: 0, value: 0, count: 0, key: "", name: ""),
+      leftSideInputOutputCharacteristics:
+          leftSideInputOutputCharacteristicsSide,
+      rightSideInputOutputCharacteristics:
+          rightSideInputOutputCharacteristicsSide,
       eff: eff ?? Measurement(spec: 0, value: 0, count: 0, key: "", name: ""),
-      powerFactor: powerFactor ?? Measurement(spec: 0, value: 0, count: 0, key: "", name: ""),
+      powerFactor: powerFactor ??
+          Measurement(spec: 0, value: 0, count: 0, key: "", name: ""),
       thd: thd ?? Measurement(spec: 0, value: 0, count: 0, key: "", name: ""),
-      standbyTotalInputPower: standbyTotalInputPower ?? Measurement(spec: 0, value: 0, count: 0, key: "", name: ""),
+      standbyTotalInputPower: standbyTotalInputPower ??
+          Measurement(spec: 0, value: 0, count: 0, key: "", name: ""),
     );
   }
 
   static fromExcel(String string) {}
+}
 
+class InputOutputCharacteristicsSide {
+  final List<Measurement> inputVoltage;
+  final List<Measurement> inputCurrent;
+  final Measurement totalInputPower;
+  final Measurement outputVoltage;
+  final Measurement outputCurrent;
+  final Measurement totalOutputPower;
 
+  final String side;
 
+  String get judgement => "OK";
+
+  InputOutputCharacteristicsSide(
+      this.side,
+      this.inputVoltage,
+      this.inputCurrent,
+      this.totalInputPower,
+      this.outputVoltage,
+      this.outputCurrent,
+      this.totalOutputPower);
 }
 
 class Measurement {
