@@ -3,7 +3,7 @@
 // import 'package:flutter/material.dart';
 // import 'package:file_picker/file_picker.dart';
 // import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
-// import 'package:zerova_oqc_report/src/report/model/protection_function_testresult.dart';
+// import 'package:zerova_oqc_report/src/report/model/protection_function_test_result.dart';
 // import 'package:zerova_oqc_report/src/report/model/software_version.dart';
 // import 'package:zerova_oqc_report/src/report/model/test_function.dart';
 //

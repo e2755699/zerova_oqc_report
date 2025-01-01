@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
-import 'package:zerova_oqc_report/src/report/model/test_function.dart';
+import 'package:zerova_oqc_report/src/report/model/protection_function_test_result.dart';
 
-class AppearanceStructureInspectionTable extends StatelessWidget {
-  final AppearanceStructureInspectionFunctionResult testFunction;
+class ProtectionFunctionTestTable extends StatelessWidget {
+  final ProtectionFunctionTestResult data;
 
-  const AppearanceStructureInspectionTable(this.testFunction, {super.key});
+  const ProtectionFunctionTestTable(this.data, {super.key});
 
   List<String> get headers =>
-      ['No.', 'Inspection Item', 'Inspection Details', 'Judgement'];
+      ['No.', 'Test Items', 'Testing Record', 'Judgement'];
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +18,7 @@ class AppearanceStructureInspectionTable extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            "a. Appearance & Structure Inspection",
+            "d. Protection Function Test",
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           IconButton(
@@ -43,31 +42,19 @@ class AppearanceStructureInspectionTable extends StatelessWidget {
                 )
                 .toList(),
             rows: List.generate(
-              testFunction.testItems.length,
+              data.showTestResultByColumn.length,
               (index) => DataRow(
                 cells: [
                   DataCell(Text((index + 1).toString())),
-                  DataCell(Text(testFunction.testItems[index].name)),
-                  DataCell(getResultDes(index)),
-                  DataCell(Text(testFunction.testItems[index].judgement)),
+                  DataCell(Text(data.showTestResultByColumn[index].name)),
+                  DataCell(Text(data.showTestResultByColumn[index].description)),
+                  DataCell(Text(data.showTestResultByColumn[index].judgement.name)),
                 ],
               ),
             ),
           ),
         ],
       ),
-    );
-  }
-
-  Widget getResultDes(int index) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: testFunction.testItems[index].results
-          .asMap()
-          .entries
-          .map((r) => Text("${r.key + 1}. ${r.value.itemDesc}"))
-          .toList(),
     );
   }
 
@@ -82,12 +69,12 @@ class AppearanceStructureInspectionTable extends StatelessWidget {
             border: pw.TableBorder.all(),
             headers: ['No.', 'S/N'],
             data: List.generate(
-              testFunction.testItems.length,
+              data.showTestResultByColumn.length,
               (index) => [
                 (index + 1).toString(),
-                testFunction.testItems[index].name,
-                getResultDes(index),
-                testFunction.testItems[index].judgement,
+                data.showTestResultByColumn[index].name,
+                data.showTestResultByColumn[index].description,
+                data.showTestResultByColumn[index].judgement,
               ],
             ),
           );

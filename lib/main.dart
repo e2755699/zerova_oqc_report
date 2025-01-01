@@ -9,7 +9,7 @@ import 'package:zerova_oqc_report/src/report/model/old_charge_module.dart';
 import 'package:zerova_oqc_report/src/report/model/old_oqc_report_model.dart';
 import 'package:zerova_oqc_report/src/report/model/old_software_version.dart';
 import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
-import 'package:zerova_oqc_report/src/report/model/protection_function_testresult.dart';
+import 'package:zerova_oqc_report/src/report/model/protection_function_test_result.dart';
 import 'package:zerova_oqc_report/src/report/model/software_version.dart';
 import 'package:zerova_oqc_report/src/report/model/test_function.dart';
 import 'package:zerova_oqc_report/src/report/model/input_output_characteristics.dart';
@@ -18,7 +18,9 @@ import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 // import 'package:pdf_text/pdf_text.dart';
 import 'package:zerova_oqc_report/src/report/oqc_report.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/appearance_structure_inspection_table.dart';
-import 'package:zerova_oqc_report/src/widget/oqc/power_table.dart';
+import 'package:zerova_oqc_report/src/widget/oqc/basic_function_test_table.dart';
+import 'package:zerova_oqc_report/src/widget/oqc/input_output_characteristics_table.dart';
+import 'package:zerova_oqc_report/src/widget/oqc/protection_function_test_table.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/psu_serial_numbers_table.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/software_version.dart';
 
@@ -49,8 +51,8 @@ class _JSONReaderScreenState extends State<JSONReaderScreen> {
   Psuserialnumber? _psuSerialNumbers; // 添加存儲 PSU Serial Number 的變量
   InputOutputCharacteristics? _inputOutputCharacteristics;
   ProtectionFunctionTestResult?
-      _testResults; // 添加存儲 Protection Function Test 結果的變量
-  TestFunction? _testfunction; // 添加存儲 Protection Function Test 結果的變量
+      _protectionTestResults; // 添加存儲 Protection Function Test 結果的變量
+  AppearanceStructureInspectionFunctionResult? _testfunction; // 添加存儲 Protection Function Test 結果的變量
   /// 選擇並讀取 JSON 檔案
   Future<void> _pickAndReadJsonFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -85,9 +87,9 @@ class _JSONReaderScreenState extends State<JSONReaderScreen> {
             Psuserialnumber.fromJsonList(moduleData); // 提取多筆 PSU Serial Number
         _inputOutputCharacteristics =
             InputOutputCharacteristics.fromJsonList(data);
-        _testResults =
+        _protectionTestResults =
             ProtectionFunctionTestResult.fromJsonList(data); // 提取測試結果
-        _testfunction = TestFunction.fromJson(testFuncionData);
+        _testfunction = AppearanceStructureInspectionFunctionResult.fromJson(testFuncionData);
       });
     }
   }
@@ -133,11 +135,12 @@ class _JSONReaderScreenState extends State<JSONReaderScreen> {
       ]).then((res) {
         setState(() {
           _psuSerialNumbers = Psuserialnumber.fromJsonList(res[0]);
-          _testfunction = TestFunction.fromJson(res[1]);
+          _testfunction = AppearanceStructureInspectionFunctionResult.fromJson(res[1]);
           _softwareVersion = SoftwareVersion.fromJsonList(res[2]);
           _inputOutputCharacteristics =
               InputOutputCharacteristics.fromJsonList(res[2]);
-          _testResults = ProtectionFunctionTestResult.fromJsonList(res[2]);
+          _protectionTestResults =
+              ProtectionFunctionTestResult.fromJsonList(res[2]);
         });
       });
 
@@ -180,55 +183,12 @@ class _JSONReaderScreenState extends State<JSONReaderScreen> {
               if (_testfunction != null)
                 AppearanceStructureInspectionTable(_testfunction!),
               if (_inputOutputCharacteristics != null)
-                PowerTable(_inputOutputCharacteristics!),
-              if (_testResults != null)
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Protection Function Test Results:",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      // 第一表：Fail Counts 顯示
-                      Text(
-                          "Emergency Test: ${_testResults!.emergencyStopFailCount.value}, Status: ${_testResults!.emergencyStopFailCount.judgment}"),
-                      Text(
-                          "Door Open Test: ${_testResults!.doorOpenFailCount.value}, Status: ${_testResults!.doorOpenFailCount.judgment}"),
-                      Text(
-                          "Ground Fault Test: ${_testResults!.groundFaultFailCount.value}, Status: ${_testResults!.groundFaultFailCount.judgment}"),
-                      SizedBox(height: 16),
-
-                      // 第二表：左槍結果顯示
-                      Text(
-                        "Left Gun Results:",
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      ..._testResults!.leftGunResults.entries.map((entry) {
-                        final key = entry.key;
-                        final measurement = entry.value;
-                        return Text(
-                            "$key: ${measurement.value}, Status: ${measurement.judgment}");
-                      }).toList(),
-                      SizedBox(height: 16),
-
-                      // 第二表：右槍結果顯示
-                      Text(
-                        "Right Gun Results:",
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      ..._testResults!.rightGunResults.entries.map((entry) {
-                        final key = entry.key;
-                        final measurement = entry.value;
-                        return Text(
-                            "$key: ${measurement.value}, Status: ${measurement.judgment}");
-                      }).toList(),
-                    ],
-                  ),
+                InputOutputCharacteristicsTable(_inputOutputCharacteristics!),
+              if (_inputOutputCharacteristics != null)
+                BasicFunctionTestTable(_inputOutputCharacteristics!.baseFunctionTestResult),
+              if (_protectionTestResults != null)
+                ProtectionFunctionTestTable(
+                  _protectionTestResults!,
                 ),
             ],
           ),

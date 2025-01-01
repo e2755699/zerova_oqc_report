@@ -6,7 +6,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf_text/pdf_text.dart';
 import 'package:zerova_oqc_report/src/report/model/input_output_characteristics.dart';
-import 'package:zerova_oqc_report/src/report/model/protection_function_testresult.dart';
+import 'package:zerova_oqc_report/src/report/model/protection_function_test_result.dart';
 import 'package:zerova_oqc_report/src/report/model/software_version.dart';
 import 'package:zerova_oqc_report/src/report/model/old_charge_module.dart';
 

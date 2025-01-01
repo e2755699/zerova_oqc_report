@@ -5,10 +5,10 @@ import 'package:zerova_oqc_report/src/report/model/input_output_characteristics.
 import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/report/model/test_function.dart';
 
-class PowerTable extends StatelessWidget {
+class InputOutputCharacteristicsTable extends StatelessWidget {
   final InputOutputCharacteristics inputOutputCharacteristics;
 
-  const PowerTable(this.inputOutputCharacteristics, {super.key});
+  const InputOutputCharacteristicsTable(this.inputOutputCharacteristics, {super.key});
 
   List<List<String>> get headers => [
         ['Item', 'Spec'],

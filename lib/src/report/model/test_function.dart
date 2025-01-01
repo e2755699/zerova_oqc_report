@@ -1,9 +1,9 @@
 import 'package:collection/collection.dart'; // 需要引入集合工具庫
 
-class TestFunction {
+class AppearanceStructureInspectionFunctionResult {
   final List<TestItem> testItems;
 
-  TestFunction(this.testItems);
+  AppearanceStructureInspectionFunctionResult(this.testItems);
 
   static List<String> keys = [
     "CSU",
@@ -24,7 +24,7 @@ class TestFunction {
     "燒機",
   ];
 
-  factory TestFunction.fromJson(List<dynamic> json) {
+  factory AppearanceStructureInspectionFunctionResult.fromJson(List<dynamic> json) {
     var results = json
         .map((j) => Result.fromJson(j))
         .where((r) => keys.contains(r.itemName))
@@ -33,7 +33,7 @@ class TestFunction {
         .map((k, v) => MapEntry(k, TestItem(k, v)))
         .values
         .toList();
-    return TestFunction(testItems);
+    return AppearanceStructureInspectionFunctionResult(testItems);
   }
 }
 

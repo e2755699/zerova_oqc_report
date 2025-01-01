@@ -1,9 +1,9 @@
 class ProtectionFunctionTestResult {
-  final Map<String, Measurement> leftGunResults;
-  final Map<String, Measurement> rightGunResults;
-  final Measurement emergencyStopFailCount;
-  final Measurement doorOpenFailCount;
-  final Measurement groundFaultFailCount;
+  final Map<String, ProtectionFunctionMeasurement> leftGunResults;
+  final Map<String, ProtectionFunctionMeasurement> rightGunResults;
+  final ProtectionFunctionMeasurement emergencyStopFailCount;
+  final ProtectionFunctionMeasurement doorOpenFailCount;
+  final ProtectionFunctionMeasurement groundFaultFailCount;
 
   static const Map<String, String> results = {
     "Emergency Test": "未找到",
@@ -22,13 +22,17 @@ class ProtectionFunctionTestResult {
     required this.groundFaultFailCount,
   });
 
+  List<ProtectionFunctionMeasurement> get showTestResultByColumn {
+    return [emergencyStopFailCount, doorOpenFailCount, groundFaultFailCount];
+  }
+
   static ProtectionFunctionTestResult fromJsonList(List<dynamic> data) {
     int emergencyFailCount = 0;
     int doorFailCount = 0;
     int groundFailCount = 0;
 
-    Map<String, Measurement> leftGunResults = {};
-    Map<String, Measurement> rightGunResults = {};
+    Map<String, ProtectionFunctionMeasurement> leftGunResults = {};
+    Map<String, ProtectionFunctionMeasurement> rightGunResults = {};
 
     for (var item in data) {
       String? spcDesc = item['SPC_DESC'];
@@ -73,17 +77,22 @@ class ProtectionFunctionTestResult {
         double tolerance = spec * 0.05; // 容差 ±5%
 
         // 判斷是否通過測試
-        FailStatus judgment = (value >= spec - tolerance && value <= spec + tolerance)
-            ? FailStatus.PASS
-            : FailStatus.FAIL;
+        Judgement judgment =
+        (value >= spec - tolerance && value <= spec + tolerance)
+            ? Judgement.pass
+            : Judgement.fail;
 
         // 新建測量結果
-        Measurement measurement = Measurement(
+        ProtectionFunctionMeasurement measurement = ProtectionFunctionMeasurement(
           spec: spec,
           value: value,
           key: spcDesc,
           name: "$testType",
-          judgment: judgment,
+          judgement: judgment,
+          description: "Insulation Impedance Test."
+              "Apply a DC Voltage:"
+              "a) Between each circuit."
+              "b) Between each of the independent circuits and the ground.",
         );
 
         // 儲存到左右槍的對應結果中，取小的值
@@ -120,26 +129,32 @@ class ProtectionFunctionTestResult {
     return ProtectionFunctionTestResult(
       leftGunResults: leftGunResults,
       rightGunResults: rightGunResults,
-      emergencyStopFailCount: Measurement(
+      emergencyStopFailCount: ProtectionFunctionMeasurement(
         spec: 3,
         value: emergencyFailCount.toDouble(),
         key: "Emergency_Stop",
         name: "緊急停止失敗次數",
-        judgment: emergencyFailCount >= 3 ? FailStatus.FAIL : FailStatus.PASS,
+        judgement: emergencyFailCount >= 3 ? Judgement.fail : Judgement.pass,
+        description:
+        'After the charger is powered on and charging normally, set the rated load to initiate charging. Once the charger reaches normal output current, press the emergency stop button. This action will disconnect the charger from the AC output and trigger an alarm.',
       ),
-      doorOpenFailCount: Measurement(
+      doorOpenFailCount: ProtectionFunctionMeasurement(
         spec: 3,
         value: doorFailCount.toDouble(),
         key: "Door_Open",
         name: "門開啟失敗次數",
-        judgment: doorFailCount >= 3 ? FailStatus.FAIL : FailStatus.PASS,
+        judgement: doorFailCount >= 3 ? Judgement.fail : Judgement.pass,
+        description:
+        'While opening the door, the charger should stop charging immediately and shows alarm when the door open.',
       ),
-      groundFaultFailCount: Measurement(
+      groundFaultFailCount: ProtectionFunctionMeasurement(
         spec: 3,
         value: groundFailCount.toDouble(),
         key: "Ground_Fault",
         name: "接地故障失敗次數",
-        judgment: groundFailCount >= 3 ? FailStatus.FAIL : FailStatus.PASS,
+        description:
+        "If the charger detects a ground fault or a drop in insulation below the protection threshold of rated resistance during simulation, it should stop charging and trigger an alarm to protect charger immediately.",
+        judgement: groundFailCount >= 3 ? Judgement.fail : Judgement.pass,
       ),
     );
   }
@@ -147,20 +162,24 @@ class ProtectionFunctionTestResult {
   static fromExcel(String string) {}
 }
 
-class Measurement {
+class ProtectionFunctionMeasurement {
   final double spec;
   final double value;
   final String key;
   final String name;
-  final FailStatus judgment;
+  final String description;
 
-  Measurement({
+  final Judgement judgement;
+
+  ProtectionFunctionMeasurement({
     required this.spec,
     required this.value,
+    required this.description,
     required this.key,
     required this.name,
-    required this.judgment,
+    required this.judgement,
   });
 }
 
-enum FailStatus { PASS, FAIL, UNKNOWN }
+enum Judgement { pass, fail, unknown }
+
