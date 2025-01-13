@@ -1,31 +1,35 @@
 import 'dart:io';
 import 'dart:convert';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:excel/excel.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:pdf/widgets.dart' as pw;
 import 'package:zerova_oqc_report/src/client/oqc_api_client.dart';
-import 'package:zerova_oqc_report/src/report/model/old_charge_module.dart';
-import 'package:zerova_oqc_report/src/report/model/old_oqc_report_model.dart';
-import 'package:zerova_oqc_report/src/report/model/old_software_version.dart';
 import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/report/model/protection_function_test_result.dart';
 import 'package:zerova_oqc_report/src/report/model/software_version.dart';
 import 'package:zerova_oqc_report/src/report/model/test_function.dart';
 import 'package:zerova_oqc_report/src/report/model/input_output_characteristics.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
+import 'package:zerova_oqc_report/src/widget/home/home_page.dart';
+import 'package:zerova_oqc_report/src/widget/oqc/oqc_report_page.dart';
+import 'package:zerova_oqc_report/src/widget/oqc/tables/psu_serial_numbers_table.dart';
 
-// import 'package:pdf_text/pdf_text.dart';
-import 'package:zerova_oqc_report/src/report/oqc_report.dart';
-import 'package:zerova_oqc_report/src/widget/oqc/appearance_structure_inspection_table.dart';
-import 'package:zerova_oqc_report/src/widget/oqc/basic_function_test_table.dart';
-import 'package:zerova_oqc_report/src/widget/oqc/input_output_characteristics_table.dart';
-import 'package:zerova_oqc_report/src/widget/oqc/protection_function_test_table.dart';
-import 'package:zerova_oqc_report/src/widget/oqc/psu_serial_numbers_table.dart';
-import 'package:zerova_oqc_report/src/widget/oqc/software_version.dart';
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-void main() {
-  runApp(MyApp());
+  await EasyLocalization.ensureInitialized();
+
+  runApp(EasyLocalization(
+    supportedLocales: const [
+      Locale('en', 'US'), // 英文
+      Locale('zh', 'CN'), // 中文
+      Locale('vi', 'VN'), // 越南文
+      Locale('ja', 'JP'), // 日文
+    ],
+    path: 'assets/translations', // 翻譯檔案的路徑
+    fallbackLocale: const Locale('en', 'US'), // 預設語言
+    child: MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -33,10 +37,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Excel Reader & PDF Generator',
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: JSONReaderScreen(),
+      home: const HomePage(),
     );
   }
 }
@@ -46,19 +53,22 @@ class JSONReaderScreen extends StatefulWidget {
   _JSONReaderScreenState createState() => _JSONReaderScreenState();
 }
 
-class _JSONReaderScreenState extends State<JSONReaderScreen> {
+class _JSONReaderScreenState extends State<JSONReaderScreen>
+    with SingleTickerProviderStateMixin {
   SoftwareVersion? _softwareVersion;
   Psuserialnumber? _psuSerialNumbers; // 添加存儲 PSU Serial Number 的變量
   InputOutputCharacteristics? _inputOutputCharacteristics;
   ProtectionFunctionTestResult?
       _protectionTestResults; // 添加存儲 Protection Function Test 結果的變量
-  AppearanceStructureInspectionFunctionResult? _testfunction; // 添加存儲 Protection Function Test 結果的變量
+  AppearanceStructureInspectionFunctionResult?
+      _testFunction; // 添加存儲 Protection Function Test 結果的變量
   /// 選擇並讀取 JSON 檔案
   Future<void> _pickAndReadJsonFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.any,
     );
 
+    AnimationController(vsync: this);
     if (result != null) {
       // String jsonContent = await File(result.files.single.path!).readAsString();
       /*String testFunctionJsonContent = await File(
@@ -89,7 +99,8 @@ class _JSONReaderScreenState extends State<JSONReaderScreen> {
             InputOutputCharacteristics.fromJsonList(data);
         _protectionTestResults =
             ProtectionFunctionTestResult.fromJsonList(data); // 提取測試結果
-        _testfunction = AppearanceStructureInspectionFunctionResult.fromJson(testFuncionData);
+        _testFunction = AppearanceStructureInspectionFunctionResult.fromJson(
+            testFuncionData);
       });
     }
   }
@@ -135,7 +146,8 @@ class _JSONReaderScreenState extends State<JSONReaderScreen> {
       ]).then((res) {
         setState(() {
           _psuSerialNumbers = Psuserialnumber.fromJsonList(res[0]);
-          _testfunction = AppearanceStructureInspectionFunctionResult.fromJson(res[1]);
+          _testFunction =
+              AppearanceStructureInspectionFunctionResult.fromJson(res[1]);
           _softwareVersion = SoftwareVersion.fromJsonList(res[2]);
           _inputOutputCharacteristics =
               InputOutputCharacteristics.fromJsonList(res[2]);
@@ -178,18 +190,11 @@ class _JSONReaderScreenState extends State<JSONReaderScreen> {
                     ],
                   ),
                 ),
-              if (_softwareVersion != null)
-                SoftwareVersionTable(_softwareVersion!),
-              if (_testfunction != null)
-                AppearanceStructureInspectionTable(_testfunction!),
-              if (_inputOutputCharacteristics != null)
-                InputOutputCharacteristicsTable(_inputOutputCharacteristics!),
-              if (_inputOutputCharacteristics != null)
-                BasicFunctionTestTable(_inputOutputCharacteristics!.baseFunctionTestResult),
-              if (_protectionTestResults != null)
-                ProtectionFunctionTestTable(
-                  _protectionTestResults!,
-                ),
+              OqcReportPage(
+                  softwareVersion: _softwareVersion,
+                  testFunction: _testFunction,
+                  inputOutputCharacteristics: _inputOutputCharacteristics,
+                  protectionTestResults: _protectionTestResults)
             ],
           ),
         ),
