@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:zerova_oqc_report/src/report/model/input_output_characteristics.dart';
 import 'package:zerova_oqc_report/src/report/model/package_list_result.dart';
 import 'package:zerova_oqc_report/src/report/model/protection_function_test_result.dart';
+import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/report/model/software_version.dart';
 import 'package:zerova_oqc_report/src/report/model/test_function.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/tables/appearance_structure_inspection_table.dart';
@@ -11,6 +12,7 @@ import 'package:zerova_oqc_report/src/widget/oqc/tables/basic_function_test_tabl
 import 'package:zerova_oqc_report/src/widget/oqc/tables/input_output_characteristics_table.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/tables/package_list_table.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/tables/protection_function_test_table.dart';
+import 'package:zerova_oqc_report/src/widget/oqc/tables/psu_serial_numbers_table.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/tables/software_version.dart';
 
 class OqcReportPage extends StatefulWidget {
@@ -20,12 +22,14 @@ class OqcReportPage extends StatefulWidget {
     required this.testFunction,
     required this.inputOutputCharacteristics,
     required this.protectionTestResults,
+    this.psuSerialNumbers,
   });
 
   final SoftwareVersion? softwareVersion;
   final AppearanceStructureInspectionFunctionResult? testFunction;
   final InputOutputCharacteristics? inputOutputCharacteristics;
   final ProtectionFunctionTestResult? protectionTestResults;
+  final Psuserialnumber? psuSerialNumbers;
 
   @override
   State<OqcReportPage> createState() => _OqcReportPageState();
@@ -51,6 +55,8 @@ class _OqcReportPageState extends State<OqcReportPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  if (widget.psuSerialNumbers != null)
+                    PsuSerialNumbersTable(widget.psuSerialNumbers!),
                   if (widget.softwareVersion != null)
                     SoftwareVersionTable(widget.softwareVersion!),
                   if (widget.testFunction != null)
