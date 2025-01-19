@@ -7,7 +7,9 @@ import 'package:zerova_oqc_report/src/report/model/protection_function_test_resu
 import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/report/model/software_version.dart';
 import 'package:zerova_oqc_report/src/report/model/test_function.dart';
+import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/tables/appearance_structure_inspection_table.dart';
+import 'package:zerova_oqc_report/src/widget/oqc/tables/attachment_table.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/tables/basic_function_test_table.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/tables/input_output_characteristics_table.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/tables/package_list_table.dart';
@@ -22,7 +24,8 @@ class OqcReportPage extends StatefulWidget {
     required this.testFunction,
     required this.inputOutputCharacteristics,
     required this.protectionTestResults,
-    this.psuSerialNumbers,
+    required this.psuSerialNumbers,
+    required this.packageListResult,
   });
 
   final SoftwareVersion? softwareVersion;
@@ -30,6 +33,7 @@ class OqcReportPage extends StatefulWidget {
   final InputOutputCharacteristics? inputOutputCharacteristics;
   final ProtectionFunctionTestResult? protectionTestResults;
   final Psuserialnumber? psuSerialNumbers;
+  final PackageListResult? packageListResult;
 
   @override
   State<OqcReportPage> createState() => _OqcReportPageState();
@@ -55,6 +59,53 @@ class _OqcReportPageState extends State<OqcReportPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  StyledCard(
+                    title: 'Basic Information',
+                    content: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Text(
+                              'Model Name : ',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.darkBlueColor,
+                              ),
+                            ),
+                            const Text(
+                              'DSYE182XXXXXXX-RW',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: AppColors.blackColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            const Text(
+                              'SN : ',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.darkBlueColor,
+                              ),
+                            ),
+                            const Text(
+                              '',  // 這裡可以放入實際的 SN
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: AppColors.blackColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                   if (widget.psuSerialNumbers != null)
                     PsuSerialNumbersTable(widget.psuSerialNumbers!),
                   if (widget.softwareVersion != null)
@@ -71,7 +122,9 @@ class _OqcReportPageState extends State<OqcReportPage> {
                     ProtectionFunctionTestTable(
                       widget.protectionTestResults!,
                     ),
-                  PackageListTable(PackageListResult()),
+                  if (widget.packageListResult != null)
+                    PackageListTable(widget.packageListResult!),
+                  const AttachmentTable(),
                 ],
               ),
             ),

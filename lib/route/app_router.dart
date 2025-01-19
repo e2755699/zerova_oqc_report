@@ -28,6 +28,8 @@ final GoRouter appRouter = GoRouter(
           testFunction: extra['testFunction'],
           inputOutputCharacteristics: extra['inputOutputCharacteristics'],
           protectionTestResults: extra['protectionTestResults'],
+          psuSerialNumbers: extra['psuSerialNumbers'],
+          packageListResult: extra['packageListResult'],
         );
       },
     ),
