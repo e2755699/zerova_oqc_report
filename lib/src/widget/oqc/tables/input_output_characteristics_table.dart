@@ -4,6 +4,7 @@ import 'package:printing/printing.dart';
 import 'package:zerova_oqc_report/src/report/model/input_output_characteristics.dart';
 import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/report/model/test_function.dart';
+import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 
 class InputOutputCharacteristicsTable extends StatelessWidget {
   final InputOutputCharacteristics inputOutputCharacteristics;
@@ -23,74 +24,49 @@ class InputOutputCharacteristicsTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          Text(
-            "a. Appearance & Structure Inspection",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          IconButton(
-            icon: const Icon(Icons.picture_as_pdf),
-            onPressed: () => _generatePdf(context),
-          ),
-          DataTable(
-            border: TableBorder.all(
-              color: Colors.black, // 黑色邊框
-              width: 1, // 邊框寬度
+    final dataTable = StyledDataTable(
+      columns: headers.map((header) => DataColumn(
+        label: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: header.map((headerColumn) => Text(
+            headerColumn,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.darkBlueColor,
             ),
-            columnSpacing: 32,
-            columns: headers
-                .map(
-                  (header) => DataColumn(
-                    label: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: header
-                          .map((headerColumn) => Text(
-                                headerColumn,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
-                              ))
-                          .toList(),
-                    ),
-                  ),
-                )
-                .toList(),
-            rows: List.generate(
-              inputOutputCharacteristics.inputOutputCharacteristicsSide.length,
-              (index) {
-                var inc = inputOutputCharacteristics
-                    .inputOutputCharacteristicsSide[index];
-                return DataRow(
-                  cells: [
-                    DataCell(Text(inc.side)),
-                    //input voltage
-                    DataCell(RichText(
-                      text: TextSpan(
-                          children: inc.inputVoltage
-                              .map((iv) => TextSpan(text: "${iv.value} V"))
-                              .toList()),
-                    )),
-                    DataCell(RichText(
-                      text: TextSpan(
-                          children: inc.inputCurrent
-                              .map((iv) => TextSpan(text: "${iv.value} A"))
-                              .toList()),
-                    )),
-                    DataCell(Text("${inc.totalInputPower.value} KW")),
-                    DataCell(Text("${inc.outputVoltage.value} V")),
-                    DataCell(Text("${inc.outputCurrent.value} A")),
-                    DataCell(Text("${inc.totalOutputPower.value} KW")),
-                    DataCell(Text(inc.judgement)),
-                  ],
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+          )).toList(),
+        ),
+      )).toList(),
+      rows: inputOutputCharacteristics.inputOutputCharacteristicsSide.map((item) {
+        return DataRow(
+          cells: [
+            DataCell(Text(item.side)),
+            DataCell(RichText(
+              text: TextSpan(
+                  children: item.inputVoltage
+                      .map((iv) => TextSpan(text: "${iv.value} V"))
+                      .toList()),
+            )),
+            DataCell(RichText(
+              text: TextSpan(
+                  children: item.inputCurrent
+                      .map((iv) => TextSpan(text: "${iv.value} A"))
+                      .toList()),
+            )),
+            DataCell(Text("${item.totalInputPower.value} KW")),
+            DataCell(Text("${item.outputVoltage.value} V")),
+            DataCell(Text("${item.outputCurrent.value} A")),
+            DataCell(Text("${item.totalOutputPower.value} KW")),
+            DataCell(Text(item.judgement)),
+          ],
+        );
+      }).toList(),
+    );
+
+    return StyledCard(
+      title: 'c. Input & Output Characteristics',
+      content: dataTable,
     );
   }
 
