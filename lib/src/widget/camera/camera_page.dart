@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
+import 'package:go_router/go_router.dart';
 
 /// Example app for Camera Windows plugin.
 class CameraPage extends StatefulWidget {
@@ -310,6 +311,10 @@ class _CameraPageState extends State<CameraPage> {
       scaffoldMessengerKey: _scaffoldMessengerKey,
       home: Scaffold(
         appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.pop(),
+          ),
           title: const Text('Camera'),
         ),
         body: ListView(
