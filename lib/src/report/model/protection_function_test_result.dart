@@ -1,3 +1,5 @@
+import 'package:zerova_oqc_report/src/report/enum/judgement.dart';
+
 class ProtectionFunctionTestResult {
   final Map<String, ProtectionFunctionMeasurement> leftGunResults;
   final Map<String, ProtectionFunctionMeasurement> rightGunResults;
@@ -168,7 +170,6 @@ class ProtectionFunctionMeasurement {
   final String key;
   final String name;
   final String description;
-
   final Judgement judgement;
 
   ProtectionFunctionMeasurement({
@@ -180,6 +181,4 @@ class ProtectionFunctionMeasurement {
     required this.judgement,
   });
 }
-
-enum Judgement { pass, fail, unknown }
 

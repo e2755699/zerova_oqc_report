@@ -3,71 +3,56 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/report/model/test_function.dart';
+import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 
 class AppearanceStructureInspectionTable extends StatelessWidget {
-  final AppearanceStructureInspectionFunctionResult testFunction;
+  final AppearanceStructureInspectionFunctionResult data;
 
-  const AppearanceStructureInspectionTable(this.testFunction, {super.key});
-
-  List<String> get headers =>
-      ['No.', 'Inspection Item', 'Inspection Details', 'Judgement'];
+  const AppearanceStructureInspectionTable(this.data, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          Text(
-            "a. Appearance & Structure Inspection",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          IconButton(
-            icon: const Icon(Icons.picture_as_pdf),
-            onPressed: () => _generatePdf(context),
-          ),
-          DataTable(
-            border: TableBorder.all(
-              color: Colors.black, // 黑色邊框
-              width: 1, // 邊框寬度
-            ),
-            columnSpacing: 32,
-            columns: headers
-                .map(
-                  (header) => DataColumn(
-                    label: Text(
-                      header,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                )
-                .toList(),
-            rows: List.generate(
-              testFunction.testItems.length,
-              (index) => DataRow(
-                cells: [
-                  DataCell(Text((index + 1).toString())),
-                  DataCell(Text(testFunction.testItems[index].name)),
-                  DataCell(getResultDes(index)),
-                  DataCell(Text(testFunction.testItems[index].judgement)),
-                ],
-              ),
+    final dataTable = StyledDataTable(
+      columns: const [
+        DataColumn(
+          label: Text(
+            'Item',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.darkBlueColor,
             ),
           ),
+        ),
+        DataColumn(
+          label: Text(
+            'Result',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.darkBlueColor,
+            ),
+          ),
+        ),
+      ],
+      rows: data.testItems.map((item) => DataRow(
+        cells: [
+          DataCell(Text(
+            item.name,
+            style: const TextStyle(color: AppColors.blackColor),
+          )),
+          DataCell(Text(
+            item.judgement,
+            style: TextStyle(
+              color: item.judgement == 'OK' ? Colors.green : Colors.red,
+              fontWeight: FontWeight.bold,
+            ),
+          )),
         ],
-      ),
+      )).toList(),
     );
-  }
 
-  Widget getResultDes(int index) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: testFunction.testItems[index].results
-          .asMap()
-          .entries
-          .map((r) => Text("${r.key + 1}. ${r.value.itemDesc}"))
-          .toList(),
+    return StyledCard(
+      title: 'b. Appearance & Structure Inspection',
+      content: dataTable,
     );
   }
 
@@ -80,14 +65,14 @@ class AppearanceStructureInspectionTable extends StatelessWidget {
         build: (pw.Context context) {
           return pw.Table.fromTextArray(
             border: pw.TableBorder.all(),
-            headers: ['No.', 'S/N'],
+            headers: ['No.', 'Item', 'Description', 'Result'],
             data: List.generate(
-              testFunction.testItems.length,
+              data.testItems.length,
               (index) => [
                 (index + 1).toString(),
-                testFunction.testItems[index].name,
-                getResultDes(index),
-                testFunction.testItems[index].judgement,
+                data.testItems[index].name,
+                data.testItems[index].results.map((r) => r.itemDesc).join('\n'),
+                data.testItems[index].judgement,
               ],
             ),
           );
@@ -98,6 +83,18 @@ class AppearanceStructureInspectionTable extends StatelessWidget {
     // 預覽 PDF
     await Printing.layoutPdf(
       onLayout: (format) async => pdf.save(),
+    );
+  }
+
+  Widget getResultDes(int index) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: data.testItems[index].results
+          .asMap()
+          .entries
+          .map((r) => Text("${r.key + 1}. ${r.value.itemDesc}"))
+          .toList(),
     );
   }
 }

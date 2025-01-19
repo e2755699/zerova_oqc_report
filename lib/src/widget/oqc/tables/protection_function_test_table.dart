@@ -1,60 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:zerova_oqc_report/src/report/enum/judgement.dart';
 import 'package:zerova_oqc_report/src/report/model/protection_function_test_result.dart';
+import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 
 class ProtectionFunctionTestTable extends StatelessWidget {
   final ProtectionFunctionTestResult data;
 
   const ProtectionFunctionTestTable(this.data, {super.key});
 
-  List<String> get headers =>
-      ['No.', 'Test Items', 'Testing Record', 'Judgement'];
-
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          Text(
-            "d. Protection Function Test",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          IconButton(
-            icon: const Icon(Icons.picture_as_pdf),
-            onPressed: () => _generatePdf(context),
-          ),
-          DataTable(
-            border: TableBorder.all(
-              color: Colors.black, // 黑色邊框
-              width: 1, // 邊框寬度
-            ),
-            columnSpacing: 32,
-            columns: headers
-                .map(
-                  (header) => DataColumn(
-                    label: Text(
-                      header,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                )
-                .toList(),
-            rows: List.generate(
-              data.showTestResultByColumn.length,
-              (index) => DataRow(
-                cells: [
-                  DataCell(Text((index + 1).toString())),
-                  DataCell(Text(data.showTestResultByColumn[index].name)),
-                  DataCell(Text(data.showTestResultByColumn[index].description)),
-                  DataCell(Text(data.showTestResultByColumn[index].judgement.name)),
-                ],
-              ),
+    final dataTable = StyledDataTable(
+      columns: const [
+        DataColumn(
+          label: Text(
+            'Item',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.darkBlueColor,
             ),
           ),
+        ),
+        DataColumn(
+          label: Text(
+            'Value',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.darkBlueColor,
+            ),
+          ),
+        ),
+      ],
+      rows: data.showTestResultByColumn.map((item) => DataRow(
+        cells: [
+          DataCell(Text(
+            item.name,
+            style: const TextStyle(color: AppColors.blackColor),
+          )),
+          DataCell(Text(
+            item.value.toString(),
+            style: TextStyle(
+              color: item.judgement == Judgement.pass ? Colors.green : Colors.red,
+              fontWeight: FontWeight.bold,
+            ),
+          )),
         ],
-      ),
+      )).toList(),
+    );
+
+    return StyledCard(
+      title: 'd. Protection Function Test',
+      content: dataTable,
     );
   }
 

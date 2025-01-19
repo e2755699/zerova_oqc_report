@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
-import 'package:zerova_oqc_report/src/report/model/software_version.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 
-class SoftwareVersionTable extends StatelessWidget {
-  final SoftwareVersion data;
+class PsuVersionTable extends StatelessWidget {
+  final Map<String, String> data;
 
-  const SoftwareVersionTable(this.data, {super.key});
+  const PsuVersionTable(this.data, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -33,22 +31,36 @@ class SoftwareVersionTable extends StatelessWidget {
           ),
         ),
       ],
-      rows: data.versions.map((version) => DataRow(
-        cells: [
-          DataCell(Text(
-            version.name,
-            style: const TextStyle(color: AppColors.blackColor),
-          )),
-          DataCell(Text(
-            version.value,
-            style: const TextStyle(color: AppColors.blackColor),
-          )),
-        ],
-      )).toList(),
+      rows: [
+        DataRow(
+          cells: [
+            DataCell(Text(
+              'MCU Version',
+              style: const TextStyle(color: AppColors.blackColor),
+            )),
+            DataCell(Text(
+              data['mcuVersion'] ?? 'N/A',
+              style: const TextStyle(color: AppColors.blackColor),
+            )),
+          ],
+        ),
+        DataRow(
+          cells: [
+            DataCell(Text(
+              'FPGA Version',
+              style: const TextStyle(color: AppColors.blackColor),
+            )),
+            DataCell(Text(
+              data['fpgaVersion'] ?? 'N/A',
+              style: const TextStyle(color: AppColors.blackColor),
+            )),
+          ],
+        ),
+      ],
     );
 
     return StyledCard(
-      title: 'Software Version',
+      title: 'PSU Version',
       content: dataTable,
     );
   }
@@ -62,15 +74,11 @@ class SoftwareVersionTable extends StatelessWidget {
         build: (pw.Context context) {
           return pw.Table.fromTextArray(
             border: pw.TableBorder.all(),
-            headers: ['No.', 'Item', 'Version'],
-            data: List.generate(
-              data.versions.length,
-              (index) => [
-                (index + 1).toString(),
-                data.versions[index].name,
-                data.versions[index].value,
-              ],
-            ),
+            headers: ['Item', 'Version'],
+            data: [
+              ['MCU Version', data['mcuVersion'] ?? 'N/A'],
+              ['FPGA Version', data['fpgaVersion'] ?? 'N/A'],
+            ],
           );
         },
       ),
@@ -81,4 +89,4 @@ class SoftwareVersionTable extends StatelessWidget {
       onLayout: (format) async => pdf.save(),
     );
   }
-}
+} 

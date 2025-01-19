@@ -1,3 +1,4 @@
+import 'package:zerova_oqc_report/src/report/enum/judgement.dart';
 import 'package:zerova_oqc_report/src/report/model/protection_function_test_result.dart';
 
 class InputOutputCharacteristics {

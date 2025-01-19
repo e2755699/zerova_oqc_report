@@ -5,6 +5,8 @@ import 'package:zerova_oqc_report/src/report/model/input_output_characteristics.
 import 'package:zerova_oqc_report/src/report/model/package_list_result.dart';
 import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/report/model/test_function.dart';
+import 'package:go_router/go_router.dart';
+import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 
 class PackageListTable extends StatelessWidget {
   final PackageListResult data;
@@ -15,57 +17,70 @@ class PackageListTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          Text(
-            "c. Basic Function Test",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          IconButton(
-            icon: const Icon(Icons.picture_as_pdf),
-            onPressed: () => _generatePdf(context),
-          ),
-          DataTable(
-            border: TableBorder.all(
-              color: Colors.black, // 黑色邊框
-              width: 1, // 邊框寬度
-            ),
-            columnSpacing: 32,
-            columns: headers
-                .map(
-                  (header) => DataColumn(
-                    label: Text(
-                      header,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                )
-                .toList(),
-            rows: List.generate(
-              data.showResultByColumn.length,
-              (index) => DataRow(
-                cells: [
-                  DataCell(Text((index + 1).toString())),
-                  DataCell(Text(data.showResultByColumn[index].name)),
-                  DataCell(
-                      Text(data.showResultByColumn[index].spec.toString())),
-                  DataCell(ValueListenableBuilder(
-                    key: GlobalKey(debugLabel: 'checkbox_${data.showResultByColumn[index].key}'),
-                    valueListenable: data.showResultByColumn[index].isCheck,
-                    builder: (context, value, _) => Checkbox(
-                        value: value,
-                        onChanged: (isCheck) {
-                          data.showResultByColumn[index].toggle();
-                        }),
-                  )),
-                ],
+    final cameraButton = Container(
+      decoration: BoxDecoration(
+        color: AppColors.primaryColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: IconButton(
+        icon: const Icon(Icons.camera_alt),
+        onPressed: () => context.push('/camera'),
+        tooltip: '開啟相機',
+        iconSize: 28,
+        color: AppColors.primaryColor,
+      ),
+    );
+
+    final dataTable = StyledDataTable(
+      columns: headers
+          .map(
+            (header) => DataColumn(
+              label: Text(
+                header,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.darkBlueColor,
+                ),
               ),
             ),
-          ),
-        ],
+          )
+          .toList(),
+      rows: List.generate(
+        data.showResultByColumn.length,
+        (index) => DataRow(
+          cells: [
+            DataCell(Text(
+              (index + 1).toString(),
+              style: const TextStyle(color: AppColors.grayColor),
+            )),
+            DataCell(Text(
+              data.showResultByColumn[index].name,
+              style: const TextStyle(color: AppColors.blackColor),
+            )),
+            DataCell(Text(
+              data.showResultByColumn[index].spec.toString(),
+              style: const TextStyle(color: AppColors.blackColor),
+            )),
+            DataCell(ValueListenableBuilder(
+              key: GlobalKey(debugLabel: 'checkbox_${data.showResultByColumn[index].key}'),
+              valueListenable: data.showResultByColumn[index].isCheck,
+              builder: (context, value, _) => Checkbox(
+                value: value,
+                onChanged: (isCheck) {
+                  data.showResultByColumn[index].toggle();
+                },
+                activeColor: AppColors.primaryColor,
+              ),
+            )),
+          ],
+        ),
       ),
+    );
+
+    return StyledCard(
+      title: 'f. Packaging Checklist',
+      titleAction: cameraButton,
+      content: dataTable,
     );
   }
 
