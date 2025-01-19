@@ -8,12 +8,12 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
 /// Example app for Camera Windows plugin.
-class MyApp extends StatefulWidget {
+class CameraPage extends StatefulWidget {
   /// Default Constructor
-  const MyApp({super.key});
+  const CameraPage({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<CameraPage> createState() => _CameraPageState();
 }
 
 Future<String> _getUserPicturesPath() async {
@@ -56,7 +56,7 @@ Future<String> _getUserZerovaPath() async {
 }
 
 
-class _MyAppState extends State<MyApp> {
+class _CameraPageState extends State<CameraPage> {
   String _cameraInfo = 'Unknown';
   List<CameraDescription> _cameras = <CameraDescription>[];
   int _cameraIndex = 0;
