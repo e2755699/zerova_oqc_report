@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:zerova_oqc_report/src/report/model/package_list_result.dart';
 import 'package:zerova_oqc_report/src/widget/camera/camera_page.dart';
 import 'package:zerova_oqc_report/src/widget/home/home_page.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/oqc_report_page.dart';
@@ -29,7 +30,7 @@ final GoRouter appRouter = GoRouter(
           inputOutputCharacteristics: extra['inputOutputCharacteristics'],
           protectionTestResults: extra['protectionTestResults'],
           psuSerialNumbers: extra['psuSerialNumbers'],
-          packageListResult: extra['packageListResult'],
+          packageListResult: extra['packageListResult']?? PackageListResult(),
         );
       },
     ),

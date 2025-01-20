@@ -319,12 +319,12 @@ class _CameraPageState extends State<CameraPage> {
         ),
         body: ListView(
           children: <Widget>[
-            if (_cameras.isEmpty)
-              ElevatedButton(
-                onPressed: _fetchCameras,
-                child: const Text('Re-check available cameras'),
-              ),
-            if (_cameras.isNotEmpty)
+            // if (_cameras.isEmpty)
+            //   ElevatedButton(
+            //     onPressed: _fetchCameras,
+            //     child: const Text('Re-check available cameras'),
+            //   ),
+            // if (_cameras.isNotEmpty)
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
