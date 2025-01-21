@@ -101,7 +101,7 @@ class _HomePageState extends State<HomePage> {
     //   scanFormat: ScanFormat.ONLY_BARCODE,
     // );
 
-    var result = "T1234567 SN8765432";
+    var result = "T2437A011A0 SN8765432";
     String model = "";
     String serialNumber = "";
     // 將 result 拆成兩部分
@@ -116,31 +116,32 @@ class _HomePageState extends State<HomePage> {
 
     //hard code
     String jsonContent = await File(
-        "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\T2437A011A0_test.json")
+            "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\T2437A011A0_test.json")
         .readAsString();
     String testFunctionJsonContent = await File(
-        "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\T2433A031A0_oqc.json")
+            "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\T2433A031A0_oqc.json")
         .readAsString();
     String moduleJsonContent = await File(
-        "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\1234keypart.json")
+            "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\1234keypart.json")
         .readAsString();
     List<dynamic> data = jsonDecode(jsonContent);
     List<dynamic> testFuncionData = jsonDecode(testFunctionJsonContent);
     List<dynamic> moduleData = jsonDecode(moduleJsonContent);
     var psuSerialNumbers = Psuserialnumber.fromJsonList(moduleData);
     var testFunction =
-    AppearanceStructureInspectionFunctionResult.fromJson(testFuncionData);
+        AppearanceStructureInspectionFunctionResult.fromJson(testFuncionData);
     var softwareVersion = SoftwareVersion.fromJsonList(data);
     var inputOutputCharacteristics =
-    InputOutputCharacteristics.fromJsonList(data);
-    var protectionTestResults =
-    ProtectionFunctionTestResult.fromJsonList(data);
+        InputOutputCharacteristics.fromJsonList(data);
+    var protectionTestResults = ProtectionFunctionTestResult.fromJsonList(data);
 
     context.push('/oqc-report', extra: {
-    'softwareVersion': softwareVersion,
-    'testFunction': testFunction,
-    'inputOutputCharacteristics': inputOutputCharacteristics,
-    'protectionTestResults': protectionTestResults,
+      'softwareVersion': softwareVersion,
+      'psuSerialNumbers': psuSerialNumbers,
+      'testFunction': testFunction,
+      'inputOutputCharacteristics': inputOutputCharacteristics,
+      'protectionTestResults': protectionTestResults,
+    });
 
     // final apiClient = OqcApiClient();
     //
@@ -164,7 +165,6 @@ class _HomePageState extends State<HomePage> {
     //     'inputOutputCharacteristics': inputOutputCharacteristics,
     //     'protectionTestResults': protectionTestResults,
     //   });
-    });
   }
 }
 
@@ -281,15 +281,15 @@ class _InputSNDialogState extends State<InputSNDialog> {
   }
 
   Future<void> loadFile(String sn, String model) async {
-     String jsonContent = await File(
-             "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\T2437A011A0_test.json")
-         .readAsString();
-     String testFunctionJsonContent = await File(
-             "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\T2433A031A0_oqc.json")
-         .readAsString();
-     String moduleJsonContent = await File(
-             "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\1234keypart.json")
-         .readAsString();
+    String jsonContent = await File(
+            "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\T2437A011A0_test.json")
+        .readAsString();
+    String testFunctionJsonContent = await File(
+            "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\T2433A031A0_oqc.json")
+        .readAsString();
+    String moduleJsonContent = await File(
+            "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\1234keypart.json")
+        .readAsString();
     /*String jsonContent = await File(
         "C:\\Users\\Dustin\\T2437A011A0_test.json")
         .readAsString();
@@ -313,10 +313,11 @@ class _InputSNDialogState extends State<InputSNDialog> {
     var testFunction =
         AppearanceStructureInspectionFunctionResult.fromJson(testFuncionData);
     context.push('/oqc-report', extra: {
-    'softwareVersion': softwareVersion,
-    'testFunction': testFunction,
-    'inputOutputCharacteristics': inputOutputCharacteristics,
-    'protectionTestResults': protectionTestResults,
+      'psuSerialNumbers': psuSerialNumbers,
+      'softwareVersion': softwareVersion,
+      'testFunction': testFunction,
+      'inputOutputCharacteristics': inputOutputCharacteristics,
+      'protectionTestResults': protectionTestResults,
     });
   }
 }
