@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
+import 'dart:io';
+import 'package:path/path.dart' as path;
+import 'package:zerova_oqc_report/src/repo/sharepoint_uploader.dart';
 import 'package:zerova_oqc_report/src/report/model/input_output_characteristics.dart';
 import 'package:zerova_oqc_report/src/report/model/package_list_result.dart';
 import 'package:zerova_oqc_report/src/report/model/protection_function_test_result.dart';
@@ -16,6 +22,7 @@ import 'package:zerova_oqc_report/src/widget/oqc/tables/package_list_table.dart'
 import 'package:zerova_oqc_report/src/widget/oqc/tables/protection_function_test_table.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/tables/psu_serial_numbers_table.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/tables/software_version.dart';
+import 'package:zerova_oqc_report/src/report/pdf_generator.dart';
 
 class OqcReportPage extends StatefulWidget {
   const OqcReportPage({
@@ -43,6 +50,8 @@ class _OqcReportPageState extends State<OqcReportPage> {
   final TextEditingController _picController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
+
+  final SharePointUploader _uploader = SharePointUploader();
 
   @override
   void initState() {
@@ -73,6 +82,60 @@ class _OqcReportPageState extends State<OqcReportPage> {
     }
   }
 
+  Future<void> _generateAndUploadPdf() async {
+    try {
+      // 生成 PDF
+      final pdf = await PdfGenerator.generateOqcReport(
+        modelName: 'T2437A011A0',
+        serialNumber: 'SN8765432',
+        pic: _picController.text,
+        date: _dateController.text,
+        psuSerialNumbers: widget.psuSerialNumbers,
+        softwareVersion: widget.softwareVersion,
+        testFunction: widget.testFunction,
+        inputOutputCharacteristics: widget.inputOutputCharacteristics,
+        protectionTestResults: widget.protectionTestResults,
+        packageListResult: widget.packageListResult,
+      );
+      
+      // 獲取用戶的 Pictures/OQC report 目錄
+      final userProfile = Platform.environment['USERPROFILE'] ?? '';
+      if (userProfile.isEmpty) {
+        throw Exception('無法獲取用戶目錄');
+      }
+      
+      final pdfPath = path.join(userProfile, 'Pictures', 'OQC report', 'oqc_report_${DateTime.now().millisecondsSinceEpoch}.pdf');
+      
+      // 保存 PDF 文件
+      final file = File(pdfPath);
+      await file.writeAsBytes(await pdf.save());
+      
+      // 上傳到 SharePoint
+      await _uploader.startAuthorization();
+
+      // 顯示成功消息
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('報告已生成並上傳')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('錯誤：$e')),
+        );
+      }
+    }
+  }
+  
+  pw.Widget _buildPsuSerialNumbersTable(Psuserialnumber data) {
+    return pw.Table(
+      // ... table implementation ...
+    );
+  }
+  
+  // ... implement other table builders ...
+  
   @override
   Widget build(BuildContext context) {
     final currentLocale = context.locale;
@@ -83,6 +146,13 @@ class _OqcReportPageState extends State<OqcReportPage> {
           onPressed: () => context.pop(),
         ),
         title: const Text('OQC Report'),
+        actions: [
+          ElevatedButton.icon(
+            onPressed: _generateAndUploadPdf,
+            icon: const Icon(Icons.upload_file),
+            label: const Text('Submit'),
+          ),
+        ],
       ),
       body: Stack(
         children: [

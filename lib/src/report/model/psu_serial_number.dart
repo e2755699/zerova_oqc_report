@@ -1,18 +1,18 @@
 class Psuserialnumber {
-  final List<Serialnumber> psuSN; // 確保這裡是 List<Serialnumber>
+  final List<SerialNumber> psuSN; // 確保這裡是 List<Serialnumber>
 
   Psuserialnumber({required this.psuSN});
 
   /// 從 JSON 數據清單提取並生成多筆 PSU SN
   static Psuserialnumber fromJsonList(List<dynamic> data) {
-    List<Serialnumber> serialNumbers = [];
+    List<SerialNumber> serialNumbers = [];
 
     for (var item in data) {
       String? spcDesc = item['ITEM_PART_SPECS'];
       String? spcValue = item['ITEM_PART_SN']; // 確保 spcValue 是 String 類型
 
       if (spcDesc != null && spcValue != null && spcDesc.contains("CHARGING MODULE")) {
-        serialNumbers.add(Serialnumber(
+        serialNumbers.add(SerialNumber(
           value: spcValue,
           key: "PSU SN",
           name: "PSU",
@@ -25,12 +25,12 @@ class Psuserialnumber {
   }
 }
 
-class Serialnumber {
+class SerialNumber {
   final String value;
   final String key;
   final String name;
 
-  Serialnumber({
+  SerialNumber({
     required this.value,
     required this.key,
     required this.name});

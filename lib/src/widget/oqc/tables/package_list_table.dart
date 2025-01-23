@@ -7,6 +7,8 @@ import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/report/model/test_function.dart';
 import 'package:go_router/go_router.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
+import 'package:zerova_oqc_report/src/widget/common/image_grid.dart';
+import 'dart:io';
 
 class PackageListTable extends StatelessWidget {
   final PackageListResult data;
@@ -31,86 +33,78 @@ class PackageListTable extends StatelessWidget {
       ),
     );
 
-    final dataTable = StyledDataTable(
-      columns: headers
-          .map(
-            (header) => DataColumn(
-              label: Text(
-                header,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.darkBlueColor,
-                ),
-              ),
-            ),
-          )
-          .toList(),
-      rows: List.generate(
-        data.showResultByColumn.length,
-        (index) => DataRow(
-          cells: [
-            DataCell(Text(
-              (index + 1).toString(),
-              style: const TextStyle(color: AppColors.grayColor),
-            )),
-            DataCell(Text(
-              data.showResultByColumn[index].name,
-              style: const TextStyle(color: AppColors.blackColor),
-            )),
-            DataCell(Text(
-              data.showResultByColumn[index].spec.toString(),
-              style: const TextStyle(color: AppColors.blackColor),
-            )),
-            DataCell(ValueListenableBuilder(
-              key: GlobalKey(debugLabel: 'checkbox_${data.showResultByColumn[index].key}'),
-              valueListenable: data.showResultByColumn[index].isCheck,
-              builder: (context, value, _) => Checkbox(
-                value: value,
-                onChanged: (isCheck) {
-                  data.showResultByColumn[index].toggle();
-                },
-                activeColor: AppColors.primaryColor,
-              ),
-            )),
-          ],
-        ),
-      ),
-    );
-
     return StyledCard(
-      title: 'f. Packaging Checklist',
+      title: 'f. Package List',
       titleAction: cameraButton,
-      content: dataTable,
+      content: Column(
+        children: [
+          Table(
+            border: TableBorder.all(),
+            children: [
+              TableRow(
+                children: headers.map((header) => Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Center(child: Text(header)),
+                )).toList(),
+              ),
+              ...data.datas.asMap().entries.map((entry) {
+                return TableRow(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(child: Text('${entry.key + 1}')),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(child: Text(entry.value.name)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(child: Text(entry.value.spec.toString())),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(
+                        child: ValueListenableBuilder(
+                          key: GlobalKey(debugLabel: 'checkbox_${entry.value.key}'),
+                          valueListenable: entry.value.isCheck,
+                          builder: (context, value, _) => Checkbox(
+                            value: value,
+                            onChanged: (isCheck) {
+                              entry.value.toggle();
+                            },
+                            activeColor: AppColors.primaryColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }).toList(),
+            ],
+          ),
+          const SizedBox(height: 20),
+          const ImageGrid(
+            imagePath: 'C:\\Users\\USER\\Pictures\\All',
+            rows: 2,
+            columns: 4,
+            cellHeight: 100,
+          ),
+        ],
+      ),
     );
   }
 
-  Future<void> _generatePdf(BuildContext context) async {
-    final pdf = pw.Document();
-
-    // 添加 PDF 表格
-    pdf.addPage(
-      pw.Page(
-        build: (pw.Context context) {
-          return pw.Table.fromTextArray(
-            border: pw.TableBorder.all(),
-            headers: ['No.', 'S/N'],
-            data: List.generate(
-              data.showResultByColumn.length,
-              (index) => [
-                (index + 1).toString(),
-                data.showResultByColumn[index].name,
-                data.showResultByColumn[index].spec,
-                data.showResultByColumn[index].isCheck.value,
-              ],
-            ),
-          );
-        },
-      ),
-    );
-
-    // 預覽 PDF
-    await Printing.layoutPdf(
-      onLayout: (format) async => pdf.save(),
-    );
+  static Future<pw.ImageProvider?> imageFromPath(String path) async {
+    try {
+      final file = File(path);
+      if (await file.exists()) {
+        final bytes = await file.readAsBytes();
+        return pw.MemoryImage(bytes);
+      }
+    } catch (e) {
+      debugPrint('Error loading image: $e');
+    }
+    return null;
   }
 }
