@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:zerova_oqc_report/route/app_router.dart';
+import 'package:zerova_oqc_report/src/repo/sharepoint_uploader.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
+
+  // 初始化 SharePointUploader
+  final uploader = SharePointUploader();
+  uploader.startAuthorization();
 
   runApp(EasyLocalization(
     supportedLocales: const [

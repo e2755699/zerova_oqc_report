@@ -115,7 +115,7 @@ class _HomePageState extends State<HomePage> {
     }
 
     //hard code
-    String jsonContent = await File(
+    /*String jsonContent = await File(
             "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\T2437A011A0_test.json")
         .readAsString();
     String testFunctionJsonContent = await File(
@@ -123,6 +123,15 @@ class _HomePageState extends State<HomePage> {
         .readAsString();
     String moduleJsonContent = await File(
             "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\1234keypart.json")
+        .readAsString();*/
+    String jsonContent = await File(
+        "C:\\Users\\Dustin\\Downloads\\T2437A011A0_test.json")
+        .readAsString();
+    String testFunctionJsonContent = await File(
+        "C:\\Users\\Dustin\\Downloads\\T2433A031A0_oqc.json")
+        .readAsString();
+    String moduleJsonContent = await File(
+        "C:\\Users\\Dustin\\Downloads\\1234keypart.json")
         .readAsString();
     List<dynamic> data = jsonDecode(jsonContent);
     List<dynamic> testFuncionData = jsonDecode(testFunctionJsonContent);
@@ -264,7 +273,7 @@ class _InputSNDialogState extends State<InputSNDialog> {
     );
   }
 
-  Future<void> _qr() async {
+  /*Future<void> _qr() async {
     String? res = await SimpleBarcodeScanner.scanBarcode(
       context,
       barcodeAppBar: const BarcodeAppBar(
@@ -278,7 +287,7 @@ class _InputSNDialogState extends State<InputSNDialog> {
       cameraFace: CameraFace.back,
       scanFormat: ScanFormat.ONLY_BARCODE,
     );
-  }
+  }*/
 
   Future<void> loadFile(String sn, String model) async {
     String jsonContent = await File(
@@ -290,14 +299,14 @@ class _InputSNDialogState extends State<InputSNDialog> {
     String moduleJsonContent = await File(
             "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\1234keypart.json")
         .readAsString();
-    /*String jsonContent = await File(
-        "C:\\Users\\Dustin\\T2437A011A0_test.json")
+   /* String jsonContent = await File(
+        "C:\\Users\\Dustin\\Downloads\\T2437A011A0_test.json")
         .readAsString();
     String testFunctionJsonContent = await File(
-        "C:\\Users\\Dustin\\T2433A031A0_oqc.json")
+        "C:\\Users\\Dustin\\Downloads\\T2433A031A0_oqc.json")
         .readAsString();
     String moduleJsonContent = await File(
-        "C:\\Users\\Dustin\\1234keypart.json")
+        "C:\\Users\\Dustin\\Downloads\\1234keypart.json")
         .readAsString();*/
     List<dynamic> data = jsonDecode(jsonContent);
     List<dynamic> testFuncionData = jsonDecode(testFunctionJsonContent);

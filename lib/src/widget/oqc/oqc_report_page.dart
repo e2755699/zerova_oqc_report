@@ -108,7 +108,7 @@ class _OqcReportPageState extends State<OqcReportPage> {
                               ),
                             ),
                             const Text(
-                              'DSYE182XXXXXXX-RW',
+                              'T2437A011A0',
                               style: TextStyle(
                                 fontSize: 16,
                                 color: AppColors.blackColor,
@@ -128,7 +128,7 @@ class _OqcReportPageState extends State<OqcReportPage> {
                               ),
                             ),
                             const Text(
-                              '',  // 這裡可以放入實際的 SN
+                              'SN8765432',  // 這裡可以放入實際的 SN
                               style: TextStyle(
                                 fontSize: 16,
                                 color: AppColors.blackColor,
