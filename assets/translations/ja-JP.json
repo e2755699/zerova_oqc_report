@@ -1,7 +1,15 @@
 {
+  "oqc_report": "出荷品質検査報告書",
+  "software_version": "ソフトウェアバージョン",
+  "appearance_structure_inspection": "外観・構造検査",
+  "input_output_characteristics": "入出力特性",
+  "basic_function_test": "基本機能テスト",
+  "protection_function_test": "保護機能テスト",
+  "package_list": "パッケージリスト",
+  "attachment": "添付資料",
   "packagingItem1": "RFIDカード",
   "packagingItem2": "製品認証カード",
-  "packagingItem3": "ネジ　M4*12",
+  "packagingItem3": "ネジ組立 M4*12",
   "packagingItem4": "ボルトカバー",
   "packagingItem5": "ユーザーマニュアル"
 }

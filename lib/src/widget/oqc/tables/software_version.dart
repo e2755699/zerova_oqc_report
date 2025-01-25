@@ -4,6 +4,7 @@ import 'package:printing/printing.dart';
 import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/report/model/software_version.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class SoftwareVersionTable extends StatelessWidget {
   final SoftwareVersion data;
@@ -48,7 +49,7 @@ class SoftwareVersionTable extends StatelessWidget {
     );
 
     return StyledCard(
-      title: 'Software Version',
+      title: context.tr('software_version'),
       content: dataTable,
     );
   }

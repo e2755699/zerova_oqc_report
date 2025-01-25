@@ -19,7 +19,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with LoadFileHelper {
   final List<String> _languages = ['繁體中文', 'English', '日本語', 'Tiếng Việt'];
   String _selectedLanguage = '繁體中文';
 
@@ -115,42 +115,86 @@ class _HomePageState extends State<HomePage> {
     }
 
     //hard code
-    /*String jsonContent = await File(
+    /*String testData = await File(
             "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\T2437A011A0_test.json")
         .readAsString();
-    String testFunctionJsonContent = await File(
+    String oqcData = await File(
             "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\T2433A031A0_oqc.json")
         .readAsString();
     String moduleJsonContent = await File(
             "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\1234keypart.json")
         .readAsString();*/
+    await loadFileModule(serialNumber, model, context);
+
+    // final apiClient = OqcApiClient();
+    //
+    // // 將 model 和 serialNumber 打印到 console
+    // Future.wait<List<dynamic>>([
+    //   apiClient.fetchAndSaveKeyPartData(serialNumber),
+    //   apiClient.fetchAndSaveOqcData(serialNumber),
+    //   apiClient.fetchAndSaveTestData(serialNumber)
+    // ]).then((res) {
+    //   var psuSerialNumbers = Psuserialnumber.fromJsonList(res[0]);
+    //   var testFunction =
+    //       AppearanceStructureInspectionFunctionResult.fromJson(res[1]);
+    //   var softwareVersion = SoftwareVersion.fromJsonList(res[2]);
+    //   var inputOutputCharacteristics =
+    //       InputOutputCharacteristics.fromJsonList(res[2]);
+    //   var protectionTestResults =
+    //       ProtectionFunctionTestResult.fromJsonList(res[2]);
+    //   context.push('/oqc-report', extra: {
+    //     'softwareVersion': softwareVersion,
+    //     'testFunction': testFunction,
+    //     'inputOutputCharacteristics': inputOutputCharacteristics,
+    //     'protectionTestResults': protectionTestResults,
+    //   });
+  }
+}
+
+mixin LoadFileHelper {
+  Future<void> loadFileModule(
+      String sn, String model, BuildContext context) async {
+    // String jsonContent = await File(
+    //     "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\T2437A011A0_test.json")
+    //     .readAsString();
+    // String testFunctionJsonContent = await File(
+    //     "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\T2433A031A0_oqc.json")
+    //     .readAsString();
+    // String moduleJsonContent = await File(
+    //     "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\1234keypart.json")
+    //     .readAsString();
     String jsonContent = await File(
-        "C:\\Users\\Dustin\\Downloads\\T2437A011A0_test.json")
+        "C:\\Users\\USER\\OQC\\T2449A003A1\\T2449A003A1_test.json")
         .readAsString();
     String testFunctionJsonContent = await File(
-        "C:\\Users\\Dustin\\Downloads\\T2433A031A0_oqc.json")
+        "C:\\Users\\USER\\OQC\\T2449A003A1\\T2449A003A1_oqc.json")
         .readAsString();
     String moduleJsonContent = await File(
-        "C:\\Users\\Dustin\\Downloads\\1234keypart.json")
+        "C:\\Users\\USER\\OQC\\T2449A003A1\\T2449A003A1_keypart.json")
         .readAsString();
+
     List<dynamic> data = jsonDecode(jsonContent);
     List<dynamic> testFuncionData = jsonDecode(testFunctionJsonContent);
     List<dynamic> moduleData = jsonDecode(moduleJsonContent);
-    var psuSerialNumbers = Psuserialnumber.fromJsonList(moduleData);
-    var testFunction =
-        AppearanceStructureInspectionFunctionResult.fromJson(testFuncionData);
+
     var softwareVersion = SoftwareVersion.fromJsonList(data);
+    var psuSerialNumbers =
+    Psuserialnumber.fromJsonList(moduleData); // 提取多筆 PSU Serial Number
     var inputOutputCharacteristics =
-        InputOutputCharacteristics.fromJsonList(data);
-    var protectionTestResults = ProtectionFunctionTestResult.fromJsonList(data);
+    InputOutputCharacteristics.fromJsonList(data);
+    var protectionTestResults =
+    ProtectionFunctionTestResult.fromJsonList(data); // 提取測試結果
+    var testFunction =
+    AppearanceStructureInspectionFunctionResult.fromJson(testFuncionData);
 
     context.push('/oqc-report', extra: {
-      'softwareVersion': softwareVersion,
       'psuSerialNumbers': psuSerialNumbers,
+      'softwareVersion': softwareVersion,
       'testFunction': testFunction,
       'inputOutputCharacteristics': inputOutputCharacteristics,
       'protectionTestResults': protectionTestResults,
     });
+
 
     // final apiClient = OqcApiClient();
     //
@@ -182,7 +226,7 @@ class InputSNDialog extends StatefulWidget {
   _InputSNDialogState createState() => _InputSNDialogState();
 }
 
-class _InputSNDialogState extends State<InputSNDialog> {
+class _InputSNDialogState extends State<InputSNDialog> with LoadFileHelper {
   final _formKey = GlobalKey<FormState>();
   final _snController = TextEditingController();
   final _modelController = TextEditingController();
@@ -258,7 +302,7 @@ class _InputSNDialogState extends State<InputSNDialog> {
               final sn = _snController.text;
               final model = _modelController.text;
 
-              loadFile(sn, model);
+              loadFile(sn, model, context);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('SN: $sn, Model: $model 已提交'),
@@ -289,44 +333,7 @@ class _InputSNDialogState extends State<InputSNDialog> {
     );
   }*/
 
-  Future<void> loadFile(String sn, String model) async {
-    String jsonContent = await File(
-            "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\T2437A011A0_test.json")
-        .readAsString();
-    String testFunctionJsonContent = await File(
-            "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\T2433A031A0_oqc.json")
-        .readAsString();
-    String moduleJsonContent = await File(
-            "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\1234keypart.json")
-        .readAsString();
-   /* String jsonContent = await File(
-        "C:\\Users\\Dustin\\Downloads\\T2437A011A0_test.json")
-        .readAsString();
-    String testFunctionJsonContent = await File(
-        "C:\\Users\\Dustin\\Downloads\\T2433A031A0_oqc.json")
-        .readAsString();
-    String moduleJsonContent = await File(
-        "C:\\Users\\Dustin\\Downloads\\1234keypart.json")
-        .readAsString();*/
-    List<dynamic> data = jsonDecode(jsonContent);
-    List<dynamic> testFuncionData = jsonDecode(testFunctionJsonContent);
-    List<dynamic> moduleData = jsonDecode(moduleJsonContent);
-
-    var softwareVersion = SoftwareVersion.fromJsonList(data);
-    var psuSerialNumbers =
-        Psuserialnumber.fromJsonList(moduleData); // 提取多筆 PSU Serial Number
-    var inputOutputCharacteristics =
-        InputOutputCharacteristics.fromJsonList(data);
-    var protectionTestResults =
-        ProtectionFunctionTestResult.fromJsonList(data); // 提取測試結果
-    var testFunction =
-        AppearanceStructureInspectionFunctionResult.fromJson(testFuncionData);
-    context.push('/oqc-report', extra: {
-      'psuSerialNumbers': psuSerialNumbers,
-      'softwareVersion': softwareVersion,
-      'testFunction': testFunction,
-      'inputOutputCharacteristics': inputOutputCharacteristics,
-      'protectionTestResults': protectionTestResults,
-    });
+  Future<void> loadFile(String sn, String model, BuildContext context) async {
+    loadFileModule(sn, model, context);
   }
 }

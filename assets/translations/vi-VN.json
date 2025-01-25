@@ -1,7 +1,15 @@
 {
+  "oqc_report": "Báo cáo kiểm tra chất lượng xuất xưởng",
+  "software_version": "Phiên bản phần mềm",
+  "appearance_structure_inspection": "Kiểm tra ngoại quan và cấu trúc",
+  "input_output_characteristics": "Đặc tính đầu vào và đầu ra",
+  "basic_function_test": "Kiểm tra chức năng cơ bản",
+  "protection_function_test": "Kiểm tra chức năng bảo vệ",
+  "package_list": "Danh sách đóng gói",
+  "attachment": "Tài liệu đính kèm",
   "packagingItem1": "Thẻ RFID",
   "packagingItem2": "Thẻ chứng nhận sản phẩm",
-  "packagingItem3": "Bộ phận vít M4*12",
+  "packagingItem3": "Bộ vít M4*12",
   "packagingItem4": "Nắp bu lông",
   "packagingItem5": "Hướng dẫn sử dụng"
 }

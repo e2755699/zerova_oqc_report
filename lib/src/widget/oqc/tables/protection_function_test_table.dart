@@ -4,6 +4,7 @@ import 'package:printing/printing.dart';
 import 'package:zerova_oqc_report/src/report/enum/judgement.dart';
 import 'package:zerova_oqc_report/src/report/model/protection_function_test_result.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class ProtectionFunctionTestTable extends StatelessWidget {
   final ProtectionFunctionTestResult data;
@@ -51,7 +52,7 @@ class ProtectionFunctionTestTable extends StatelessWidget {
     );
 
     return StyledCard(
-      title: 'd. Protection Function Test',
+      title: context.tr('protection_function_test'),
       content: dataTable,
     );
   }

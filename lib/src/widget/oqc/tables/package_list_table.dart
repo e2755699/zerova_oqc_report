@@ -8,6 +8,7 @@ import 'package:zerova_oqc_report/src/report/model/test_function.dart';
 import 'package:go_router/go_router.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 import 'package:zerova_oqc_report/src/widget/common/image_grid.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'dart:io';
 
 class PackageListTable extends StatelessWidget {
@@ -34,7 +35,7 @@ class PackageListTable extends StatelessWidget {
     );
 
     return StyledCard(
-      title: 'f. Package List',
+      title: context.tr('package_list'),
       titleAction: cameraButton,
       content: Column(
         children: [

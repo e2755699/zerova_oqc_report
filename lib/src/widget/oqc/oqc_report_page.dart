@@ -141,24 +141,38 @@ class _OqcReportPageState extends State<OqcReportPage> {
     final currentLocale = context.locale;
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
-        title: const Text('OQC Report'),
-        actions: [
-          ElevatedButton.icon(
-            onPressed: _generateAndUploadPdf,
-            icon: const Icon(Icons.upload_file),
-            label: const Text('Submit'),
+        leading: FittedBox(
+          fit: BoxFit.fill,
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.pop(),
           ),
+        ),
+        title: Text(
+          context.tr('oqc_report'),
+          style: const TextStyle(
+            fontFamily: 'Roboto',
+            fontSize: 48,
+            fontWeight: FontWeight.w700,
+            height: 1.2, // 調整 height 值以適應越南文
+            textBaseline: TextBaseline.alphabetic,
+          ),
+        ),
+        actions: [
+          buildLanguageDropdownButton(context, currentLocale),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _generateAndUploadPdf,
+        icon: const Icon(Icons.upload_file),
+        label: const Text('Submit'),
       ),
       body: Stack(
         children: [
           SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.only(top: 48.0),
+              padding: const EdgeInsets.only(top: 48.0, bottom: 80.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -291,60 +305,59 @@ class _OqcReportPageState extends State<OqcReportPage> {
               ),
             ),
           ),
-          Positioned(
-            top: 8,
-            right: 16,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Theme.of(context).scaffoldBackgroundColor,
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: DropdownButton<Locale>(
-                value: currentLocale,
-                icon: const Icon(Icons.language),
-                underline: Container(),
-                elevation: 4,
-                items: context.supportedLocales.map((locale) {
-                  String label = '';
-                  switch (locale.languageCode) {
-                    case 'en':
-                      label = 'English';
-                      break;
-                    case 'zh':
-                      label = '繁體中文';
-                      break;
-                    case 'vi':
-                      label = 'Tiếng Việt';
-                      break;
-                    case 'ja':
-                      label = '日本語';
-                      break;
-                    default:
-                      label = locale.languageCode;
-                  }
-                  return DropdownMenuItem(
-                    value: locale,
-                    child: Text(label),
-                  );
-                }).toList(),
-                onChanged: (Locale? locale) {
-                  if (locale != null) {
-                    context.setLocale(locale);
-                  }
-                },
-              ),
-            ),
-          ),
         ],
       ),
     );
+  }
+
+  Container buildLanguageDropdownButton(BuildContext context, Locale currentLocale) {
+    return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: DropdownButton<Locale>(
+              value: currentLocale,
+              icon: const Icon(Icons.language),
+              underline: Container(),
+              elevation: 4,
+              items: context.supportedLocales.map((locale) {
+                String label = '';
+                switch (locale.languageCode) {
+                  case 'en':
+                    label = 'English';
+                    break;
+                  case 'zh':
+                    label = '繁體中文';
+                    break;
+                  case 'vi':
+                    label = 'Tiếng Việt';
+                    break;
+                  case 'ja':
+                    label = '日本語';
+                    break;
+                  default:
+                    label = locale.languageCode;
+                }
+                return DropdownMenuItem(
+                  value: locale,
+                  child: Text(label),
+                );
+              }).toList(),
+              onChanged: (Locale? locale) {
+                if (locale != null) {
+                  context.setLocale(locale);
+                }
+              },
+            ),
+          );
   }
 }

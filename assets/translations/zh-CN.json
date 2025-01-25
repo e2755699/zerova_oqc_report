@@ -1,7 +1,15 @@
 {
+  "oqc_report": "出廠品質檢驗報告",
+  "software_version": "軟體版本",
+  "appearance_structure_inspection": "外觀及結構檢查",
+  "input_output_characteristics": "輸入輸出特性",
+  "basic_function_test": "基本功能測試",
+  "protection_function_test": "保護功能測試",
+  "package_list": "包裝清單",
+  "attachment": "附件",
   "packagingItem1": "RFID卡",
-  "packagingItem2": "產品驗證卡",
+  "packagingItem2": "產品認證卡",
   "packagingItem3": "螺絲組件 M4*12",
   "packagingItem4": "螺栓蓋",
-  "packagingItem5": "用戶手冊"
+  "packagingItem5": "使用手冊"
 }

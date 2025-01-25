@@ -8,8 +8,8 @@ void main() async {
   await EasyLocalization.ensureInitialized();
 
   // 初始化 SharePointUploader
-  final uploader = SharePointUploader();
-  uploader.startAuthorization();
+  // final uploader = SharePointUploader();
+  // uploader.startAuthorization();
 
   runApp(EasyLocalization(
     supportedLocales: const [

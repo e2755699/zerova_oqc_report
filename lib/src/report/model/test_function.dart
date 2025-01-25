@@ -1,4 +1,6 @@
 import 'package:collection/collection.dart'; // 需要引入集合工具庫
+import 'package:flutter/foundation.dart';
+import 'package:zerova_oqc_report/src/report/enum/judgement.dart';
 
 class AppearanceStructureInspectionFunctionResult {
   final List<TestItem> testItems;
@@ -40,41 +42,49 @@ class AppearanceStructureInspectionFunctionResult {
 class TestItem {
   final String name;
   final List<Result> results;
+  final ValueNotifier<Judgement> _judgementNotifier;
 
-  TestItem(this.name, this.results);
+  TestItem(this.name, this.results) : _judgementNotifier = ValueNotifier(_calculateInitialJudgement(results));
 
-  String get judgement {
+  static Judgement _calculateInitialJudgement(List<Result> results) {
     for (var result in results) {
       if (result.judgement == "NG") {
-        return "NG";
+        return Judgement.fail;
       }
     }
-    for (var result in results) {
-      if (result.judgement == "NA") {
-        return "NA";
-      }
-    }
-    return "OK";
+    return Judgement.pass;
+  }
+
+  String get judgement => _judgementNotifier.value.toString().split('.').last.toUpperCase();
+
+  void updateJudgement(Judgement newJudgement) {
+    _judgementNotifier.value = newJudgement;
+  }
+
+  @override
+  String toString() {
+    return 'TestItem{name: $name, judgement: $judgement}';
   }
 }
 
 class Result {
-  final String judgement;
-  final String itemDesc;
   final String itemName;
+  final String itemDesc;
+  final String judgement;
 
-  Result({
-    required this.judgement,
-    required this.itemDesc,
-    required this.itemName,
-  });
+  Result(this.itemName, this.itemDesc, this.judgement);
 
   factory Result.fromJson(Map<String, dynamic> json) {
     return Result(
-      judgement: json["INSP_RESULT"] ?? "N/A",
-      itemDesc: json["ITEM_DESC"] ?? "N/A",
-      itemName: json["ITEM_NAME"] ?? "N/A",
+      json['ITEM_NAME'] ?? 'N/A',
+      json['ITEM_DESC'] ?? 'N/A',
+      json['INSP_RESULT'] ?? 'N/A',
     );
+  }
+
+  @override
+  String toString() {
+    return 'Result{itemName: $itemName, itemDesc: $itemDesc, judgement: $judgement}';
   }
 }
 
@@ -280,3 +290,4 @@ class Result {
 //     return TestFunction.fromJson(results);
 //   }
 // }
+

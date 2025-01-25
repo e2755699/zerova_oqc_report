@@ -5,6 +5,7 @@ import 'package:zerova_oqc_report/src/report/model/input_output_characteristics.
 import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/report/model/test_function.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class InputOutputCharacteristicsTable extends StatelessWidget {
   final InputOutputCharacteristics inputOutputCharacteristics;
@@ -65,7 +66,7 @@ class InputOutputCharacteristicsTable extends StatelessWidget {
     );
 
     return StyledCard(
-      title: 'c. Input & Output Characteristics',
+      title: context.tr('input_output_characteristics'),
       content: dataTable,
     );
   }

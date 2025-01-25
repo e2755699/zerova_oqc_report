@@ -4,6 +4,8 @@ import 'package:printing/printing.dart';
 import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/report/model/test_function.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
+import 'package:zerova_oqc_report/src/report/enum/judgement.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class AppearanceStructureInspectionTable extends StatelessWidget {
   final AppearanceStructureInspectionFunctionResult data;
@@ -39,19 +41,36 @@ class AppearanceStructureInspectionTable extends StatelessWidget {
             item.name,
             style: const TextStyle(color: AppColors.blackColor),
           )),
-          DataCell(Text(
-            item.judgement,
-            style: TextStyle(
-              color: item.judgement == 'OK' ? Colors.green : Colors.red,
-              fontWeight: FontWeight.bold,
+          DataCell(
+            DropdownButton<Judgement>(
+              value: _getJudgementFromString(item.judgement),
+              items: Judgement.values.map((Judgement value) {
+                return DropdownMenuItem<Judgement>(
+                  value: value,
+                  child: Text(
+                    value.toString().split('.').last.toUpperCase(),
+                    style: TextStyle(
+                      color: value == Judgement.pass ? Colors.green : 
+                             value == Judgement.fail ? Colors.red :
+                             Colors.grey,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                );
+              }).toList(),
+              onChanged: (Judgement? newValue) {
+                if (newValue != null) {
+                  item.updateJudgement(newValue);
+                }
+              },
             ),
-          )),
+          ),
         ],
       )).toList(),
     );
 
     return StyledCard(
-      title: 'b. Appearance & Structure Inspection',
+      title: context.tr('appearance_structure_inspection'),
       content: dataTable,
     );
   }
@@ -84,6 +103,17 @@ class AppearanceStructureInspectionTable extends StatelessWidget {
     await Printing.layoutPdf(
       onLayout: (format) async => pdf.save(),
     );
+  }
+
+  Judgement _getJudgementFromString(String judgement) {
+    switch (judgement.toLowerCase()) {
+      case 'pass':
+        return Judgement.pass;
+      case 'fail':
+        return Judgement.fail;
+      default:
+        return Judgement.unknown;
+    }
   }
 
   Widget getResultDes(int index) {

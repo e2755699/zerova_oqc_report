@@ -6,6 +6,7 @@ import 'package:zerova_oqc_report/src/report/model/input_output_characteristics.
 import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/report/model/test_function.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class BasicFunctionTestTable extends StatelessWidget {
   final BaseFunctionTestResult data;
@@ -53,7 +54,7 @@ class BasicFunctionTestTable extends StatelessWidget {
     );
 
     return StyledCard(
-      title: 'c. Basic Function Test',
+      title: context.tr('basic_function_test'),
       content: dataTable,
     );
   }

@@ -1,4 +1,12 @@
 {
+  "oqc_report": "OQC Report",
+  "software_version": "Software Version",
+  "appearance_structure_inspection": "Appearance & Structure Inspection",
+  "input_output_characteristics": "Input & Output Characteristics",
+  "basic_function_test": "Basic Function Test",
+  "protection_function_test": "Protection Function Test",
+  "package_list": "Package List",
+  "attachment": "Attachment",
   "packagingItem1": "RFID Card",
   "packagingItem2": "Product Certificate Card",
   "packagingItem3": "Screw Assy M4*12",
