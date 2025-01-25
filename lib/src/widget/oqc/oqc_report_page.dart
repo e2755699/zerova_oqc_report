@@ -97,19 +97,20 @@ class _OqcReportPageState extends State<OqcReportPage> {
         protectionTestResults: widget.protectionTestResults,
         packageListResult: widget.packageListResult,
       );
-      
+
       // 獲取用戶的 Pictures/OQC report 目錄
       final userProfile = Platform.environment['USERPROFILE'] ?? '';
       if (userProfile.isEmpty) {
         throw Exception('無法獲取用戶目錄');
       }
-      
-      final pdfPath = path.join(userProfile, 'Pictures', 'OQC report', 'oqc_report_${DateTime.now().millisecondsSinceEpoch}.pdf');
-      
+
+      final pdfPath = path.join(userProfile, 'Pictures', 'OQC report',
+          'oqc_report_${DateTime.now().millisecondsSinceEpoch}.pdf');
+
       // 保存 PDF 文件
       final file = File(pdfPath);
       await file.writeAsBytes(await pdf.save());
-      
+
       // 上傳到 SharePoint
       await _uploader.startAuthorization();
 
@@ -127,25 +128,37 @@ class _OqcReportPageState extends State<OqcReportPage> {
       }
     }
   }
-  
+
   pw.Widget _buildPsuSerialNumbersTable(Psuserialnumber data) {
     return pw.Table(
-      // ... table implementation ...
-    );
+        // ... table implementation ...
+        );
   }
-  
+
   // ... implement other table builders ...
-  
+
   @override
   Widget build(BuildContext context) {
     final currentLocale = context.locale;
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 84,  // 增加工具欄高度
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF008999), Color(0x808080)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        elevation: 2,
+        shadowColor: Colors.black.withOpacity(0.4),
         leading: FittedBox(
-          fit: BoxFit.fill,
+          fit: BoxFit.cover,
           child: IconButton(
             padding: EdgeInsets.zero,
-            icon: const Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back_outlined),
             onPressed: () => context.pop(),
           ),
         ),
@@ -153,14 +166,18 @@ class _OqcReportPageState extends State<OqcReportPage> {
           context.tr('oqc_report'),
           style: const TextStyle(
             fontFamily: 'Roboto',
-            fontSize: 48,
+            fontSize: 60,
             fontWeight: FontWeight.w700,
-            height: 1.2, // 調整 height 值以適應越南文
+            height: 1.2,
+            // 調整 height 值以適應越南文
             textBaseline: TextBaseline.alphabetic,
           ),
         ),
         actions: [
-          buildLanguageDropdownButton(context, currentLocale),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: buildLanguageDropdownButton(context, currentLocale),
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -212,7 +229,7 @@ class _OqcReportPageState extends State<OqcReportPage> {
                               ),
                             ),
                             const Text(
-                              'SN8765432',  // 這裡可以放入實際的 SN
+                              'SN8765432', // 這裡可以放入實際的 SN
                               style: TextStyle(
                                 fontSize: 16,
                                 color: AppColors.blackColor,
@@ -233,8 +250,8 @@ class _OqcReportPageState extends State<OqcReportPage> {
                     InputOutputCharacteristicsTable(
                         widget.inputOutputCharacteristics!),
                   if (widget.inputOutputCharacteristics != null)
-                    BasicFunctionTestTable(
-                        widget.inputOutputCharacteristics!.baseFunctionTestResult),
+                    BasicFunctionTestTable(widget
+                        .inputOutputCharacteristics!.baseFunctionTestResult),
                   if (widget.protectionTestResults != null)
                     ProtectionFunctionTestTable(
                       widget.protectionTestResults!,
@@ -249,7 +266,7 @@ class _OqcReportPageState extends State<OqcReportPage> {
                         Row(
                           children: [
                             SizedBox(
-                              width: 100,  // 固定標籤寬度
+                              width: 100, // 固定標籤寬度
                               child: const Text(
                                 'PIC : ',
                                 style: TextStyle(
@@ -264,7 +281,8 @@ class _OqcReportPageState extends State<OqcReportPage> {
                                 controller: _picController,
                                 decoration: const InputDecoration(
                                   border: OutlineInputBorder(),
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 8),
                                 ),
                               ),
                             ),
@@ -274,7 +292,7 @@ class _OqcReportPageState extends State<OqcReportPage> {
                         Row(
                           children: [
                             SizedBox(
-                              width: 100,  // 固定標籤寬度
+                              width: 100, // 固定標籤寬度
                               child: const Text(
                                 'Date : ',
                                 style: TextStyle(
@@ -291,7 +309,8 @@ class _OqcReportPageState extends State<OqcReportPage> {
                                 onTap: () => _selectDate(context),
                                 decoration: const InputDecoration(
                                   border: OutlineInputBorder(),
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 8),
                                   suffixIcon: Icon(Icons.calendar_today),
                                 ),
                               ),
@@ -310,54 +329,55 @@ class _OqcReportPageState extends State<OqcReportPage> {
     );
   }
 
-  Container buildLanguageDropdownButton(BuildContext context, Locale currentLocale) {
+  Container buildLanguageDropdownButton(
+      BuildContext context, Locale currentLocale) {
     return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: Theme.of(context).scaffoldBackgroundColor,
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: DropdownButton<Locale>(
-              value: currentLocale,
-              icon: const Icon(Icons.language),
-              underline: Container(),
-              elevation: 4,
-              items: context.supportedLocales.map((locale) {
-                String label = '';
-                switch (locale.languageCode) {
-                  case 'en':
-                    label = 'English';
-                    break;
-                  case 'zh':
-                    label = '繁體中文';
-                    break;
-                  case 'vi':
-                    label = 'Tiếng Việt';
-                    break;
-                  case 'ja':
-                    label = '日本語';
-                    break;
-                  default:
-                    label = locale.languageCode;
-                }
-                return DropdownMenuItem(
-                  value: locale,
-                  child: Text(label),
-                );
-              }).toList(),
-              onChanged: (Locale? locale) {
-                if (locale != null) {
-                  context.setLocale(locale);
-                }
-              },
-            ),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: DropdownButton<Locale>(
+        value: currentLocale,
+        icon: const Icon(Icons.language),
+        underline: Container(),
+        elevation: 4,
+        items: context.supportedLocales.map((locale) {
+          String label = '';
+          switch (locale.languageCode) {
+            case 'en':
+              label = 'English';
+              break;
+            case 'zh':
+              label = '繁體中文';
+              break;
+            case 'vi':
+              label = 'Tiếng Việt';
+              break;
+            case 'ja':
+              label = '日本語';
+              break;
+            default:
+              label = locale.languageCode;
+          }
+          return DropdownMenuItem(
+            value: locale,
+            child: Text(label),
           );
+        }).toList(),
+        onChanged: (Locale? locale) {
+          if (locale != null) {
+            context.setLocale(locale);
+          }
+        },
+      ),
+    );
   }
 }
