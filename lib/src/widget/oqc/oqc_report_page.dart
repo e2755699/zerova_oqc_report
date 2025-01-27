@@ -232,7 +232,7 @@ class _OqcReportPageState extends State<OqcReportPage> {
                         widget.inputOutputCharacteristics!),
                   if (widget.inputOutputCharacteristics != null)
                     BasicFunctionTestTable(widget
-                        .inputOutputCharacteristics!.baseFunctionTestResult),
+                        .inputOutputCharacteristics!.basicFunctionTestResult),
                   if (widget.protectionTestResults != null)
                     ProtectionFunctionTestTable(
                       widget.protectionTestResults!,

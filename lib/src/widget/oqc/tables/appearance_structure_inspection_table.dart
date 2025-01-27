@@ -4,13 +4,28 @@ import 'package:printing/printing.dart';
 import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/report/model/test_function.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
+import 'package:zerova_oqc_report/src/widget/common/table_wrapper.dart';
 import 'package:zerova_oqc_report/src/report/enum/judgement.dart';
+import 'package:zerova_oqc_report/src/widget/common/table_helper.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-class AppearanceStructureInspectionTable extends StatelessWidget {
+class AppearanceStructureInspectionTable extends StatefulWidget  {
   final AppearanceStructureInspectionFunctionResult data;
 
   const AppearanceStructureInspectionTable(this.data, {super.key});
+
+  @override
+  State<AppearanceStructureInspectionTable> createState() => _AppearanceStructureInspectionTableState();
+}
+
+class _AppearanceStructureInspectionTableState extends State<AppearanceStructureInspectionTable> with TableHelper{
+  late AppearanceStructureInspectionFunctionResult data;
+
+  @override
+  void initState() {
+    super.initState();
+    data = widget.data;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,19 +34,13 @@ class AppearanceStructureInspectionTable extends StatelessWidget {
         DataColumn(
           label: Text(
             'Item',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: AppColors.darkBlueColor,
-            ),
+            style: TableTextStyle.headerStyle,
           ),
         ),
         DataColumn(
           label: Text(
             'Result',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: AppColors.darkBlueColor,
-            ),
+            style: TableTextStyle.headerStyle,
           ),
         ),
       ],
@@ -39,17 +48,18 @@ class AppearanceStructureInspectionTable extends StatelessWidget {
         cells: [
           DataCell(Text(
             item.name,
-            style: const TextStyle(color: AppColors.blackColor),
+            style: TableTextStyle.contentStyle,
           )),
           DataCell(
             DropdownButton<Judgement>(
-              value: _getJudgementFromString(item.judgement),
+              value: getJudgementFromString(item.judgement),
               items: Judgement.values.map((Judgement value) {
                 return DropdownMenuItem<Judgement>(
                   value: value,
                   child: Text(
                     value.toString().split('.').last.toUpperCase(),
                     style: TextStyle(
+                      fontSize: 32,
                       color: value == Judgement.pass ? Colors.green : 
                              value == Judgement.fail ? Colors.red :
                              Colors.grey,
@@ -60,7 +70,9 @@ class AppearanceStructureInspectionTable extends StatelessWidget {
               }).toList(),
               onChanged: (Judgement? newValue) {
                 if (newValue != null) {
-                  item.updateJudgement(newValue);
+                  setState(() {
+                    item.updateJudgement(newValue);
+                  });
                 }
               },
             ),
@@ -69,7 +81,7 @@ class AppearanceStructureInspectionTable extends StatelessWidget {
       )).toList(),
     );
 
-    return StyledCard(
+    return TableWrapper(
       title: context.tr('appearance_structure_inspection'),
       content: dataTable,
     );
@@ -103,17 +115,6 @@ class AppearanceStructureInspectionTable extends StatelessWidget {
     await Printing.layoutPdf(
       onLayout: (format) async => pdf.save(),
     );
-  }
-
-  Judgement _getJudgementFromString(String judgement) {
-    switch (judgement.toLowerCase()) {
-      case 'pass':
-        return Judgement.pass;
-      case 'fail':
-        return Judgement.fail;
-      default:
-        return Judgement.unknown;
-    }
   }
 
   Widget getResultDes(int index) {

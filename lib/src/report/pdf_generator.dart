@@ -124,7 +124,7 @@ class PdfGenerator {
                 if (inputOutputCharacteristics != null) ...[
                   _buildInputOutputCharacteristicsTable(inputOutputCharacteristics, font),
                   pw.SizedBox(height: 20),
-                  _buildBasicFunctionTestTable(inputOutputCharacteristics.baseFunctionTestResult, font),
+                  _buildBasicFunctionTestTable(inputOutputCharacteristics.basicFunctionTestResult, font),
                 ],
               ],
             ),
@@ -421,7 +421,7 @@ class PdfGenerator {
     );
   }
 
-  static pw.Widget _buildBasicFunctionTestTable(BaseFunctionTestResult data, pw.Font font) {
+  static pw.Widget _buildBasicFunctionTestTable(BasicFunctionTestResult data, pw.Font font) {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.center,
       children: [
@@ -460,7 +460,7 @@ class PdfGenerator {
                 ),
               ],
             ),
-            ...data.showResultByColumn.asMap().entries.map((entry) {
+            ...data.testItems.asMap().entries.map((entry) {
               return pw.TableRow(
                 children: [
                   pw.Padding(
@@ -529,7 +529,7 @@ class PdfGenerator {
                 ),
               ],
             ),
-            ...data.showTestResultByColumn.asMap().entries.map((entry) {
+            ...data.testItems.asMap().entries.map((entry) {
               return pw.TableRow(
                 children: [
                   pw.Padding(

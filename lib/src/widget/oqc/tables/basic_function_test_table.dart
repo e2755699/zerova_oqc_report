@@ -1,17 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import 'package:zerova_oqc_report/src/report/enum/judgement.dart';
 import 'package:zerova_oqc_report/src/report/model/input_output_characteristics.dart';
-import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/report/model/test_function.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
+import 'package:zerova_oqc_report/src/widget/common/table_wrapper.dart';
+import 'package:zerova_oqc_report/src/report/enum/judgement.dart';
+import 'package:zerova_oqc_report/src/widget/common/table_helper.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-class BasicFunctionTestTable extends StatelessWidget {
-  final BaseFunctionTestResult data;
+class BasicFunctionTestTable extends StatefulWidget {
+  final BasicFunctionTestResult data;
 
   const BasicFunctionTestTable(this.data, {super.key});
+
+  @override
+  State<BasicFunctionTestTable> createState() => _BasicFunctionTestTableState();
+}
+
+class _BasicFunctionTestTableState extends State<BasicFunctionTestTable> with TableHelper {
+  late BasicFunctionTestResult data;
+
+  @override
+  void initState() {
+    super.initState();
+    data = widget.data;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,40 +34,54 @@ class BasicFunctionTestTable extends StatelessWidget {
         DataColumn(
           label: Text(
             'Item',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: AppColors.darkBlueColor,
-            ),
+            style: TableTextStyle.headerStyle,
           ),
         ),
         DataColumn(
           label: Text(
-            'Value',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: AppColors.darkBlueColor,
-            ),
+            'Result',
+            style: TableTextStyle.headerStyle,
           ),
         ),
       ],
-      rows: data.showResultByColumn.map((item) => DataRow(
+      rows: data.testItems.map((item) => DataRow(
         cells: [
           DataCell(Text(
             item.name,
-            style: const TextStyle(color: AppColors.blackColor),
+            style: TableTextStyle.contentStyle,
           )),
-          DataCell(Text(
-            item.value.toString(),
-            style: TextStyle(
-              color: item.judgement == Judgement.pass ? Colors.green : Colors.red,
-              fontWeight: FontWeight.bold,
+          DataCell(
+            DropdownButton<Judgement>(
+              value: getJudgementFromString(item.judgement.name),
+              items: Judgement.values.map((Judgement value) {
+                return DropdownMenuItem<Judgement>(
+                  value: value,
+                  child: Text(
+                    value.toString().split('.').last.toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 32,
+                      color: value == Judgement.pass ? Colors.green : 
+                             value == Judgement.fail ? Colors.red :
+                             Colors.grey,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                );
+              }).toList(),
+              onChanged: (Judgement? newValue) {
+                if (newValue != null) {
+                  setState(() {
+                    item.judgement.name;
+                  });
+                }
+              },
             ),
-          )),
+          ),
         ],
       )).toList(),
     );
 
-    return StyledCard(
+    return TableWrapper(
       title: context.tr('basic_function_test'),
       content: dataTable,
     );
@@ -70,12 +98,11 @@ class BasicFunctionTestTable extends StatelessWidget {
             border: pw.TableBorder.all(),
             headers: ['No.', 'S/N'],
             data: List.generate(
-              data.showResultByColumn.length,
+              data.testItems.length,
               (index) => [
                 (index + 1).toString(),
-                data.showResultByColumn[index].name,
-                data.showResultByColumn[index].description,
-                data.showResultByColumn[index].judgement,
+                data.testItems[index].name,
+                data.testItems[index].judgement,
               ],
             ),
           );

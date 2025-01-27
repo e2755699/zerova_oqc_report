@@ -24,7 +24,7 @@ class ProtectionFunctionTestResult {
     required this.groundFaultFailCount,
   });
 
-  List<ProtectionFunctionMeasurement> get showTestResultByColumn {
+  List<ProtectionFunctionMeasurement> get testItems {
     return [emergencyStopFailCount, doorOpenFailCount, groundFaultFailCount];
   }
 

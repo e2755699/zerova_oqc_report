@@ -3,6 +3,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
+import 'package:zerova_oqc_report/src/widget/common/table_wrapper.dart';
 
 class PsuSerialNumbersTable extends StatelessWidget {
   final Psuserialnumber data;
@@ -16,19 +17,13 @@ class PsuSerialNumbersTable extends StatelessWidget {
         DataColumn(
           label: Text(
             'No.',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: AppColors.darkBlueColor,
-            ),
+            style: TableTextStyle.headerStyle,
           ),
         ),
         DataColumn(
           label: Text(
             'S/N',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: AppColors.darkBlueColor,
-            ),
+            style: TableTextStyle.headerStyle,
           ),
         ),
       ],
@@ -38,18 +33,18 @@ class PsuSerialNumbersTable extends StatelessWidget {
           cells: [
             DataCell(Text(
               (index + 1).toString(),
-              style: const TextStyle(color: AppColors.grayColor),
+              style: TableTextStyle.contentStyle,
             )),
             DataCell(Text(
               data.psuSN[index].value,
-              style: const TextStyle(color: AppColors.blackColor),
+              style: TableTextStyle.contentStyle,
             )),
           ],
         ),
       ),
     );
 
-    return StyledCard(
+    return TableWrapper(
       title: 'PSU S/N',
       content: dataTable,
     );

@@ -4,6 +4,7 @@ import 'package:printing/printing.dart';
 import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/report/model/software_version.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
+import 'package:zerova_oqc_report/src/widget/common/table_wrapper.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 class SoftwareVersionTable extends StatelessWidget {
@@ -18,19 +19,13 @@ class SoftwareVersionTable extends StatelessWidget {
         DataColumn(
           label: Text(
             'Item',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: AppColors.darkBlueColor,
-            ),
+            style: TableTextStyle.headerStyle,
           ),
         ),
         DataColumn(
           label: Text(
             'Version',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: AppColors.darkBlueColor,
-            ),
+            style: TableTextStyle.headerStyle,
           ),
         ),
       ],
@@ -38,17 +33,17 @@ class SoftwareVersionTable extends StatelessWidget {
         cells: [
           DataCell(Text(
             version.name,
-            style: const TextStyle(color: AppColors.blackColor),
+            style: TableTextStyle.contentStyle,
           )),
           DataCell(Text(
             version.value,
-            style: const TextStyle(color: AppColors.blackColor),
+            style: TableTextStyle.contentStyle,
           )),
         ],
       )).toList(),
     );
 
-    return StyledCard(
+    return TableWrapper(
       title: context.tr('software_version'),
       content: dataTable,
     );

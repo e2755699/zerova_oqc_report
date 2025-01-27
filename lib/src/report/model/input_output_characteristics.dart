@@ -4,7 +4,7 @@ import 'package:zerova_oqc_report/src/report/model/protection_function_test_resu
 class InputOutputCharacteristics {
   final InputOutputCharacteristicsSide leftSideInputOutputCharacteristics;
   final InputOutputCharacteristicsSide rightSideInputOutputCharacteristics;
-  final BaseFunctionTestResult baseFunctionTestResult;
+  final BasicFunctionTestResult basicFunctionTestResult;
 
   List<InputOutputCharacteristicsSide> get inputOutputCharacteristicsSide => [
         leftSideInputOutputCharacteristics,
@@ -14,7 +14,7 @@ class InputOutputCharacteristics {
   InputOutputCharacteristics({
     required this.rightSideInputOutputCharacteristics,
     required this.leftSideInputOutputCharacteristics,
-    required this.baseFunctionTestResult,
+    required this.basicFunctionTestResult,
   });
 
   /// 從 JSON 清單數據提取並生成 `InputOutputCharacteristics`
@@ -281,7 +281,7 @@ class InputOutputCharacteristics {
             leftSideInputOutputCharacteristicsSide,
         rightSideInputOutputCharacteristics:
             rightSideInputOutputCharacteristicsSide,
-        baseFunctionTestResult: BaseFunctionTestResult(
+        basicFunctionTestResult: BasicFunctionTestResult(
           eff: eff ?? InputOutputMeasurement.empty(),
           powerFactor: powerFactor ?? InputOutputMeasurement.empty(),
           harmonic: harmonic ?? InputOutputMeasurement.empty(),
@@ -293,20 +293,20 @@ class InputOutputCharacteristics {
   static fromExcel(String string) {}
 }
 
-class BaseFunctionTestResult {
+class BasicFunctionTestResult {
   final InputOutputMeasurement eff;
   final InputOutputMeasurement powerFactor;
   final InputOutputMeasurement harmonic;
   final InputOutputMeasurement standbyTotalInputPower;
 
-  BaseFunctionTestResult({
+  BasicFunctionTestResult({
     required this.eff,
     required this.powerFactor,
     required this.harmonic,
     required this.standbyTotalInputPower,
   });
 
-  List<InputOutputMeasurement> get showResultByColumn => [
+  List<InputOutputMeasurement> get testItems => [
         eff,
         powerFactor,
         harmonic,

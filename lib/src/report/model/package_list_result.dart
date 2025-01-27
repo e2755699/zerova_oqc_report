@@ -49,7 +49,7 @@ class PackageListResult {
        this.rows = rows ?? [],
        this.datas = datas ?? defaultDatas;
 
-  List<List<String>> get showResultByColumn {
+  List<List<String>> get testItems {
     return datas.map((data) => [
       data.translationKey.tr(),
       data.spec.toString(),
