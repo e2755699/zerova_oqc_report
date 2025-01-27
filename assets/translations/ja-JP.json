@@ -11,5 +11,7 @@
   "packagingItem2": "製品認証カード",
   "packagingItem3": "ネジ組立 M4*12",
   "packagingItem4": "ボルトカバー",
-  "packagingItem5": "ユーザーマニュアル"
+  "packagingItem5": "ユーザーマニュアル",
+  "input_sn_model": "SNモデルを入力",
+  "qr_code_scan": "QRコードスキャン"
 }

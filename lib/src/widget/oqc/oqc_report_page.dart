@@ -23,6 +23,7 @@ import 'package:zerova_oqc_report/src/widget/oqc/tables/protection_function_test
 import 'package:zerova_oqc_report/src/widget/oqc/tables/psu_serial_numbers_table.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/tables/software_version.dart';
 import 'package:zerova_oqc_report/src/report/pdf_generator.dart';
+import 'package:zerova_oqc_report/src/widget/common/custom_app_bar.dart';
 
 class OqcReportPage extends StatefulWidget {
   const OqcReportPage({
@@ -141,19 +142,7 @@ class _OqcReportPageState extends State<OqcReportPage> {
   Widget build(BuildContext context) {
     final currentLocale = context.locale;
     return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 84,  // 增加工具欄高度
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF008999), Color(0x808080)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
-        elevation: 2,
-        shadowColor: Colors.black.withOpacity(0.4),
+      appBar: CustomAppBar(
         leading: FittedBox(
           fit: BoxFit.cover,
           child: IconButton(
@@ -162,28 +151,20 @@ class _OqcReportPageState extends State<OqcReportPage> {
             onPressed: () => context.pop(),
           ),
         ),
-        title: Text(
-          context.tr('oqc_report'),
-          style: const TextStyle(
-            fontFamily: 'Roboto',
-            fontSize: 60,
-            fontWeight: FontWeight.w700,
-            height: 1.2,
-            // 調整 height 值以適應越南文
-            textBaseline: TextBaseline.alphabetic,
-          ),
+        title: context.tr('oqc_report'),
+        titleStyle: const TextStyle(
+          fontFamily: 'Roboto',
+          fontSize: 60,
+          fontWeight: FontWeight.w700,
+          height: 1.2,
+          textBaseline: TextBaseline.alphabetic,
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: buildLanguageDropdownButton(context, currentLocale),
-          ),
-        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _generateAndUploadPdf,
         icon: const Icon(Icons.upload_file),
         label: const Text('Submit'),
+        backgroundColor: const Color(0xFFF8F9FD),  // 使用 #f8f9fd 顏色
       ),
       body: Stack(
         children: [

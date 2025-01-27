@@ -11,5 +11,7 @@
   "packagingItem2": "Thẻ chứng nhận sản phẩm",
   "packagingItem3": "Bộ vít M4*12",
   "packagingItem4": "Nắp bu lông",
-  "packagingItem5": "Hướng dẫn sử dụng"
+  "packagingItem5": "Hướng dẫn sử dụng",
+  "input_sn_model": "Nhập Model SN",
+  "qr_code_scan": "Quét mã QR"
 }

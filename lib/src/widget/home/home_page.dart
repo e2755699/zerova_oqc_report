@@ -11,6 +11,8 @@ import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/report/model/software_version.dart';
 import 'package:zerova_oqc_report/src/report/model/test_function.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/oqc_report_page.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:zerova_oqc_report/src/widget/common/custom_app_bar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -20,28 +22,11 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with LoadFileHelper {
-  final List<String> _languages = ['繁體中文', 'English', '日本語', 'Tiếng Việt'];
-  String _selectedLanguage = '繁體中文';
-
   @override
   Widget build(BuildContext context) {
+    final currentLocale = context.locale;
     return Scaffold(
-      appBar: AppBar(
-        title: DropdownButton<String>(
-          value: _selectedLanguage,
-          items: _languages
-              .map((lang) => DropdownMenuItem(
-                    value: lang,
-                    child: Text(lang),
-                  ))
-              .toList(),
-          onChanged: (value) {
-            setState(() {
-              _selectedLanguage = value!;
-            });
-          },
-        ),
-      ),
+      appBar: const CustomAppBar(),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -55,8 +40,12 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
 
             // 按鈕1: 輸入SN機種
             SizedBox(
-              width: 200, // 統一按鈕寬度
+              width: 300, // 增加按鈕寬度
+              height: 60, // 增加按鈕高度
               child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  textStyle: const TextStyle(fontSize: 20), // 增加文字大小
+                ),
                 onPressed: () {
                   showDialog(
                     context: context,
@@ -65,19 +54,23 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
                     },
                   );
                 },
-                child: Text('輸入SN機種'),
+                child: Text(context.tr('input_sn_model')),
               ),
             ),
             SizedBox(height: 20),
 
             // 按鈕2: QR Scan
             SizedBox(
-              width: 200, // 統一按鈕寬度
+              width: 300, // 增加按鈕寬度
+              height: 60, // 增加按鈕高度
               child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  textStyle: const TextStyle(fontSize: 20), // 增加文字大小
+                ),
                 onPressed: () {
                   loadFile();
                 },
-                child: Text('QR code掃描'),
+                child: Text(context.tr('qr_code_scan')),
               ),
             ),
           ],
@@ -148,6 +141,58 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
     //     'inputOutputCharacteristics': inputOutputCharacteristics,
     //     'protectionTestResults': protectionTestResults,
     //   });
+  }
+
+  Container buildLanguageDropdownButton(
+      BuildContext context, Locale currentLocale) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: DropdownButton<Locale>(
+        value: currentLocale,
+        icon: const Icon(Icons.language),
+        underline: Container(),
+        elevation: 4,
+        items: context.supportedLocales.map((locale) {
+          String label = '';
+          switch (locale.languageCode) {
+            case 'en':
+              label = 'English';
+              break;
+            case 'zh':
+              label = '繁體中文';
+              break;
+            case 'vi':
+              label = 'Tiếng Việt';
+              break;
+            case 'ja':
+              label = '日本語';
+              break;
+            default:
+              label = locale.languageCode;
+          }
+          return DropdownMenuItem(
+            value: locale,
+            child: Text(label),
+          );
+        }).toList(),
+        onChanged: (Locale? locale) {
+          if (locale != null) {
+            context.setLocale(locale);
+          }
+        },
+      ),
+    );
   }
 }
 

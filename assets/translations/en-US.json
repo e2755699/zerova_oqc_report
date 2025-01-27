@@ -11,5 +11,7 @@
   "packagingItem2": "Product Certificate Card",
   "packagingItem3": "Screw Assy M4*12",
   "packagingItem4": "Bolt Cover",
-  "packagingItem5": "User Manual"
+  "packagingItem5": "User Manual",
+  "input_sn_model": "Input SN Model",
+  "qr_code_scan": "QR Code Scan"
 }
