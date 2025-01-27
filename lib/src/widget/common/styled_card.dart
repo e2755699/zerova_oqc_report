@@ -85,23 +85,25 @@ class StyledDataTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DataTable(
-      border: TableBorder.all(
-        color: AppColors.lightBlueColor,
-        width: 1,
+    return Center(
+      child: DataTable(
+        border: TableBorder.all(
+          color: AppColors.lightBlueColor,
+          width: 1,
+        ),
+        columnSpacing: 32,
+        headingRowColor: MaterialStateProperty.all(AppColors.primaryColor.withOpacity(0.05)),
+        dataRowColor: MaterialStateProperty.resolveWith<Color?>(
+          (Set<MaterialState> states) {
+            if (states.contains(MaterialState.selected)) {
+              return AppColors.primaryColor.withOpacity(0.08);
+            }
+            return null;
+          },
+        ),
+        columns: columns,
+        rows: rows,
       ),
-      columnSpacing: 32,
-      headingRowColor: MaterialStateProperty.all(AppColors.primaryColor.withOpacity(0.05)),
-      dataRowColor: MaterialStateProperty.resolveWith<Color?>(
-        (Set<MaterialState> states) {
-          if (states.contains(MaterialState.selected)) {
-            return AppColors.primaryColor.withOpacity(0.08);
-          }
-          return null;
-        },
-      ),
-      columns: columns,
-      rows: rows,
     );
   }
 } 
