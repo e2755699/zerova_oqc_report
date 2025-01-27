@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -595,7 +596,7 @@ class PdfGenerator {
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
                     child: pw.Center(
-                      child: pw.Text(entry.value.name, style: pw.TextStyle(font: font)),
+                      child: pw.Text(entry.value.translationKey.tr(), style: pw.TextStyle(font: font)),
                     ),
                   ),
                   pw.Padding(

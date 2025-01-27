@@ -57,7 +57,7 @@ class PackageListTable extends StatelessWidget {
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Center(child: Text(entry.value.name)),
+                      child: Center(child: Text(entry.value.translationKey.tr())),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),

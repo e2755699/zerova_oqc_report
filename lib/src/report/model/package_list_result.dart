@@ -13,27 +13,27 @@ class PackageListResult {
     PackageListResultMeasurement(
       spec: 2,
       key: '1',
-      name: 'packagingItem1'.tr(),
+      translationKey: 'packagingItem1',
     ),
     PackageListResultMeasurement(
       spec: 1,
       key: '2',
-      name: 'packagingItem2'.tr(),
+      translationKey: 'packagingItem2',
     ),
     PackageListResultMeasurement(
       spec: 22,
       key: '3',
-      name: 'packagingItem3'.tr(),
+      translationKey: 'packagingItem3',
     ),
     PackageListResultMeasurement(
       spec: 4,
       key: '4',
-      name: 'packagingItem4'.tr(),
+      translationKey: 'packagingItem4',
     ),
     PackageListResultMeasurement(
       spec: 1,
       key: '5',
-      name: 'packagingItem5'.tr(),
+      translationKey: 'packagingItem5',
     ),
   ];
 
@@ -51,7 +51,7 @@ class PackageListResult {
 
   List<List<String>> get showResultByColumn {
     return datas.map((data) => [
-      data.name,
+      data.translationKey.tr(),
       data.spec.toString(),
       data.isCheck.value ? '✓' : ''
     ]).toList();
@@ -61,13 +61,13 @@ class PackageListResult {
 class PackageListResultMeasurement {
   final int spec;
   final String key;
-  final String name;
+  final String translationKey;
   final ValueNotifier<bool> isCheck;
 
   PackageListResultMeasurement({
     required this.spec,
     required this.key,
-    required this.name,
+    required this.translationKey,
   }) : isCheck = ValueNotifier<bool>(false);
 
   void toggle() {
