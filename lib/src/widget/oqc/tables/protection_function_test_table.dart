@@ -50,27 +50,13 @@ class _ProtectionFunctionTestTableState extends State<ProtectionFunctionTestTabl
             style: TableTextStyle.contentStyle,
           )),
           DataCell(
-            DropdownButton<Judgement>(
-              value: getJudgementFromString(item.judgement.name),
-              items: Judgement.values.map((Judgement value) {
-                return DropdownMenuItem<Judgement>(
-                  value: value,
-                  child: Text(
-                    value.toString().split('.').last.toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 32,
-                      color: value == Judgement.pass ? Colors.green : 
-                             value == Judgement.fail ? Colors.red :
-                             Colors.grey,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                );
-              }).toList(),
-              onChanged: (Judgement? newValue) {
+            buildJudgementDropdown(
+              item.judgement.name,
+              (newValue) {
                 if (newValue != null) {
                   setState(() {
-                    item.judgement.name;
+                    //todo
+                    // item.judgement = updateJudgement(newValue);
                   });
                 }
               },
