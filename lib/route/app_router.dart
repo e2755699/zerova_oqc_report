@@ -17,7 +17,11 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/camera',
       builder: (BuildContext context, GoRouterState state) {
-        return const CameraPage();
+        final extra = state.extra as Map<String, dynamic>;
+        return  CameraPage(
+          sn: extra['sn'],
+          packagingOrAttachment: extra['packagingOrAttachment'],
+        );
       },
     ),
     GoRoute(
@@ -25,6 +29,8 @@ final GoRouter appRouter = GoRouter(
       builder: (BuildContext context, GoRouterState state) {
         final extra = state.extra as Map<String, dynamic>;
         return OqcReportPage(
+          sn: extra['sn'],
+          model: extra['model'],
           softwareVersion: extra['softwareVersion'],
           testFunction: extra['testFunction'],
           inputOutputCharacteristics: extra['inputOutputCharacteristics'],

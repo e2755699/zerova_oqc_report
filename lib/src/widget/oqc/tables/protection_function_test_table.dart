@@ -26,49 +26,185 @@ class _ProtectionFunctionTestTableState extends State<ProtectionFunctionTestTabl
     data = widget.data;
   }
 
+  Widget _buildInsulationTestingRecord() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Insulation impedance >10MΩ',
+            style: TableTextStyle.contentStyle,
+          ),
+          const SizedBox(height: 8),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Left Plug:', style: TableTextStyle.contentStyle),
+                    Text('Input/Output: ${data.leftSideProtectionFunctionTestResult.insulationImpedanceInputOutput.value} MΩ',
+                        style: TableTextStyle.contentStyle),
+                    Text('Input/Ground: ${data.leftSideProtectionFunctionTestResult.insulationImpedanceInputGround.value} MΩ',
+                        style: TableTextStyle.contentStyle),
+                    Text('Output/Ground: ${data.leftSideProtectionFunctionTestResult.insulationImpedanceOutputGround.value} MΩ',
+                        style: TableTextStyle.contentStyle),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Right Plug:', style: TableTextStyle.contentStyle),
+                    Text('Input/Output: ${data.rightSideProtectionFunctionTestResult.insulationImpedanceInputOutput.value} MΩ',
+                        style: TableTextStyle.contentStyle),
+                    Text('Input/Ground: ${data.rightSideProtectionFunctionTestResult.insulationImpedanceInputGround.value} MΩ',
+                        style: TableTextStyle.contentStyle),
+                    Text('Output/Ground: ${data.rightSideProtectionFunctionTestResult.insulationImpedanceOutputGround.value} MΩ',
+                        style: TableTextStyle.contentStyle),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLeakageTestingRecord() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Leakage current <10mA',
+            style: TextStyle(
+              fontSize: TableTextStyle.contentStyle.fontSize,
+              color: Colors.red,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Left Plug:', style: TableTextStyle.contentStyle),
+                    Text('Input/Output: ${data.leftSideProtectionFunctionTestResult.insulationVoltageInputOutput.value} mA',
+                        style: TableTextStyle.contentStyle),
+                    Text('Input/Ground: ${data.leftSideProtectionFunctionTestResult.insulationVoltageInputGround.value} mA',
+                        style: TableTextStyle.contentStyle),
+                    Text('Output/Ground: ${data.leftSideProtectionFunctionTestResult.insulationVoltageOutputGround.value} mA',
+                        style: TableTextStyle.contentStyle),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Right Plug:', style: TableTextStyle.contentStyle),
+                    Text('Input/Output: ${data.rightSideProtectionFunctionTestResult.insulationVoltageInputOutput.value} mA',
+                        style: TableTextStyle.contentStyle),
+                    Text('Input/Ground: ${data.rightSideProtectionFunctionTestResult.insulationVoltageInputGround.value} mA',
+                        style: TableTextStyle.contentStyle),
+                    Text('Output/Ground: ${data.rightSideProtectionFunctionTestResult.insulationVoltageOutputGround.value} mA',
+                        style: TableTextStyle.contentStyle),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final dataTable = StyledDataTable(
-      columns: const [
-        DataColumn(
-          label: Text(
-            'Item',
-            style: TableTextStyle.headerStyle,
+    return TableWrapper(
+      title: context.tr('protection_function_test'),
+      content: StyledDataTable(
+        columns: const [
+          DataColumn(
+            label: Text(
+              'No.',
+              style: TableTextStyle.headerStyle,
+            ),
           ),
-        ),
-        DataColumn(
-          label: Text(
-            'Result',
-            style: TableTextStyle.headerStyle,
+          DataColumn(
+            label: Text(
+              'Test Items',
+              style: TableTextStyle.headerStyle,
+            ),
           ),
-        ),
-      ],
-      rows: data.testItems.map((item) => DataRow(
-        cells: [
-          DataCell(Text(
-            item.name,
-            style: TableTextStyle.contentStyle,
-          )),
-          DataCell(
-            buildJudgementDropdown(
-              item.judgement.name,
-              (newValue) {
-                if (newValue != null) {
-                  setState(() {
-                    //todo
-                    // item.judgement = updateJudgement(newValue);
-                  });
-                }
-              },
+          DataColumn(
+            label: Text(
+              'Testing Record',
+              style: TableTextStyle.headerStyle,
+            ),
+          ),
+          DataColumn(
+            label: Text(
+              'Judgement',
+              style: TableTextStyle.headerStyle,
             ),
           ),
         ],
-      )).toList(),
-    );
-
-    return TableWrapper(
-      title: context.tr('protection_function_test'),
-      content: dataTable,
+        rows: [
+          DataRow(cells: [
+            const DataCell(Text(
+              '1',
+              style: TableTextStyle.contentStyle,
+            )),
+            const DataCell(Text(
+              'Insulation Impedance Test.\n\nApply a DC Voltage:\na) Between each circuit.\nb) Between each of the independent circuits and the ground.',
+              style: TableTextStyle.contentStyle,
+            )),
+            DataCell(_buildInsulationTestingRecord()),
+            DataCell(buildJudgementDropdown(
+              data.leftSideProtectionFunctionTestResult.judgement,
+              (newValue) {
+                if (newValue != null) {
+                  setState(() {
+                    // TODO: Update judgement
+                  });
+                }
+              },
+            )),
+          ]),
+          DataRow(cells: [
+            const DataCell(Text(
+              '2',
+              style: TableTextStyle.contentStyle,
+            )),
+            const DataCell(Text(
+              'Insulation Voltage Test.\n\nApply a DC Voltage:\na) Between each circuit.\nb) Between each of the independent circuits and the ground.',
+              style: TableTextStyle.contentStyle,
+            )),
+            DataCell(_buildLeakageTestingRecord()),
+            DataCell(buildJudgementDropdown(
+              data.rightSideProtectionFunctionTestResult.judgement,
+              (newValue) {
+                if (newValue != null) {
+                  setState(() {
+                    // TODO: Update judgement
+                  });
+                }
+              },
+            )),
+          ]),
+        ],
+      ),
     );
   }
 
@@ -83,12 +219,12 @@ class _ProtectionFunctionTestTableState extends State<ProtectionFunctionTestTabl
             border: pw.TableBorder.all(),
             headers: ['No.', 'S/N'],
             data: List.generate(
-              data.testItems.length,
+              data.specialFunctionTestResult.testItems.length,
               (index) => [
                 (index + 1).toString(),
-                data.testItems[index].name,
-                data.testItems[index].description,
-                data.testItems[index].judgement,
+                data.specialFunctionTestResult.testItems[index].name,
+                data.specialFunctionTestResult.testItems[index].description,
+                data.specialFunctionTestResult.testItems[index].judgement,
               ],
             ),
           );

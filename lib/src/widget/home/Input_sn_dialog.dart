@@ -1,0 +1,122 @@
+import 'package:flutter/material.dart';
+import 'package:zerova_oqc_report/src/widget/home/home_page.dart';
+import 'package:easy_localization/easy_localization.dart';
+
+class InputSNDialog extends StatefulWidget {
+  const InputSNDialog({super.key});
+
+  @override
+  _InputSNDialogState createState() => _InputSNDialogState();
+}
+
+class _InputSNDialogState extends State<InputSNDialog> with LoadFileHelper {
+  final _formKey = GlobalKey<FormState>();
+  final _snController = TextEditingController();
+  final _modelController = TextEditingController();
+
+  @override
+  void dispose() {
+    _snController.dispose();
+    _modelController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(context.tr('input_sn_model')),
+      content: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              controller: _modelController,
+              decoration: InputDecoration(
+                labelText: context.tr('model_name'),
+                hintText: context.tr('please_input_model_name'),
+                prefixIcon: const Icon(Icons.text_fields),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                filled: true,
+                fillColor: Colors.grey[200],
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return context.tr('please_input_model_name');
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _snController,
+              decoration: InputDecoration(
+                labelText: context.tr('sn'),
+                hintText: context.tr('please_input_sn'),
+                prefixIcon: const Icon(Icons.numbers),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                filled: true,
+                fillColor: Colors.grey[200],
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return context.tr('please_input_sn');
+                }
+                return null;
+              },
+            )
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: Text(context.tr('cancel')),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            if (_formKey.currentState!.validate()) {
+              final sn = _snController.text;
+              final model = _modelController.text;
+
+              loadFile(sn, model, context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(context.tr('submit_success', args: [sn, model])),
+                ),
+              );
+              Navigator.of(context).pop();
+            }
+          },
+          child: Text(context.tr('submit')),
+        ),
+      ],
+    );
+  }
+
+  /*Future<void> _qr() async {
+    String? res = await SimpleBarcodeScanner.scanBarcode(
+      context,
+      barcodeAppBar: const BarcodeAppBar(
+        appBarTitle: 'Test',
+        centerTitle: false,
+        enableBackButton: true,
+        backButtonIcon: Icon(Icons.arrow_back_ios),
+      ),
+      isShowFlashIcon: true,
+      delayMillis: 500,
+      cameraFace: CameraFace.back,
+      scanFormat: ScanFormat.ONLY_BARCODE,
+    );
+  }*/
+
+  Future<void> loadFile(String sn, String model, BuildContext context) async {
+    loadFileModule(sn, model, context);
+  }
+}

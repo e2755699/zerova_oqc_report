@@ -6,47 +6,42 @@ import 'package:zerova_oqc_report/src/report/model/package_list_result.dart';
 import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/report/model/test_function.dart';
 import 'package:go_router/go_router.dart';
+import 'package:zerova_oqc_report/src/widget/common/camera_button.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 import 'package:zerova_oqc_report/src/widget/common/image_grid.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'dart:io';
 
 class PackageListTable extends StatelessWidget {
+  final String sn;
   final PackageListResult data;
 
-  const PackageListTable(this.data, {super.key});
+  const PackageListTable(this.data, {super.key, required this.sn});
 
   List<String> get headers => data.header;
 
   @override
   Widget build(BuildContext context) {
-    final cameraButton = Container(
-      decoration: BoxDecoration(
-        color: AppColors.primaryColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: IconButton(
-        icon: const Icon(Icons.camera_alt),
-        onPressed: () => context.push('/camera'),
-        tooltip: '開啟相機',
-        iconSize: 28,
-        color: AppColors.primaryColor,
-      ),
-    );
+    ;
 
     return StyledCard(
       title: context.tr('package_list'),
-      titleAction: cameraButton,
+      titleAction: CameraButton(
+        sn: sn,
+        packagingOrAttachment: 0,
+      ),
       content: Column(
         children: [
           Table(
             border: TableBorder.all(),
             children: [
               TableRow(
-                children: headers.map((header) => Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Center(child: Text(header)),
-                )).toList(),
+                children: headers
+                    .map((header) => Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Center(child: Text(header)),
+                        ))
+                    .toList(),
               ),
               ...data.datas.asMap().entries.map((entry) {
                 return TableRow(
@@ -57,7 +52,8 @@ class PackageListTable extends StatelessWidget {
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Center(child: Text(entry.value.translationKey.tr())),
+                      child:
+                          Center(child: Text(entry.value.translationKey.tr())),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -67,7 +63,8 @@ class PackageListTable extends StatelessWidget {
                       padding: const EdgeInsets.all(8.0),
                       child: Center(
                         child: ValueListenableBuilder(
-                          key: GlobalKey(debugLabel: 'checkbox_${entry.value.key}'),
+                          key: GlobalKey(
+                              debugLabel: 'checkbox_${entry.value.key}'),
                           valueListenable: entry.value.isCheck,
                           builder: (context, value, _) => Checkbox(
                             value: value,

@@ -1,0 +1,10 @@
+{
+  "open_camera": "開啟相機",
+  "model_name": "型號名稱",
+  "please_input_model_name": "請輸入型號名稱",
+  "sn": "序號",
+  "please_input_sn": "請輸入序號",
+  "cancel": "取消",
+  "submit": "提交",
+  "submit_success": "序號: {0}, 型號: {1} 已提交"
+} 

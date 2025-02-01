@@ -34,6 +34,8 @@ class OqcReportPage extends StatefulWidget {
     required this.protectionTestResults,
     required this.psuSerialNumbers,
     required this.packageListResult,
+    required this.sn,
+    required this.model,
   });
 
   final SoftwareVersion? softwareVersion;
@@ -42,6 +44,9 @@ class OqcReportPage extends StatefulWidget {
   final ProtectionFunctionTestResult? protectionTestResults;
   final Psuserialnumber? psuSerialNumbers;
   final PackageListResult? packageListResult;
+
+  final String sn;
+  final String model;
 
   @override
   State<OqcReportPage> createState() => _OqcReportPageState();
@@ -164,7 +169,7 @@ class _OqcReportPageState extends State<OqcReportPage> {
         onPressed: _generateAndUploadPdf,
         icon: const Icon(Icons.upload_file),
         label: const Text('Submit'),
-        backgroundColor: const Color(0xFFF8F9FD),  // 使用 #f8f9fd 顏色
+        backgroundColor: const Color(0xFFF8F9FD), // 使用 #f8f9fd 顏色
       ),
       body: Stack(
         children: [
@@ -189,8 +194,8 @@ class _OqcReportPageState extends State<OqcReportPage> {
                                 color: AppColors.darkBlueColor,
                               ),
                             ),
-                            const Text(
-                              'T2437A011A0',
+                             Text(
+                              widget.model,
                               style: TextStyle(
                                 fontSize: 16,
                                 color: AppColors.blackColor,
@@ -209,8 +214,8 @@ class _OqcReportPageState extends State<OqcReportPage> {
                                 color: AppColors.darkBlueColor,
                               ),
                             ),
-                            const Text(
-                              'SN8765432', // 這裡可以放入實際的 SN
+                             Text(
+                              widget.sn, // 這裡可以放入實際的 SN
                               style: TextStyle(
                                 fontSize: 16,
                                 color: AppColors.blackColor,
@@ -238,8 +243,10 @@ class _OqcReportPageState extends State<OqcReportPage> {
                       widget.protectionTestResults!,
                     ),
                   if (widget.packageListResult != null)
-                    PackageListTable(widget.packageListResult!),
-                  const AttachmentTable(),
+                    PackageListTable(widget.packageListResult!,sn: widget.sn,),
+                  AttachmentTable(
+                    sn: widget.sn,
+                  ),
                   StyledCard(
                     title: 'Signature',
                     content: Column(

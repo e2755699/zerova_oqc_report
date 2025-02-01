@@ -13,5 +13,13 @@
   "packagingItem4": "ボルトカバー",
   "packagingItem5": "ユーザーマニュアル",
   "input_sn_model": "SNモデルを入力",
-  "qr_code_scan": "QRコードスキャン"
+  "qr_code_scan": "QRコードスキャン",
+  "open_camera": "カメラを開く",
+  "model_name": "モデル名",
+  "please_input_model_name": "モデル名を入力してください",
+  "sn": "シリアル番号",
+  "please_input_sn": "シリアル番号を入力してください",
+  "cancel": "キャンセル",
+  "submit": "送信",
+  "submit_success": "SN: {0}、モデル: {1} が送信されました"
 }

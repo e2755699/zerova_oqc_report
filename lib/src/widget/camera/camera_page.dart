@@ -5,59 +5,22 @@ import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
-import 'package:go_router/go_router.dart';
 
-/// Example app for Camera Windows plugin.
 class CameraPage extends StatefulWidget {
-  /// Default Constructor
-  const CameraPage({super.key});
+  final int packagingOrAttachment; // 0:Packaging  1:Attachment
+  final String sn;
+
+  const CameraPage({
+    super.key,
+    required this.packagingOrAttachment,
+    required this.sn,
+  });
 
   @override
   State<CameraPage> createState() => _CameraPageState();
 }
 
-Future<String> _getUserPicturesPath() async {
-  // 獲取當前使用者的根目錄
-  final String userProfile = Platform.environment['USERPROFILE'] ?? '';
-
-  // 根據根目錄構建圖片目錄路徑
-  if (userProfile.isNotEmpty) {
-    final String picturesPath = path.join(userProfile, 'Pictures');
-    return picturesPath;
-  } else {
-    throw Exception("Unable to find the user profile directory.");
-  }
-}
-
-Future<String> _getUserComparePath() async {
-  final String picturesPath = await _getUserPicturesPath();
-  final String comparePath = path.join(picturesPath, 'Compare Pictures');
-
-  // 檢查資料夾是否存在，若不存在則建立
-  final directory = Directory(comparePath);
-  if (!await directory.exists()) {
-    await directory.create(recursive: true); // recursive 為 true 會自動建立所有必要的父資料夾
-  }
-
-  return comparePath;
-}
-
-Future<String> _getUserZerovaPath() async {
-  final String picturesPath = await _getUserPicturesPath();
-  final String zerovaPath = path.join(picturesPath, 'Zerova');
-
-  // 檢查資料夾是否存在，若不存在則建立
-  final directory = Directory(zerovaPath);
-  if (!await directory.exists()) {
-    await directory.create(recursive: true);
-  }
-
-  return zerovaPath;
-}
-
-
-class _CameraPageState extends State<CameraPage> {
+class _CameraPageState extends State<CameraPage> with CameraHelper {
   String _cameraInfo = 'Unknown';
   List<CameraDescription> _cameras = <CameraDescription>[];
   int _cameraIndex = 0;
@@ -249,7 +212,27 @@ class _CameraPageState extends State<CameraPage> {
       if (!_previewPaused) {
         await CameraPlatform.instance.pausePreview(_cameraId);
         final XFile file = await CameraPlatform.instance.takePicture(_cameraId);
-        _showInSnackBar('Picture captured to: ${file.path}');
+
+        final String saveImagesPath;
+
+        if (widget.packagingOrAttachment == 0) { // Packaging
+          saveImagesPath = await _getUserAllPhotosPackagingPath(widget.sn);
+        } else if (widget.packagingOrAttachment == 1) { // Attachment
+          saveImagesPath = await _getUserAllPhotosAttachmentPath(widget.sn);
+        } else {
+          throw Exception("Didn't contain Packaging Or Attachment");
+        }
+
+        final directory = Directory(saveImagesPath);
+        if (!directory.existsSync()) {
+          directory.createSync(recursive: true);
+        }
+
+        final String newPath = '${directory.path}/${file.name}';
+        final File savedFile = File(file.path);
+        await savedFile.rename(newPath);
+
+        _showInSnackBar('Picture saved to: $newPath');
       } else {
         await CameraPlatform.instance.resumePreview(_cameraId);
       }
@@ -259,8 +242,6 @@ class _CameraPageState extends State<CameraPage> {
         });
       }
     }
-    /*final XFile file = await CameraPlatform.instance.takePicture(_cameraId);
-    _showInSnackBar('Picture captured to: ${file.path}');*/
   }
 
   Future<void> _togglePreview() async {
@@ -311,49 +292,39 @@ class _CameraPageState extends State<CameraPage> {
       scaffoldMessengerKey: _scaffoldMessengerKey,
       home: Scaffold(
         appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => context.pop(),
-          ),
           title: const Text('Camera'),
         ),
         body: ListView(
           children: <Widget>[
-            // if (_cameras.isEmpty)
-            //   ElevatedButton(
-            //     onPressed: _fetchCameras,
-            //     child: const Text('Re-check available cameras'),
-            //   ),
-            // if (_cameras.isNotEmpty)
+            if (_cameras.isEmpty)
+              ElevatedButton(
+                onPressed: _fetchCameras,
+                child: const Text('Re-check available cameras'),
+              ),
+            if (_cameras.isNotEmpty)
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  DropdownButton<String>(
-                    hint: const Text('Select Image'),
-                    value: _selectedImagePath,
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedImagePath = newValue;
-                      });
-                    },
-                    items: _imagePaths.map<DropdownMenuItem<String>>((String path) {
-                      return DropdownMenuItem<String>(
-                        value: path,
-                        child: Text(path.split('\\').last),
-                      );
-                    }).toList(),
-                  ),
-                  /*ElevatedButton(
-                    onPressed: _initialized
-                        ? _disposeCurrentCamera
-                        : _initializeCamera,
-                    child: Text(_initialized ? '關閉相機' : '開啟相機'),
-                  ),
-                  const SizedBox(width: 5),*/
+                  if(widget.packagingOrAttachment != 0)
+                    DropdownButton<String>(
+                      hint: const Text('Select Image'),
+                      value: _selectedImagePath,
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _selectedImagePath = newValue;
+                        });
+                      },
+                      items: _imagePaths.map<DropdownMenuItem<String>>((String path) {
+                        return DropdownMenuItem<String>(
+                          value: path,
+                          child: Text(path.split('\\').last),
+                        );
+                      }).toList(),
+                    ),
                   ElevatedButton(
                     onPressed: _initialized ? _takePicture : null,
                     child: Text(
-                      _previewPaused ? '下一張照片' : '拍照', // 根據預覽是否暫停顯示不同文字
+                      _previewPaused ? '下一張照片' : '拍照',
                     ),
                   ),
                   const SizedBox(width: 5),
@@ -363,15 +334,18 @@ class _CameraPageState extends State<CameraPage> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => const ImagePickerScreen()),
+                            MaterialPageRoute(
+                              builder: (context) => ImagePickerScreen(
+                                packagingOrAttachment: widget.packagingOrAttachment,
+                                sn: widget.sn,
+                              ),
+                            ),
                           );
                         },
                         child: const Text('瀏覽照片'),
                       );
                     },
                   ),
-
-                  const SizedBox(width: 5),
                 ],
               ),
             const SizedBox(height: 5),
@@ -379,13 +353,19 @@ class _CameraPageState extends State<CameraPage> {
               padding: const EdgeInsets.symmetric(vertical: 10),
               child: Row(
                 children: <Widget>[
-                  if (_selectedImagePath != null)
+                  if (_selectedImagePath != null && _previewSize != null)
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.all(10.0),
-                        child: Image.file(
-                          File(_selectedImagePath!),
-                          fit: BoxFit.contain,
+                        child: Container(
+                          constraints: const BoxConstraints(maxHeight: 500), // 與相機畫面相同的最大高度
+                          child: AspectRatio(
+                            aspectRatio: _previewSize!.width / _previewSize!.height, // 保持相機畫面比例
+                            child: Image.file(
+                              File(_selectedImagePath!),
+                              fit: BoxFit.contain, // 確保圖片完整顯示，不被裁切
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -412,23 +392,122 @@ class _CameraPageState extends State<CameraPage> {
   }
 }
 
+mixin CameraHelper{
+  Future<String> _getOrCreateUserZerovaPath() async {
+    final String userProfile = Platform.environment['USERPROFILE'] ?? '';
+
+    if (userProfile.isNotEmpty) {
+      final String zerovaPath = path.join(userProfile, 'Pictures', 'Zerova');
+      // 如果資料夾不存在，則建立它
+      final Directory dir = Directory(zerovaPath);
+      if (!await dir.exists()) {
+        await dir.create(recursive: true);
+      }
+      return zerovaPath;
+    } else {
+      throw Exception("Unable to find the user profile directory.");
+    }
+  }
+
+
+  Future<String> _getUserComparePath() async {
+    final String picturesPath = await _getOrCreateUserZerovaPath();
+    final String comparePath = path.join(picturesPath, 'Compare Pictures');
+
+    // 檢查資料夾是否存在，若不存在則建立
+    final directory = Directory(comparePath);
+    if (!await directory.exists()) {
+      await directory.create(recursive: true); // recursive 為 true 會自動建立所有必要的父資料夾
+    }
+
+    return comparePath;
+  }
+
+  Future<String> _getUserAllPhotosPackagingPath(String sn) async {
+    final String picturesPath = await _getOrCreateUserZerovaPath();
+    final String allPhotosPackagingPath = path.join(picturesPath, 'All Photos', sn, 'Packaging');
+
+    // 檢查資料夾是否存在，若不存在則建立
+    final directory = Directory(allPhotosPackagingPath);
+    if (!await directory.exists()) {
+      await directory.create(recursive: true);
+    }
+
+    return allPhotosPackagingPath;
+  }
+
+  Future<String> _getUserAllPhotosAttachmentPath(String sn) async {
+    final String picturesPath = await _getOrCreateUserZerovaPath();
+    final String allPhotosAttachmentPath = path.join(picturesPath, 'All Photos', sn, 'Attachment');
+
+    // 檢查資料夾是否存在，若不存在則建立
+    final directory = Directory(allPhotosAttachmentPath);
+    if (!await directory.exists()) {
+      await directory.create(recursive: true);
+    }
+
+    return allPhotosAttachmentPath;
+  }
+
+  Future<String> _getUserSelectedPhotosPackagingPath(String sn) async {
+    final String picturesPath = await _getOrCreateUserZerovaPath();
+    final String selectedPhotosPackagingPath = path.join(picturesPath, 'Selected Photos', sn, 'Packaging');
+
+    // 檢查資料夾是否存在，若不存在則建立
+    final directory = Directory(selectedPhotosPackagingPath);
+    if (!await directory.exists()) {
+      await directory.create(recursive: true);
+    }
+
+    return selectedPhotosPackagingPath;
+  }
+
+  Future<String> _getUserSelectedPhotosAttachmentPath(String sn) async {
+    final String picturesPath = await _getOrCreateUserZerovaPath();
+    final String selectedPhotosAttachmentPath = path.join(picturesPath, 'Selected Photos', sn, 'Attachment');
+
+    // 檢查資料夾是否存在，若不存在則建立
+    final directory = Directory(selectedPhotosAttachmentPath);
+    if (!await directory.exists()) {
+      await directory.create(recursive: true);
+    }
+
+    return selectedPhotosAttachmentPath;
+  }
+
+}
+
 
 class ImagePickerScreen extends StatefulWidget {
-  const ImagePickerScreen({super.key});
+  final int packagingOrAttachment;
+  final String sn;
+
+  const ImagePickerScreen({
+    super.key,
+    required this.packagingOrAttachment,
+    required this.sn,
+  });
 
   @override
   State<ImagePickerScreen> createState() => _ImagePickerScreenState();
 }
 
-class _ImagePickerScreenState extends State<ImagePickerScreen> {
+class _ImagePickerScreenState extends State<ImagePickerScreen> with CameraHelper {
   List<String> _imagePaths = [];
   List<bool> _selectedImages = [];
 
   @override
   void initState() {
     super.initState();
-    _loadImages();
-    // 在初始化時直接顯示選擇對話框
+    _initializeImages();
+  }
+
+  Future<void> _initializeImages() async {
+    await _loadImages(); // 確保圖片加載完成
+    setState(() {
+      // 在這裡更新 UI，顯示圖片或選擇框
+    });
+    // 加載完成後顯示選擇對話框
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _showImageSelectionDialog();
     });
@@ -436,8 +515,15 @@ class _ImagePickerScreenState extends State<ImagePickerScreen> {
 
   Future<void> _loadImages() async {
     try {
-      // 獲取用戶的圖片目錄
-      final String picturesPath = await _getUserPicturesPath();
+      final String picturesPath;
+
+      if (widget.packagingOrAttachment == 0) { // Packaging
+        picturesPath = await _getUserAllPhotosPackagingPath(widget.sn);
+      } else if (widget.packagingOrAttachment == 1) { // Attachment
+        picturesPath = await _getUserAllPhotosAttachmentPath(widget.sn);
+      } else {
+        throw Exception("Didn't contain Packaging Or Attachment");
+      }
       final directory = Directory(picturesPath);
 
       if (!directory.existsSync()) {
@@ -469,8 +555,17 @@ class _ImagePickerScreenState extends State<ImagePickerScreen> {
   }
 
   Future<void> _saveSelectedImages() async {
-    final String zerovaPath = await _getUserZerovaPath();
-    final targetDirectory = Directory(zerovaPath);
+    final String saveImagesPath;
+
+    if (widget.packagingOrAttachment == 0) { // Packaging
+      saveImagesPath = await _getUserSelectedPhotosPackagingPath(widget.sn);
+    } else if (widget.packagingOrAttachment == 1) { // Attachment
+      saveImagesPath = await _getUserSelectedPhotosAttachmentPath(widget.sn);
+    } else {
+      throw Exception("Didn't contain Packaging Or Attachment");
+    }
+
+    final targetDirectory = Directory(saveImagesPath);
 
     if (!await targetDirectory.exists()) {
       await targetDirectory.create(recursive: true);
@@ -515,7 +610,6 @@ class _ImagePickerScreenState extends State<ImagePickerScreen> {
                       icon: const Icon(Icons.close),
                       onPressed: () {
                         Navigator.of(context).pop(); // 關閉對話框
-                        Navigator.of(context).pop(); // 返回上一頁（Camera 頁面）
                       },
                     ),
                   ],
@@ -562,6 +656,7 @@ class _ImagePickerScreenState extends State<ImagePickerScreen> {
                           : const Center(
                         child: Text(
                             'No images found in the specified directory.'),
+                        //child: CircularProgressIndicator(), // 顯示加載中的進度條
                       );
                     },
                   ),
@@ -574,7 +669,6 @@ class _ImagePickerScreenState extends State<ImagePickerScreen> {
                       TextButton(
                         onPressed: () {
                           Navigator.of(context).pop(); // 關閉對話框
-                          Navigator.of(context).pop(); // 返回上一頁（Camera 頁面）
                         },
                         child: const Text('Close'),
                       ),
@@ -582,7 +676,6 @@ class _ImagePickerScreenState extends State<ImagePickerScreen> {
                         onPressed: () async {
                           await _saveSelectedImages(); // 儲存所選影像
                           Navigator.of(context).pop(); // 關閉對話框
-                          Navigator.of(context).pop(); // 返回上一頁（Camera 頁面）
                         },
                         child: const Text('Save Selected Images'),
                       ),
@@ -610,4 +703,5 @@ class _ImagePickerScreenState extends State<ImagePickerScreen> {
       ),
     );
   }
-} 
+}
+

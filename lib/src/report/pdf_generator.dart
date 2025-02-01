@@ -529,7 +529,7 @@ class PdfGenerator {
                 ),
               ],
             ),
-            ...data.testItems.asMap().entries.map((entry) {
+            ...data.specialFunctionTestResult.testItems.asMap().entries.map((entry) {
               return pw.TableRow(
                 children: [
                   pw.Padding(

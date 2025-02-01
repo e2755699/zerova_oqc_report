@@ -13,5 +13,13 @@
   "packagingItem4": "Bolt Cover",
   "packagingItem5": "User Manual",
   "input_sn_model": "Input SN Model",
-  "qr_code_scan": "QR Code Scan"
+  "qr_code_scan": "QR Code Scan",
+  "open_camera": "Open Camera",
+  "model_name": "Model Name",
+  "please_input_model_name": "Please input model name",
+  "sn": "Serial Number",
+  "please_input_sn": "Please input serial number",
+  "cancel": "Cancel",
+  "submit": "Submit",
+  "submit_success": "SN: {0}, Model: {1} submitted"
 }

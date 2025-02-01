@@ -10,6 +10,7 @@ import 'package:zerova_oqc_report/src/report/model/protection_function_test_resu
 import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/report/model/software_version.dart';
 import 'package:zerova_oqc_report/src/report/model/test_function.dart';
+import 'package:zerova_oqc_report/src/widget/home/Input_sn_dialog.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/oqc_report_page.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:zerova_oqc_report/src/widget/common/custom_app_bar.dart';
@@ -37,7 +38,6 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
               height: 300, // 調整LOGO大小
             ),
             SizedBox(height: 40),
-
             // 按鈕1: 輸入SN機種
             SizedBox(
               width: 300, // 增加按鈕寬度
@@ -68,7 +68,7 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
                   textStyle: const TextStyle(fontSize: 20), // 增加文字大小
                 ),
                 onPressed: () {
-                  loadFile();
+                  qrcodeScan();
                 },
                 child: Text(context.tr('qr_code_scan')),
               ),
@@ -79,44 +79,37 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
     );
   }
 
-  Future<void> loadFile() async {
-    // String? res = await SimpleBarcodeScanner.scanBarcode(
-    //   context,
-    //   barcodeAppBar: const BarcodeAppBar(
-    //     appBarTitle: 'Test',
-    //     centerTitle: false,
-    //     enableBackButton: true,
-    //     backButtonIcon: Icon(Icons.arrow_back_ios),
-    //   ),
-    //   isShowFlashIcon: true,
-    //   delayMillis: 500,
-    //   cameraFace: CameraFace.back,
-    //   scanFormat: ScanFormat.ONLY_BARCODE,
-    // );
+  Future<void> qrcodeScan() async {
+    String? res = await SimpleBarcodeScanner.scanBarcode(
+      context,
+      barcodeAppBar: BarcodeAppBar(
+        appBarTitle: context.tr('qr_code_scan'),
+        centerTitle: true,
+        enableBackButton: true,
+        backButtonIcon: const Icon(
+          Icons.arrow_back_ios,
+          color: Colors.white,
+        ),
+      ),
+      isShowFlashIcon: true,
+      delayMillis: 500,
+      cameraFace: CameraFace.back,
+      scanFormat: ScanFormat.ONLY_BARCODE,
+    );
 
-    var result = "T2437A011A0 SN8765432";
     String model = "";
     String serialNumber = "";
     // 將 result 拆成兩部分
-    List<String> parts = result.split(RegExp(r'\s+'));
+    List<String> parts = res!.split(RegExp(r'\s+'));
     if (parts.length >= 2) {
       model = parts[0];
       serialNumber = parts[1];
     } else {
-      model = result;
+      model = res;
       serialNumber = ''; // 若分割後不足兩部分，則 part2 保持空字串
     }
 
-    //hard code
-    /*String testData = await File(
-            "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\T2437A011A0_test.json")
-        .readAsString();
-    String oqcData = await File(
-            "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\T2433A031A0_oqc.json")
-        .readAsString();
-    String moduleJsonContent = await File(
-            "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\1234keypart.json")
-        .readAsString();*/
+
     await loadFileModule(serialNumber, model, context);
 
     // final apiClient = OqcApiClient();
@@ -233,6 +226,8 @@ mixin LoadFileHelper {
     AppearanceStructureInspectionFunctionResult.fromJson(testFuncionData);
 
     context.push('/oqc-report', extra: {
+      'sn': sn,
+      'model': model,
       'psuSerialNumbers': psuSerialNumbers,
       'softwareVersion': softwareVersion,
       'testFunction': testFunction,
@@ -263,122 +258,5 @@ mixin LoadFileHelper {
     //     'inputOutputCharacteristics': inputOutputCharacteristics,
     //     'protectionTestResults': protectionTestResults,
     //   });
-  }
-}
-
-class InputSNDialog extends StatefulWidget {
-  @override
-  _InputSNDialogState createState() => _InputSNDialogState();
-}
-
-class _InputSNDialogState extends State<InputSNDialog> with LoadFileHelper {
-  final _formKey = GlobalKey<FormState>();
-  final _snController = TextEditingController();
-  final _modelController = TextEditingController();
-
-  @override
-  void dispose() {
-    _snController.dispose();
-    _modelController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('輸入SN和Model'),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: _snController,
-              decoration: InputDecoration(
-                labelText: 'SN',
-                hintText: '請輸入SN',
-                prefixIcon: Icon(Icons.numbers),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                filled: true,
-                fillColor: Colors.grey[200],
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '請輸入SN';
-                }
-                return null;
-              },
-            ),
-            SizedBox(height: 16),
-            TextFormField(
-              controller: _modelController,
-              decoration: InputDecoration(
-                labelText: 'Model Name',
-                hintText: '請輸入Model Name',
-                prefixIcon: Icon(Icons.text_fields),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                filled: true,
-                fillColor: Colors.grey[200],
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '請輸入Model Name';
-                }
-                return null;
-              },
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop(); // 關閉彈出視窗
-          },
-          child: Text('取消'),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            if (_formKey.currentState!.validate()) {
-              final sn = _snController.text;
-              final model = _modelController.text;
-
-              loadFile(sn, model, context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('SN: $sn, Model: $model 已提交'),
-                ),
-              );
-              Navigator.of(context).pop(); // 關閉彈出視窗
-            }
-          },
-          child: Text('提交'),
-        ),
-      ],
-    );
-  }
-
-  /*Future<void> _qr() async {
-    String? res = await SimpleBarcodeScanner.scanBarcode(
-      context,
-      barcodeAppBar: const BarcodeAppBar(
-        appBarTitle: 'Test',
-        centerTitle: false,
-        enableBackButton: true,
-        backButtonIcon: Icon(Icons.arrow_back_ios),
-      ),
-      isShowFlashIcon: true,
-      delayMillis: 500,
-      cameraFace: CameraFace.back,
-      scanFormat: ScanFormat.ONLY_BARCODE,
-    );
-  }*/
-
-  Future<void> loadFile(String sn, String model, BuildContext context) async {
-    loadFileModule(sn, model, context);
   }
 }

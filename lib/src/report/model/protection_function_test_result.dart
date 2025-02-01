@@ -288,7 +288,6 @@ static ProtectionFunctionTestResult fromJsonList(List<dynamic> data) {
       rightInsulationVoltageInputOutput ?? ProtectionFunctionMeasurement.empty(),
       rightInsulationVoltageInputGround ?? ProtectionFunctionMeasurement.empty(),
       rightInsulationVoltageOutputGround ?? ProtectionFunctionMeasurement.empty());
-
   var result = ProtectionFunctionTestResult(
     leftSideProtectionFunctionTestResult: leftSideProtectionFunctionTestResultSide,
     rightSideProtectionFunctionTestResult: rightSideProtectionFunctionTestResultSide,
@@ -298,8 +297,7 @@ static ProtectionFunctionTestResult fromJsonList(List<dynamic> data) {
       groundFaultTest: groundFaultTest ?? ProtectionFunctionMeasurement.empty(),
     ),
   );
-
-
+  /*
   print("=== Protection Function Test Result ===");
   for (var side in result.protectionFunctionTestResultSide) {
     print("Side: ${side.side}");
@@ -315,7 +313,7 @@ static ProtectionFunctionTestResult fromJsonList(List<dynamic> data) {
   print("Emergency Test: ${result.specialFunctionTestResult.emergencyTest.value}, Judgement: ${result.specialFunctionTestResult.emergencyTest.judgement}");
   print("Door Open Test: ${result.specialFunctionTestResult.doorOpenTest.value}, Judgement: ${result.specialFunctionTestResult.doorOpenTest.judgement}");
   print("Ground Fault Test: ${result.specialFunctionTestResult.groundFaultTest.value}, Judgement: ${result.specialFunctionTestResult.groundFaultTest.judgement}");
-  print("=====================================");
+  print("=====================================");*/
   return result;
 }
 

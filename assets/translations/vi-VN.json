@@ -13,5 +13,13 @@
   "packagingItem4": "Nắp bu lông",
   "packagingItem5": "Hướng dẫn sử dụng",
   "input_sn_model": "Nhập Model SN",
-  "qr_code_scan": "Quét mã QR"
+  "qr_code_scan": "Quét mã QR",
+  "open_camera": "Mở máy ảnh",
+  "model_name": "Tên model",
+  "please_input_model_name": "Vui lòng nhập tên model",
+  "sn": "Số sê-ri",
+  "please_input_sn": "Vui lòng nhập số sê-ri",
+  "cancel": "Hủy",
+  "submit": "Gửi",
+  "submit_success": "SN: {0}, Model: {1} đã được gửi"
 }

@@ -1,19 +1,27 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:pdf/widgets.dart' as pw;
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 import 'package:zerova_oqc_report/src/widget/common/image_grid.dart';
+import 'package:zerova_oqc_report/src/widget/common/camera_button.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 /// 附件表格
 class AttachmentTable extends StatelessWidget {
-  /// 構造函數
-  const AttachmentTable({super.key});
+  final String sn;
+
+  const AttachmentTable({
+    super.key,
+    required this.sn,
+  });
 
   @override
   Widget build(BuildContext context) {
     return StyledCard(
       title: context.tr('attachment'),
+      titleAction: CameraButton(
+        sn: sn,
+        packagingOrAttachment: 1,
+      ),
       content: ImageGrid(
         imagePath: 'C:\\Users\\USER\\Pictures\\Attachment',
         rows: 2,
