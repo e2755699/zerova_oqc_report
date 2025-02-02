@@ -15,32 +15,20 @@ class SoftwareVersionTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dataTable = StyledDataTable(
-      columns: const [
-        DataColumn(
-          label: Text(
-            'Item',
-            style: TableTextStyle.headerStyle,
-          ),
-        ),
-        DataColumn(
-          label: Text(
-            'Version',
-            style: TableTextStyle.headerStyle,
-          ),
-        ),
+      columns: [
+        OqcTableStyle.getDataColumn('No.'),
+        OqcTableStyle.getDataColumn('Item'),
+        OqcTableStyle.getDataColumn('Version'),
       ],
-      rows: data.versions.map((version) => DataRow(
-        cells: [
-          DataCell(Text(
-            version.name,
-            style: TableTextStyle.contentStyle,
-          )),
-          DataCell(Text(
-            version.value,
-            style: TableTextStyle.contentStyle,
-          )),
-        ],
-      )).toList(),
+      rows: List.generate(
+          data.versions.length,
+          (index) => DataRow(
+                cells: [
+                  OqcTableStyle.getDataCell((index + 1).toString()),
+                  OqcTableStyle.getDataCell(data.versions[index].name),
+                  OqcTableStyle.getDataCell(data.versions[index].value),
+                ],
+              )),
     );
 
     return TableWrapper(

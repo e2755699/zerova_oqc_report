@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:zerova_oqc_report/src/report/enum/judgement.dart';
 import 'package:zerova_oqc_report/src/widget/common/table_wrapper.dart';
-
 mixin TableHelper {
   Judgement getJudgementFromString(String judgement) {
     switch (judgement.toLowerCase()) {
@@ -18,6 +17,7 @@ mixin TableHelper {
     return judgement.toString().split('.').last.toUpperCase();
   }
 
+
   Widget buildJudgementDropdown(String currentJudgement, Function(Judgement?) onChanged) {
     return DropdownButton<Judgement>(
       value: getJudgementFromString(currentJudgement),
@@ -28,9 +28,9 @@ mixin TableHelper {
             value.toString().split('.').last.toUpperCase(),
             style: TextStyle(
               fontSize: TableTextStyle.contentStyle.fontSize,
-              color: value == Judgement.pass ? Colors.green : 
-                     value == Judgement.fail ? Colors.red :
-                     Colors.grey,
+              color: value == Judgement.pass ? Colors.green :
+              value == Judgement.fail ? Colors.red :
+              Colors.grey,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -39,4 +39,5 @@ mixin TableHelper {
       onChanged: onChanged,
     );
   }
-} 
+
+}

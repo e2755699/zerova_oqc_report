@@ -5,7 +5,7 @@ import 'package:zerova_oqc_report/src/report/model/input_output_characteristics.
 import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/report/model/protection_function_test_result.dart';
 import 'package:zerova_oqc_report/src/report/model/software_version.dart';
-import 'package:zerova_oqc_report/src/report/model/test_function.dart';
+import 'package:zerova_oqc_report/src/report/model/appearance_structure_inspection_function_result.dart';
 
 class OqcApiClient {
   final String baseUrl = "http://api.ztmn.com/zapi";

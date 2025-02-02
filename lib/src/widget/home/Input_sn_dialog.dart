@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:zerova_oqc_report/src/widget/home/home_page.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-class InputSNDialog extends StatefulWidget {
-  const InputSNDialog({super.key});
+class InputModelNameAndSnDialog extends StatefulWidget {
+  const InputModelNameAndSnDialog({super.key});
 
   @override
-  _InputSNDialogState createState() => _InputSNDialogState();
+  State<InputModelNameAndSnDialog> createState() =>
+      _InputModelNameAndSnDialogState();
 }
 
-class _InputSNDialogState extends State<InputSNDialog> with LoadFileHelper {
+class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
+    with LoadFileHelper {
   final _formKey = GlobalKey<FormState>();
   final _snController = TextEditingController();
   final _modelController = TextEditingController();
@@ -80,18 +82,31 @@ class _InputSNDialogState extends State<InputSNDialog> with LoadFileHelper {
           child: Text(context.tr('cancel')),
         ),
         ElevatedButton(
-          onPressed: () {
+          onPressed: () async {
             if (_formKey.currentState!.validate()) {
               final sn = _snController.text;
               final model = _modelController.text;
 
-              loadFile(sn, model, context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(context.tr('submit_success', args: [sn, model])),
-                ),
-              );
-              Navigator.of(context).pop();
+              await loadFileModule(sn, model, context).then((_) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content:
+                          Text(context.tr('submit_success', args: [sn, model])),
+                    ),
+                  );
+                  Navigator.of(context).pop();
+                }
+              }).onError((e, st) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content:
+                      Text(context.tr('submit_fail', args: [sn, model])),
+                    ),
+                  );
+                }
+              });
             }
           },
           child: Text(context.tr('submit')),
@@ -116,7 +131,5 @@ class _InputSNDialogState extends State<InputSNDialog> with LoadFileHelper {
     );
   }*/
 
-  Future<void> loadFile(String sn, String model, BuildContext context) async {
-    loadFileModule(sn, model, context);
-  }
+  Future<void> loadFile(String sn, String model, BuildContext context) async {}
 }

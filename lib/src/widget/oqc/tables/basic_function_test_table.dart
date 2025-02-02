@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:zerova_oqc_report/src/report/model/basic_function_test_result.dart';
 import 'package:zerova_oqc_report/src/report/model/input_output_characteristics.dart';
-import 'package:zerova_oqc_report/src/report/model/test_function.dart';
+import 'package:zerova_oqc_report/src/report/model/appearance_structure_inspection_function_result.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 import 'package:zerova_oqc_report/src/widget/common/table_wrapper.dart';
 import 'package:zerova_oqc_report/src/report/enum/judgement.dart';
@@ -18,7 +19,8 @@ class BasicFunctionTestTable extends StatefulWidget {
   State<BasicFunctionTestTable> createState() => _BasicFunctionTestTableState();
 }
 
-class _BasicFunctionTestTableState extends State<BasicFunctionTestTable> with TableHelper {
+class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
+    with TableHelper {
   late BasicFunctionTestResult data;
 
   @override
@@ -30,40 +32,36 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable> with Ta
   @override
   Widget build(BuildContext context) {
     final dataTable = StyledDataTable(
-      columns: const [
-        DataColumn(
-          label: Text(
-            'Item',
-            style: TableTextStyle.headerStyle,
-          ),
-        ),
-        DataColumn(
-          label: Text(
-            'Result',
-            style: TableTextStyle.headerStyle,
-          ),
-        ),
+      columns: [
+        OqcTableStyle.getDataColumn('No.'),
+        OqcTableStyle.getDataColumn('Test Items'),
+        OqcTableStyle.getDataColumn('Testing Record'),
+        OqcTableStyle.getDataColumn('Judgement'),
       ],
-      rows: data.testItems.map((item) => DataRow(
-        cells: [
-          DataCell(Text(
-            item.name,
-            style: TableTextStyle.contentStyle,
-          )),
-          DataCell(
-            buildJudgementDropdown(
-              item.judgement.name,
-              (newValue) {
-                if (newValue != null) {
-                  setState(() {
-                    //todo
-                  });
-                }
-              },
+      rows: List.generate(
+        data.testItems.length,
+        (index) => DataRow(
+          cells: [
+            OqcTableStyle.getDataCell((index + 1).toString()),
+            OqcTableStyle.getDataCell(data.testItems[index].name),
+
+            DataCell(
+              Text(
+                data.testItems[index].getReportValue,
+                style: TableTextStyle.contentStyle,
+              ),
             ),
-          ),
-        ],
-      )).toList(),
+            OqcTableStyle.getDataCell(
+              data.testItems[index].judgement.name.toUpperCase(),
+              color: data.testItems[index].judgement == Judgement.pass ? Colors.green :
+              data.testItems[index].judgement == Judgement.fail ? Colors.red :
+              Colors.grey,
+              fontWeight: FontWeight.bold,
+
+            ),
+          ],
+        ),
+      ),
     );
 
     return TableWrapper(

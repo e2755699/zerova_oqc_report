@@ -6,5 +6,20 @@
   "please_input_sn": "請輸入序號",
   "cancel": "取消",
   "submit": "提交",
-  "submit_success": "序號: {0}, 型號: {1} 已提交"
+  "submit_success": "序號: {0}, 型號: {1} 已提交",
+  "oqc_report": "出廠品質檢驗報告",
+  "software_version": "軟體版本",
+  "appearance_structure_inspection": "外觀及結構檢查",
+  "input_output_characteristics": "輸入輸出特性",
+  "basic_function_test": "基本功能測試",
+  "protection_function_test": "保護功能測試",
+  "package_list": "包裝清單",
+  "attachment": "附件",
+  "packagingItem1": "RFID卡",
+  "packagingItem2": "產品認證卡",
+  "packagingItem3": "螺絲組件 M4*12",
+  "packagingItem4": "螺栓蓋",
+  "packagingItem5": "使用手冊",
+  "input_sn_model": "輸入SN機種",
+  "qr_code_scan": "QR code掃描"
 } 

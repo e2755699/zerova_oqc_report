@@ -4,7 +4,7 @@ import 'package:printing/printing.dart';
 import 'package:zerova_oqc_report/src/report/model/input_output_characteristics.dart';
 import 'package:zerova_oqc_report/src/report/model/package_list_result.dart';
 import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
-import 'package:zerova_oqc_report/src/report/model/test_function.dart';
+import 'package:zerova_oqc_report/src/report/model/appearance_structure_inspection_function_result.dart';
 import 'package:go_router/go_router.dart';
 import 'package:zerova_oqc_report/src/widget/common/camera_button.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
@@ -22,10 +22,9 @@ class PackageListTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ;
 
     return StyledCard(
-      title: context.tr('package_list'),
+      title: 'Packaging Checklist',
       titleAction: CameraButton(
         sn: sn,
         packagingOrAttachment: 0,
@@ -78,13 +77,12 @@ class PackageListTable extends StatelessWidget {
                     ),
                   ],
                 );
-              }).toList(),
+              }),
             ],
           ),
           const SizedBox(height: 20),
-          const ImageGrid(
-            imagePath: 'C:\\Users\\USER\\Pictures\\All',
-            rows: 2,
+          ImageGrid(
+            imagePath: 'Selected Photos\\$sn\\Packaging',
             columns: 4,
             cellHeight: 100,
           ),

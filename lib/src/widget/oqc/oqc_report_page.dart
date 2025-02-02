@@ -12,18 +12,22 @@ import 'package:zerova_oqc_report/src/report/model/package_list_result.dart';
 import 'package:zerova_oqc_report/src/report/model/protection_function_test_result.dart';
 import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/report/model/software_version.dart';
-import 'package:zerova_oqc_report/src/report/model/test_function.dart';
+import 'package:zerova_oqc_report/src/report/model/appearance_structure_inspection_function_result.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/tables/appearance_structure_inspection_table.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/tables/attachment_table.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/tables/basic_function_test_table.dart';
-import 'package:zerova_oqc_report/src/widget/oqc/tables/input_output_characteristics_table.dart';
-import 'package:zerova_oqc_report/src/widget/oqc/tables/package_list_table.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/tables/protection_function_test_table.dart';
+import 'package:zerova_oqc_report/src/widget/oqc/tables/input_output_characteristics_table.dart';
+import 'package:zerova_oqc_report/src/widget/oqc/tables/model_name_and_serial_number_table.dart';
+import 'package:zerova_oqc_report/src/widget/oqc/tables/package_list_table.dart';
+import 'package:zerova_oqc_report/src/widget/oqc/tables/hipot_test_table.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/tables/psu_serial_numbers_table.dart';
+import 'package:zerova_oqc_report/src/widget/oqc/tables/signature_table.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/tables/software_version.dart';
 import 'package:zerova_oqc_report/src/report/pdf_generator.dart';
 import 'package:zerova_oqc_report/src/widget/common/custom_app_bar.dart';
+import 'package:zerova_oqc_report/src/widget/common/main_layout.dart';
 
 class OqcReportPage extends StatefulWidget {
   const OqcReportPage({
@@ -55,37 +59,14 @@ class OqcReportPage extends StatefulWidget {
 class _OqcReportPageState extends State<OqcReportPage> {
   final TextEditingController _picController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
-  DateTime _selectedDate = DateTime.now();
 
   final SharePointUploader _uploader = SharePointUploader();
-
-  @override
-  void initState() {
-    super.initState();
-    // 設定預設日期為今天
-    _dateController.text = DateFormat('yyyy-MM-dd').format(_selectedDate);
-  }
 
   @override
   void dispose() {
     _picController.dispose();
     _dateController.dispose();
     super.dispose();
-  }
-
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-        _dateController.text = DateFormat('yyyy-MM-dd').format(_selectedDate);
-      });
-    }
   }
 
   Future<void> _generateAndUploadPdf() async {
@@ -146,30 +127,13 @@ class _OqcReportPageState extends State<OqcReportPage> {
   @override
   Widget build(BuildContext context) {
     final currentLocale = context.locale;
-    return Scaffold(
-      appBar: CustomAppBar(
-        leading: FittedBox(
-          fit: BoxFit.cover,
-          child: IconButton(
-            padding: EdgeInsets.zero,
-            icon: const Icon(Icons.arrow_back_outlined),
-            onPressed: () => context.pop(),
-          ),
-        ),
-        title: context.tr('oqc_report'),
-        titleStyle: const TextStyle(
-          fontFamily: 'Roboto',
-          fontSize: 60,
-          fontWeight: FontWeight.w700,
-          height: 1.2,
-          textBaseline: TextBaseline.alphabetic,
-        ),
-      ),
+    return MainLayout(
+      title: context.tr('oqc_report'),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _generateAndUploadPdf,
         icon: const Icon(Icons.upload_file),
         label: const Text('Submit'),
-        backgroundColor: const Color(0xFFF8F9FD), // 使用 #f8f9fd 顏色
+        backgroundColor: const Color(0xFFF8F9FD),
       ),
       body: Stack(
         children: [
@@ -179,135 +143,29 @@ class _OqcReportPageState extends State<OqcReportPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  StyledCard(
-                    title: 'Basic Information',
-                    content: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Text(
-                              'Model Name : ',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.darkBlueColor,
-                              ),
-                            ),
-                             Text(
-                              widget.model,
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: AppColors.blackColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            const Text(
-                              'SN : ',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.darkBlueColor,
-                              ),
-                            ),
-                             Text(
-                              widget.sn, // 這裡可以放入實際的 SN
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: AppColors.blackColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                  ModelNameAndSerialNumberTable(
+                      model: widget.model, sn: widget.sn),
+                  PsuSerialNumbersTable(widget.psuSerialNumbers!),
+                  SoftwareVersionTable(widget.softwareVersion!),
+                  AppearanceStructureInspectionTable(widget.testFunction!),
+                  InputOutputCharacteristicsTable(
+                      widget.inputOutputCharacteristics!),
+                  BasicFunctionTestTable(widget
+                      .inputOutputCharacteristics!.basicFunctionTestResult),
+                  ProtectionFunctionTestTable(
+                    widget.protectionTestResults!,
                   ),
-                  if (widget.psuSerialNumbers != null)
-                    PsuSerialNumbersTable(widget.psuSerialNumbers!),
-                  if (widget.softwareVersion != null)
-                    SoftwareVersionTable(widget.softwareVersion!),
-                  if (widget.testFunction != null)
-                    AppearanceStructureInspectionTable(widget.testFunction!),
-                  if (widget.inputOutputCharacteristics != null)
-                    InputOutputCharacteristicsTable(
-                        widget.inputOutputCharacteristics!),
-                  if (widget.inputOutputCharacteristics != null)
-                    BasicFunctionTestTable(widget
-                        .inputOutputCharacteristics!.basicFunctionTestResult),
-                  if (widget.protectionTestResults != null)
-                    ProtectionFunctionTestTable(
-                      widget.protectionTestResults!,
-                    ),
-                  if (widget.packageListResult != null)
-                    PackageListTable(widget.packageListResult!,sn: widget.sn,),
+                  HiPotTestTable(
+                    widget.protectionTestResults!,
+                  ),
+                  PackageListTable(
+                    widget.packageListResult!,
+                    sn: widget.sn,
+                  ),
                   AttachmentTable(
                     sn: widget.sn,
                   ),
-                  StyledCard(
-                    title: 'Signature',
-                    content: Column(
-                      children: [
-                        Row(
-                          children: [
-                            SizedBox(
-                              width: 100, // 固定標籤寬度
-                              child: const Text(
-                                'PIC : ',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.darkBlueColor,
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: TextField(
-                                controller: _picController,
-                                decoration: const InputDecoration(
-                                  border: OutlineInputBorder(),
-                                  contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 8),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            SizedBox(
-                              width: 100, // 固定標籤寬度
-                              child: const Text(
-                                'Date : ',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.darkBlueColor,
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: TextField(
-                                controller: _dateController,
-                                readOnly: true,
-                                onTap: () => _selectDate(context),
-                                decoration: const InputDecoration(
-                                  border: OutlineInputBorder(),
-                                  contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 8),
-                                  suffixIcon: Icon(Icons.calendar_today),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
+                  Signature(),
                 ],
               ),
             ),

@@ -31,10 +31,19 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: 2,
       shadowColor: Colors.black.withOpacity(0.4),
       leading: leading,
-      title: title != null ? Text(
-        title!,
-        style: titleStyle ?? const TextStyle(),
-      ) : null,
+      title: title != null
+          ? Text(
+              title!,
+              style: titleStyle ??
+                  const TextStyle(
+                    fontFamily: 'Roboto',
+                    fontSize: 32,
+                    fontWeight: FontWeight.w700,
+                    height: 1.2,
+                    textBaseline: TextBaseline.alphabetic,
+                  ),
+            )
+          : null,
       actions: [
         if (additionalActions != null) ...additionalActions!,
         Padding(
@@ -99,4 +108,4 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => const Size.fromHeight(84);
-} 
+}

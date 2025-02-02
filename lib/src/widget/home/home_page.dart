@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:path/path.dart' as path;
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -9,7 +10,7 @@ import 'package:zerova_oqc_report/src/report/model/input_output_characteristics.
 import 'package:zerova_oqc_report/src/report/model/protection_function_test_result.dart';
 import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/report/model/software_version.dart';
-import 'package:zerova_oqc_report/src/report/model/test_function.dart';
+import 'package:zerova_oqc_report/src/report/model/appearance_structure_inspection_function_result.dart';
 import 'package:zerova_oqc_report/src/widget/home/Input_sn_dialog.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/oqc_report_page.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -50,7 +51,7 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {
-                      return InputSNDialog(); // 彈出視窗
+                      return const InputModelNameAndSnDialog(); // 彈出視窗
                     },
                   );
                 },
@@ -108,7 +109,6 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
       model = res;
       serialNumber = ''; // 若分割後不足兩部分，則 part2 保持空字串
     }
-
 
     await loadFileModule(serialNumber, model, context);
 
@@ -201,29 +201,31 @@ mixin LoadFileHelper {
     // String moduleJsonContent = await File(
     //     "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\1234keypart.json")
     //     .readAsString();
-    String jsonContent = await File(
-        "C:\\Users\\USER\\OQC\\T2449A003A1\\T2449A003A1_test.json")
-        .readAsString();
-    String testFunctionJsonContent = await File(
-        "C:\\Users\\USER\\OQC\\T2449A003A1\\T2449A003A1_oqc.json")
-        .readAsString();
-    String moduleJsonContent = await File(
-        "C:\\Users\\USER\\OQC\\T2449A003A1\\T2449A003A1_keypart.json")
-        .readAsString();
+    var filePath = path.join(
+        Platform.environment['USERPROFILE'] ?? '', 'Test Result', 'Zerova');
+    String jsonContent =
+        await File("$filePath\\$sn\\T2449A003A1_test.json")
+            .readAsString();
+    String testFunctionJsonContent =
+        await File("$filePath\\$sn\\T2449A003A1_oqc.json")
+            .readAsString();
+    String moduleJsonContent =
+        await File("$filePath\\$sn\\T2449A003A1_keypart.json")
+            .readAsString();
 
     List<dynamic> data = jsonDecode(jsonContent);
-    List<dynamic> testFuncionData = jsonDecode(testFunctionJsonContent);
+    List<dynamic> testFunctionData = jsonDecode(testFunctionJsonContent);
     List<dynamic> moduleData = jsonDecode(moduleJsonContent);
 
     var softwareVersion = SoftwareVersion.fromJsonList(data);
     var psuSerialNumbers =
-    Psuserialnumber.fromJsonList(moduleData); // 提取多筆 PSU Serial Number
+        Psuserialnumber.fromJsonList(moduleData); // 提取多筆 PSU Serial Number
     var inputOutputCharacteristics =
-    InputOutputCharacteristics.fromJsonList(data);
+        InputOutputCharacteristics.fromJsonList(data);
     var protectionTestResults =
-    ProtectionFunctionTestResult.fromJsonList(data); // 提取測試結果
+        ProtectionFunctionTestResult.fromJsonList(data); // 提取測試結果
     var testFunction =
-    AppearanceStructureInspectionFunctionResult.fromJson(testFuncionData);
+        AppearanceStructureInspectionFunctionResult.fromJson(testFunctionData);
 
     context.push('/oqc-report', extra: {
       'sn': sn,
@@ -234,7 +236,6 @@ mixin LoadFileHelper {
       'inputOutputCharacteristics': inputOutputCharacteristics,
       'protectionTestResults': protectionTestResults,
     });
-
 
     // final apiClient = OqcApiClient();
     //

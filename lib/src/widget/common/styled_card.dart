@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const primaryColor = Color(0xFF008999);    // 綠藍色
-  static const blackColor = Color(0xFF000000);      // 黑色
-  static const grayColor = Color(0xFF808080);       // 灰色
-  static const darkBlueColor = Color(0xFF002361);   // 深藍色
-  static const cyanColor = Color(0xFF008999);       // 青色
-  static const lightBlueColor = Color(0xFFA7D0E6);  // 淺藍色
+  static const primaryColor = Color(0xFF008999); // 綠藍色
+  static const blackColor = Color(0xFF000000); // 黑色
+  static const grayColor = Color(0xFF808080); // 灰色
+  static const darkBlueColor = Color(0xFF002361); // 深藍色
+  static const cyanColor = Color(0xFF008999); // 青色
+  static const lightBlueColor = Color(0xFFA7D0E6); // 淺藍色
 }
 
 class StyledCard extends StatelessWidget {
@@ -77,33 +77,34 @@ class StyledDataTable extends StatelessWidget {
   final List<DataColumn> columns;
   final List<DataRow> rows;
 
+  final double? dataRowMinHeight;
+  final double? dataRowMaxHeight;
+
   const StyledDataTable({
     super.key,
     required this.columns,
     required this.rows,
+    this.dataRowMinHeight,
+    this.dataRowMaxHeight,
   });
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: DataTable(
+        dataRowMinHeight: dataRowMinHeight,
+        // 设置数据行的最小高度
+        dataRowMaxHeight: dataRowMaxHeight,
+        // 设置数据行的最大高度
         border: TableBorder.all(
           color: AppColors.lightBlueColor,
           width: 1,
         ),
-        columnSpacing: 32,
-        headingRowColor: MaterialStateProperty.all(AppColors.primaryColor.withOpacity(0.05)),
-        dataRowColor: MaterialStateProperty.resolveWith<Color?>(
-          (Set<MaterialState> states) {
-            if (states.contains(MaterialState.selected)) {
-              return AppColors.primaryColor.withOpacity(0.08);
-            }
-            return null;
-          },
-        ),
+        headingRowColor:
+            MaterialStateProperty.all(AppColors.primaryColor.withOpacity(0.1)),
         columns: columns,
         rows: rows,
       ),
     );
   }
-} 
+}

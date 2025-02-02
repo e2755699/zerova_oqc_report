@@ -14,7 +14,7 @@ void main() async {
   runApp(EasyLocalization(
     supportedLocales: const [
       Locale('en', 'US'), // 英文
-      Locale('zh', 'CN'), // 中文
+      Locale('zh', 'TW'), // 繁體中文
       Locale('vi', 'VN'), // 越南文
       Locale('ja', 'JP'), // 日文
     ],

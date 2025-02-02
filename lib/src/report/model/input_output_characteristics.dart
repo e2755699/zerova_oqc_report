@@ -1,4 +1,5 @@
 import 'package:zerova_oqc_report/src/report/enum/judgement.dart';
+import 'package:zerova_oqc_report/src/report/model/basic_function_test_result.dart';
 
 class InputOutputCharacteristics {
   final InputOutputCharacteristicsSide leftSideInputOutputCharacteristics;
@@ -6,9 +7,9 @@ class InputOutputCharacteristics {
   final BasicFunctionTestResult basicFunctionTestResult;
 
   List<InputOutputCharacteristicsSide> get inputOutputCharacteristicsSide => [
-    leftSideInputOutputCharacteristics,
-    rightSideInputOutputCharacteristics,
-  ];
+        leftSideInputOutputCharacteristics,
+        rightSideInputOutputCharacteristics,
+      ];
 
   InputOutputCharacteristics({
     required this.leftSideInputOutputCharacteristics,
@@ -31,10 +32,10 @@ class InputOutputCharacteristics {
     InputOutputMeasurement? rightOutputVoltage;
     InputOutputMeasurement? rightOutputCurrent;
     InputOutputMeasurement? rightTotalOutputPower;
-    InputOutputMeasurement? eff;
-    InputOutputMeasurement? powerFactor;
-    InputOutputMeasurement? harmonic;
-    InputOutputMeasurement? standbyTotalInputPower;
+    BasicFunctionMeasurement? eff;
+    BasicFunctionMeasurement? powerFactor;
+    BasicFunctionMeasurement? harmonic;
+    BasicFunctionMeasurement? standbyTotalInputPower;
 
     double leftInputVoltageCount = 0;
     double leftInputCurrentCount = 0;
@@ -77,8 +78,8 @@ class InputOutputCharacteristics {
                   ? Judgement.pass
                   : Judgement.fail,
             ));
-          }
-          else if (spcItem.contains("Right Plug") && rightInputVoltageCount < 3) {
+          } else if (spcItem.contains("Right Plug") &&
+              rightInputVoltageCount < 3) {
             double spec = 220;
             double lowerBound = 187;
             double upperBound = 253;
@@ -95,8 +96,7 @@ class InputOutputCharacteristics {
                   : Judgement.fail,
             ));
           }
-        }
-        else if (spcDesc.contains("Input_Current")) {
+        } else if (spcDesc.contains("Input_Current")) {
           if (spcItem.contains("Left  Plug") && leftInputCurrentCount < 3) {
             double spec = 230;
             leftInputCurrentCount++;
@@ -109,7 +109,8 @@ class InputOutputCharacteristics {
               description: '',
               judgement: spcValue < spec ? Judgement.pass : Judgement.fail,
             ));
-          } else if (spcItem.contains("Right Plug") && rightInputCurrentCount < 3) {
+          } else if (spcItem.contains("Right Plug") &&
+              rightInputCurrentCount < 3) {
             double spec = 230;
             rightInputCurrentCount++;
             rightInputCurrent.add(InputOutputMeasurement(
@@ -122,8 +123,7 @@ class InputOutputCharacteristics {
               judgement: spcValue < spec ? Judgement.pass : Judgement.fail,
             ));
           }
-        }
-        else if (spcDesc =="Total_Input_Power") {
+        } else if (spcDesc == "Total_Input_Power") {
           if (spcItem.contains("Left  Plug") && leftTotalInputPowerCount < 1) {
             double spec = 130;
             leftTotalInputPowerCount++;
@@ -136,7 +136,8 @@ class InputOutputCharacteristics {
               description: '',
               judgement: spcValue < spec ? Judgement.pass : Judgement.fail,
             );
-          } else if (spcItem.contains("Right Plug") && rightTotalInputPowerCount < 1) {
+          } else if (spcItem.contains("Right Plug") &&
+              rightTotalInputPowerCount < 1) {
             double spec = 130;
             rightTotalInputPowerCount++;
             rightTotalInputPower = InputOutputMeasurement(
@@ -149,8 +150,7 @@ class InputOutputCharacteristics {
               judgement: spcValue < spec ? Judgement.pass : Judgement.fail,
             );
           }
-        }
-        else if (spcDesc.contains("Output_Voltage")) {
+        } else if (spcDesc.contains("Output_Voltage")) {
           if (spcItem.contains("Left  Plug") && leftOutputVoltageCount < 1) {
             double spec = 950;
             double lowerBound = 931;
@@ -167,7 +167,8 @@ class InputOutputCharacteristics {
                   ? Judgement.pass
                   : Judgement.fail,
             );
-          } else if (spcItem.contains("Right Plug") && rightOutputVoltageCount < 1) {
+          } else if (spcItem.contains("Right Plug") &&
+              rightOutputVoltageCount < 1) {
             double spec = 950;
             double lowerBound = 931;
             double upperBound = 969;
@@ -184,8 +185,7 @@ class InputOutputCharacteristics {
                   : Judgement.fail,
             );
           }
-        }
-        else if (spcDesc.contains("Output_Current")) {
+        } else if (spcDesc.contains("Output_Current")) {
           if (spcItem.contains("Left  Plug") && leftOutputCurrentCount < 1) {
             double spec = 126;
             double lowerBound = 123;
@@ -202,7 +202,8 @@ class InputOutputCharacteristics {
                   ? Judgement.pass
                   : Judgement.fail,
             );
-          } else if (spcItem.contains("Right Plug") && rightOutputCurrentCount < 1) {
+          } else if (spcItem.contains("Right Plug") &&
+              rightOutputCurrentCount < 1) {
             double spec = 126;
             double lowerBound = 123;
             double upperBound = 129;
@@ -219,8 +220,7 @@ class InputOutputCharacteristics {
                   : Judgement.fail,
             );
           }
-        }
-        else if (spcDesc.contains("Output_Power")) {
+        } else if (spcDesc.contains("Output_Power")) {
           if (spcItem.contains("Left  Plug") && leftTotalOutputPowerCount < 1) {
             double spec = 120;
             double lowerBound = 118;
@@ -237,7 +237,8 @@ class InputOutputCharacteristics {
                   ? Judgement.pass
                   : Judgement.fail,
             );
-          } else if (spcItem.contains("Right Plug") && rightTotalOutputPowerCount < 1) {
+          } else if (spcItem.contains("Right Plug") &&
+              rightTotalOutputPowerCount < 1) {
             double spec = 120;
             double lowerBound = 118;
             double upperBound = 122;
@@ -254,63 +255,59 @@ class InputOutputCharacteristics {
                   : Judgement.fail,
             );
           }
-        }
-        else if (spcDesc.contains("EFF")) {
+        } else if (spcDesc.contains("EFF")) {
           double spec = 94;
           if (effCount < 1) {
             effCount++;
-            eff = InputOutputMeasurement(
+            eff = BasicFunctionMeasurement(
               spec: spec,
               value: spcValue,
               count: effCount,
               key: spcDesc,
               name: "EFF",
-              description: 'Spec: >94%',
+              description: 'Spec: >94% \n Efficiency: {VALUE} %',
               judgement: spcValue <= spec ? Judgement.fail : Judgement.pass,
             );
           }
-        }
-        else if (spcDesc.contains("PowerFactor")) {
+        } else if (spcDesc.contains("PowerFactor")) {
           double spec = 0.99;
           if (powerFactorCount < 1) {
             powerFactorCount++;
-            powerFactor = InputOutputMeasurement(
+            powerFactor = BasicFunctionMeasurement(
               spec: 0.99,
               value: spcValue,
               count: powerFactorCount,
               key: spcDesc,
               name: "PF",
-              description: 'Spec: ≧ 0.99',
+              description: 'Spec: ≧ 0.99 \n PF: {VALUE} %',
               judgement: spcValue < spec ? Judgement.fail : Judgement.pass,
             );
           }
-        }
-        else if (spcDesc.contains("THD")) {
+        } else if (spcDesc.contains("THD")) {
           double spec = 5;
           if (thdCount < 1) {
             thdCount++;
-            harmonic = InputOutputMeasurement(
+            harmonic = BasicFunctionMeasurement(
               spec: spec,
               value: spcValue,
               count: thdCount,
               key: spcDesc,
               name: "Harmonic",
-              description: 'Spec: <5%',
+              description: 'Spec: <5% \n THD: {VALUE} %',
               judgement: spcValue >= spec ? Judgement.fail : Judgement.pass,
             );
           }
-        }
-        else if (spcDesc.contains("Standby_Total_Input_Power")) {
+        } else if (spcDesc.contains("Standby_Total_Input_Power")) {
           double spec = 100;
           if (standbyTotalInputPowerCount < 1) {
             standbyTotalInputPowerCount++;
-            standbyTotalInputPower = InputOutputMeasurement(
+            standbyTotalInputPower = BasicFunctionMeasurement(
               spec: spec,
               value: spcValue,
               count: standbyTotalInputPowerCount,
               key: spcDesc,
-              name: "STIP",
-              description: 'Spec: <100W',
+              name: "Standby Power",
+              description: 'Spec: <100W \n Standby Power: {VALUE} W',
               judgement: spcValue >= spec ? Judgement.fail : Judgement.pass,
             );
           }
@@ -327,50 +324,29 @@ class InputOutputCharacteristics {
         leftOutputCurrent ?? InputOutputMeasurement.empty(),
         leftTotalOutputPower ?? InputOutputMeasurement.empty());
     var rightSideInputOutputCharacteristicsSide =
-    InputOutputCharacteristicsSide(
-        "R",
-        rightInputVoltage,
-        rightInputCurrent,
-        rightTotalInputPower ?? InputOutputMeasurement.empty(),
-        rightOutputVoltage ?? InputOutputMeasurement.empty(),
-        rightOutputCurrent ?? InputOutputMeasurement.empty(),
-        rightTotalOutputPower ?? InputOutputMeasurement.empty());
+        InputOutputCharacteristicsSide(
+            "R",
+            rightInputVoltage,
+            rightInputCurrent,
+            rightTotalInputPower ?? InputOutputMeasurement.empty(),
+            rightOutputVoltage ?? InputOutputMeasurement.empty(),
+            rightOutputCurrent ?? InputOutputMeasurement.empty(),
+            rightTotalOutputPower ?? InputOutputMeasurement.empty());
     return InputOutputCharacteristics(
         leftSideInputOutputCharacteristics:
-        leftSideInputOutputCharacteristicsSide,
+            leftSideInputOutputCharacteristicsSide,
         rightSideInputOutputCharacteristics:
-        rightSideInputOutputCharacteristicsSide,
+            rightSideInputOutputCharacteristicsSide,
         basicFunctionTestResult: BasicFunctionTestResult(
-          eff: eff ?? InputOutputMeasurement.empty(),
-          powerFactor: powerFactor ?? InputOutputMeasurement.empty(),
-          harmonic: harmonic ?? InputOutputMeasurement.empty(),
+          eff: eff ?? BasicFunctionMeasurement.empty(),
+          powerFactor: powerFactor ?? BasicFunctionMeasurement.empty(),
+          harmonic: harmonic ?? BasicFunctionMeasurement.empty(),
           standbyTotalInputPower:
-          standbyTotalInputPower ?? InputOutputMeasurement.empty(),
+              standbyTotalInputPower ?? BasicFunctionMeasurement.empty(),
         ));
   }
 
   static fromExcel(String string) {}
-}
-
-class BasicFunctionTestResult {
-  final InputOutputMeasurement eff;
-  final InputOutputMeasurement powerFactor;
-  final InputOutputMeasurement harmonic;
-  final InputOutputMeasurement standbyTotalInputPower;
-
-  BasicFunctionTestResult({
-    required this.eff,
-    required this.powerFactor,
-    required this.harmonic,
-    required this.standbyTotalInputPower,
-  });
-
-  List<InputOutputMeasurement> get testItems => [
-    eff,
-    powerFactor,
-    harmonic,
-    standbyTotalInputPower,
-  ];
 }
 
 class InputOutputCharacteristicsSide {
@@ -407,12 +383,12 @@ class InputOutputMeasurement {
 
   InputOutputMeasurement(
       {required this.spec,
-        required this.value,
-        required this.count,
-        required this.key,
-        required this.name,
-        required this.description,
-        required this.judgement});
+      required this.value,
+      required this.count,
+      required this.key,
+      required this.name,
+      required this.description,
+      required this.judgement});
 
   factory InputOutputMeasurement.empty() {
     return InputOutputMeasurement(

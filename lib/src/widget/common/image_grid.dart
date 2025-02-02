@@ -1,17 +1,16 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:zerova_oqc_report/src/widget/common/image_preview_dialog.dart';
+import 'package:path/path.dart' as path;
 
 class ImageGrid extends StatefulWidget {
   final String imagePath;
-  final int rows;
   final int columns;
   final double cellHeight;
 
   const ImageGrid({
     super.key,
     required this.imagePath,
-    this.rows = 2,
     this.columns = 4,
     this.cellHeight = 100,
   });
@@ -30,14 +29,19 @@ class _ImageGridState extends State<ImageGrid> {
   }
 
   void _loadImages() {
-    final directory = Directory(widget.imagePath);
+    final directory = Directory(path.join(
+        Platform.environment['USERPROFILE'] ?? '',
+        'Pictures',
+        'Zerova',
+        widget.imagePath));
     if (directory.existsSync()) {
-      final files = directory.listSync()
-          .where((file) => file.path.toLowerCase().endsWith('.jpg') || 
-                          file.path.toLowerCase().endsWith('.jpeg') || 
-                          file.path.toLowerCase().endsWith('.png'))
+      final files = directory
+          .listSync()
+          .where((file) =>
+              file.path.toLowerCase().endsWith('.jpg') ||
+              file.path.toLowerCase().endsWith('.jpeg') ||
+              file.path.toLowerCase().endsWith('.png'))
           .map((file) => file.path)
-          .take(widget.rows * widget.columns)
           .toList();
       setState(() {
         _imagePaths.clear();
@@ -55,10 +59,11 @@ class _ImageGridState extends State<ImageGrid> {
 
   @override
   Widget build(BuildContext context) {
+    var rows = (_imagePaths.length / widget.columns).ceil();
     return Table(
       border: TableBorder.all(),
       children: List.generate(
-        widget.rows,
+        rows,
         (rowIndex) => TableRow(
           children: List.generate(
             widget.columns,
@@ -84,4 +89,4 @@ class _ImageGridState extends State<ImageGrid> {
       ),
     );
   }
-} 
+}

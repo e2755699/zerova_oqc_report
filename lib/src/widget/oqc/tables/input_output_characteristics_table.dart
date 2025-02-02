@@ -3,7 +3,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:zerova_oqc_report/src/report/model/input_output_characteristics.dart';
 import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
-import 'package:zerova_oqc_report/src/report/model/test_function.dart';
+import 'package:zerova_oqc_report/src/report/model/appearance_structure_inspection_function_result.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 import 'package:easy_localization/easy_localization.dart';
 
@@ -46,19 +46,19 @@ class InputOutputCharacteristicsTable extends StatelessWidget {
             DataCell(RichText(
               text: TextSpan(
                   children: item.inputVoltage
-                      .map((iv) => TextSpan(text: "${iv.value} V"))
+                      .map((iv) => TextSpan(text: "${iv.value.toStringAsFixed(2)} V"))
                       .toList()),
             )),
             DataCell(RichText(
               text: TextSpan(
                   children: item.inputCurrent
-                      .map((iv) => TextSpan(text: "${iv.value} A"))
+                      .map((iv) => TextSpan(text: "${iv.value.toStringAsFixed(2)} A"))
                       .toList()),
             )),
-            DataCell(Text("${item.totalInputPower.value} KW")),
-            DataCell(Text("${item.outputVoltage.value} V")),
-            DataCell(Text("${item.outputCurrent.value} A")),
-            DataCell(Text("${item.totalOutputPower.value} KW")),
+            DataCell(Text("${item.totalInputPower.value.toStringAsFixed(2)} KW")),
+            DataCell(Text("${item.outputVoltage.value.toStringAsFixed(2)} V")),
+            DataCell(Text("${item.outputCurrent.value.toStringAsFixed(2)} A")),
+            DataCell(Text("${item.totalOutputPower.value.toStringAsFixed(2)} KW")),
             DataCell(Text(item.judgement)),
           ],
         );
@@ -66,7 +66,7 @@ class InputOutputCharacteristicsTable extends StatelessWidget {
     );
 
     return StyledCard(
-      title: context.tr('input_output_characteristics'),
+      title: 'Input & Output Characteristics',
       content: dataTable,
     );
   }

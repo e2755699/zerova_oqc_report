@@ -16,8 +16,8 @@ class TableWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Container(
-        width: MediaQuery.of(context).size.width * 0.8,
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width * 0.9,
         child: StyledCard(
           title: title,
           titleAction: titleAction,
@@ -30,7 +30,7 @@ class TableWrapper extends StatelessWidget {
 
 class TableTextStyle {
   static const headerStyle = TextStyle(
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: FontWeight.bold,
     color: AppColors.darkBlueColor,
   );
@@ -39,4 +39,25 @@ class TableTextStyle {
     fontSize: 16,
     color: AppColors.blackColor,
   );
-} 
+}
+
+class OqcTableStyle {
+  static getDataColumn(
+    String text,
+  ) {
+    return DataColumn(
+      headingRowAlignment: MainAxisAlignment.center,
+      label: Text(
+        text,
+        style: TableTextStyle.headerStyle,
+      ),
+    );
+  }
+
+  static getDataCell(String text, {MaterialColor? color,  FontWeight? fontWeight}) {
+    return DataCell(Text(
+      text,
+      style: TableTextStyle.contentStyle.copyWith(color: color, fontWeight: fontWeight)
+    ));
+  }
+}

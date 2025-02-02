@@ -5,6 +5,8 @@ import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
+import 'package:easy_localization/easy_localization.dart';
+import 'package:zerova_oqc_report/src/widget/common/main_layout.dart';
 
 class CameraPage extends StatefulWidget {
   final int packagingOrAttachment; // 0:Packaging  1:Attachment
@@ -288,105 +290,100 @@ class _CameraPageState extends State<CameraPage> with CameraHelper {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      scaffoldMessengerKey: _scaffoldMessengerKey,
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Camera'),
-        ),
-        body: ListView(
-          children: <Widget>[
-            if (_cameras.isEmpty)
-              ElevatedButton(
-                onPressed: _fetchCameras,
-                child: const Text('Re-check available cameras'),
-              ),
-            if (_cameras.isNotEmpty)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  if(widget.packagingOrAttachment != 0)
-                    DropdownButton<String>(
-                      hint: const Text('Select Image'),
-                      value: _selectedImagePath,
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          _selectedImagePath = newValue;
-                        });
-                      },
-                      items: _imagePaths.map<DropdownMenuItem<String>>((String path) {
-                        return DropdownMenuItem<String>(
-                          value: path,
-                          child: Text(path.split('\\').last),
-                        );
-                      }).toList(),
-                    ),
-                  ElevatedButton(
-                    onPressed: _initialized ? _takePicture : null,
-                    child: Text(
-                      _previewPaused ? '下一張照片' : '拍照',
-                    ),
-                  ),
-                  const SizedBox(width: 5),
-                  Builder(
-                    builder: (BuildContext context) {
-                      return ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ImagePickerScreen(
-                                packagingOrAttachment: widget.packagingOrAttachment,
-                                sn: widget.sn,
-                              ),
-                            ),
-                          );
-                        },
-                        child: const Text('瀏覽照片'),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            const SizedBox(height: 5),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Row(
-                children: <Widget>[
-                  if (_selectedImagePath != null && _previewSize != null)
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Container(
-                          constraints: const BoxConstraints(maxHeight: 500), // 與相機畫面相同的最大高度
-                          child: AspectRatio(
-                            aspectRatio: _previewSize!.width / _previewSize!.height, // 保持相機畫面比例
-                            child: Image.file(
-                              File(_selectedImagePath!),
-                              fit: BoxFit.contain, // 確保圖片完整顯示，不被裁切
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  if (_initialized && _previewSize != null)
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                        child: Container(
-                          constraints: const BoxConstraints(maxHeight: 500),
-                          child: AspectRatio(
-                            aspectRatio: _previewSize!.width / _previewSize!.height,
-                            child: _buildPreview(),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
+    return MainLayout(
+      title:  context.tr('camera'),
+      body: ListView(
+        children: <Widget>[
+          if (_cameras.isEmpty)
+            ElevatedButton(
+              onPressed: _fetchCameras,
+              child: const Text('Re-check available cameras'),
             ),
-          ],
-        ),
+          if (_cameras.isNotEmpty)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                if(widget.packagingOrAttachment != 0)
+                  DropdownButton<String>(
+                    hint: const Text('Select Image'),
+                    value: _selectedImagePath,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedImagePath = newValue;
+                      });
+                    },
+                    items: _imagePaths.map<DropdownMenuItem<String>>((String path) {
+                      return DropdownMenuItem<String>(
+                        value: path,
+                        child: Text(path.split('\\').last),
+                      );
+                    }).toList(),
+                  ),
+                ElevatedButton(
+                  onPressed: _initialized ? _takePicture : null,
+                  child: Text(
+                    _previewPaused ? '下一張照片' : '拍照',
+                  ),
+                ),
+                const SizedBox(width: 5),
+                Builder(
+                  builder: (BuildContext context) {
+                    return ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ImagePickerScreen(
+                              packagingOrAttachment: widget.packagingOrAttachment,
+                              sn: widget.sn,
+                            ),
+                          ),
+                        );
+                      },
+                      child: const Text('瀏覽照片'),
+                    );
+                  },
+                ),
+              ],
+            ),
+          const SizedBox(height: 5),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Row(
+              children: <Widget>[
+                if (_selectedImagePath != null && _previewSize != null)
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Container(
+                        constraints: const BoxConstraints(maxHeight: 500), // 與相機畫面相同的最大高度
+                        child: AspectRatio(
+                          aspectRatio: _previewSize!.width / _previewSize!.height, // 保持相機畫面比例
+                          child: Image.file(
+                            File(_selectedImagePath!),
+                            fit: BoxFit.contain, // 確保圖片完整顯示，不被裁切
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                if (_initialized && _previewSize != null)
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                      child: Container(
+                        constraints: const BoxConstraints(maxHeight: 500),
+                        child: AspectRatio(
+                          aspectRatio: _previewSize!.width / _previewSize!.height,
+                          child: _buildPreview(),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

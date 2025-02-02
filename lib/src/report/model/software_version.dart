@@ -1,24 +1,8 @@
 class SoftwareVersion {
   final List<Version> versions;
-  // final Version csuRootfs;
-  // final Version fanModule;
-  // final Version relayModule;
-  // final Version primaryMCU;
-  // final Version connector1;
-  // final Version connector2;
-  // final Version lcmUI;
-  // final Version ledModule;
 
   SoftwareVersion({
     required this.versions
-    // required this.csuRootfs,
-    // required this.fanModule,
-    // required this.relayModule,
-    // required this.primaryMCU,
-    // required this.connector1,
-    // required this.connector2,
-    // required this.lcmUI,
-    // required this.ledModule,
   });
 
   /// 從單個 JSON 對象創建 `softwareversion`
@@ -132,7 +116,7 @@ class SoftwareVersion {
       if (spcDesc != null && spcValue != null) {
         for (var key in results.keys) {
           if (spcDesc.contains(key)) {
-            results[key] = spcValue;  // 儲存為 String 類型
+            results[key] = spcValue.replaceAll("empty", "");  // 儲存為 String 類型
           }
         }
       }
