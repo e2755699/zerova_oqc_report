@@ -359,7 +359,25 @@ class InputOutputCharacteristicsSide {
 
   final String side;
 
-  String get judgement => "OK";
+  Judgement get judgement {
+    // 檢查所有 inputVoltage 的 judgement
+    bool inputVoltagePass = inputVoltage.every((m) => m.judgement == Judgement.pass);
+    // 檢查所有 inputCurrent 的 judgement
+    bool inputCurrentPass = inputCurrent.every((m) => m.judgement == Judgement.pass);
+    // 檢查其他單一測量值的 judgement
+    bool otherMeasurementsPass = 
+      totalInputPower.judgement == Judgement.pass &&
+      outputVoltage.judgement == Judgement.pass &&
+      outputCurrent.judgement == Judgement.pass &&
+      totalOutputPower.judgement == Judgement.pass;
+
+    // 如果所有測量值都通過，返回 OK
+    if (inputVoltagePass && inputCurrentPass && otherMeasurementsPass) {
+      return Judgement.pass;
+    } else {
+      return Judgement.fail;
+    }
+  }
 
   InputOutputCharacteristicsSide(
       this.side,

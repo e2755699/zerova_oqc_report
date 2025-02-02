@@ -59,7 +59,9 @@ class _ImageGridState extends State<ImageGrid> {
 
   @override
   Widget build(BuildContext context) {
-    var rows = (_imagePaths.length / widget.columns).ceil();
+    var rows = _imagePaths.isNotEmpty
+        ? (_imagePaths.length / widget.columns).ceil()
+        : 2;
     return Table(
       border: TableBorder.all(),
       children: List.generate(

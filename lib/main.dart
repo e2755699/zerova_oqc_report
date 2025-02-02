@@ -6,6 +6,7 @@ import 'package:zerova_oqc_report/src/repo/sharepoint_uploader.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
+  // SharePointUploader(uploadOrDownload: 1, sn: '').startAuthorization();
 
   // 初始化 SharePointUploader
   // final uploader = SharePointUploader();

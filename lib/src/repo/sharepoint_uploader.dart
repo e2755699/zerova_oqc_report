@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 
 class SharePointUploader {
@@ -16,7 +15,11 @@ class SharePointUploader {
       "b!bxcVXbtUO0yXa2JTE_hUv63SGRQg159AsrlclkrJYp4SVeWUkLLJR6xfCNOrFGQg";
   late HttpServer _server;
 
-  Future<String> _getUserPicturesPath(String subDirectory) async {
+  final int uploadOrDownload;
+  final String sn;
+
+  SharePointUploader({required this.uploadOrDownload, required this.sn});
+  /*Future<String> _getUserPicturesPath(String subDirectory) async {
     // 獲取當前使用者的根目錄
     final String userProfile = Platform.environment['USERPROFILE'] ?? '';
 
@@ -27,9 +30,25 @@ class SharePointUploader {
     } else {
       throw Exception("Unable to find the user profile directory.");
     }
+  }*/
+
+  Future<String> _getOrCreateUserZerovaPath() async {
+    final String userProfile = Platform.environment['USERPROFILE'] ?? '';
+
+    if (userProfile.isNotEmpty) {
+      final String zerovaPath = path.join(userProfile, 'Pictures', 'Zerova');
+      // 如果資料夾不存在，則建立它
+      final Directory dir = Directory(zerovaPath);
+      if (!await dir.exists()) {
+        await dir.create(recursive: true);
+      }
+      return zerovaPath;
+    } else {
+      throw Exception("Unable to find the user profile directory.");
+    }
   }
 
-  Future<void> startAuthorization() async {
+  Future<void> startAuthorization({Function(String, int, int)? onProgressUpdate}) async {
     final authUrl = Uri.https(
       "login.microsoftonline.com",
       "$tenantId/oauth2/v2.0/authorize",
@@ -57,10 +76,17 @@ class SharePointUploader {
           final token = await getAccessToken(authCode);
           if (token != null) {
             print("Access Token 獲取成功，正在上傳/下載檔案...");
-            await uploadAllFiles(token); // 上傳所有照片
-            await uploadSelectedFiles(token); // 上傳選擇的照片
-            await uploadOQCFiles(token); // 上傳OQC report
-            await downloadFiles(token); // 下載參考照片
+            if (uploadOrDownload == 0) { //Upload
+              await uploadAllPackagingPhotos(token, (current, total) => onProgressUpdate?.call("配件包照片", current, total)!); //上傳所有配件包照片
+              await uploadAllAttachmentPhotos(token, (current, total) => onProgressUpdate?.call("外觀檢查照片", current, total)); //上傳所有外觀檢查照片
+              await uploadOQCReport(token, (current, total) => onProgressUpdate?.call("OQC 報告", current, total)); //上傳OQC report
+              //await uploadSelectedPackagingPhotos(token); // 上傳選擇的配件包照片
+              //await uploadSelectedAttachmentPhotos(token); // 上傳選擇的外觀檢查照片
+            } else if (uploadOrDownload == 1) {  //Donwload
+              await downloadComparePictures(token); // 下載參考照片
+            } else {
+              throw Exception("Didn't contain Upload Or Download");
+            }
           } else {
             print("無法獲取 Access Token");
           }
@@ -74,7 +100,6 @@ class SharePointUploader {
       }
     }
   }
-
   Future<String?> getAccessToken(String authCode) async {
     final tokenUrl =
         "https://login.microsoftonline.com/$tenantId/oauth2/v2.0/token";
@@ -99,28 +124,40 @@ class SharePointUploader {
     }
   }
 
-  Future<void> uploadAllFiles(String accessToken) async {
-    final directoryPath = await _getUserPicturesPath('All');
-    final directory = Directory(directoryPath);
+  Future<void> uploadAllPackagingPhotos(String accessToken, Function(int, int) onProgressUpdate) async {
+    final String zerovaPath = await _getOrCreateUserZerovaPath();
+    final String snFolderPath = path.join(zerovaPath, 'All Photos', sn);
+    final String packagingFolderPath = path.join(snFolderPath, 'Packaging');
+    final Directory snDirectory = Directory(snFolderPath);
+    final Directory packagingDirectory = Directory(packagingFolderPath);
 
-    if (!directory.existsSync()) {
-      print("資料夾不存在: $directoryPath");
+    if (!snDirectory.existsSync()) {
+      print("資料夾不存在: $snFolderPath");
       return;
     }
 
-    // 只選擇檔案，排除資料夾
-    final files = directory.listSync().where((entity) => entity is File).toList();
+    // 取得 SN 及其底下 Packaging 內的所有檔案
+    final List<File> files = [
+      ...snDirectory.listSync().whereType<File>(), // 只包含 SN 目錄內的檔案
+      if (packagingDirectory.existsSync()) ...packagingDirectory.listSync(recursive: true).whereType<File>(), // Packaging 內的檔案
+    ];
 
     if (files.isEmpty) {
-      print("資料夾中沒有檔案: $directoryPath");
+      print("資料夾中沒有檔案: $snFolderPath");
       return;
     }
 
-    for (var fileEntity in files) {
-      final file = fileEntity as File;  // 強制轉換為 File 類型
-      final fileName = file.path.split(Platform.pathSeparator).last;
-      final uploadUrl =
-          "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/items/root:/Jackalope/拍照上傳照片/$fileName:/content";
+    // 統計檔案數量
+    int totalFiles = files.length;
+    int uploadedFiles = 0;
+    print("總共需要上傳 $totalFiles 張配件包照片");
+
+    for (var file in files) {
+      final String relativePath = path.relative(file.path, from: zerovaPath);
+      final String sharePointPath = "Jackalope/$relativePath";
+
+      final String uploadUrl =
+          "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/items/root:/$sharePointPath:/content";
 
       try {
         final response = await http.put(
@@ -129,42 +166,59 @@ class SharePointUploader {
             "Authorization": "Bearer $accessToken",
             "Content-Type": "application/octet-stream"
           },
-          body: file.readAsBytesSync(), // 讀取檔案內容為二進位數據
+          body: file.readAsBytesSync(),
         );
 
+        // 顯示進度
+        double progress = (uploadedFiles + 1) / totalFiles * 100;
+        print("配件包照片上傳進度: ${uploadedFiles + 1}/$totalFiles (${progress.toStringAsFixed(2)}%)");
+        uploadedFiles++;
+        onProgressUpdate(uploadedFiles, totalFiles);
+
         if (response.statusCode == 201) {
-          print("檔案上傳成功: $fileName");
+          print("檔案上傳成功: $relativePath");
         } else {
-          print("檔案上傳失敗: $fileName - ${response.statusCode} ${response.body}");
+          print("檔案上傳失敗: $relativePath - ${response.statusCode} ${response.body}");
         }
       } catch (e) {
-        print("檔案上傳失敗: $fileName - $e");
+        print("檔案上傳失敗: $relativePath - $e");
       }
     }
   }
+  Future<void> uploadAllAttachmentPhotos(String accessToken, Function(int, int) onProgressUpdate) async {
+    final String zerovaPath = await _getOrCreateUserZerovaPath();
+    final String snFolderPath = path.join(zerovaPath, 'All Photos', sn);
+    final String attachmentFolderPath = path.join(snFolderPath, 'Attachment');
+    final Directory snDirectory = Directory(snFolderPath);
+    final Directory attachmentDirectory = Directory(attachmentFolderPath);
 
-  Future<void> uploadSelectedFiles(String accessToken) async {
-    final directoryPath = await _getUserPicturesPath('Zerova');
-    final directory = Directory(directoryPath);
-
-    if (!directory.existsSync()) {
-      print("資料夾不存在: $directoryPath");
+    if (!snDirectory.existsSync()) {
+      print("資料夾不存在: $snFolderPath");
       return;
     }
 
-    // 只選擇檔案，排除資料夾
-    final files = directory.listSync().where((entity) => entity is File).toList();
+    // 取得 SN 及其底下 Attachment 內的所有檔案
+    final List<File> files = [
+      ...snDirectory.listSync().whereType<File>(), // 只包含 SN 目錄內的檔案
+      if (attachmentDirectory.existsSync()) ...attachmentDirectory.listSync(recursive: true).whereType<File>(), // Attachment 內的檔案
+    ];
 
     if (files.isEmpty) {
-      print("資料夾中沒有檔案: $directoryPath");
+      print("資料夾中沒有檔案: $snFolderPath");
       return;
     }
 
-    for (var fileEntity in files) {
-      final file = fileEntity as File;  // 強制轉換為 File 類型
-      final fileName = file.path.split(Platform.pathSeparator).last;
-      final uploadUrl =
-          "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/items/root:/Jackalope/選擇上傳報告的照片/$fileName:/content";
+    // 統計檔案數量
+    int totalFiles = files.length;
+    int uploadedFiles = 0;
+    print("總共需要上傳 $totalFiles 張外觀檢查照片");
+
+    for (var file in files) {
+      final String relativePath = path.relative(file.path, from: zerovaPath);
+      final String sharePointPath = "Jackalope/$relativePath";
+
+      final String uploadUrl =
+          "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/items/root:/$sharePointPath:/content";
 
       try {
         final response = await http.put(
@@ -173,42 +227,55 @@ class SharePointUploader {
             "Authorization": "Bearer $accessToken",
             "Content-Type": "application/octet-stream"
           },
-          body: file.readAsBytesSync(), // 讀取檔案內容為二進位數據
+          body: file.readAsBytesSync(),
         );
 
+        // 顯示進度
+        double progress = (uploadedFiles + 1) / totalFiles * 100;
+        print("外觀檢查照片上傳進度: ${uploadedFiles + 1}/$totalFiles (${progress.toStringAsFixed(2)}%)");
+        uploadedFiles++;
+        onProgressUpdate(uploadedFiles, totalFiles);
+
         if (response.statusCode == 201) {
-          print("檔案上傳成功: $fileName");
+          print("檔案上傳成功: $relativePath");
         } else {
-          print("檔案上傳失敗: $fileName - ${response.statusCode} ${response.body}");
+          print("檔案上傳失敗: $relativePath - ${response.statusCode} ${response.body}");
         }
       } catch (e) {
-        print("檔案上傳失敗: $fileName - $e");
+        print("檔案上傳失敗: $relativePath - $e");
       }
     }
   }
+  Future<void> uploadOQCReport(String accessToken, Function(int, int) onProgressUpdate) async {
+    final String zerovaPath = await _getOrCreateUserZerovaPath();
+    final String snFolderPath = path.join(zerovaPath, 'OQC Report', sn);
+    final Directory snDirectory = Directory(snFolderPath);
 
-  Future<void> uploadOQCFiles(String accessToken) async {
-    final directoryPath = await _getUserPicturesPath('OQC report');
-    final directory = Directory(directoryPath);
-
-    if (!directory.existsSync()) {
-      print("資料夾不存在: $directoryPath");
+    if (!snDirectory.existsSync()) {
+      print("資料夾不存在: $snFolderPath");
       return;
     }
 
-    // 只選擇檔案，排除資料夾
-    final files = directory.listSync().where((entity) => entity is File).toList();
+    // 取得 SN 內的所有檔案
+    final List<File> files = [
+      ...snDirectory.listSync().whereType<File>(), // 只包含 SN 目錄內的檔案
+    ];
 
     if (files.isEmpty) {
-      print("資料夾中沒有檔案: $directoryPath");
+      print("資料夾中沒有檔案: $snFolderPath");
       return;
     }
+    // 統計檔案數量
+    int totalFiles = files.length;
+    int uploadedFiles = 0;
+    print("總共需要上傳 $totalFiles 份OQC Report");
 
-    for (var fileEntity in files) {
-      final file = fileEntity as File;  // 強制轉換為 File 類型
-      final fileName = file.path.split(Platform.pathSeparator).last;
-      final uploadUrl =
-          "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/items/root:/Jackalope/OQC Report/$fileName:/content";
+    for (var file in files) {
+      final String relativePath = path.relative(file.path, from: zerovaPath);
+      final String sharePointPath = "Jackalope/$relativePath";
+
+      final String uploadUrl =
+          "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/items/root:/$sharePointPath:/content";
 
       try {
         final response = await http.put(
@@ -217,22 +284,28 @@ class SharePointUploader {
             "Authorization": "Bearer $accessToken",
             "Content-Type": "application/octet-stream"
           },
-          body: file.readAsBytesSync(), // 讀取檔案內容為二進位數據
+          body: file.readAsBytesSync(),
         );
 
+        // 顯示進度
+        double progress = (uploadedFiles + 1) / totalFiles * 100;
+        print("OQC Report上傳進度: ${uploadedFiles + 1}/$totalFiles (${progress.toStringAsFixed(2)}%)");
+        uploadedFiles++;
+        onProgressUpdate(uploadedFiles, totalFiles);
+
         if (response.statusCode == 201) {
-          print("檔案上傳成功: $fileName");
+          print("檔案上傳成功: $relativePath");
         } else {
-          print("檔案上傳失敗: $fileName - ${response.statusCode} ${response.body}");
+          print("檔案上傳失敗: $relativePath - ${response.statusCode} ${response.body}");
         }
       } catch (e) {
-        print("檔案上傳失敗: $fileName - $e");
+        print("檔案上傳失敗: $relativePath - $e");
       }
     }
   }
-
-  Future<void> downloadFiles(String accessToken) async {
-    final directoryPath = await _getUserPicturesPath('Compare Pictures');
+  Future<void> downloadComparePictures(String accessToken) async {
+    final String zerovaPath = await _getOrCreateUserZerovaPath();
+    final String directoryPath = path.join(zerovaPath, 'Compare Pictures');
     final listFilesUrl =
         "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/Jackalope/外觀參考照片:/children";
 
@@ -276,4 +349,106 @@ class SharePointUploader {
       print("無法取得檔案清單: ${response.statusCode} ${response.body}");
     }
   }
-} 
+/*
+  Future<void> uploadSelectedPackagingPhotos(String accessToken) async {
+    final String zerovaPath = await _getOrCreateUserZerovaPath();
+    final String snFolderPath = path.join(zerovaPath, 'Selected Photos', SN);
+    final String packagingFolderPath = path.join(snFolderPath, 'Packaging');
+    final Directory snDirectory = Directory(snFolderPath);
+    final Directory packagingDirectory = Directory(packagingFolderPath);
+
+    if (!snDirectory.existsSync()) {
+      print("資料夾不存在: $snFolderPath");
+      return;
+    }
+
+    // 取得 SN 及其底下 Packaging 內的所有檔案
+    final List<File> files = [
+      ...snDirectory.listSync().whereType<File>(), // 只包含 SN 目錄內的檔案
+      if (packagingDirectory.existsSync()) ...packagingDirectory.listSync(recursive: true).whereType<File>(), // Packaging 內的檔案
+    ];
+
+    if (files.isEmpty) {
+      print("資料夾中沒有檔案: $snFolderPath");
+      return;
+    }
+
+    for (var file in files) {
+      final String relativePath = path.relative(file.path, from: zerovaPath);
+      final String sharePointPath = "Jackalope/$relativePath";
+
+      final String uploadUrl =
+          "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/items/root:/$sharePointPath:/content";
+
+      try {
+        final response = await http.put(
+          Uri.parse(uploadUrl),
+          headers: {
+            "Authorization": "Bearer $accessToken",
+            "Content-Type": "application/octet-stream"
+          },
+          body: file.readAsBytesSync(),
+        );
+
+        if (response.statusCode == 201) {
+          print("檔案上傳成功: $relativePath");
+        } else {
+          print("檔案上傳失敗: $relativePath - ${response.statusCode} ${response.body}");
+        }
+      } catch (e) {
+        print("檔案上傳失敗: $relativePath - $e");
+      }
+    }
+  }
+  Future<void> uploadSelectedAttachmentPhotos(String accessToken) async {
+    final String zerovaPath = await _getOrCreateUserZerovaPath();
+    final String snFolderPath = path.join(zerovaPath, 'Selected Photos', SN);
+    final String attachmentFolderPath = path.join(snFolderPath, 'Attachment');
+    final Directory snDirectory = Directory(snFolderPath);
+    final Directory attachmentDirectory = Directory(attachmentFolderPath);
+
+    if (!snDirectory.existsSync()) {
+      print("資料夾不存在: $snFolderPath");
+      return;
+    }
+
+    // 取得 SN 及其底下 Attachment 內的所有檔案
+    final List<File> files = [
+      ...snDirectory.listSync().whereType<File>(), // 只包含 SN 目錄內的檔案
+      if (attachmentDirectory.existsSync()) ...attachmentDirectory.listSync(recursive: true).whereType<File>(), // Attachment 內的檔案
+    ];
+
+    if (files.isEmpty) {
+      print("資料夾中沒有檔案: $snFolderPath");
+      return;
+    }
+
+    for (var file in files) {
+      final String relativePath = path.relative(file.path, from: zerovaPath);
+      final String sharePointPath = "Jackalope/$relativePath";
+
+      final String uploadUrl =
+          "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/items/root:/$sharePointPath:/content";
+
+      try {
+        final response = await http.put(
+          Uri.parse(uploadUrl),
+          headers: {
+            "Authorization": "Bearer $accessToken",
+            "Content-Type": "application/octet-stream"
+          },
+          body: file.readAsBytesSync(),
+        );
+
+        if (response.statusCode == 201) {
+          print("檔案上傳成功: $relativePath");
+        } else {
+          print("檔案上傳失敗: $relativePath - ${response.statusCode} ${response.body}");
+        }
+      } catch (e) {
+        print("檔案上傳失敗: $relativePath - $e");
+      }
+    }
+  }
+*/
+}

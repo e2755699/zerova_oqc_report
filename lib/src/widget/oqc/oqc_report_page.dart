@@ -28,6 +28,7 @@ import 'package:zerova_oqc_report/src/widget/oqc/tables/software_version.dart';
 import 'package:zerova_oqc_report/src/report/pdf_generator.dart';
 import 'package:zerova_oqc_report/src/widget/common/custom_app_bar.dart';
 import 'package:zerova_oqc_report/src/widget/common/main_layout.dart';
+import 'package:zerova_oqc_report/src/widget/upload/upload.dart';
 
 class OqcReportPage extends StatefulWidget {
   const OqcReportPage({
@@ -60,8 +61,6 @@ class _OqcReportPageState extends State<OqcReportPage> {
   final TextEditingController _picController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
 
-  final SharePointUploader _uploader = SharePointUploader();
-
   @override
   void dispose() {
     _picController.dispose();
@@ -73,8 +72,8 @@ class _OqcReportPageState extends State<OqcReportPage> {
     try {
       // 生成 PDF
       final pdf = await PdfGenerator.generateOqcReport(
-        modelName: 'T2437A011A0',
-        serialNumber: 'SN8765432',
+        modelName: widget.model,
+        serialNumber: widget.sn,
         pic: _picController.text,
         date: _dateController.text,
         psuSerialNumbers: widget.psuSerialNumbers,
@@ -90,16 +89,15 @@ class _OqcReportPageState extends State<OqcReportPage> {
       if (userProfile.isEmpty) {
         throw Exception('無法獲取用戶目錄');
       }
-
-      final pdfPath = path.join(userProfile, 'Pictures', 'OQC report',
-          'oqc_report_${DateTime.now().millisecondsSinceEpoch}.pdf');
-
+      var filePath = path.join(
+          userProfile, 'Pictures', 'Zerova', 'OQC Report', widget.sn);
+      final Directory dir = Directory(filePath);
+      if (!await dir.exists()) {
+        await dir.create(recursive: true);
+      }
       // 保存 PDF 文件
-      final file = File(pdfPath);
+      final file = File("$filePath\\oqc_report_${DateTime.now().millisecondsSinceEpoch}.pdf");
       await file.writeAsBytes(await pdf.save());
-
-      // 上傳到 SharePoint
-      await _uploader.startAuthorization();
 
       // 顯示成功消息
       if (mounted) {
@@ -116,13 +114,18 @@ class _OqcReportPageState extends State<OqcReportPage> {
     }
   }
 
-  pw.Widget _buildPsuSerialNumbersTable(Psuserialnumber data) {
-    return pw.Table(
-        // ... table implementation ...
+  void startUpload(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // 防止意外關閉
+      builder: (BuildContext dialogContext) {
+        return UploadProgressDialog.create(
+          uploadOrDownload: 0,
+          sn: widget.sn,
         );
+      },
+    );
   }
-
-  // ... implement other table builders ...
 
   @override
   Widget build(BuildContext context) {
@@ -130,7 +133,10 @@ class _OqcReportPageState extends State<OqcReportPage> {
     return MainLayout(
       title: context.tr('oqc_report'),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _generateAndUploadPdf,
+        onPressed: () async {
+          await _generateAndUploadPdf();
+          startUpload(context);
+        },
         icon: const Icon(Icons.upload_file),
         label: const Text('Submit'),
         backgroundColor: const Color(0xFFF8F9FD),

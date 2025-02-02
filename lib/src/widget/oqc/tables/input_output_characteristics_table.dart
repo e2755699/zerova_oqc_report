@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:zerova_oqc_report/src/report/enum/judgement.dart';
 import 'package:zerova_oqc_report/src/report/model/input_output_characteristics.dart';
 import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/report/model/appearance_structure_inspection_function_result.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:zerova_oqc_report/src/widget/common/table_wrapper.dart';
 
 class InputOutputCharacteristicsTable extends StatelessWidget {
   final InputOutputCharacteristics inputOutputCharacteristics;
@@ -26,6 +28,8 @@ class InputOutputCharacteristicsTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dataTable = StyledDataTable(
+      dataRowMinHeight: 50,
+      dataRowMaxHeight: 80,
       columns: headers.map((header) => DataColumn(
         label: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -42,24 +46,32 @@ class InputOutputCharacteristicsTable extends StatelessWidget {
       rows: inputOutputCharacteristics.inputOutputCharacteristicsSide.map((item) {
         return DataRow(
           cells: [
-            DataCell(Text(item.side)),
-            DataCell(RichText(
-              text: TextSpan(
-                  children: item.inputVoltage
-                      .map((iv) => TextSpan(text: "${iv.value.toStringAsFixed(2)} V"))
-                      .toList()),
-            )),
-            DataCell(RichText(
-              text: TextSpan(
-                  children: item.inputCurrent
-                      .map((iv) => TextSpan(text: "${iv.value.toStringAsFixed(2)} A"))
-                      .toList()),
-            )),
-            DataCell(Text("${item.totalInputPower.value.toStringAsFixed(2)} KW")),
-            DataCell(Text("${item.outputVoltage.value.toStringAsFixed(2)} V")),
-            DataCell(Text("${item.outputCurrent.value.toStringAsFixed(2)} A")),
-            DataCell(Text("${item.totalOutputPower.value.toStringAsFixed(2)} KW")),
-            DataCell(Text(item.judgement)),
+            DataCell(Text(item.side, textAlign: TextAlign.center,)),
+            DataCell(Text(item.inputVoltage
+                .map((iv) => "${iv.value.toStringAsFixed(2)} V").toList().join("\n")
+              , textAlign: TextAlign.center,),),
+            DataCell(Text(item.inputCurrent
+                .map((iv) => "${iv.value.toStringAsFixed(2)} A").toList().join("\n")
+              , textAlign: TextAlign.center,),),
+            // DataCell(RichText(
+            //   text: TextSpan(
+            //       children: item.inputCurrent
+            //           .map((iv) => TextSpan(text: "${iv.value.toStringAsFixed(2)} A"))
+            //           .toList()),
+            //    textAlign: TextAlign.center,),),
+            DataCell(Text("${item.totalInputPower.value.toStringAsFixed(2)} KW", textAlign: TextAlign.center,)),
+            DataCell(Text("${item.outputVoltage.value.toStringAsFixed(2)} V", textAlign: TextAlign.center,)),
+            DataCell(Text("${item.outputCurrent.value.toStringAsFixed(2)} A", textAlign: TextAlign.center,)),
+            DataCell(Text("${item.totalOutputPower.value.toStringAsFixed(2)} KW", textAlign: TextAlign.center,)),
+            OqcTableStyle.getDataCell(
+              item.judgement.name.toUpperCase(),
+              color: item.judgement == Judgement.pass
+                  ? Colors.green
+                  : item.judgement == Judgement.fail
+                  ? Colors.red
+                  : Colors.grey,
+              fontWeight: FontWeight.bold,
+            )
           ],
         );
       }).toList(),
