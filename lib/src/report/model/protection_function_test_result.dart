@@ -1,303 +1,328 @@
 import 'package:zerova_oqc_report/src/report/enum/judgement.dart';
 
 class ProtectionFunctionTestResult {
-  final HiPotTestResultSide insulationImpedanceTest;
-  final HiPotTestResultSide insulationVoltageTest;
+  final HiPotTestResult hiPotTestResult;
   final SpecialFunctionTestResult specialFunctionTestResult;
 
-List<HiPotTestResultSide> get hiPotTestResults => [
-  insulationImpedanceTest,
-  insulationVoltageTest,
-];
+  ProtectionFunctionTestResult({
+    required this.hiPotTestResult,
+    required this.specialFunctionTestResult,
+  });
 
-ProtectionFunctionTestResult({
-  required this.insulationImpedanceTest,
-  required this.insulationVoltageTest,
-  required this.specialFunctionTestResult,
-});
+  static ProtectionFunctionTestResult fromJsonList(List<dynamic> data) {
+    ProtectionFunctionMeasurement? leftInsulationImpedanceInputOutput;
+    ProtectionFunctionMeasurement? leftInsulationImpedanceInputGround;
+    ProtectionFunctionMeasurement? leftInsulationImpedanceOutputGround;
+    ProtectionFunctionMeasurement? leftInsulationVoltageInputOutput;
+    ProtectionFunctionMeasurement? leftInsulationVoltageInputGround;
+    ProtectionFunctionMeasurement? leftInsulationVoltageOutputGround;
+    ProtectionFunctionMeasurement? rightInsulationImpedanceInputOutput;
+    ProtectionFunctionMeasurement? rightInsulationImpedanceInputGround;
+    ProtectionFunctionMeasurement? rightInsulationImpedanceOutputGround;
+    ProtectionFunctionMeasurement? rightInsulationVoltageInputOutput;
+    ProtectionFunctionMeasurement? rightInsulationVoltageInputGround;
+    ProtectionFunctionMeasurement? rightInsulationVoltageOutputGround;
+    ProtectionFunctionMeasurement? emergencyTest;
+    ProtectionFunctionMeasurement? doorOpenTest;
+    ProtectionFunctionMeasurement? groundFaultTest;
+    double leftInsulationImpedanceInputOutputValue = 1000000000;
+    double leftInsulationImpedanceInputGroundValue = 1000000000;
+    double leftInsulationImpedanceOutputGroundValue = 1000000000;
+    double leftInsulationVoltageInputOutputValue = 1000000000;
+    double leftInsulationVoltageInputGroundValue = 1000000000;
+    double leftInsulationVoltageOutputGroundValue = 1000000000;
+    double rightInsulationImpedanceInputOutputValue = 1000000000;
+    double rightInsulationImpedanceInputGroundValue = 1000000000;
+    double rightInsulationImpedanceOutputGroundValue = 1000000000;
+    double rightInsulationVoltageInputOutputValue = 1000000000;
+    double rightInsulationVoltageInputGroundValue = 1000000000;
+    double rightInsulationVoltageOutputGroundValue = 1000000000;
+    double emergencyFailCount = 0;
+    double doorFailCount = 0;
+    double groundFailCount = 0;
 
-static ProtectionFunctionTestResult fromJsonList(List<dynamic> data) {
-  ProtectionFunctionMeasurement? leftInsulationImpedanceInputOutput;
-  ProtectionFunctionMeasurement? leftInsulationImpedanceInputGround;
-  ProtectionFunctionMeasurement? leftInsulationImpedanceOutputGround;
-  ProtectionFunctionMeasurement? leftInsulationVoltageInputOutput;
-  ProtectionFunctionMeasurement? leftInsulationVoltageInputGround;
-  ProtectionFunctionMeasurement? leftInsulationVoltageOutputGround;
-  ProtectionFunctionMeasurement? rightInsulationImpedanceInputOutput;
-  ProtectionFunctionMeasurement? rightInsulationImpedanceInputGround;
-  ProtectionFunctionMeasurement? rightInsulationImpedanceOutputGround;
-  ProtectionFunctionMeasurement? rightInsulationVoltageInputOutput;
-  ProtectionFunctionMeasurement? rightInsulationVoltageInputGround;
-  ProtectionFunctionMeasurement? rightInsulationVoltageOutputGround;
-  ProtectionFunctionMeasurement? emergencyTest;
-  ProtectionFunctionMeasurement? doorOpenTest;
-  ProtectionFunctionMeasurement? groundFaultTest;
-  double leftInsulationImpedanceInputOutputValue = 1000000000;
-  double leftInsulationImpedanceInputGroundValue = 1000000000;
-  double leftInsulationImpedanceOutputGroundValue = 1000000000;
-  double leftInsulationVoltageInputOutputValue = 1000000000;
-  double leftInsulationVoltageInputGroundValue = 1000000000;
-  double leftInsulationVoltageOutputGroundValue = 1000000000;
-  double rightInsulationImpedanceInputOutputValue = 1000000000;
-  double rightInsulationImpedanceInputGroundValue = 1000000000;
-  double rightInsulationImpedanceOutputGroundValue = 1000000000;
-  double rightInsulationVoltageInputOutputValue = 1000000000;
-  double rightInsulationVoltageInputGroundValue = 1000000000;
-  double rightInsulationVoltageOutputGroundValue = 1000000000;
-  double emergencyFailCount = 0;
-  double doorFailCount = 0;
-  double groundFailCount = 0;
+    for (var item in data) {
+      String? spcDesc = item['SPC_DESC'];
+      String? spcItem = item['SPC_ITEM'];
+      String? spcValueStr = item['SPC_VALUE'];
+      String? spcResult = item['RESULT'];
+      double spcValue = double.tryParse(spcValueStr ?? "0") ?? 0;
 
-  for (var item in data) {
-    String? spcDesc = item['SPC_DESC'];
-    String? spcItem = item['SPC_ITEM'];
-    String? spcValueStr = item['SPC_VALUE'];
-    String? spcResult = item['RESULT'];
-    double spcValue = double.tryParse(spcValueStr ?? "0") ?? 0;
-
-    if (spcDesc != null && spcItem != null) {
-      if (spcItem.contains("Data_1")) {
-        double spec = 10;
-        if (spcItem.contains("Seq.2")) {
-          if (leftInsulationImpedanceInputOutputValue > spcValue) {
-            leftInsulationImpedanceInputOutputValue = spcValue;
+      if (spcDesc != null && spcItem != null) {
+        if (spcItem.contains("Data_1")) {
+          double spec = 10;
+          if (spcItem.contains("Seq.2")) {
+            if (leftInsulationImpedanceInputOutputValue > spcValue) {
+              leftInsulationImpedanceInputOutputValue = spcValue;
+            }
+            leftInsulationImpedanceInputOutput = ProtectionFunctionMeasurement(
+              spec: spec,
+              value: leftInsulationImpedanceInputOutputValue,
+              key: spcItem,
+              name: "IIIO",
+              description: '',
+              judgement: leftInsulationImpedanceInputOutputValue >= spec
+                  ? Judgement.pass
+                  : Judgement.fail,
+            );
+          } else if (spcItem.contains("Seq.4")) {
+            if (rightInsulationImpedanceInputOutputValue > spcValue) {
+              rightInsulationImpedanceInputOutputValue = spcValue;
+            }
+            rightInsulationImpedanceInputOutput = ProtectionFunctionMeasurement(
+              spec: spec,
+              value: rightInsulationImpedanceInputOutputValue,
+              key: spcItem,
+              name: "IIIO",
+              description: '',
+              judgement: rightInsulationImpedanceInputOutputValue >= spec
+                  ? Judgement.pass
+                  : Judgement.fail,
+            );
           }
-          leftInsulationImpedanceInputOutput = ProtectionFunctionMeasurement(
-            spec: spec,
-            value: leftInsulationImpedanceInputOutputValue,
-            key: spcItem,
-            name: "IIIO",
-            description: '',
-            judgement: leftInsulationImpedanceInputOutputValue  >= spec ? Judgement.pass : Judgement.fail,
-          );
-        }else if (spcItem.contains("Seq.4")) {
-          if (rightInsulationImpedanceInputOutputValue > spcValue) {
-            rightInsulationImpedanceInputOutputValue = spcValue;
+        } else if (spcItem.contains("Data_2")) {
+          double spec = 10;
+          if (spcItem.contains("Seq.2")) {
+            if (leftInsulationImpedanceInputGroundValue > spcValue) {
+              leftInsulationImpedanceInputGroundValue = spcValue;
+            }
+            leftInsulationImpedanceInputGround = ProtectionFunctionMeasurement(
+              spec: spec,
+              value: leftInsulationImpedanceInputGroundValue,
+              key: spcItem,
+              name: "IIIG",
+              description: '',
+              judgement: leftInsulationImpedanceInputGroundValue >= spec
+                  ? Judgement.pass
+                  : Judgement.fail,
+            );
+          } else if (spcItem.contains("Seq.4")) {
+            if (rightInsulationImpedanceInputGroundValue > spcValue) {
+              rightInsulationImpedanceInputGroundValue = spcValue;
+            }
+            rightInsulationImpedanceInputGround = ProtectionFunctionMeasurement(
+              spec: spec,
+              value: rightInsulationImpedanceInputGroundValue,
+              key: spcItem,
+              name: "IIIG",
+              description: '',
+              judgement: rightInsulationImpedanceInputGroundValue >= spec
+                  ? Judgement.pass
+                  : Judgement.fail,
+            );
           }
-          rightInsulationImpedanceInputOutput = ProtectionFunctionMeasurement(
-            spec: spec,
-            value: rightInsulationImpedanceInputOutputValue,
-            key: spcItem,
-            name: "IIIO",
-            description: '',
-            judgement: rightInsulationImpedanceInputOutputValue  >= spec ? Judgement.pass : Judgement.fail,
-          );
-        }
-      }
-      else if (spcItem.contains("Data_2")) {
-        double spec = 10;
-        if (spcItem.contains("Seq.2")) {
-          if (leftInsulationImpedanceInputGroundValue > spcValue) {
-            leftInsulationImpedanceInputGroundValue = spcValue;
+        } else if (spcItem.contains("Data_3")) {
+          double spec = 10;
+          if (spcItem.contains("Seq.2")) {
+            if (leftInsulationImpedanceOutputGroundValue > spcValue) {
+              leftInsulationImpedanceOutputGroundValue = spcValue;
+            }
+            leftInsulationImpedanceOutputGround = ProtectionFunctionMeasurement(
+              spec: spec,
+              value: leftInsulationImpedanceOutputGroundValue,
+              key: spcItem,
+              name: "IIOG",
+              description: '',
+              judgement: leftInsulationImpedanceOutputGroundValue >= spec
+                  ? Judgement.pass
+                  : Judgement.fail,
+            );
+          } else if (spcItem.contains("Seq.4")) {
+            if (rightInsulationImpedanceOutputGroundValue > spcValue) {
+              rightInsulationImpedanceOutputGroundValue = spcValue;
+            }
+            rightInsulationImpedanceOutputGround =
+                ProtectionFunctionMeasurement(
+              spec: spec,
+              value: rightInsulationImpedanceOutputGroundValue,
+              key: spcItem,
+              name: "IIOG",
+              description: '',
+              judgement: rightInsulationImpedanceOutputGroundValue >= spec
+                  ? Judgement.pass
+                  : Judgement.fail,
+            );
           }
-          leftInsulationImpedanceInputGround = ProtectionFunctionMeasurement(
-            spec: spec,
-            value: leftInsulationImpedanceInputGroundValue,
-            key: spcItem,
-            name: "IIIG",
-            description: '',
-            judgement: leftInsulationImpedanceInputGroundValue  >= spec ? Judgement.pass : Judgement.fail,
-          );
-        }else if (spcItem.contains("Seq.4")) {
-          if (rightInsulationImpedanceInputGroundValue > spcValue) {
-            rightInsulationImpedanceInputGroundValue = spcValue;
+        } else if (spcItem.contains("Data_4")) {
+          double spec = 10;
+          if (spcItem.contains("Seq.2")) {
+            if (leftInsulationVoltageInputOutputValue > spcValue) {
+              leftInsulationVoltageInputOutputValue = spcValue;
+            }
+            leftInsulationVoltageInputOutput = ProtectionFunctionMeasurement(
+              spec: spec,
+              value: leftInsulationVoltageInputOutputValue,
+              key: spcItem,
+              name: "IVIO",
+              description: '',
+              judgement: leftInsulationVoltageInputOutputValue >= spec
+                  ? Judgement.pass
+                  : Judgement.fail,
+            );
+          } else if (spcItem.contains("Seq.4")) {
+            if (rightInsulationVoltageInputOutputValue > spcValue) {
+              rightInsulationVoltageInputOutputValue = spcValue;
+            }
+            rightInsulationVoltageInputOutput = ProtectionFunctionMeasurement(
+              spec: spec,
+              value: rightInsulationVoltageInputOutputValue,
+              key: spcItem,
+              name: "IVIO",
+              description: '',
+              judgement: rightInsulationVoltageInputOutputValue >= spec
+                  ? Judgement.pass
+                  : Judgement.fail,
+            );
           }
-          rightInsulationImpedanceInputGround = ProtectionFunctionMeasurement(
-            spec: spec,
-            value: rightInsulationImpedanceInputGroundValue,
-            key: spcItem,
-            name: "IIIG",
-            description: '',
-            judgement: rightInsulationImpedanceInputGroundValue  >= spec ? Judgement.pass : Judgement.fail,
-          );
-        }
-      }
-      else if (spcItem.contains("Data_3")) {
-        double spec = 10;
-        if (spcItem.contains("Seq.2")) {
-          if (leftInsulationImpedanceOutputGroundValue > spcValue) {
-            leftInsulationImpedanceOutputGroundValue = spcValue;
+        } else if (spcItem.contains("Data_5")) {
+          double spec = 10;
+          if (spcItem.contains("Seq.2")) {
+            if (leftInsulationVoltageInputGroundValue > spcValue) {
+              leftInsulationVoltageInputGroundValue = spcValue;
+            }
+            leftInsulationVoltageInputGround = ProtectionFunctionMeasurement(
+              spec: spec,
+              value: leftInsulationVoltageInputGroundValue,
+              key: spcItem,
+              name: "IVIG",
+              description: '',
+              judgement: leftInsulationVoltageInputGroundValue >= spec
+                  ? Judgement.pass
+                  : Judgement.fail,
+            );
+          } else if (spcItem.contains("Seq.4")) {
+            if (rightInsulationVoltageInputGroundValue > spcValue) {
+              rightInsulationVoltageInputGroundValue = spcValue;
+            }
+            rightInsulationVoltageInputGround = ProtectionFunctionMeasurement(
+              spec: spec,
+              value: rightInsulationVoltageInputGroundValue,
+              key: spcItem,
+              name: "IVIG",
+              description: '',
+              judgement: rightInsulationVoltageInputGroundValue >= spec
+                  ? Judgement.pass
+                  : Judgement.fail,
+            );
           }
-          leftInsulationImpedanceOutputGround = ProtectionFunctionMeasurement(
-            spec: spec,
-            value: leftInsulationImpedanceOutputGroundValue,
-            key: spcItem,
-            name: "IIOG",
-            description: '',
-            judgement: leftInsulationImpedanceOutputGroundValue  >= spec ? Judgement.pass : Judgement.fail,
-          );
-        }else if (spcItem.contains("Seq.4")) {
-          if (rightInsulationImpedanceOutputGroundValue > spcValue) {
-            rightInsulationImpedanceOutputGroundValue = spcValue;
+        } else if (spcItem.contains("Data_6")) {
+          double spec = 10;
+          if (spcItem.contains("Seq.2")) {
+            if (leftInsulationVoltageOutputGroundValue > spcValue) {
+              leftInsulationVoltageOutputGroundValue = spcValue;
+            }
+            leftInsulationVoltageOutputGround = ProtectionFunctionMeasurement(
+              spec: spec,
+              value: leftInsulationVoltageOutputGroundValue,
+              key: spcItem,
+              name: "IVOG",
+              description: '',
+              judgement: leftInsulationVoltageOutputGroundValue >= spec
+                  ? Judgement.pass
+                  : Judgement.fail,
+            );
+          } else if (spcItem.contains("Seq.4")) {
+            if (rightInsulationVoltageOutputGroundValue > spcValue) {
+              rightInsulationVoltageOutputGroundValue = spcValue;
+            }
+            rightInsulationVoltageOutputGround = ProtectionFunctionMeasurement(
+              spec: spec,
+              value: rightInsulationVoltageOutputGroundValue,
+              key: spcItem,
+              name: "IVOG",
+              description: '',
+              judgement: rightInsulationVoltageOutputGroundValue >= spec
+                  ? Judgement.pass
+                  : Judgement.fail,
+            );
           }
-          rightInsulationImpedanceOutputGround = ProtectionFunctionMeasurement(
-            spec: spec,
-            value: rightInsulationImpedanceOutputGroundValue,
-            key: spcItem,
-            name: "IIOG",
-            description: '',
-            judgement: rightInsulationImpedanceOutputGroundValue  >= spec ? Judgement.pass : Judgement.fail,
-          );
-        }
-      }
-      else if (spcItem.contains("Data_4")) {
-        double spec = 10;
-        if (spcItem.contains("Seq.2")) {
-          if (leftInsulationVoltageInputOutputValue > spcValue) {
-            leftInsulationVoltageInputOutputValue = spcValue;
+        } else if (spcItem.contains("Emergency Test")) {
+          double spec = 3;
+          if (spcResult == "FAIL") {
+            emergencyFailCount++;
           }
-          leftInsulationVoltageInputOutput = ProtectionFunctionMeasurement(
-            spec: spec,
-            value: leftInsulationVoltageInputOutputValue,
-            key: spcItem,
-            name: "IVIO",
-            description: '',
-            judgement: leftInsulationVoltageInputOutputValue  >= spec ? Judgement.pass : Judgement.fail,
-          );
-        }else if (spcItem.contains("Seq.4")) {
-          if (rightInsulationVoltageInputOutputValue > spcValue) {
-            rightInsulationVoltageInputOutputValue = spcValue;
+          emergencyTest = ProtectionFunctionMeasurement(
+              spec: spec,
+              value: emergencyFailCount.toDouble(),
+              key: "Emergency_Stop",
+              name: "Emergency Stop Function",
+              description:
+                  'After the charger is powered on and charging normally, set the rated load to initiate charging. Once the charger reaches normal output current, press the emergency stop button. This action will disconnect the charger from the AC output and trigger an alarm.',
+              judgement:
+                  emergencyFailCount >= spec ? Judgement.fail : Judgement.pass);
+        } else if (spcItem.contains("Door Open Test")) {
+          double spec = 3;
+          if (spcResult == "FAIL") {
+            doorFailCount++;
           }
-          rightInsulationVoltageInputOutput = ProtectionFunctionMeasurement(
+          doorOpenTest = ProtectionFunctionMeasurement(
             spec: spec,
-            value: rightInsulationVoltageInputOutputValue,
-            key: spcItem,
-            name: "IVIO",
-            description: '',
-            judgement: rightInsulationVoltageInputOutputValue  >= spec ? Judgement.pass : Judgement.fail,
-          );
-        }
-      }
-      else if (spcItem.contains("Data_5")) {
-        double spec = 10;
-        if (spcItem.contains("Seq.2")) {
-          if (leftInsulationVoltageInputGroundValue > spcValue) {
-            leftInsulationVoltageInputGroundValue = spcValue;
-          }
-          leftInsulationVoltageInputGround = ProtectionFunctionMeasurement(
-            spec: spec,
-            value: leftInsulationVoltageInputGroundValue,
-            key: spcItem,
-            name: "IVIG",
-            description: '',
-            judgement: leftInsulationVoltageInputGroundValue  >= spec ? Judgement.pass : Judgement.fail,
-          );
-        }else if (spcItem.contains("Seq.4")) {
-          if (rightInsulationVoltageInputGroundValue > spcValue) {
-            rightInsulationVoltageInputGroundValue = spcValue;
-          }
-          rightInsulationVoltageInputGround = ProtectionFunctionMeasurement(
-            spec: spec,
-            value: rightInsulationVoltageInputGroundValue,
-            key: spcItem,
-            name: "IVIG",
-            description: '',
-            judgement: rightInsulationVoltageInputGroundValue  >= spec ? Judgement.pass : Judgement.fail,
-          );
-        }
-      }
-      else if (spcItem.contains("Data_6")) {
-        double spec = 10;
-        if (spcItem.contains("Seq.2")) {
-          if (leftInsulationVoltageOutputGroundValue > spcValue) {
-            leftInsulationVoltageOutputGroundValue = spcValue;
-          }
-          leftInsulationVoltageOutputGround = ProtectionFunctionMeasurement(
-            spec: spec,
-            value: leftInsulationVoltageOutputGroundValue,
-            key: spcItem,
-            name: "IVOG",
-            description: '',
-            judgement: leftInsulationVoltageOutputGroundValue  >= spec ? Judgement.pass : Judgement.fail,
-          );
-        }else if (spcItem.contains("Seq.4")) {
-          if (rightInsulationVoltageOutputGroundValue > spcValue) {
-            rightInsulationVoltageOutputGroundValue = spcValue;
-          }
-          rightInsulationVoltageOutputGround = ProtectionFunctionMeasurement(
-            spec: spec,
-            value: rightInsulationVoltageOutputGroundValue,
-            key: spcItem,
-            name: "IVOG",
-            description: '',
-            judgement: rightInsulationVoltageOutputGroundValue  >= spec ? Judgement.pass : Judgement.fail,
-          );
-        }
-      }
-      else if (spcItem.contains("Emergency Test")) {
-        double spec = 3;
-        if (spcResult == "FAIL") {
-          emergencyFailCount++;
-        }
-        emergencyTest = ProtectionFunctionMeasurement(
-            spec: spec,
-            value: emergencyFailCount.toDouble(),
-            key: "Emergency_Stop",
-            name: "Emergency Stop Function",
+            value: doorFailCount.toDouble(),
+            key: "Door_Open",
+            name: "Door Open Function",
             description:
-            'After the charger is powered on and charging normally, set the rated load to initiate charging. Once the charger reaches normal output current, press the emergency stop button. This action will disconnect the charger from the AC output and trigger an alarm.',
-            judgement: emergencyFailCount >= spec ? Judgement.fail : Judgement.pass
-        );
-      }
-      else if (spcItem.contains("Door Open Test")) {
-        double spec = 3;
-        if (spcResult == "FAIL") {
-          doorFailCount++;
+                'While opening the door, the charger should stop charging immediately and shows alarm when the door open.',
+            judgement: doorFailCount >= spec ? Judgement.fail : Judgement.pass,
+          );
+        } else if (spcItem.contains("Ground Fault Test")) {
+          double spec = 3;
+          if (spcResult == "FAIL") {
+            groundFailCount++;
+          }
+          groundFaultTest = ProtectionFunctionMeasurement(
+            spec: spec,
+            value: groundFailCount.toDouble(),
+            key: "Ground_Fault",
+            name: "Ground Fault Function",
+            description:
+                "If the charger detects a ground fault or a drop in insulation below the protection threshold of rated resistance during simulation, it should stop charging and trigger an alarm to protect charger immediately.",
+            judgement:
+                groundFailCount >= spec ? Judgement.fail : Judgement.pass,
+          );
         }
-        doorOpenTest = ProtectionFunctionMeasurement(
-          spec: spec,
-          value: doorFailCount.toDouble(),
-          key: "Door_Open",
-          name: "Door Open Function",
-          description:
-          'While opening the door, the charger should stop charging immediately and shows alarm when the door open.',
-          judgement: doorFailCount >= spec ? Judgement.fail : Judgement.pass,
-        );
-      }
-      else if (spcItem.contains("Ground Fault Test")) {
-        double spec = 3;
-        if (spcResult == "FAIL") {
-          groundFailCount++;
-        }
-        groundFaultTest = ProtectionFunctionMeasurement(
-          spec: spec,
-          value: groundFailCount.toDouble(),
-          key: "Ground_Fault",
-          name: "Ground Fault Function",
-          description:
-          "If the charger detects a ground fault or a drop in insulation below the protection threshold of rated resistance during simulation, it should stop charging and trigger an alarm to protect charger immediately.",
-          judgement: groundFailCount >= spec ? Judgement.fail : Judgement.pass,
-        );
       }
     }
-  }
+    var insulationImpedanceInputOutput = InsulationTestResult(
+      leftInsulationImpedanceInputOutput ??
+          ProtectionFunctionMeasurement.empty(),
+      leftInsulationImpedanceInputGround ??
+          ProtectionFunctionMeasurement.empty(),
+      leftInsulationImpedanceOutputGround ??
+          ProtectionFunctionMeasurement.empty(),
+      rightInsulationImpedanceInputOutput ??
+          ProtectionFunctionMeasurement.empty(),
+      rightInsulationImpedanceInputGround ??
+          ProtectionFunctionMeasurement.empty(),
+      rightInsulationImpedanceOutputGround ??
+          ProtectionFunctionMeasurement.empty(),
+    );
+    var insulationVInputOutput = InsulationTestResult(
+        leftInsulationVoltageInputOutput ??
+            ProtectionFunctionMeasurement.empty(),
+        leftInsulationVoltageInputGround ??
+            ProtectionFunctionMeasurement.empty(),
+        leftInsulationVoltageOutputGround ??
+            ProtectionFunctionMeasurement.empty(),
+        rightInsulationVoltageInputOutput ??
+            ProtectionFunctionMeasurement.empty(),
+        rightInsulationVoltageInputGround ??
+            ProtectionFunctionMeasurement.empty(),
+        rightInsulationVoltageOutputGround ??
+            ProtectionFunctionMeasurement.empty());
 
-  var leftSideProtectionFunctionTestResultSide = HiPotTestResultSide(
-      "L",
-      leftInsulationImpedanceInputOutput ?? ProtectionFunctionMeasurement.empty(),
-      leftInsulationImpedanceInputGround ?? ProtectionFunctionMeasurement.empty(),
-      leftInsulationImpedanceOutputGround ?? ProtectionFunctionMeasurement.empty(),
-      leftInsulationVoltageInputOutput ?? ProtectionFunctionMeasurement.empty(),
-      leftInsulationVoltageInputGround ?? ProtectionFunctionMeasurement.empty(),
-      leftInsulationVoltageOutputGround ?? ProtectionFunctionMeasurement.empty());
-  var rightSideProtectionFunctionTestResultSide = HiPotTestResultSide(
-      "R",
-      rightInsulationImpedanceInputOutput ?? ProtectionFunctionMeasurement.empty(),
-      rightInsulationImpedanceInputGround ?? ProtectionFunctionMeasurement.empty(),
-      rightInsulationImpedanceOutputGround ?? ProtectionFunctionMeasurement.empty(),
-      rightInsulationVoltageInputOutput ?? ProtectionFunctionMeasurement.empty(),
-      rightInsulationVoltageInputGround ?? ProtectionFunctionMeasurement.empty(),
-      rightInsulationVoltageOutputGround ?? ProtectionFunctionMeasurement.empty());
-  var result = ProtectionFunctionTestResult(
-    insulationImpedanceTest: leftSideProtectionFunctionTestResultSide,
-    insulationVoltageTest: rightSideProtectionFunctionTestResultSide,
-    specialFunctionTestResult: SpecialFunctionTestResult(
-      emergencyTest: emergencyTest ?? ProtectionFunctionMeasurement.empty(),
-      doorOpenTest: doorOpenTest ?? ProtectionFunctionMeasurement.empty(),
-      groundFaultTest: groundFaultTest ?? ProtectionFunctionMeasurement.empty(),
-    ),
-  );
-  /*
+    var result = ProtectionFunctionTestResult(
+      hiPotTestResult: HiPotTestResult(
+        insulationImpedanceTest: insulationImpedanceInputOutput,
+        insulationVoltageTest: insulationVInputOutput,
+      ),
+      specialFunctionTestResult: SpecialFunctionTestResult(
+        emergencyTest: emergencyTest ?? ProtectionFunctionMeasurement.empty(),
+        doorOpenTest: doorOpenTest ?? ProtectionFunctionMeasurement.empty(),
+        groundFaultTest:
+            groundFaultTest ?? ProtectionFunctionMeasurement.empty(),
+      ),
+    );
+    /*
   print("=== Protection Function Test Result ===");
   for (var side in result.protectionFunctionTestResultSide) {
     print("Side: ${side.side}");
@@ -314,10 +339,10 @@ static ProtectionFunctionTestResult fromJsonList(List<dynamic> data) {
   print("Door Open Test: ${result.specialFunctionTestResult.doorOpenTest.value}, Judgement: ${result.specialFunctionTestResult.doorOpenTest.judgement}");
   print("Ground Fault Test: ${result.specialFunctionTestResult.groundFaultTest.value}, Judgement: ${result.specialFunctionTestResult.groundFaultTest.judgement}");
   print("=====================================");*/
-  return result;
-}
+    return result;
+  }
 
-static fromExcel(String string) {}
+  static fromExcel(String string) {}
 }
 
 class SpecialFunctionTestResult {
@@ -332,33 +357,58 @@ class SpecialFunctionTestResult {
   });
 
   List<ProtectionFunctionMeasurement> get testItems => [
-    emergencyTest,
-    doorOpenTest,
-    groundFaultTest,
-  ];
+        emergencyTest,
+        doorOpenTest,
+        groundFaultTest,
+      ];
 }
 
-class HiPotTestResultSide {
-  final ProtectionFunctionMeasurement insulationImpedanceInputOutput;
-  final ProtectionFunctionMeasurement insulationImpedanceInputGround;
-  final ProtectionFunctionMeasurement insulationImpedanceOutputGround;
-  final ProtectionFunctionMeasurement insulationVoltageInputOutput;
-  final ProtectionFunctionMeasurement insulationVoltageInputGround;
-  final ProtectionFunctionMeasurement insulationVoltageOutputGround;
+class HiPotTestResult {
+  final InsulationTestResult insulationImpedanceTest;
+  final InsulationTestResult insulationVoltageTest;
 
-  final String type;
+  HiPotTestResult(
+      {required this.insulationImpedanceTest,
+      required this.insulationVoltageTest});
+
+  List<InsulationTestResult> get hiPotTestResults => [
+        insulationImpedanceTest,
+        insulationVoltageTest,
+      ];
 
   String get judgement => "OK";
-
-  HiPotTestResultSide(
-      this.type,
-      this.insulationImpedanceInputOutput,
-      this.insulationImpedanceInputGround,
-      this.insulationImpedanceOutputGround,
-      this.insulationVoltageInputOutput,
-      this.insulationVoltageInputGround,
-      this.insulationVoltageOutputGround);
 }
+
+class InsulationTestResult {
+  final ProtectionFunctionMeasurement leftInsulationInputOutput;
+  final ProtectionFunctionMeasurement leftInsulationInputGround;
+  final ProtectionFunctionMeasurement leftInsulationOutputGround;
+  final ProtectionFunctionMeasurement rightInsulationInputOutput;
+  final ProtectionFunctionMeasurement rightInsulationInputGround;
+  final ProtectionFunctionMeasurement rightInsulationOutputGround;
+
+  get leftInsulationInputOutputBySide => {
+        'R': [
+          rightInsulationInputOutput,
+          rightInsulationInputGround,
+          rightInsulationOutputGround,
+        ],
+        'L': [
+          leftInsulationInputOutput,
+          leftInsulationInputGround,
+          leftInsulationOutputGround,
+        ]
+      };
+
+  InsulationTestResult(
+      this.leftInsulationInputOutput,
+      this.leftInsulationInputGround,
+      this.leftInsulationOutputGround,
+      this.rightInsulationInputOutput,
+      this.rightInsulationInputGround,
+      this.rightInsulationOutputGround);
+}
+
 class HiPotTestResultSide2 {
   final ProtectionFunctionMeasurement leftInputOutput;
   final ProtectionFunctionMeasurement leftInputGround;
@@ -372,13 +422,14 @@ class HiPotTestResultSide2 {
   String get judgement => "OK";
 
   HiPotTestResultSide2(
-      this.type,
-  this.leftInputOutput,
-  this.leftInputGround,
-  this.leftOutputGround,
-  this.rightInputOutput,
-  this.rightInputGround,
-  this.rightOutputGround,);
+    this.type,
+    this.leftInputOutput,
+    this.leftInputGround,
+    this.leftOutputGround,
+    this.rightInputOutput,
+    this.rightInputGround,
+    this.rightOutputGround,
+  );
 }
 
 class ProtectionFunctionMeasurement {
