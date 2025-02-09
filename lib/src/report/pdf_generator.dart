@@ -910,19 +910,31 @@ class PdfGenerator {
                 file.path.toLowerCase().endsWith('.png'))
             .toList();
 
-        for (final file in imageFiles) {
-          final image = await _imageFromPath(file.path);
-          if (image != null) {
-            images.add(
-              pw.Container(
-                margin: const pw.EdgeInsets.symmetric(vertical: 10),
-                alignment: pw.Alignment.center,
-                child: pw.Image(
-                  image,
-                  width: PdfPageFormat.a4.availableWidth * 0.8,
-                  height: 600,
-                  fit: pw.BoxFit.fitWidth,
+        // 將圖片分組為每組3張
+        for (var i = 0; i < imageFiles.length; i += 3) {
+          final rowImages = <pw.Widget>[];
+          for (var j = 0; j < 3 && i + j < imageFiles.length; j++) {
+            final image = await _imageFromPath(imageFiles[i + j].path);
+            if (image != null) {
+              rowImages.add(
+                pw.Expanded(
+                  child: pw.Container(
+                    margin: const pw.EdgeInsets.all(5),
+                    height: 200,
+                    child: pw.Image(
+                      image,
+                      fit: pw.BoxFit.contain,
+                    ),
+                  ),
                 ),
+              );
+            }
+          }
+          if (rowImages.isNotEmpty) {
+            images.add(
+              pw.Row(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: rowImages,
               ),
             );
           }
@@ -955,19 +967,31 @@ class PdfGenerator {
                 file.path.toLowerCase().endsWith('.png'))
             .toList();
 
-        for (final file in imageFiles) {
-          final image = await _imageFromPath(file.path);
-          if (image != null) {
-            images.add(
-              pw.Container(
-                margin: const pw.EdgeInsets.symmetric(vertical: 10),
-                alignment: pw.Alignment.center,
-                child: pw.Image(
-                  image,
-                  width: PdfPageFormat.a4.availableWidth * 0.8,
-                  height: 600,
-                  fit: pw.BoxFit.fitWidth,
+        // 將圖片分組為每組3張
+        for (var i = 0; i < imageFiles.length; i += 3) {
+          final rowImages = <pw.Widget>[];
+          for (var j = 0; j < 3 && i + j < imageFiles.length; j++) {
+            final image = await _imageFromPath(imageFiles[i + j].path);
+            if (image != null) {
+              rowImages.add(
+                pw.Expanded(
+                  child: pw.Container(
+                    margin: const pw.EdgeInsets.all(5),
+                    height: 200,
+                    child: pw.Image(
+                      image,
+                      fit: pw.BoxFit.contain,
+                    ),
+                  ),
                 ),
+              );
+            }
+          }
+          if (rowImages.isNotEmpty) {
+            images.add(
+              pw.Row(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: rowImages,
               ),
             );
           }
