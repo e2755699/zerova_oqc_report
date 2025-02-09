@@ -1,16 +1,30 @@
-# zerova_oqc_report
+# Zerova OQC Report
 
-A new Flutter project.
+## 项目配置步骤
 
-## Getting Started
+1. 复制配置文件模板：
+   ```bash
+   cp config.template.json config.json
+   ```
 
-This project is a starting point for a Flutter application.
+2. 在 `config.json` 中填入实际的配置值：
+   - clientId: Azure AD 应用程序 ID
+   - clientSecret: Azure AD 应用程序密钥
+   - tenantId: Azure AD 租户 ID
+   - siteId: SharePoint 站点 ID
+   - driveId: SharePoint 驱动器 ID
 
-A few resources to get you started if this is your first Flutter project:
+3. 或者设置环境变量：
+   ```bash
+   export AZURE_CLIENT_ID="your_client_id"
+   export AZURE_CLIENT_SECRET="your_client_secret"
+   export AZURE_TENANT_ID="your_tenant_id"
+   export AZURE_REDIRECT_URI="http://localhost:8000/callback"
+   export SHAREPOINT_SITE_ID="your_site_id"
+   export SHAREPOINT_DRIVE_ID="your_drive_id"
+   ```
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 注意事项
+- 不要将 `config.json` 提交到 Git 仓库
+- 确保 `.gitignore` 中包含 `config.json`
+- 每个开发者需要使用自己的配置文件
