@@ -15,7 +15,7 @@ class OqcApiClient {
   OqcApiClient();
 
   Future<List<dynamic>> fetchAndSaveOqcData(String serialNumber) async {
-    final url = Uri.parse("${baseUrl}/OQC");
+    final url = Uri.parse("$baseUrl/OQC");
     final headers = {
       'Authorization': 'Bearer $token',
       'Accept': 'application/json',
@@ -43,7 +43,7 @@ class OqcApiClient {
   }
 
   Future<List<dynamic>> fetchAndSaveTestData(String serialNumber) async {
-    final url = Uri.parse("${baseUrl}/TEST");
+    final url = Uri.parse("$baseUrl/TEST");
     final headers = {
       'Authorization': 'Bearer $token',
       'Accept': 'application/json',
@@ -71,7 +71,7 @@ class OqcApiClient {
   }
 
   Future<List<dynamic>> fetchAndSaveKeyPartData(String serialNumber) async {
-    final url = Uri.parse("${baseUrl}/KEYPART");
+    final url = Uri.parse("$baseUrl/KEYPART");
     final headers = {
       'Authorization': 'Bearer $token',
       'Accept': 'application/json',

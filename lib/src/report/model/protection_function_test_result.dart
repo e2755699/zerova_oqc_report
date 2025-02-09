@@ -1,18 +1,18 @@
 import 'package:zerova_oqc_report/src/report/enum/judgement.dart';
 
 class ProtectionFunctionTestResult {
-  final ProtectionFunctionTestResultSide leftSideProtectionFunctionTestResult;
-  final ProtectionFunctionTestResultSide rightSideProtectionFunctionTestResult;
+  final HiPotTestResultSide insulationImpedanceTest;
+  final HiPotTestResultSide insulationVoltageTest;
   final SpecialFunctionTestResult specialFunctionTestResult;
 
-List<ProtectionFunctionTestResultSide> get protectionFunctionTestResultSide => [
-  leftSideProtectionFunctionTestResult,
-  rightSideProtectionFunctionTestResult,
+List<HiPotTestResultSide> get hiPotTestResults => [
+  insulationImpedanceTest,
+  insulationVoltageTest,
 ];
 
 ProtectionFunctionTestResult({
-  required this.leftSideProtectionFunctionTestResult,
-  required this.rightSideProtectionFunctionTestResult,
+  required this.insulationImpedanceTest,
+  required this.insulationVoltageTest,
   required this.specialFunctionTestResult,
 });
 
@@ -272,7 +272,7 @@ static ProtectionFunctionTestResult fromJsonList(List<dynamic> data) {
     }
   }
 
-  var leftSideProtectionFunctionTestResultSide = ProtectionFunctionTestResultSide(
+  var leftSideProtectionFunctionTestResultSide = HiPotTestResultSide(
       "L",
       leftInsulationImpedanceInputOutput ?? ProtectionFunctionMeasurement.empty(),
       leftInsulationImpedanceInputGround ?? ProtectionFunctionMeasurement.empty(),
@@ -280,7 +280,7 @@ static ProtectionFunctionTestResult fromJsonList(List<dynamic> data) {
       leftInsulationVoltageInputOutput ?? ProtectionFunctionMeasurement.empty(),
       leftInsulationVoltageInputGround ?? ProtectionFunctionMeasurement.empty(),
       leftInsulationVoltageOutputGround ?? ProtectionFunctionMeasurement.empty());
-  var rightSideProtectionFunctionTestResultSide = ProtectionFunctionTestResultSide(
+  var rightSideProtectionFunctionTestResultSide = HiPotTestResultSide(
       "R",
       rightInsulationImpedanceInputOutput ?? ProtectionFunctionMeasurement.empty(),
       rightInsulationImpedanceInputGround ?? ProtectionFunctionMeasurement.empty(),
@@ -289,8 +289,8 @@ static ProtectionFunctionTestResult fromJsonList(List<dynamic> data) {
       rightInsulationVoltageInputGround ?? ProtectionFunctionMeasurement.empty(),
       rightInsulationVoltageOutputGround ?? ProtectionFunctionMeasurement.empty());
   var result = ProtectionFunctionTestResult(
-    leftSideProtectionFunctionTestResult: leftSideProtectionFunctionTestResultSide,
-    rightSideProtectionFunctionTestResult: rightSideProtectionFunctionTestResultSide,
+    insulationImpedanceTest: leftSideProtectionFunctionTestResultSide,
+    insulationVoltageTest: rightSideProtectionFunctionTestResultSide,
     specialFunctionTestResult: SpecialFunctionTestResult(
       emergencyTest: emergencyTest ?? ProtectionFunctionMeasurement.empty(),
       doorOpenTest: doorOpenTest ?? ProtectionFunctionMeasurement.empty(),
@@ -338,7 +338,7 @@ class SpecialFunctionTestResult {
   ];
 }
 
-class ProtectionFunctionTestResultSide {
+class HiPotTestResultSide {
   final ProtectionFunctionMeasurement insulationImpedanceInputOutput;
   final ProtectionFunctionMeasurement insulationImpedanceInputGround;
   final ProtectionFunctionMeasurement insulationImpedanceOutputGround;
@@ -346,18 +346,39 @@ class ProtectionFunctionTestResultSide {
   final ProtectionFunctionMeasurement insulationVoltageInputGround;
   final ProtectionFunctionMeasurement insulationVoltageOutputGround;
 
-  final String side;
+  final String type;
 
   String get judgement => "OK";
 
-  ProtectionFunctionTestResultSide(
-      this.side,
+  HiPotTestResultSide(
+      this.type,
       this.insulationImpedanceInputOutput,
       this.insulationImpedanceInputGround,
       this.insulationImpedanceOutputGround,
       this.insulationVoltageInputOutput,
       this.insulationVoltageInputGround,
       this.insulationVoltageOutputGround);
+}
+class HiPotTestResultSide2 {
+  final ProtectionFunctionMeasurement leftInputOutput;
+  final ProtectionFunctionMeasurement leftInputGround;
+  final ProtectionFunctionMeasurement leftOutputGround;
+  final ProtectionFunctionMeasurement rightInputOutput;
+  final ProtectionFunctionMeasurement rightInputGround;
+  final ProtectionFunctionMeasurement rightOutputGround;
+
+  final String type;
+
+  String get judgement => "OK";
+
+  HiPotTestResultSide2(
+      this.type,
+  this.leftInputOutput,
+  this.leftInputGround,
+  this.leftOutputGround,
+  this.rightInputOutput,
+  this.rightInputGround,
+  this.rightOutputGround,);
 }
 
 class ProtectionFunctionMeasurement {

@@ -1,19 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:go_router/go_router.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
 import 'dart:io';
 import 'package:path/path.dart' as path;
-import 'package:zerova_oqc_report/src/repo/sharepoint_uploader.dart';
 import 'package:zerova_oqc_report/src/report/model/input_output_characteristics.dart';
 import 'package:zerova_oqc_report/src/report/model/package_list_result.dart';
 import 'package:zerova_oqc_report/src/report/model/protection_function_test_result.dart';
 import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/report/model/software_version.dart';
 import 'package:zerova_oqc_report/src/report/model/appearance_structure_inspection_function_result.dart';
-import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/tables/appearance_structure_inspection_table.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/tables/attachment_table.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/tables/basic_function_test_table.dart';
@@ -26,7 +20,6 @@ import 'package:zerova_oqc_report/src/widget/oqc/tables/psu_serial_numbers_table
 import 'package:zerova_oqc_report/src/widget/oqc/tables/signature_table.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/tables/software_version.dart';
 import 'package:zerova_oqc_report/src/report/pdf_generator.dart';
-import 'package:zerova_oqc_report/src/widget/common/custom_app_bar.dart';
 import 'package:zerova_oqc_report/src/widget/common/main_layout.dart';
 import 'package:zerova_oqc_report/src/widget/upload/upload.dart';
 
@@ -76,6 +69,7 @@ class _OqcReportPageState extends State<OqcReportPage> {
         serialNumber: widget.sn,
         pic: _picController.text,
         date: _dateController.text,
+        context: context,
         psuSerialNumbers: widget.psuSerialNumbers,
         softwareVersion: widget.softwareVersion,
         testFunction: widget.testFunction,
@@ -89,14 +83,15 @@ class _OqcReportPageState extends State<OqcReportPage> {
       if (userProfile.isEmpty) {
         throw Exception('無法獲取用戶目錄');
       }
-      var filePath = path.join(
-          userProfile, 'Pictures', 'Zerova', 'OQC Report', widget.sn);
+      var filePath =
+          path.join(userProfile, 'Pictures', 'Zerova', 'OQC Report', widget.sn);
       final Directory dir = Directory(filePath);
       if (!await dir.exists()) {
         await dir.create(recursive: true);
       }
       // 保存 PDF 文件
-      final file = File("$filePath\\oqc_report_${DateTime.now().millisecondsSinceEpoch}.pdf");
+      final file = File(
+          "$filePath\\oqc_report_${DateTime.now().millisecondsSinceEpoch}.pdf");
       await file.writeAsBytes(await pdf.save());
 
       // 顯示成功消息

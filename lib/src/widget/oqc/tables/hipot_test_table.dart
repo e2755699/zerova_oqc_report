@@ -46,11 +46,11 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text('Left Plug:', style: TableTextStyle.contentStyle),
-                    Text('Input/Output: ${data.leftSideProtectionFunctionTestResult.insulationImpedanceInputOutput.value} MΩ',
+                    Text('Input/Output: ${data.insulationImpedanceTest.insulationImpedanceInputOutput.value} MΩ',
                         style: TableTextStyle.contentStyle),
-                    Text('Input/Ground: ${data.leftSideProtectionFunctionTestResult.insulationImpedanceInputGround.value} MΩ',
+                    Text('Input/Ground: ${data.insulationImpedanceTest.insulationImpedanceInputGround.value} MΩ',
                         style: TableTextStyle.contentStyle),
-                    Text('Output/Ground: ${data.leftSideProtectionFunctionTestResult.insulationImpedanceOutputGround.value} MΩ',
+                    Text('Output/Ground: ${data.insulationImpedanceTest.insulationImpedanceOutputGround.value} MΩ',
                         style: TableTextStyle.contentStyle),
                   ],
                 ),
@@ -60,11 +60,11 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text('Right Plug:', style: TableTextStyle.contentStyle),
-                    Text('Input/Output: ${data.rightSideProtectionFunctionTestResult.insulationImpedanceInputOutput.value} MΩ',
+                    Text('Input/Output: ${data.insulationVoltageTest.insulationImpedanceInputOutput.value} MΩ',
                         style: TableTextStyle.contentStyle),
-                    Text('Input/Ground: ${data.rightSideProtectionFunctionTestResult.insulationImpedanceInputGround.value} MΩ',
+                    Text('Input/Ground: ${data.insulationVoltageTest.insulationImpedanceInputGround.value} MΩ',
                         style: TableTextStyle.contentStyle),
-                    Text('Output/Ground: ${data.rightSideProtectionFunctionTestResult.insulationImpedanceOutputGround.value} MΩ',
+                    Text('Output/Ground: ${data.insulationVoltageTest.insulationImpedanceOutputGround.value} MΩ',
                         style: TableTextStyle.contentStyle),
                   ],
                 ),
@@ -99,11 +99,11 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text('Left Plug:', style: TableTextStyle.contentStyle),
-                    Text('Input/Output: ${data.leftSideProtectionFunctionTestResult.insulationVoltageInputOutput.value} mA',
+                    Text('Input/Output: ${data.insulationImpedanceTest.insulationVoltageInputOutput.value} mA',
                         style: TableTextStyle.contentStyle),
-                    Text('Input/Ground: ${data.leftSideProtectionFunctionTestResult.insulationVoltageInputGround.value} mA',
+                    Text('Input/Ground: ${data.insulationImpedanceTest.insulationVoltageInputGround.value} mA',
                         style: TableTextStyle.contentStyle),
-                    Text('Output/Ground: ${data.leftSideProtectionFunctionTestResult.insulationVoltageOutputGround.value} mA',
+                    Text('Output/Ground: ${data.insulationImpedanceTest.insulationVoltageOutputGround.value} mA',
                         style: TableTextStyle.contentStyle),
                   ],
                 ),
@@ -113,11 +113,11 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text('Right Plug:', style: TableTextStyle.contentStyle),
-                    Text('Input/Output: ${data.rightSideProtectionFunctionTestResult.insulationVoltageInputOutput.value} mA',
+                    Text('Input/Output: ${data.insulationVoltageTest.insulationVoltageInputOutput.value} mA',
                         style: TableTextStyle.contentStyle),
-                    Text('Input/Ground: ${data.rightSideProtectionFunctionTestResult.insulationVoltageInputGround.value} mA',
+                    Text('Input/Ground: ${data.insulationVoltageTest.insulationVoltageInputGround.value} mA',
                         style: TableTextStyle.contentStyle),
-                    Text('Output/Ground: ${data.rightSideProtectionFunctionTestResult.insulationVoltageOutputGround.value} mA',
+                    Text('Output/Ground: ${data.insulationVoltageTest.insulationVoltageOutputGround.value} mA',
                         style: TableTextStyle.contentStyle),
                   ],
                 ),
@@ -173,16 +173,15 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
               style: TableTextStyle.contentStyle,
             )),
             DataCell(_buildInsulationTestingRecord()),
-            DataCell(buildJudgementDropdown(
-              data.leftSideProtectionFunctionTestResult.judgement,
-              (newValue) {
-                if (newValue != null) {
-                  setState(() {
-                    // TODO: Update judgement
-                  });
-                }
-              },
-            )),
+            OqcTableStyle.getDataCell(
+              data.insulationImpedanceTest.insulationImpedanceInputOutput.judgement.name.toUpperCase(),
+              color: data.insulationImpedanceTest.insulationImpedanceInputOutput.judgement == Judgement.pass
+                  ? Colors.green
+                  : data.insulationImpedanceTest.insulationImpedanceInputOutput.judgement == Judgement.fail
+                  ? Colors.red
+                  : Colors.grey,
+              fontWeight: FontWeight.bold,
+            ),
           ]),
           DataRow(cells: [
             const DataCell(Text(
@@ -195,7 +194,7 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
             )),
             DataCell(_buildLeakageTestingRecord()),
             DataCell(buildJudgementDropdown(
-              data.rightSideProtectionFunctionTestResult.judgement,
+              data.insulationVoltageTest.judgement,
               (newValue) {
                 if (newValue != null) {
                   setState(() {

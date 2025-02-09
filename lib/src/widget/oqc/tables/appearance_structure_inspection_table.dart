@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/report/model/appearance_structure_inspection_function_result.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 import 'package:zerova_oqc_report/src/widget/common/table_wrapper.dart';
-import 'package:zerova_oqc_report/src/report/enum/judgement.dart';
 import 'package:zerova_oqc_report/src/widget/common/table_helper.dart';
 import 'package:easy_localization/easy_localization.dart';
 
@@ -47,10 +45,10 @@ class _AppearanceStructureInspectionTableState
             OqcTableStyle.getDataCell(data.testItems[index].description),
             DataCell(buildJudgementDropdown(
               data.testItems[index].judgement,
-                  (newValue) {
+              (newValue) {
                 if (newValue != null) {
                   setState(() {
-                    // TODO: Update judgement
+                    data.testItems[index].updateJudgement(newValue);
                   });
                 }
               },
