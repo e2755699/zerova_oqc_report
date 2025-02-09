@@ -36,7 +36,7 @@ final GoRouter appRouter = GoRouter(
           inputOutputCharacteristics: extra['inputOutputCharacteristics'],
           protectionTestResults: extra['protectionTestResults'],
           psuSerialNumbers: extra['psuSerialNumbers'],
-          packageListResult: extra['packageListResult']?? PackageListResult(),
+          packageListResult: PackageListResult(),
         );
       },
     ),

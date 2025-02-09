@@ -344,10 +344,10 @@ class PdfGenerator {
   static pw.Widget _buildAppearanceInspectionTable(
       AppearanceStructureInspectionFunctionResult data, pw.Font font) {
     final columnWidths = <int, pw.FlexColumnWidth>{
-      0: const pw.FlexColumnWidth(0.5), // No.
-      1: const pw.FlexColumnWidth(1.5), // Item
-      2: const pw.FlexColumnWidth(2.0), // Details
-      3: const pw.FlexColumnWidth(1.0), // Judgement
+      0: const pw.FlexColumnWidth(0.3),  // No. 縮小
+      1: const pw.FlexColumnWidth(1.0),  // Item 適中
+      2: const pw.FlexColumnWidth(3.0),  // Details 加大
+      3: const pw.FlexColumnWidth(0.5),  // Judgement 縮小
     };
 
     return pw.Column(
@@ -370,19 +370,31 @@ class PdfGenerator {
               children: [
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text('No.', style: pw.TextStyle(font: font)),
+                  child: pw.Text('No.', 
+                    style: pw.TextStyle(font: font),
+                    textAlign: pw.TextAlign.center,
+                  ),
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text('Item', style: pw.TextStyle(font: font)),
+                  child: pw.Text('Item', 
+                    style: pw.TextStyle(font: font),
+                    textAlign: pw.TextAlign.center,
+                  ),
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text('Details', style: pw.TextStyle(font: font)),
+                  child: pw.Text('Details', 
+                    style: pw.TextStyle(font: font),
+                    textAlign: pw.TextAlign.center,
+                  ),
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text('Judgement', style: pw.TextStyle(font: font)),
+                  child: pw.Text('Judgement', 
+                    style: pw.TextStyle(font: font),
+                    textAlign: pw.TextAlign.center,
+                  ),
                 ),
               ],
             ),
@@ -393,22 +405,32 @@ class PdfGenerator {
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
                     child: pw.Text('${index + 1}',
-                        style: pw.TextStyle(font: font)),
+                        style: pw.TextStyle(font: font),
+                        textAlign: pw.TextAlign.center,
+                    ),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
                     child: pw.Text(data.testItems[index].name,
-                        style: pw.TextStyle(font: font)),
+                        style: pw.TextStyle(font: font, fontSize: 10),
+                        textAlign: pw.TextAlign.left,
+                    ),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
-                    child: pw.Text(data.testItems[index].description,
-                        style: pw.TextStyle(font: font)),
+                    child: pw.Text(
+                      AppearanceStructureInspectionFunctionResult.descriptionMapping[data.testItems[index].name] ?? '',
+                      style: pw.TextStyle(font: font, fontSize: 8),
+                      textAlign: pw.TextAlign.left,
+                      maxLines: 5,
+                    ),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
                     child: pw.Text(data.testItems[index].judgement,
-                        style: pw.TextStyle(font: font)),
+                        style: pw.TextStyle(font: font),
+                        textAlign: pw.TextAlign.center,
+                    ),
                   ),
                 ],
               ),
@@ -822,8 +844,9 @@ class PdfGenerator {
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
-                    child: pw.Text(data.datas[index].translationKey.tr(),
-                        style: pw.TextStyle(font: font)),
+                    child: pw.Text(
+                      data.getEnglishText(data.datas[index].translationKey),
+                      style: pw.TextStyle(font: font)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),

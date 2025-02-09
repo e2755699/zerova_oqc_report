@@ -11,29 +11,29 @@ class PackageListResult {
 
   static final List<PackageListResultMeasurement> defaultDatas = [
     PackageListResultMeasurement(
-      spec: 2,
-      key: '1',
-      translationKey: 'packagingItem1',
+      spec: 1,
+      key: 1,
+      translationKey: 'rfid_card',
     ),
     PackageListResultMeasurement(
-      spec: 1,
-      key: '2',
-      translationKey: 'packagingItem2',
+      spec: 2,
+      key: 2,
+      translationKey: 'certificate_card',
     ),
     PackageListResultMeasurement(
       spec: 22,
-      key: '3',
-      translationKey: 'packagingItem3',
+      key: 3,
+      translationKey: 'bolts_cover',
     ),
     PackageListResultMeasurement(
       spec: 4,
-      key: '4',
-      translationKey: 'packagingItem4',
+      key: 4,
+      translationKey: 'cabinet_key',
     ),
     PackageListResultMeasurement(
       spec: 1,
-      key: '5',
-      translationKey: 'packagingItem5',
+      key: 5,
+      translationKey: 'ac_breaker_key',
     ),
   ];
 
@@ -45,22 +45,37 @@ class PackageListResult {
     List<String>? header,
     List<List<String>>? rows,
     List<PackageListResultMeasurement>? datas,
-  }) : this.header = header ?? defaultHeader,
-       this.rows = rows ?? [],
-       this.datas = datas ?? defaultDatas;
+  })  : this.header = header ?? defaultHeader,
+        this.rows = rows ?? [],
+        this.datas = datas ?? defaultDatas;
 
   List<List<String>> get testItems {
-    return datas.map((data) => [
-      data.translationKey.tr(),
-      data.spec.toString(),
-      data.isCheck.value ? '✓' : ''
-    ]).toList();
+    return datas
+        .map((data) => [
+              data.translationKey.tr(),
+              data.spec.toString(),
+              data.isCheck.value ? '✓' : ''
+            ])
+        .toList();
+  }
+
+  static final Map<String, String> englishMapping = {
+    'certificate_card': 'Certificate Card',
+    'rfid_card': 'RFID Card',
+    'bolts_cover': 'Bolts Cover',
+    'cabinet_key': "Cabinet's key",
+    'ac_breaker_key': "AC Breaker's key",
+    'others': 'Others',
+  };
+
+  String getEnglishText(String key) {
+    return englishMapping[key] ?? key;
   }
 }
 
 class PackageListResultMeasurement {
   final int spec;
-  final String key;
+  final int key;
   final String translationKey;
   final ValueNotifier<bool> isCheck;
 
