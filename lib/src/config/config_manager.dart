@@ -19,10 +19,17 @@ class ConfigManager {
 
       // 如果环境变量不存在，尝试从配置文件读取
       if (_config!.values.any((value) => value == null)) {
-        final configFile = File('config.json');
-        if (await configFile.exists()) {
-          final jsonString = await configFile.readAsString();
+        try {
+          final jsonString = await rootBundle.loadString('assets/config.json');
           _config = json.decode(jsonString);
+        } catch (e) {
+          print('Error loading config from assets: $e');
+          // 如果从assets加载失败，尝试从当前目录读取
+          final configFile = File('config.json');
+          if (await configFile.exists()) {
+            final jsonString = await configFile.readAsString();
+            _config = json.decode(jsonString);
+          }
         }
       }
 
