@@ -80,12 +80,15 @@ class StyledDataTable extends StatelessWidget {
   final double? dataRowMinHeight;
   final double? dataRowMaxHeight;
 
+  final double? columnSpacing;
+
   const StyledDataTable({
     super.key,
     required this.columns,
     required this.rows,
     this.dataRowMinHeight,
     this.dataRowMaxHeight,
+    this.columnSpacing,
   });
 
   @override
@@ -95,6 +98,7 @@ class StyledDataTable extends StatelessWidget {
         dataRowMinHeight: dataRowMinHeight,
         // 设置数据行的最小高度
         dataRowMaxHeight: dataRowMaxHeight,
+        columnSpacing: columnSpacing,
         // 设置数据行的最大高度
         border: TableBorder.all(
           color: AppColors.lightBlueColor,

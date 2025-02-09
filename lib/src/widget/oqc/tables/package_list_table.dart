@@ -12,22 +12,40 @@ import 'package:zerova_oqc_report/src/widget/common/image_grid.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'dart:io';
 
-class PackageListTable extends StatelessWidget {
+class PackageListTable extends StatefulWidget {
   final String sn;
   final PackageListResult data;
 
   const PackageListTable(this.data, {super.key, required this.sn});
 
-  List<String> get headers => data.header;
+  @override
+  State<PackageListTable> createState() => _PackageListTableState();
+
+  static Future<pw.ImageProvider?> imageFromPath(String path) async {
+    try {
+      final file = File(path);
+      if (await file.exists()) {
+        final bytes = await file.readAsBytes();
+        return pw.MemoryImage(bytes);
+      }
+    } catch (e) {
+      debugPrint('Error loading image: $e');
+    }
+    return null;
+  }
+}
+
+class _PackageListTableState extends State<PackageListTable> {
+  List<String> get headers => widget.data.header;
 
   @override
   Widget build(BuildContext context) {
-
     return StyledCard(
       title: 'Packaging Checklist',
       titleAction: CameraButton(
-        sn: sn,
+        sn: widget.sn,
         packagingOrAttachment: 0,
+        callBack: () => setState(() {}),
       ),
       content: Column(
         children: [
@@ -42,7 +60,7 @@ class PackageListTable extends StatelessWidget {
                         ))
                     .toList(),
               ),
-              ...data.datas.asMap().entries.map((entry) {
+              ...widget.data.datas.asMap().entries.map((entry) {
                 return TableRow(
                   children: [
                     Padding(
@@ -82,25 +100,12 @@ class PackageListTable extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           ImageGrid(
-            imagePath: 'Selected Photos\\$sn\\Packaging',
+            imagePath: 'Selected Photos/${widget.sn}/Packaging',
             columns: 4,
             cellHeight: 100,
           ),
         ],
       ),
     );
-  }
-
-  static Future<pw.ImageProvider?> imageFromPath(String path) async {
-    try {
-      final file = File(path);
-      if (await file.exists()) {
-        final bytes = await file.readAsBytes();
-        return pw.MemoryImage(bytes);
-      }
-    } catch (e) {
-      debugPrint('Error loading image: $e');
-    }
-    return null;
   }
 }

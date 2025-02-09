@@ -5,11 +5,13 @@ import 'package:easy_localization/easy_localization.dart';
 class CameraButton extends StatelessWidget {
   final String sn;
   final int packagingOrAttachment;
+  final VoidCallback? callBack;
 
   const CameraButton({
     super.key,
     required this.sn,
     required this.packagingOrAttachment,
+    this.callBack,
   });
 
   @override
@@ -24,6 +26,8 @@ class CameraButton extends StatelessWidget {
         onPressed: () => context.push('/camera', extra: {
           'sn': sn,
           'packagingOrAttachment': packagingOrAttachment,
+        }).then((value) {
+          callBack?.call();
         }),
         tooltip: context.tr('open_camera'),
         iconSize: 28,
@@ -31,4 +35,4 @@ class CameraButton extends StatelessWidget {
       ),
     );
   }
-} 
+}

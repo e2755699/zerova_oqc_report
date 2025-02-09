@@ -4,7 +4,9 @@ import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
+import 'package:zerova_oqc_report/route/app_router.dart';
 import 'package:zerova_oqc_report/src/repo/sharepoint_uploader.dart';
+import 'package:zerova_oqc_report/src/widget/oqc/tables/package_list_table.dart';
 
 class UploadProgressDialog extends StatefulWidget {
   final int uploadOrDownload;
@@ -116,11 +118,10 @@ class _UploadProgressDialogState extends State<UploadProgressDialog> {
       ),
       actionsAlignment: MainAxisAlignment.center, // **讓按鈕置中**
       actions: [
-        if (!isUploading)
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context), // 手動關閉視窗
-            child: Text("關閉"),
-          ),
+        ElevatedButton(
+          onPressed: () => Navigator.pop(context), // 手動關閉視窗
+          child: Text("關閉"),
+        ),
       ],
     );
   }

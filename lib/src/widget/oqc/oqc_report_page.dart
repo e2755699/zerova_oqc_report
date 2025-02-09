@@ -79,7 +79,19 @@ class _OqcReportPageState extends State<OqcReportPage> {
       );
 
       // 獲取用戶的 Pictures/OQC report 目錄
-      final userProfile = Platform.environment['USERPROFILE'] ?? '';
+
+      var userProfile = Platform.environment['USERPROFILE'] ?? '';
+      if (Platform.isMacOS) {
+        // macOS 路徑
+        userProfile = Platform.environment['HOME'] ?? '';
+      } else if (Platform.isWindows) {
+        // Windows 路徑
+        userProfile = Platform.environment['USERPROFILE'] ?? '';
+      } else {
+        // 其他系統（如 Linux）
+        userProfile = Platform.environment['HOME'] ?? '';
+      }
+
       if (userProfile.isEmpty) {
         throw Exception('無法獲取用戶目錄');
       }
@@ -91,7 +103,7 @@ class _OqcReportPageState extends State<OqcReportPage> {
       }
       // 保存 PDF 文件
       final file = File(
-          "$filePath\\oqc_report_${DateTime.now().millisecondsSinceEpoch}.pdf");
+          "$filePath/oqc_report_${DateTime.now().millisecondsSinceEpoch}.pdf");
       await file.writeAsBytes(await pdf.save());
 
       // 顯示成功消息

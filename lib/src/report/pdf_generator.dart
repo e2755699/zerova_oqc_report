@@ -1116,14 +1116,39 @@ class PdfGenerator {
     );
   }
 
+  static Future<String> _getPicturesPath() async {
+    if (Platform.isMacOS) {
+      // macOS 路徑
+      return path.join(
+        Platform.environment['HOME'] ?? '',
+        'Pictures',
+        'Zerova'
+      );
+    } else if (Platform.isWindows) {
+      // Windows 路徑
+      return path.join(
+        Platform.environment['USERPROFILE'] ?? '',
+        'Pictures',
+        'Zerova'
+      );
+    } else {
+      // 其他系統（如 Linux）
+      return path.join(
+        Platform.environment['HOME'] ?? '',
+        'Pictures',
+        'Zerova'
+      );
+    }
+  }
+
   static Future<List<pw.Widget>> _loadPackageListImages(String sn) async {
     try {
-      final userProfile = Platform.environment['USERPROFILE'] ?? '';
-      if (userProfile.isEmpty) {
+      final picturesPath = await _getPicturesPath();
+      if (picturesPath.isEmpty) {
         return [];
       }
 
-      final directory = Directory(path.join(userProfile, 'Pictures', 'Zerova',
+      final directory = Directory(path.join(picturesPath,
           'Selected Photos', sn, 'Packaging'));
       final images = <pw.Widget>[];
 
@@ -1175,12 +1200,12 @@ class PdfGenerator {
 
   static Future<List<pw.Widget>> _loadAttachmentImages(String sn) async {
     try {
-      final userProfile = Platform.environment['USERPROFILE'] ?? '';
-      if (userProfile.isEmpty) {
+      final picturesPath = await _getPicturesPath();
+      if (picturesPath.isEmpty) {
         return [];
       }
 
-      final directory = Directory(path.join(userProfile, 'Pictures', 'Zerova',
+      final directory = Directory(path.join(picturesPath,
           'Selected Photos', sn, 'Attachment'));
       final images = <pw.Widget>[];
 

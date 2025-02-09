@@ -27,47 +27,72 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
   }
 
   Widget _buildInsulationTestingRecord() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+    return SizedBox(
+      width: 400,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text(
-            'Insulation impedance >10MΩ',
-            style: TableTextStyle.contentStyle,
-          ),
-          const SizedBox(height: 8),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Left Plug:', style: TableTextStyle.contentStyle),
-                    Text('Input/Output: ${data.insulationImpedanceTest.insulationImpedanceInputOutput.value} MΩ',
-                        style: TableTextStyle.contentStyle),
-                    Text('Input/Ground: ${data.insulationImpedanceTest.insulationImpedanceInputGround.value} MΩ',
-                        style: TableTextStyle.contentStyle),
-                    Text('Output/Ground: ${data.insulationImpedanceTest.insulationImpedanceOutputGround.value} MΩ',
-                        style: TableTextStyle.contentStyle),
-                  ],
-                ),
+          Center(
+            child: Text(
+              'Insulation impedance >10MΩ',
+              style: TextStyle(
+                fontSize: TableTextStyle.contentStyle.fontSize,
               ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Right Plug:', style: TableTextStyle.contentStyle),
-                    Text('Input/Output: ${data.insulationVoltageTest.insulationImpedanceInputOutput.value} MΩ',
-                        style: TableTextStyle.contentStyle),
-                    Text('Input/Ground: ${data.insulationVoltageTest.insulationImpedanceInputGround.value} MΩ',
-                        style: TableTextStyle.contentStyle),
-                    Text('Output/Ground: ${data.insulationVoltageTest.insulationImpedanceOutputGround.value} MΩ',
-                        style: TableTextStyle.contentStyle),
-                  ],
-                ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          Table(
+            border: TableBorder.all(),
+            columnWidths: const {
+              0: FlexColumnWidth(1),
+              1: FlexColumnWidth(1),
+            },
+            children: [
+              TableRow(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Left Plug:',
+                            style: TableTextStyle.contentStyle.copyWith(
+                              fontWeight: FontWeight.bold,
+                            )),
+                        Text(
+                            'Input/Output: ${data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputOutput.value.toStringAsFixed(2)} MΩ',
+                            style: TableTextStyle.contentStyle),
+                        Text(
+                            'Input/Ground: ${data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputGround.value.toStringAsFixed(2)} MΩ',
+                            style: TableTextStyle.contentStyle),
+                        Text(
+                            'Output/Ground: ${data.hiPotTestResult.insulationImpedanceTest.leftInsulationOutputGround.value.toStringAsFixed(2)} MΩ',
+                            style: TableTextStyle.contentStyle),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Right Plug:',
+                            style: TableTextStyle.contentStyle.copyWith(
+                              fontWeight: FontWeight.bold,
+                            )),
+                        Text(
+                            'Input/Output: ${data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputOutput.value.toStringAsFixed(2)} MΩ',
+                            style: TableTextStyle.contentStyle),
+                        Text(
+                            'Input/Ground: ${data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputGround.value.toStringAsFixed(2)} MΩ',
+                            style: TableTextStyle.contentStyle),
+                        Text(
+                            'Output/Ground: ${data.hiPotTestResult.insulationImpedanceTest.rightInsulationOutputGround.value.toStringAsFixed(2)} MΩ',
+                            style: TableTextStyle.contentStyle),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -77,55 +102,75 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
   }
 
   Widget _buildLeakageTestingRecord() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Center(
+          child: Text(
             'Leakage current <10mA',
             style: TextStyle(
               fontSize: TableTextStyle.contentStyle.fontSize,
               color: Colors.red,
             ),
+            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 8),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Left Plug:', style: TableTextStyle.contentStyle),
-                    Text('Input/Output: ${data.insulationImpedanceTest.insulationVoltageInputOutput.value} mA',
-                        style: TableTextStyle.contentStyle),
-                    Text('Input/Ground: ${data.insulationImpedanceTest.insulationVoltageInputGround.value} mA',
-                        style: TableTextStyle.contentStyle),
-                    Text('Output/Ground: ${data.insulationImpedanceTest.insulationVoltageOutputGround.value} mA',
-                        style: TableTextStyle.contentStyle),
-                  ],
+        ),
+        Table(
+          border: TableBorder.all(),
+          columnWidths: const {
+            0: FlexColumnWidth(1),
+            1: FlexColumnWidth(1),
+          },
+          children: [
+            TableRow(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Left Plug:',
+                          style: TableTextStyle.contentStyle.copyWith(
+                            fontWeight: FontWeight.bold,
+                          )),
+                      Text(
+                          'Input/Output: ${data.hiPotTestResult.insulationVoltageTest.leftInsulationInputOutput.value.toStringAsFixed(2)} mA',
+                          style: TableTextStyle.contentStyle),
+                      Text(
+                          'Input/Ground: ${data.hiPotTestResult.insulationVoltageTest.leftInsulationInputGround.value.toStringAsFixed(2)} mA',
+                          style: TableTextStyle.contentStyle),
+                      Text(
+                          'Output/Ground: ${data.hiPotTestResult.insulationVoltageTest.leftInsulationOutputGround.value.toStringAsFixed(2)} mA',
+                          style: TableTextStyle.contentStyle),
+                    ],
+                  ),
                 ),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Right Plug:', style: TableTextStyle.contentStyle),
-                    Text('Input/Output: ${data.insulationVoltageTest.insulationVoltageInputOutput.value} mA',
-                        style: TableTextStyle.contentStyle),
-                    Text('Input/Ground: ${data.insulationVoltageTest.insulationVoltageInputGround.value} mA',
-                        style: TableTextStyle.contentStyle),
-                    Text('Output/Ground: ${data.insulationVoltageTest.insulationVoltageOutputGround.value} mA',
-                        style: TableTextStyle.contentStyle),
-                  ],
+                Container(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Right Plug:',
+                          style: TableTextStyle.contentStyle.copyWith(
+                            fontWeight: FontWeight.bold,
+                          )),
+                      Text(
+                          'Input/Output: ${data.hiPotTestResult.insulationVoltageTest.rightInsulationInputOutput.value.toStringAsFixed(2)} mA',
+                          style: TableTextStyle.contentStyle),
+                      Text(
+                          'Input/Ground: ${data.hiPotTestResult.insulationVoltageTest.rightInsulationInputGround.value.toStringAsFixed(2)} mA',
+                          style: TableTextStyle.contentStyle),
+                      Text(
+                          'Output/Ground: ${data.hiPotTestResult.insulationVoltageTest.rightInsulationOutputGround.value.toStringAsFixed(2)} mA',
+                          style: TableTextStyle.contentStyle),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
-      ),
+              ],
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -135,7 +180,8 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
       title: 'Hi-Pot Test',
       content: StyledDataTable(
         dataRowMinHeight: 200,
-        dataRowMaxHeight: 300,
+        dataRowMaxHeight: 230,
+        columnSpacing: 30,
         columns: const [
           DataColumn(
             label: Text(
@@ -173,15 +219,15 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
               style: TableTextStyle.contentStyle,
             )),
             DataCell(_buildInsulationTestingRecord()),
-            OqcTableStyle.getDataCell(
-              data.insulationImpedanceTest.insulationImpedanceInputOutput.judgement.name.toUpperCase(),
-              color: data.insulationImpedanceTest.insulationImpedanceInputOutput.judgement == Judgement.pass
-                  ? Colors.green
-                  : data.insulationImpedanceTest.insulationImpedanceInputOutput.judgement == Judgement.fail
-                  ? Colors.red
-                  : Colors.grey,
-              fontWeight: FontWeight.bold,
-            ),
+            DataCell(Text(
+              data.hiPotTestResult.judgement,
+              style: TableTextStyle.contentStyle.copyWith(
+                color: data.hiPotTestResult.judgement == "OK"
+                    ? Colors.green
+                    : Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            )),
           ]),
           DataRow(cells: [
             const DataCell(Text(
@@ -193,49 +239,18 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
               style: TableTextStyle.contentStyle,
             )),
             DataCell(_buildLeakageTestingRecord()),
-            DataCell(buildJudgementDropdown(
-              data.insulationVoltageTest.judgement,
-              (newValue) {
-                if (newValue != null) {
-                  setState(() {
-                    // TODO: Update judgement
-                  });
-                }
-              },
+            DataCell(Text(
+              data.hiPotTestResult.judgement,
+              style: TableTextStyle.contentStyle.copyWith(
+                color: data.hiPotTestResult.judgement == "OK"
+                    ? Colors.green
+                    : Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
             )),
           ]),
         ],
       ),
-    );
-  }
-
-  Future<void> _generatePdf(BuildContext context) async {
-    final pdf = pw.Document();
-
-    // 添加 PDF 表格
-    pdf.addPage(
-      pw.Page(
-        build: (pw.Context context) {
-          return pw.Table.fromTextArray(
-            border: pw.TableBorder.all(),
-            headers: ['No.', 'S/N'],
-            data: List.generate(
-              data.specialFunctionTestResult.testItems.length,
-              (index) => [
-                (index + 1).toString(),
-                data.specialFunctionTestResult.testItems[index].name,
-                data.specialFunctionTestResult.testItems[index].description,
-                data.specialFunctionTestResult.testItems[index].judgement,
-              ],
-            ),
-          );
-        },
-      ),
-    );
-
-    // 預覽 PDF
-    await Printing.layoutPdf(
-      onLayout: (format) async => pdf.save(),
     );
   }
 }

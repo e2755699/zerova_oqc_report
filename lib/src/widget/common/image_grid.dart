@@ -28,12 +28,41 @@ class _ImageGridState extends State<ImageGrid> {
     _loadImages();
   }
 
-  void _loadImages() {
-    final directory = Directory(path.join(
+  @override
+  didUpdateWidget(ImageGrid oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _loadImages();
+  }
+
+  Future<String> _getPicturesPath() async {
+    if (Platform.isMacOS) {
+      // macOS 路徑
+      return path.join(
+        Platform.environment['HOME'] ?? '',
+        'Pictures',
+        'Zerova'
+      );
+    } else if (Platform.isWindows) {
+      // Windows 路徑
+      return path.join(
         Platform.environment['USERPROFILE'] ?? '',
         'Pictures',
-        'Zerova',
-        widget.imagePath));
+        'Zerova'
+      );
+    } else {
+      // 其他系統（如 Linux）
+      return path.join(
+        Platform.environment['HOME'] ?? '',
+        'Pictures',
+        'Zerova'
+      );
+    }
+  }
+
+  void _loadImages() async {
+    final picturesPath = await _getPicturesPath();
+    final directory = Directory(path.join(picturesPath, widget.imagePath));
+    
     if (directory.existsSync()) {
       final files = directory
           .listSync()
