@@ -730,6 +730,13 @@ class PdfGenerator {
 
   static pw.Widget _buildHiPotTestTable(
       ProtectionFunctionTestResult data, pw.Font font) {
+    final columnWidths = <int, pw.FlexColumnWidth>{
+      0: const pw.FlexColumnWidth(0.5),  // No.
+      1: const pw.FlexColumnWidth(1.5),  // Test Items
+      2: const pw.FlexColumnWidth(3.0),  // Testing Record
+      3: const pw.FlexColumnWidth(1.0),  // Judgement
+    };
+
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
@@ -742,55 +749,251 @@ class PdfGenerator {
           ),
         ),
         pw.SizedBox(height: 10),
-        pw.Column(
+        pw.Table(
+          columnWidths: columnWidths,
+          border: pw.TableBorder.all(),
           children: [
-            pw.Text(
-              'Insulation impedance >10MΩ',
-              style: pw.TextStyle(font: font),
-            ),
-            pw.SizedBox(height: 8),
-            pw.Row(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
+            // Header Row
+            pw.TableRow(
               children: [
-                pw.Expanded(
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(5),
+                  child: pw.Text('No.',
+                      style: pw.TextStyle(font: font),
+                      textAlign: pw.TextAlign.center),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(5),
+                  child: pw.Text('Test Items',
+                      style: pw.TextStyle(font: font),
+                      textAlign: pw.TextAlign.center),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(5),
+                  child: pw.Text('Testing Record',
+                      style: pw.TextStyle(font: font),
+                      textAlign: pw.TextAlign.center),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(5),
+                  child: pw.Text('Judgement',
+                      style: pw.TextStyle(font: font),
+                      textAlign: pw.TextAlign.center),
+                ),
+              ],
+            ),
+            // Insulation Impedance Test Row
+            pw.TableRow(
+              children: [
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(5),
+                  child: pw.Text('1',
+                      style: pw.TextStyle(font: font),
+                      textAlign: pw.TextAlign.center),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(5),
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text('Left Plug:', style: pw.TextStyle(font: font)),
-                      pw.Text(
-                        'Input/Output: ${data.insulationImpedanceTest.insulationImpedanceInputOutput.value} MΩ',
-                        style: pw.TextStyle(font: font),
+                      pw.Text('Insulation Impedance Test.',
+                          style: pw.TextStyle(font: font)),
+                      pw.SizedBox(height: 5),
+                      pw.Text('Apply a DC Voltage:',
+                          style: pw.TextStyle(font: font)),
+                      pw.Text('a) Between each circuit.',
+                          style: pw.TextStyle(font: font)),
+                      pw.Text('b) Between each of the\nindependent circuits and the\nground.',
+                          style: pw.TextStyle(font: font)),
+                    ],
+                  ),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(5),
+                  child: pw.Column(
+                    mainAxisAlignment: pw.MainAxisAlignment.center,
+                    children: [
+                      pw.Center(
+                        child: pw.Text(
+                          'Insulation impedance >10MΩ',
+                          style: pw.TextStyle(font: font),
+                          textAlign: pw.TextAlign.center,
+                        ),
                       ),
-                      pw.Text(
-                        'Input/Ground: ${data.insulationImpedanceTest.insulationImpedanceInputGround.value} MΩ',
-                        style: pw.TextStyle(font: font),
-                      ),
-                      pw.Text(
-                        'Output/Ground: ${data.insulationImpedanceTest.insulationImpedanceOutputGround.value} MΩ',
-                        style: pw.TextStyle(font: font),
+                      pw.Table(
+                        border: pw.TableBorder.all(),
+                        columnWidths: {
+                          0: const pw.FlexColumnWidth(1),
+                          1: const pw.FlexColumnWidth(1),
+                        },
+                        children: [
+                          pw.TableRow(
+                            children: [
+                              pw.Container(
+                                padding: const pw.EdgeInsets.all(8),
+                                child: pw.Column(
+                                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                                  children: [
+                                    pw.Text('Left Plug:',
+                                        style: pw.TextStyle(
+                                          font: font,
+                                          fontWeight: pw.FontWeight.bold,
+                                        )),
+                                    pw.Text(
+                                        'Input/Output: ${data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputOutput.value.toStringAsFixed(2)} MΩ',
+                                        style: pw.TextStyle(font: font)),
+                                    pw.Text(
+                                        'Input/Ground: ${data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputGround.value.toStringAsFixed(2)} MΩ',
+                                        style: pw.TextStyle(font: font)),
+                                    pw.Text(
+                                        'Output/Ground: ${data.hiPotTestResult.insulationImpedanceTest.leftInsulationOutputGround.value.toStringAsFixed(2)} MΩ',
+                                        style: pw.TextStyle(font: font)),
+                                  ],
+                                ),
+                              ),
+                              pw.Container(
+                                padding: const pw.EdgeInsets.all(8),
+                                child: pw.Column(
+                                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                                  children: [
+                                    pw.Text('Right Plug:',
+                                        style: pw.TextStyle(
+                                          font: font,
+                                          fontWeight: pw.FontWeight.bold,
+                                        )),
+                                    pw.Text(
+                                        'Input/Output: ${data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputOutput.value.toStringAsFixed(2)} MΩ',
+                                        style: pw.TextStyle(font: font)),
+                                    pw.Text(
+                                        'Input/Ground: ${data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputGround.value.toStringAsFixed(2)} MΩ',
+                                        style: pw.TextStyle(font: font)),
+                                    pw.Text(
+                                        'Output/Ground: ${data.hiPotTestResult.insulationImpedanceTest.rightInsulationOutputGround.value.toStringAsFixed(2)} MΩ',
+                                        style: pw.TextStyle(font: font)),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
-                pw.Expanded(
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(5),
+                  child: pw.Text(data.hiPotTestResult.judgement,
+                      style: pw.TextStyle(font: font),
+                      textAlign: pw.TextAlign.center),
+                ),
+              ],
+            ),
+            // Insulation Voltage Test Row
+            pw.TableRow(
+              children: [
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(5),
+                  child: pw.Text('2',
+                      style: pw.TextStyle(font: font),
+                      textAlign: pw.TextAlign.center),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(5),
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text('Right Plug:', style: pw.TextStyle(font: font)),
-                      pw.Text(
-                        'Input/Output: ${data.insulationVoltageTest.insulationImpedanceInputOutput.value} MΩ',
-                        style: pw.TextStyle(font: font),
+                      pw.Text('Insulation Voltage Test.',
+                          style: pw.TextStyle(font: font)),
+                      pw.SizedBox(height: 5),
+                      pw.Text('Apply a DC Voltage:',
+                          style: pw.TextStyle(font: font)),
+                      pw.Text('a) Between each circuit.',
+                          style: pw.TextStyle(font: font)),
+                      pw.Text('b) Between each of the\nindependent circuits and the\nground.',
+                          style: pw.TextStyle(font: font)),
+                    ],
+                  ),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(5),
+                  child: pw.Column(
+                    mainAxisAlignment: pw.MainAxisAlignment.center,
+                    children: [
+                      pw.Center(
+                        child: pw.Text(
+                          'Leakage current <10mA',
+                          style: pw.TextStyle(
+                            font: font,
+                            color: PdfColors.red,
+                          ),
+                          textAlign: pw.TextAlign.center,
+                        ),
                       ),
-                      pw.Text(
-                        'Input/Ground: ${data.insulationVoltageTest.insulationImpedanceInputGround.value} MΩ',
-                        style: pw.TextStyle(font: font),
-                      ),
-                      pw.Text(
-                        'Output/Ground: ${data.insulationVoltageTest.insulationImpedanceOutputGround.value} MΩ',
-                        style: pw.TextStyle(font: font),
+                      pw.Table(
+                        border: pw.TableBorder.all(),
+                        columnWidths: {
+                          0: const pw.FlexColumnWidth(1),
+                          1: const pw.FlexColumnWidth(1),
+                        },
+                        children: [
+                          pw.TableRow(
+                            children: [
+                              pw.Container(
+                                padding: const pw.EdgeInsets.all(8),
+                                child: pw.Column(
+                                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                                  children: [
+                                    pw.Text('Left Plug:',
+                                        style: pw.TextStyle(
+                                          font: font,
+                                          fontWeight: pw.FontWeight.bold,
+                                        )),
+                                    pw.Text(
+                                        'Input/Output: ${data.hiPotTestResult.insulationVoltageTest.leftInsulationInputOutput.value.toStringAsFixed(2)} mA',
+                                        style: pw.TextStyle(font: font)),
+                                    pw.Text(
+                                        'Input/Ground: ${data.hiPotTestResult.insulationVoltageTest.leftInsulationInputGround.value.toStringAsFixed(2)} mA',
+                                        style: pw.TextStyle(font: font)),
+                                    pw.Text(
+                                        'Output/Ground: ${data.hiPotTestResult.insulationVoltageTest.leftInsulationOutputGround.value.toStringAsFixed(2)} mA',
+                                        style: pw.TextStyle(font: font)),
+                                  ],
+                                ),
+                              ),
+                              pw.Container(
+                                padding: const pw.EdgeInsets.all(8),
+                                child: pw.Column(
+                                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                                  children: [
+                                    pw.Text('Right Plug:',
+                                        style: pw.TextStyle(
+                                          font: font,
+                                          fontWeight: pw.FontWeight.bold,
+                                        )),
+                                    pw.Text(
+                                        'Input/Output: ${data.hiPotTestResult.insulationVoltageTest.rightInsulationInputOutput.value.toStringAsFixed(2)} mA',
+                                        style: pw.TextStyle(font: font)),
+                                    pw.Text(
+                                        'Input/Ground: ${data.hiPotTestResult.insulationVoltageTest.rightInsulationInputGround.value.toStringAsFixed(2)} mA',
+                                        style: pw.TextStyle(font: font)),
+                                    pw.Text(
+                                        'Output/Ground: ${data.hiPotTestResult.insulationVoltageTest.rightInsulationOutputGround.value.toStringAsFixed(2)} mA',
+                                        style: pw.TextStyle(font: font)),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ],
                   ),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(5),
+                  child: pw.Text(data.hiPotTestResult.judgement,
+                      style: pw.TextStyle(font: font),
+                      textAlign: pw.TextAlign.center),
                 ),
               ],
             ),
@@ -934,9 +1137,9 @@ class PdfGenerator {
             .toList();
 
         // 將圖片分組為每組3張
-        for (var i = 0; i < imageFiles.length; i += 3) {
+        for (var i = 0; i < imageFiles.length; i += 2) {
           final rowImages = <pw.Widget>[];
-          for (var j = 0; j < 3 && i + j < imageFiles.length; j++) {
+          for (var j = 0; j < 5 && i + j < imageFiles.length; j++) {
             final image = await _imageFromPath(imageFiles[i + j].path);
             if (image != null) {
               rowImages.add(
@@ -991,9 +1194,9 @@ class PdfGenerator {
             .toList();
 
         // 將圖片分組為每組3張
-        for (var i = 0; i < imageFiles.length; i += 3) {
+        for (var i = 0; i < imageFiles.length; i += 2) {
           final rowImages = <pw.Widget>[];
-          for (var j = 0; j < 3 && i + j < imageFiles.length; j++) {
+          for (var j = 0; j < 5 && i + j < imageFiles.length; j++) {
             final image = await _imageFromPath(imageFiles[i + j].path);
             if (image != null) {
               rowImages.add(
