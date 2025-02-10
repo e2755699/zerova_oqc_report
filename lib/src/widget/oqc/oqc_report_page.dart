@@ -145,7 +145,7 @@ class _OqcReportPageState extends State<OqcReportPage> {
           startUpload(context);
         },
         icon: const Icon(Icons.upload_file),
-        label: const Text('Submit'),
+        label: Text(context.tr('submit')),
         backgroundColor: const Color(0xFFF8F9FD),
       ),
       body: Stack(
@@ -178,7 +178,10 @@ class _OqcReportPageState extends State<OqcReportPage> {
                   AttachmentTable(
                     sn: widget.sn,
                   ),
-                  SignatureTable(picController:_picController, dateController: _dateController,),
+                  SignatureTable(
+                    picController: _picController,
+                    dateController: _dateController,
+                  ),
                 ],
               ),
             ),

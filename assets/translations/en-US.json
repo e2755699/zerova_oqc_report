@@ -21,5 +21,6 @@
   "please_input_sn": "Please input serial number",
   "cancel": "Cancel",
   "submit": "Submit",
-  "submit_success": "SN: {0}, Model: {1} submitted"
+  "submit_success": "SN: {}, Model: {} submitted",
+  "submit_fail": "SN: {}, Model: {} submission failed"
 }

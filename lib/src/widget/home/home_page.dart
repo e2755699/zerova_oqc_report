@@ -11,7 +11,7 @@ import 'package:zerova_oqc_report/src/report/model/protection_function_test_resu
 import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/report/model/software_version.dart';
 import 'package:zerova_oqc_report/src/report/model/appearance_structure_inspection_function_result.dart';
-import 'package:zerova_oqc_report/src/widget/home/Input_sn_dialog.dart';
+import 'package:zerova_oqc_report/src/widget/home/input_model_name_and_sn_dialog.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/oqc_report_page.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:zerova_oqc_report/src/widget/common/custom_app_bar.dart';
@@ -172,7 +172,7 @@ mixin LoadFileHelper {
 
 
     //load json from User/Test Result/Zerova/$sn/...
-   /* var filePath = '';
+    var filePath = '';
     if (Platform.isMacOS) {
       // macOS 路徑
       filePath = path.join(
@@ -217,13 +217,13 @@ mixin LoadFileHelper {
       'protectionTestResults': protectionTestResults,
     });
     return ;
-*/
+
 
     //call api
     final apiClient = OqcApiClient();
 
     // 將 model 和 serialNumber 打印到 console
-    Future.wait<List<dynamic>>([
+    await Future.wait<List<dynamic>>([
       apiClient.fetchAndSaveKeyPartData(sn),
       apiClient.fetchAndSaveOqcData(sn),
       apiClient.fetchAndSaveTestData(sn)

@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
+import 'package:zerova_oqc_report/src/widget/common/table_wrapper.dart';
 
 class SignatureTable extends StatefulWidget {
   final TextEditingController _picController;
@@ -8,8 +9,8 @@ class SignatureTable extends StatefulWidget {
 
   SignatureTable(
       {super.key,
-        TextEditingController? picController,
-        TextEditingController? dateController})
+      TextEditingController? picController,
+      TextEditingController? dateController})
       : _picController = picController ?? TextEditingController(),
         _dateController = dateController ?? TextEditingController();
 
@@ -46,15 +47,15 @@ class _SignatureTableState extends State<SignatureTable> {
 
   @override
   Widget build(BuildContext context) {
-    return StyledCard(
+    return TableWrapper(
       title: 'Signature',
       content: Column(
         children: [
           Row(
             children: [
-              SizedBox(
+              const SizedBox(
                 width: 100, // 固定標籤寬度
-                child: const Text(
+                child: Text(
                   'PIC : ',
                   style: TextStyle(
                     fontSize: 16,
@@ -69,7 +70,7 @@ class _SignatureTableState extends State<SignatureTable> {
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     contentPadding:
-                    EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   ),
                 ),
               ),
@@ -78,9 +79,9 @@ class _SignatureTableState extends State<SignatureTable> {
           const SizedBox(height: 16),
           Row(
             children: [
-              SizedBox(
+              const SizedBox(
                 width: 100, // 固定標籤寬度
-                child: const Text(
+                child: Text(
                   'Date : ',
                   style: TextStyle(
                     fontSize: 16,
@@ -97,7 +98,7 @@ class _SignatureTableState extends State<SignatureTable> {
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     contentPadding:
-                    EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     suffixIcon: Icon(Icons.calendar_today),
                   ),
                 ),

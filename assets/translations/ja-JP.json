@@ -21,5 +21,6 @@
   "please_input_sn": "シリアル番号を入力してください",
   "cancel": "キャンセル",
   "submit": "送信",
-  "submit_success": "SN: {0}、モデル: {1} が送信されました"
+  "submit_success": "SN: {}、モデル: {} が送信されました",
+  "submit_fail": "SN: {}、モデル: {} の送信に失敗しました"
 }

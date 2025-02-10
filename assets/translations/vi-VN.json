@@ -21,5 +21,6 @@
   "please_input_sn": "Vui lòng nhập số sê-ri",
   "cancel": "Hủy",
   "submit": "Gửi",
-  "submit_success": "SN: {0}, Model: {1} đã được gửi"
+  "submit_success": "SN: {}, Model: {} đã được gửi",
+  "submit_fail": "SN: {}, Model: {} gửi thất bại"
 }

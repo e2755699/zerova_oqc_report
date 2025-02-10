@@ -73,33 +73,4 @@ class _ProtectionFunctionTestTableState extends State<ProtectionFunctionTestTabl
     );
   }
 
-  Future<void> _generatePdf(BuildContext context) async {
-    final pdf = pw.Document();
-
-    // 添加 PDF 表格
-    pdf.addPage(
-      pw.Page(
-        build: (pw.Context context) {
-          return pw.Table.fromTextArray(
-            border: pw.TableBorder.all(),
-            headers: ['No.', 'S/N'],
-            data: List.generate(
-              testItems.length,
-              (index) => [
-                (index + 1).toString(),
-                testItems[index].name,
-                testItems[index].description,
-                testItems[index].judgement,
-              ],
-            ),
-          );
-        },
-      ),
-    );
-
-    // 預覽 PDF
-    await Printing.layoutPdf(
-      onLayout: (format) async => pdf.save(),
-    );
-  }
 }

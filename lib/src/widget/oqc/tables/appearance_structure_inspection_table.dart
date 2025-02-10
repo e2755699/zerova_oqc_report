@@ -29,67 +29,36 @@ class _AppearanceStructureInspectionTableState
 
   @override
   Widget build(BuildContext context) {
-    final dataTable = StyledDataTable(
-      columns: [
-        OqcTableStyle.getDataColumn('No.'),
-        OqcTableStyle.getDataColumn('Item'),
-        OqcTableStyle.getDataColumn('Details'),
-        OqcTableStyle.getDataColumn('Judgement'),
-      ],
-      rows: List.generate(
-        data.testItems.length,
-        (index) => DataRow(
-          cells: [
-            OqcTableStyle.getDataCell((index + 1).toString()),
-            OqcTableStyle.getDataCell(data.testItems[index].name),
-            OqcTableStyle.getDataCell(data.testItems[index].description),
-            DataCell(buildJudgementDropdown(
-              data.testItems[index].judgement,
-              (newValue) {
-                if (newValue != null) {
-                  setState(() {
-                    data.testItems[index].updateJudgement(newValue);
-                  });
-                }
-              },
-            ))          ],
-        ),
-      ),
-    );
-
     return TableWrapper(
       title: context.tr('appearance_structure_inspection'),
-      content: dataTable,
-    );
-  }
-
-  Future<void> _generatePdf(BuildContext context) async {
-    final pdf = pw.Document();
-
-    // 添加 PDF 表格
-    pdf.addPage(
-      pw.Page(
-        build: (pw.Context context) {
-          return pw.Table.fromTextArray(
-            border: pw.TableBorder.all(),
-            headers: ['No.', 'Item', 'Description', 'Result'],
-            data: List.generate(
-              data.testItems.length,
-              (index) => [
-                (index + 1).toString(),
-                data.testItems[index].name,
-                data.testItems[index].description,
+      content: StyledDataTable(
+        columns: [
+          OqcTableStyle.getDataColumn('No.'),
+          OqcTableStyle.getDataColumn('Item'),
+          OqcTableStyle.getDataColumn('Details'),
+          OqcTableStyle.getDataColumn('Judgement'),
+        ],
+        rows: List.generate(
+          data.testItems.length,
+          (index) => DataRow(
+            cells: [
+              OqcTableStyle.getDataCell((index + 1).toString()),
+              OqcTableStyle.getDataCell(data.testItems[index].name),
+              OqcTableStyle.getDataCell(data.testItems[index].description),
+              DataCell(buildJudgementDropdown(
                 data.testItems[index].judgement,
-              ],
-            ),
-          );
-        },
+                (newValue) {
+                  if (newValue != null) {
+                    setState(() {
+                      data.testItems[index].updateJudgement(newValue);
+                    });
+                  }
+                },
+              ))
+            ],
+          ),
+        ),
       ),
-    );
-
-    // 預覽 PDF
-    await Printing.layoutPdf(
-      onLayout: (format) async => pdf.save(),
     );
   }
 }

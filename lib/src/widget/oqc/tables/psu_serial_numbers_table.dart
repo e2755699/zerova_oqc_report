@@ -50,31 +50,4 @@ class PsuSerialNumbersTable extends StatelessWidget {
     );
   }
 
-  Future<void> _generatePdf(BuildContext context) async {
-    final pdf = pw.Document();
-
-    // 添加 PDF 表格
-    pdf.addPage(
-      pw.Page(
-        build: (pw.Context context) {
-          return pw.Table.fromTextArray(
-            border: pw.TableBorder.all(),
-            headers: ['No.', 'S/N'],
-            data: List.generate(
-              data.psuSN.length,
-              (index) => [
-                (index + 1).toString(),
-                data.psuSN[index].value,
-              ],
-            ),
-          );
-        },
-      ),
-    );
-
-    // 預覽 PDF
-    await Printing.layoutPdf(
-      onLayout: (format) async => pdf.save(),
-    );
-  }
 }
