@@ -25,7 +25,7 @@ class PsuSerialNumbersTable extends StatelessWidget {
                   style: TableTextStyle.headerStyle,
                 ),
                 Text(
-                  'Q\'ty : 4',
+                  'Spec : 4',
                   style: TableTextStyle.headerStyle,
                 ),
               ],

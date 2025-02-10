@@ -245,7 +245,7 @@ class PdfGenerator {
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text(data.psuSN[0].value,
+                  child: pw.Text("S/N  Spec : 4",
                       style: pw.TextStyle(font: font)),
                 ),
               ],
@@ -344,10 +344,10 @@ class PdfGenerator {
   static pw.Widget _buildAppearanceInspectionTable(
       AppearanceStructureInspectionFunctionResult data, pw.Font font) {
     final columnWidths = <int, pw.FlexColumnWidth>{
-      0: const pw.FlexColumnWidth(0.3),  // No. 縮小
-      1: const pw.FlexColumnWidth(1.0),  // Item 適中
-      2: const pw.FlexColumnWidth(3.0),  // Details 加大
-      3: const pw.FlexColumnWidth(0.5),  // Judgement 縮小
+      0: const pw.FlexColumnWidth(0.3), // No. 縮小
+      1: const pw.FlexColumnWidth(1.0), // Item 適中
+      2: const pw.FlexColumnWidth(3.0), // Details 加大
+      3: const pw.FlexColumnWidth(0.5), // Judgement 縮小
     };
 
     return pw.Column(
@@ -370,28 +370,32 @@ class PdfGenerator {
               children: [
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text('No.', 
+                  child: pw.Text(
+                    'No.',
                     style: pw.TextStyle(font: font),
                     textAlign: pw.TextAlign.center,
                   ),
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text('Item', 
+                  child: pw.Text(
+                    'Item',
                     style: pw.TextStyle(font: font),
                     textAlign: pw.TextAlign.center,
                   ),
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text('Details', 
+                  child: pw.Text(
+                    'Details',
                     style: pw.TextStyle(font: font),
                     textAlign: pw.TextAlign.center,
                   ),
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text('Judgement', 
+                  child: pw.Text(
+                    'Judgement',
                     style: pw.TextStyle(font: font),
                     textAlign: pw.TextAlign.center,
                   ),
@@ -404,22 +408,26 @@ class PdfGenerator {
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
-                    child: pw.Text('${index + 1}',
-                        style: pw.TextStyle(font: font),
-                        textAlign: pw.TextAlign.center,
-                    ),
-                  ),
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(5),
-                    child: pw.Text(data.testItems[index].name,
-                        style: pw.TextStyle(font: font, fontSize: 10),
-                        textAlign: pw.TextAlign.left,
+                    child: pw.Text(
+                      '${index + 1}',
+                      style: pw.TextStyle(font: font),
+                      textAlign: pw.TextAlign.center,
                     ),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
                     child: pw.Text(
-                      AppearanceStructureInspectionFunctionResult.descriptionMapping[data.testItems[index].name] ?? '',
+                      data.testItems[index].name,
+                      style: pw.TextStyle(font: font, fontSize: 10),
+                      textAlign: pw.TextAlign.left,
+                    ),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(5),
+                    child: pw.Text(
+                      AppearanceStructureInspectionFunctionResult
+                              .descriptionMapping[data.testItems[index].name] ??
+                          '',
                       style: pw.TextStyle(font: font, fontSize: 8),
                       textAlign: pw.TextAlign.left,
                       maxLines: 5,
@@ -427,9 +435,10 @@ class PdfGenerator {
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
-                    child: pw.Text(data.testItems[index].judgement,
-                        style: pw.TextStyle(font: font),
-                        textAlign: pw.TextAlign.center,
+                    child: pw.Text(
+                      data.testItems[index].judgement,
+                      style: pw.TextStyle(font: font),
+                      textAlign: pw.TextAlign.center,
                     ),
                   ),
                 ],
@@ -731,10 +740,10 @@ class PdfGenerator {
   static pw.Widget _buildHiPotTestTable(
       ProtectionFunctionTestResult data, pw.Font font) {
     final columnWidths = <int, pw.FlexColumnWidth>{
-      0: const pw.FlexColumnWidth(0.5),  // No.
-      1: const pw.FlexColumnWidth(1.5),  // Test Items
-      2: const pw.FlexColumnWidth(3.0),  // Testing Record
-      3: const pw.FlexColumnWidth(1.0),  // Judgement
+      0: const pw.FlexColumnWidth(0.5), // No.
+      1: const pw.FlexColumnWidth(1.5), // Test Items
+      2: const pw.FlexColumnWidth(3.0), // Testing Record
+      3: const pw.FlexColumnWidth(1.0), // Judgement
     };
 
     return pw.Column(
@@ -803,7 +812,8 @@ class PdfGenerator {
                           style: pw.TextStyle(font: font)),
                       pw.Text('a) Between each circuit.',
                           style: pw.TextStyle(font: font)),
-                      pw.Text('b) Between each of the\nindependent circuits and the\nground.',
+                      pw.Text(
+                          'b) Between each of the\nindependent circuits and the\nground.',
                           style: pw.TextStyle(font: font)),
                     ],
                   ),
@@ -832,7 +842,8 @@ class PdfGenerator {
                               pw.Container(
                                 padding: const pw.EdgeInsets.all(8),
                                 child: pw.Column(
-                                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                                  crossAxisAlignment:
+                                      pw.CrossAxisAlignment.start,
                                   children: [
                                     pw.Text('Left Plug:',
                                         style: pw.TextStyle(
@@ -854,7 +865,8 @@ class PdfGenerator {
                               pw.Container(
                                 padding: const pw.EdgeInsets.all(8),
                                 child: pw.Column(
-                                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                                  crossAxisAlignment:
+                                      pw.CrossAxisAlignment.start,
                                   children: [
                                     pw.Text('Right Plug:',
                                         style: pw.TextStyle(
@@ -909,7 +921,8 @@ class PdfGenerator {
                           style: pw.TextStyle(font: font)),
                       pw.Text('a) Between each circuit.',
                           style: pw.TextStyle(font: font)),
-                      pw.Text('b) Between each of the\nindependent circuits and the\nground.',
+                      pw.Text(
+                          'b) Between each of the\nindependent circuits and the\nground.',
                           style: pw.TextStyle(font: font)),
                     ],
                   ),
@@ -941,7 +954,8 @@ class PdfGenerator {
                               pw.Container(
                                 padding: const pw.EdgeInsets.all(8),
                                 child: pw.Column(
-                                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                                  crossAxisAlignment:
+                                      pw.CrossAxisAlignment.start,
                                   children: [
                                     pw.Text('Left Plug:',
                                         style: pw.TextStyle(
@@ -963,7 +977,8 @@ class PdfGenerator {
                               pw.Container(
                                 padding: const pw.EdgeInsets.all(8),
                                 child: pw.Column(
-                                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                                  crossAxisAlignment:
+                                      pw.CrossAxisAlignment.start,
                                   children: [
                                     pw.Text('Right Plug:',
                                         style: pw.TextStyle(
@@ -1048,8 +1063,8 @@ class PdfGenerator {
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
                     child: pw.Text(
-                      data.getEnglishText(data.datas[index].translationKey),
-                      style: pw.TextStyle(font: font)),
+                        data.getEnglishText(data.datas[index].translationKey),
+                        style: pw.TextStyle(font: font)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
@@ -1105,11 +1120,63 @@ class PdfGenerator {
           ),
         ),
         pw.SizedBox(height: 10),
-        pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        pw.Column(
           children: [
-            pw.Text('PIC: $pic', style: pw.TextStyle(font: font)),
-            pw.Text('Date: $date', style: pw.TextStyle(font: font)),
+            pw.Row(
+              children: [
+                pw.Container(
+                  width: 100,
+                  child: pw.Text(
+                    'PIC : ',
+                    style: pw.TextStyle(
+                      fontSize: 16,
+                      fontWeight: pw.FontWeight.bold,
+                      font: font,
+                    ),
+                  ),
+                ),
+                pw.Expanded(
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 8),
+                    decoration: pw.BoxDecoration(
+                      border: pw.Border.all(),
+                      borderRadius:
+                          const pw.BorderRadius.all(pw.Radius.circular(4)),
+                    ),
+                    child: pw.Text(pic, style: pw.TextStyle(font: font)),
+                  ),
+                ),
+              ],
+            ),
+            pw.SizedBox(height: 16),
+            pw.Row(
+              children: [
+                pw.Container(
+                  width: 100,
+                  child: pw.Text(
+                    'Date : ',
+                    style: pw.TextStyle(
+                      fontSize: 16,
+                      fontWeight: pw.FontWeight.bold,
+                      font: font,
+                    ),
+                  ),
+                ),
+                pw.Expanded(
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 8),
+                    decoration: pw.BoxDecoration(
+                      border: pw.Border.all(),
+                      borderRadius:
+                          const pw.BorderRadius.all(pw.Radius.circular(4)),
+                    ),
+                    child: pw.Text(date, style: pw.TextStyle(font: font)),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ],
@@ -1120,24 +1187,15 @@ class PdfGenerator {
     if (Platform.isMacOS) {
       // macOS 路徑
       return path.join(
-        Platform.environment['HOME'] ?? '',
-        'Pictures',
-        'Zerova'
-      );
+          Platform.environment['HOME'] ?? '', 'Pictures', 'Zerova');
     } else if (Platform.isWindows) {
       // Windows 路徑
       return path.join(
-        Platform.environment['USERPROFILE'] ?? '',
-        'Pictures',
-        'Zerova'
-      );
+          Platform.environment['USERPROFILE'] ?? '', 'Pictures', 'Zerova');
     } else {
       // 其他系統（如 Linux）
       return path.join(
-        Platform.environment['HOME'] ?? '',
-        'Pictures',
-        'Zerova'
-      );
+          Platform.environment['HOME'] ?? '', 'Pictures', 'Zerova');
     }
   }
 
@@ -1148,8 +1206,8 @@ class PdfGenerator {
         return [];
       }
 
-      final directory = Directory(path.join(picturesPath,
-          'Selected Photos', sn, 'Packaging'));
+      final directory = Directory(
+          path.join(picturesPath, 'Selected Photos', sn, 'Packaging'));
       final images = <pw.Widget>[];
 
       if (await directory.exists()) {
@@ -1205,8 +1263,8 @@ class PdfGenerator {
         return [];
       }
 
-      final directory = Directory(path.join(picturesPath,
-          'Selected Photos', sn, 'Attachment'));
+      final directory = Directory(
+          path.join(picturesPath, 'Selected Photos', sn, 'Attachment'));
       final images = <pw.Widget>[];
 
       if (await directory.exists()) {

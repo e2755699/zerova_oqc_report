@@ -2,11 +2,11 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 
-class Signature extends StatefulWidget {
+class SignatureTable extends StatefulWidget {
   final TextEditingController _picController;
   final TextEditingController _dateController;
 
-  Signature(
+  SignatureTable(
       {super.key,
         TextEditingController? picController,
         TextEditingController? dateController})
@@ -14,10 +14,10 @@ class Signature extends StatefulWidget {
         _dateController = dateController ?? TextEditingController();
 
   @override
-  State<Signature> createState() => _SignatureState();
+  State<SignatureTable> createState() => _SignatureTableState();
 }
 
-class _SignatureState extends State<Signature> {
+class _SignatureTableState extends State<SignatureTable> {
   DateTime _selectedDate = DateTime.now();
 
   Future<void> _selectDate(BuildContext context) async {

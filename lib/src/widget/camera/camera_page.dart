@@ -666,12 +666,15 @@ class _ImagePickerScreenState extends State<ImagePickerScreen> with CameraHelper
                       TextButton(
                         onPressed: () {
                           Navigator.of(context).pop(); // 關閉對話框
+                          Navigator.of(context).pop(); // 關閉對話框
                         },
                         child: const Text('Close'),
                       ),
                       ElevatedButton(
                         onPressed: () async {
                           await _saveSelectedImages(); // 儲存所選影像
+                          Navigator.of(context).pop(); // 關閉對話框
+                          Navigator.of(context).pop(); // 關閉對話框
                           Navigator.of(context).pop(); // 關閉對話框
                         },
                         child: const Text('Save Selected Images'),

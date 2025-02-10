@@ -178,7 +178,7 @@ class _OqcReportPageState extends State<OqcReportPage> {
                   AttachmentTable(
                     sn: widget.sn,
                   ),
-                  Signature(),
+                  SignatureTable(picController:_picController, dateController: _dateController,),
                 ],
               ),
             ),

@@ -111,29 +111,6 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
     }
 
     await loadFileModule(serialNumber, model, context);
-
-    // final apiClient = OqcApiClient();
-    //
-    // // 將 model 和 serialNumber 打印到 console
-    // Future.wait<List<dynamic>>([
-    //   apiClient.fetchAndSaveKeyPartData(serialNumber),
-    //   apiClient.fetchAndSaveOqcData(serialNumber),
-    //   apiClient.fetchAndSaveTestData(serialNumber)
-    // ]).then((res) {
-    //   var psuSerialNumbers = Psuserialnumber.fromJsonList(res[0]);
-    //   var testFunction =
-    //       AppearanceStructureInspectionFunctionResult.fromJson(res[1]);
-    //   var softwareVersion = SoftwareVersion.fromJsonList(res[2]);
-    //   var inputOutputCharacteristics =
-    //       InputOutputCharacteristics.fromJsonList(res[2]);
-    //   var protectionTestResults =
-    //       ProtectionFunctionTestResult.fromJsonList(res[2]);
-    //   context.push('/oqc-report', extra: {
-    //     'softwareVersion': softwareVersion,
-    //     'testFunction': testFunction,
-    //     'inputOutputCharacteristics': inputOutputCharacteristics,
-    //     'protectionTestResults': protectionTestResults,
-    //   });
   }
 
   Container buildLanguageDropdownButton(
@@ -192,29 +169,21 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
 mixin LoadFileHelper {
   Future<void> loadFileModule(
       String sn, String model, BuildContext context) async {
-    // String jsonContent = await File(
-    //     "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\T2437A011A0_test.json")
-    //     .readAsString();
-    // String testFunctionJsonContent = await File(
-    //     "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\T2433A031A0_oqc.json")
-    //     .readAsString();
-    // String moduleJsonContent = await File(
-    //     "C:\\Users\\USER\\Downloads\\resultfile\\resultfile\\files\\1234keypart.json")
-    //     .readAsString();
 
-    var filePath = '';
+
+    //load json from User/Test Result/Zerova/$sn/...
+   /* var filePath = '';
     if (Platform.isMacOS) {
       // macOS 路徑
       filePath = path.join(
           Platform.environment['HOME'] ?? '', 'Test Result', 'Zerova');
     } else if (Platform.isWindows) {
       // Windows 路徑
-      filePath = path.join(Platform.environment['USERPROFILE'] ?? '',
-          'Pictures', 'Zerova' ?? '', 'Test Result', 'Zerova');
+      filePath = path.join(Platform.environment['USERPROFILE'] ?? '', 'Test Result', 'Zerova');
     } else {
       // 其他系統（如 Linux）
-      filePath = path.join(Platform.environment['HOME'] ?? '', 'Pictures',
-          'Zerova' ?? '', 'Test Result', 'Zerova');
+      filePath = path.join(
+          Platform.environment['HOME'] ?? '', 'Test Result', 'Zerova');
     }
 
     String jsonContent =
@@ -247,28 +216,35 @@ mixin LoadFileHelper {
       'inputOutputCharacteristics': inputOutputCharacteristics,
       'protectionTestResults': protectionTestResults,
     });
+    return ;
+*/
 
-    // final apiClient = OqcApiClient();
-    //
-    // // 將 model 和 serialNumber 打印到 console
-    // Future.wait<List<dynamic>>([
-    //   apiClient.fetchAndSaveKeyPartData(serialNumber),
-    //   apiClient.fetchAndSaveOqcData(serialNumber),
-    //   apiClient.fetchAndSaveTestData(serialNumber)
-    // ]).then((res) {
-    //   var psuSerialNumbers = Psuserialnumber.fromJsonList(res[0]);
-    //   var testFunction =
-    //       AppearanceStructureInspectionFunctionResult.fromJson(res[1]);
-    //   var softwareVersion = SoftwareVersion.fromJsonList(res[2]);
-    //   var inputOutputCharacteristics =
-    //       InputOutputCharacteristics.fromJsonList(res[2]);
-    //   var protectionTestResults =
-    //       ProtectionFunctionTestResult.fromJsonList(res[2]);
-    //   context.push('/oqc-report', extra: {
-    //     'softwareVersion': softwareVersion,
-    //     'testFunction': testFunction,
-    //     'inputOutputCharacteristics': inputOutputCharacteristics,
-    //     'protectionTestResults': protectionTestResults,
-    //   });
+    //call api
+    final apiClient = OqcApiClient();
+
+    // 將 model 和 serialNumber 打印到 console
+    Future.wait<List<dynamic>>([
+      apiClient.fetchAndSaveKeyPartData(sn),
+      apiClient.fetchAndSaveOqcData(sn),
+      apiClient.fetchAndSaveTestData(sn)
+    ]).then((res) {
+      var psuSerialNumbers = Psuserialnumber.fromJsonList(res[0]);
+      var testFunction =
+      AppearanceStructureInspectionFunctionResult.fromJson(res[1]);
+      var softwareVersion = SoftwareVersion.fromJsonList(res[2]);
+      var inputOutputCharacteristics =
+      InputOutputCharacteristics.fromJsonList(res[2]);
+      var protectionTestResults =
+      ProtectionFunctionTestResult.fromJsonList(res[2]);
+      context.push('/oqc-report', extra: {
+        'sn': sn,
+        'model': model,
+        'psuSerialNumbers': psuSerialNumbers,
+        'softwareVersion': softwareVersion,
+        'testFunction': testFunction,
+        'inputOutputCharacteristics': inputOutputCharacteristics,
+        'protectionTestResults': protectionTestResults,
+      });
+    });
   }
 }
