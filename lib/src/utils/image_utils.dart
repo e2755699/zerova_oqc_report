@@ -19,34 +19,57 @@ class ImageUtils {
                 file.path.toLowerCase().endsWith('.png'))
             .toList();
 
-        // 将图片分组
-        for (var i = 0; i < (imageFiles.length / imagesPerRow).ceil(); i++) {
-          final rowImages = <pw.Widget>[];
-          for (var j = 0;
-              j < imagesPerRow && i * imagesPerRow + j < imageFiles.length;
-              j++) {
-            final image =
-                await imageFromPath(imageFiles[i * imagesPerRow + j].path);
-            if (image != null) {
-              rowImages.add(
+        // 计算总行数
+        final totalRows = (imageFiles.length / imagesPerRow).ceil();
+
+        // 创建表格行
+        for (var i = 0; i < totalRows; i++) {
+          final tableCells = <pw.Widget>[];
+
+          // 填充每一行的单元格
+          for (var j = 0; j < imagesPerRow; j++) {
+            final imageIndex = i * imagesPerRow + j;
+
+            if (imageIndex < imageFiles.length) {
+              // 有图片的单元格
+              final image = await imageFromPath(imageFiles[imageIndex].path);
+              if (image != null) {
+                tableCells.add(
+                  pw.Expanded(
+                    child: pw.Container(
+                      height: imageHeight,
+                      padding: const pw.EdgeInsets.all(5),
+                      child: pw.Image(
+                        image,
+                        fit: pw.BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                );
+              }
+            } else {
+              // 空白单元格填充
+              tableCells.add(
                 pw.Expanded(
                   child: pw.Container(
-                    margin: const pw.EdgeInsets.all(5),
                     height: imageHeight,
-                    child: pw.Image(
-                      image,
-                      fit: pw.BoxFit.contain,
-                    ),
+                    padding: const pw.EdgeInsets.all(5),
                   ),
                 ),
               );
             }
           }
-          if (rowImages.isNotEmpty) {
+
+          // 将行添加到表格中
+          if (tableCells.isNotEmpty) {
             images.add(
-              pw.Row(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: rowImages,
+              pw.Table(
+                border: pw.TableBorder.all(),
+                children: [
+                  pw.TableRow(
+                    children: tableCells,
+                  ),
+                ],
               ),
             );
           }
