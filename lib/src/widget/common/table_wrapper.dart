@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class TableWrapper extends StatelessWidget {
   final String title;
@@ -29,54 +30,37 @@ class TableWrapper extends StatelessWidget {
 }
 
 class TableTextStyle {
-  static TextStyle getLocalizedStyle(BuildContext context,
-      {bool isHeader = false}) {
-    // 根據當前語言選擇合適的字體
-    String fontFamily;
-    switch (context.locale.languageCode) {
-      case 'zh':
-        fontFamily = 'Noto Sans TC';
-        break;
-      case 'ja':
-        fontFamily = 'Noto Sans JP';
-        break;
-      case 'vi':
-        fontFamily = 'Noto Sans Vietnamese';
-        break;
-      default:
-        fontFamily = 'Roboto';
-    }
+  static TextStyle getLocalizedStyle({bool isHeader = false}) {
+    // 根据当前语言选择合适的字体
+    TextStyle baseStyle = GoogleFonts.notoSans();
 
-    return TextStyle(
+    return baseStyle.copyWith(
       fontSize: isHeader ? 20 : 16,
       fontWeight: isHeader ? FontWeight.bold : FontWeight.normal,
       color: isHeader ? AppColors.darkBlueColor : AppColors.blackColor,
-      fontFamily: fontFamily,
     );
   }
 
-  static TextStyle headerStyle(BuildContext context) =>
-      getLocalizedStyle(context, isHeader: true);
-  static TextStyle contentStyle(BuildContext context) =>
-      getLocalizedStyle(context, isHeader: false);
+  static TextStyle headerStyle() => getLocalizedStyle(isHeader: true);
+  static TextStyle contentStyle() => getLocalizedStyle(isHeader: false);
 }
 
 class OqcTableStyle {
-  static DataColumn getDataColumn(String text, BuildContext context) {
+  static DataColumn getDataColumn(String text) {
     return DataColumn(
       headingRowAlignment: MainAxisAlignment.center,
       label: Text(
         text,
-        style: TableTextStyle.headerStyle(context),
+        style: TableTextStyle.headerStyle(),
       ),
     );
   }
 
-  static DataCell getDataCell(String text, BuildContext context,
+  static DataCell getDataCell(String text,
       {MaterialColor? color, FontWeight? fontWeight}) {
     return DataCell(Text(
       text,
-      style: TableTextStyle.contentStyle(context).copyWith(
+      style: TableTextStyle.contentStyle().copyWith(
         color: color,
         fontWeight: fontWeight,
       ),

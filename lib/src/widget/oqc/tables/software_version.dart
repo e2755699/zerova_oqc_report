@@ -15,18 +15,17 @@ class SoftwareVersionTable extends StatelessWidget {
   Widget build(BuildContext context) {
     final dataTable = StyledDataTable(
       columns: [
-        OqcTableStyle.getDataColumn('No.', context),
-        OqcTableStyle.getDataColumn('Item', context),
-        OqcTableStyle.getDataColumn('Version', context),
+        OqcTableStyle.getDataColumn('No.'),
+        OqcTableStyle.getDataColumn('Item'),
+        OqcTableStyle.getDataColumn('Version'),
       ],
       rows: List.generate(
           data.versions.length,
           (index) => DataRow(
                 cells: [
-                  OqcTableStyle.getDataCell((index + 1).toString(), context),
-                  OqcTableStyle.getDataCell(data.versions[index].name, context),
-                  OqcTableStyle.getDataCell(
-                      data.versions[index].value, context),
+                  OqcTableStyle.getDataCell((index + 1).toString()),
+                  OqcTableStyle.getDataCell(data.versions[index].name),
+                  OqcTableStyle.getDataCell(data.versions[index].value),
                 ],
               )),
     );

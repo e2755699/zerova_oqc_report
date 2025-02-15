@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
 import 'package:zerova_oqc_report/src/report/model/appearance_structure_inspection_function_result.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 import 'package:zerova_oqc_report/src/widget/common/table_wrapper.dart';
@@ -33,19 +31,18 @@ class _AppearanceStructureInspectionTableState
       title: context.tr('appearance_structure_inspection'),
       content: StyledDataTable(
         columns: [
-          OqcTableStyle.getDataColumn('No.', context),
-          OqcTableStyle.getDataColumn('Item', context),
-          OqcTableStyle.getDataColumn('Details', context),
-          OqcTableStyle.getDataColumn('Judgement', context),
+          OqcTableStyle.getDataColumn('No.'),
+          OqcTableStyle.getDataColumn('Item'),
+          OqcTableStyle.getDataColumn('Details'),
+          OqcTableStyle.getDataColumn('Judgement'),
         ],
         rows: List.generate(
           data.testItems.length,
           (index) => DataRow(
             cells: [
-              OqcTableStyle.getDataCell((index + 1).toString(), context),
-              OqcTableStyle.getDataCell(data.testItems[index].name, context),
-              OqcTableStyle.getDataCell(
-                  data.testItems[index].description, context),
+              OqcTableStyle.getDataCell((index + 1).toString()),
+              OqcTableStyle.getDataCell(data.testItems[index].name),
+              OqcTableStyle.getDataCell(data.testItems[index].description),
               DataCell(buildJudgementDropdown(
                 data.testItems[index].judgement,
                 (newValue) {

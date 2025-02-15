@@ -42,13 +42,10 @@ dependencies:
   easy_localization: ^3.0.0
   camera_windows: ^0.2.6+1
   go_router: ^13.2.0
-  http: ^0.13.6
+  http: ^1.1.0
   url_launcher: ^6.2.5
   path: ^1.9.0
-
-  pdf_text: ^0.5.0
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
+  google_fonts: ^6.1.0
   cupertino_icons: ^1.0.6
 
 dev_dependencies:
@@ -103,25 +100,3 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
-
-  fonts:
-    - family: Noto Sans TC
-      fonts:
-        - asset: assets/fonts/NotoSansTC-Regular.otf
-        - asset: assets/fonts/NotoSansTC-Bold.otf
-          weight: 700
-    - family: Roboto
-      fonts:
-        - asset: assets/fonts/Roboto-Regular.ttf
-        - asset: assets/fonts/Roboto-Bold.ttf
-          weight: 700
-    - family: Noto Sans JP
-      fonts:
-        - asset: assets/fonts/NotoSansJP-Regular.otf
-        - asset: assets/fonts/NotoSansJP-Bold.otf
-          weight: 700
-    - family: Noto Sans Vietnamese
-      fonts:
-        - asset: assets/fonts/NotoSansVietnamese-Regular.ttf
-        - asset: assets/fonts/NotoSansVietnamese-Bold.ttf
-          weight: 700

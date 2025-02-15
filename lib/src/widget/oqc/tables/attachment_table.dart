@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 import 'package:zerova_oqc_report/src/widget/common/image_grid.dart';
 import 'package:zerova_oqc_report/src/widget/common/camera_button.dart';
 import 'package:easy_localization/easy_localization.dart';

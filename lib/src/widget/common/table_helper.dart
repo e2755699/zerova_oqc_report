@@ -27,8 +27,7 @@ mixin TableHelper {
           value: value,
           child: Text(
             value.toString().split('.').last.toUpperCase(),
-            style: TextStyle(
-              fontSize: TableTextStyle.contentStyle.fontSize,
+            style: TableTextStyle.contentStyle().copyWith(
               color: value == Judgement.pass
                   ? Colors.green
                   : value == Judgement.fail

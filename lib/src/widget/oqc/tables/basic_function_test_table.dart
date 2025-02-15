@@ -31,26 +31,25 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
   Widget build(BuildContext context) {
     final dataTable = StyledDataTable(
       columns: [
-        OqcTableStyle.getDataColumn('No.', context),
-        OqcTableStyle.getDataColumn('Test Items', context),
-        OqcTableStyle.getDataColumn('Testing Record', context),
-        OqcTableStyle.getDataColumn('Judgement', context),
+        OqcTableStyle.getDataColumn('No.'),
+        OqcTableStyle.getDataColumn('Test Items'),
+        OqcTableStyle.getDataColumn('Testing Record'),
+        OqcTableStyle.getDataColumn('Judgement'),
       ],
       rows: List.generate(
         data.testItems.length,
         (index) => DataRow(
           cells: [
-            OqcTableStyle.getDataCell((index + 1).toString(), context),
-            OqcTableStyle.getDataCell(data.testItems[index].name, context),
+            OqcTableStyle.getDataCell((index + 1).toString()),
+            OqcTableStyle.getDataCell(data.testItems[index].name),
             DataCell(
               Text(
                 data.testItems[index].getReportValue,
-                style: TableTextStyle.contentStyle(context),
+                style: TableTextStyle.contentStyle(),
               ),
             ),
             OqcTableStyle.getDataCell(
               data.testItems[index].judgement.name.toUpperCase(),
-              context,
               color: data.testItems[index].judgement == Judgement.pass
                   ? Colors.green
                   : data.testItems[index].judgement == Judgement.fail

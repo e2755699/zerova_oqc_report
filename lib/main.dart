@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:zerova_oqc_report/route/app_router.dart';
-import 'package:zerova_oqc_report/src/repo/sharepoint_uploader.dart';
 import 'src/config/config_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 强制横屏模式
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]);
+
   await EasyLocalization.ensureInitialized();
   await ConfigManager.initialize();
   //SharePointUploader(uploadOrDownload: 1, sn: '').startAuthorization();

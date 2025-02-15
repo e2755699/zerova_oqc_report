@@ -1,11 +1,8 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:zerova_oqc_report/src/report/model/input_output_characteristics.dart';
-import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/report/model/protection_function_test_result.dart';
 import 'package:zerova_oqc_report/src/report/model/software_version.dart';
-import 'package:zerova_oqc_report/src/report/model/appearance_structure_inspection_function_result.dart';
 
 class OqcApiClient {
   final String baseUrl = "http://api.ztmn.com/zapi";

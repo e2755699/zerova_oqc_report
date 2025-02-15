@@ -1,0 +1,31 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        
+
+        {
+            "name": "zerova_oqc_report (开发环境)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "debug",
+            "args": [
+                "--dart-define=ENVIRONMENT=development"
+            ]
+        },
+        {
+            "name": "zerova_oqc_report (生产环境)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release",
+            "args": [
+                "--dart-define=ENVIRONMENT=production"
+            ]
+        },
+        {
+            "name": "zerova_oqc_report (性能分析)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        }
+    ]
+} 

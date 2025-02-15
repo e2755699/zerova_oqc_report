@@ -15,7 +15,7 @@ class PackageListResult {
       key: 1,
       translationKey: 'certificate_card',
     ),
-        PackageListResultMeasurement(
+    PackageListResultMeasurement(
       spec: 2,
       key: 2,
       translationKey: 'rfid_card',
@@ -45,9 +45,9 @@ class PackageListResult {
     List<String>? header,
     List<List<String>>? rows,
     List<PackageListResultMeasurement>? datas,
-  })  : this.header = header ?? defaultHeader,
-        this.rows = rows ?? [],
-        this.datas = datas ?? defaultDatas;
+  })  : header = header ?? defaultHeader,
+        rows = rows ?? [],
+        datas = datas ?? defaultDatas;
 
   List<List<String>> get testItems {
     return datas

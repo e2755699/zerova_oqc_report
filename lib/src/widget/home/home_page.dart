@@ -38,7 +38,7 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
               'assets/logo.png', // 請確保此路徑下有對應的圖片
               height: 300, // 調整LOGO大小
             ),
-            SizedBox(height: 40),
+            const SizedBox(height: 40),
             // 按鈕1: 輸入SN機種
             SizedBox(
               width: 300, // 增加按鈕寬度
@@ -58,7 +58,7 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
                 child: Text(context.tr('input_sn_model')),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             // 按鈕2: QR Scan
             SizedBox(

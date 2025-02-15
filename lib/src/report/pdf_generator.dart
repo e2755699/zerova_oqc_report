@@ -15,6 +15,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
+import 'package:zerova_oqc_report/src/utils/image_utils.dart';
 
 class PdfGenerator {
   static Future<pw.Document> generateOqcReport({
@@ -500,69 +501,67 @@ class PdfGenerator {
                       ))
                   .toList(),
             ),
-            ...data.inputOutputCharacteristicsSide
-                .map((item) => pw.TableRow(
-                      children: [
-                        pw.Padding(
-                          padding: const pw.EdgeInsets.all(5),
-                          child: pw.Text(item.side,
-                              style: pw.TextStyle(font: font)),
-                        ),
-                        pw.Padding(
-                          padding: const pw.EdgeInsets.all(5),
-                          child: pw.Text('253V,187V',
-                              style: pw.TextStyle(font: font)),
-                        ),
-                        pw.Padding(
-                          padding: const pw.EdgeInsets.all(5),
-                          child: pw.Text(
-                            item.inputVoltage
-                                .map((iv) => "${iv.value.toStringAsFixed(2)} V")
-                                .join("\n"),
-                            style: pw.TextStyle(font: font),
-                          ),
-                        ),
-                        pw.Padding(
-                          padding: const pw.EdgeInsets.all(5),
-                          child: pw.Text(
-                            item.inputCurrent
-                                .map((ic) => "${ic.value.toStringAsFixed(2)} A")
-                                .join("\n"),
-                            style: pw.TextStyle(font: font),
-                          ),
-                        ),
-                        pw.Padding(
-                          padding: const pw.EdgeInsets.all(5),
-                          child: pw.Text(
-                              "${item.totalInputPower.value.toStringAsFixed(2)} KW",
-                              style: pw.TextStyle(font: font)),
-                        ),
-                        pw.Padding(
-                          padding: const pw.EdgeInsets.all(5),
-                          child: pw.Text(
-                              "${item.outputVoltage.value.toStringAsFixed(2)} V",
-                              style: pw.TextStyle(font: font)),
-                        ),
-                        pw.Padding(
-                          padding: const pw.EdgeInsets.all(5),
-                          child: pw.Text(
-                              "${item.outputCurrent.value.toStringAsFixed(2)} A",
-                              style: pw.TextStyle(font: font)),
-                        ),
-                        pw.Padding(
-                          padding: const pw.EdgeInsets.all(5),
-                          child: pw.Text(
-                              "${item.totalOutputPower.value.toStringAsFixed(2)} KW",
-                              style: pw.TextStyle(font: font)),
-                        ),
-                        pw.Padding(
-                          padding: const pw.EdgeInsets.all(5),
-                          child: pw.Text(item.judgement.name.toUpperCase(),
-                              style: pw.TextStyle(font: font)),
-                        ),
-                      ],
-                    ))
-                .toList(),
+            ...data.inputOutputCharacteristicsSide.map((item) => pw.TableRow(
+                  children: [
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(5),
+                      child:
+                          pw.Text(item.side, style: pw.TextStyle(font: font)),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(5),
+                      child:
+                          pw.Text('253V,187V', style: pw.TextStyle(font: font)),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(5),
+                      child: pw.Text(
+                        item.inputVoltage
+                            .map((iv) => "${iv.value.toStringAsFixed(2)} V")
+                            .join("\n"),
+                        style: pw.TextStyle(font: font),
+                      ),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(5),
+                      child: pw.Text(
+                        item.inputCurrent
+                            .map((ic) => "${ic.value.toStringAsFixed(2)} A")
+                            .join("\n"),
+                        style: pw.TextStyle(font: font),
+                      ),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(5),
+                      child: pw.Text(
+                          "${item.totalInputPower.value.toStringAsFixed(2)} KW",
+                          style: pw.TextStyle(font: font)),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(5),
+                      child: pw.Text(
+                          "${item.outputVoltage.value.toStringAsFixed(2)} V",
+                          style: pw.TextStyle(font: font)),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(5),
+                      child: pw.Text(
+                          "${item.outputCurrent.value.toStringAsFixed(2)} A",
+                          style: pw.TextStyle(font: font)),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(5),
+                      child: pw.Text(
+                          "${item.totalOutputPower.value.toStringAsFixed(2)} KW",
+                          style: pw.TextStyle(font: font)),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(5),
+                      child: pw.Text(item.judgement.name.toUpperCase(),
+                          style: pw.TextStyle(font: font)),
+                    ),
+                  ],
+                )),
           ],
         ),
       ],
@@ -1206,54 +1205,13 @@ class PdfGenerator {
         return [];
       }
 
-      final directory = Directory(
-          path.join(picturesPath, 'Selected Photos', sn, 'Packaging'));
-      final images = <pw.Widget>[];
-
-      if (await directory.exists()) {
-        final imageFiles = directory
-            .listSync()
-            .where((file) =>
-                file.path.toLowerCase().endsWith('.jpg') ||
-                file.path.toLowerCase().endsWith('.jpeg') ||
-                file.path.toLowerCase().endsWith('.png'))
-            .toList();
-
-        // 將圖片分組為每組3張
-        for (var i = 0; i < imageFiles.length; i += 2) {
-          final rowImages = <pw.Widget>[];
-          for (var j = 0; j < 5 && i + j < imageFiles.length; j++) {
-            final image = await _imageFromPath(imageFiles[i + j].path);
-            if (image != null) {
-              rowImages.add(
-                pw.Expanded(
-                  child: pw.Container(
-                    margin: const pw.EdgeInsets.all(5),
-                    height: 200,
-                    child: pw.Image(
-                      image,
-                      fit: pw.BoxFit.contain,
-                    ),
-                  ),
-                ),
-              );
-            }
-          }
-          if (rowImages.isNotEmpty) {
-            images.add(
-              pw.Row(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: rowImages,
-              ),
-            );
-          }
-        }
-        return images;
-      }
+      final directory =
+          path.join(picturesPath, 'Selected Photos', sn, 'Packaging');
+      return await ImageUtils.loadAndGroupImages(directory);
     } catch (e) {
       debugPrint('Error loading package list images: $e');
+      return [];
     }
-    return [];
   }
 
   static Future<List<pw.Widget>> _loadAttachmentImages(String sn) async {
@@ -1263,66 +1221,16 @@ class PdfGenerator {
         return [];
       }
 
-      final directory = Directory(
-          path.join(picturesPath, 'Selected Photos', sn, 'Attachment'));
-      final images = <pw.Widget>[];
-
-      if (await directory.exists()) {
-        final imageFiles = directory
-            .listSync()
-            .where((file) =>
-                file.path.toLowerCase().endsWith('.jpg') ||
-                file.path.toLowerCase().endsWith('.jpeg') ||
-                file.path.toLowerCase().endsWith('.png'))
-            .toList();
-
-        // 將圖片分組為每組3張
-        for (var i = 0; i < imageFiles.length; i += 2) {
-          final rowImages = <pw.Widget>[];
-          for (var j = 0; j < 5 && i + j < imageFiles.length; j++) {
-            final image = await _imageFromPath(imageFiles[i + j].path);
-            if (image != null) {
-              rowImages.add(
-                pw.Expanded(
-                  child: pw.Container(
-                    margin: const pw.EdgeInsets.all(5),
-                    height: 200,
-                    child: pw.Image(
-                      image,
-                      fit: pw.BoxFit.contain,
-                    ),
-                  ),
-                ),
-              );
-            }
-          }
-          if (rowImages.isNotEmpty) {
-            images.add(
-              pw.Row(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: rowImages,
-              ),
-            );
-          }
-        }
-        return images;
-      }
+      final directory =
+          path.join(picturesPath, 'Selected Photos', sn, 'Attachment');
+      return await ImageUtils.loadAndGroupImages(directory);
     } catch (e) {
       debugPrint('Error loading attachment images: $e');
+      return [];
     }
-    return [];
   }
 
   static Future<pw.ImageProvider?> _imageFromPath(String path) async {
-    try {
-      final file = File(path);
-      if (await file.exists()) {
-        final bytes = await file.readAsBytes();
-        return pw.MemoryImage(bytes);
-      }
-    } catch (e) {
-      debugPrint('Error loading image: $e');
-    }
-    return null;
+    return await ImageUtils.imageFromPath(path);
   }
 }

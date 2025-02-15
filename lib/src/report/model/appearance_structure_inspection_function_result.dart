@@ -1,4 +1,4 @@
-import 'package:collection/collection.dart'; // 需要引入集合工具庫
+// 需要引入集合工具庫
 import 'package:flutter/foundation.dart';
 import 'package:zerova_oqc_report/src/report/enum/judgement.dart';
 

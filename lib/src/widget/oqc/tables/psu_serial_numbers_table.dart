@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
 import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 import 'package:zerova_oqc_report/src/widget/common/table_wrapper.dart';
@@ -14,7 +12,7 @@ class PsuSerialNumbersTable extends StatelessWidget {
   Widget build(BuildContext context) {
     final dataTable = StyledDataTable(
       columns: [
-        OqcTableStyle.getDataColumn('No.', context),
+        OqcTableStyle.getDataColumn('No.'),
         DataColumn(
           label: Expanded(
             child: Row(
@@ -22,11 +20,11 @@ class PsuSerialNumbersTable extends StatelessWidget {
               children: [
                 Text(
                   'S/N',
-                  style: TableTextStyle.headerStyle(context),
+                  style: TableTextStyle.headerStyle(),
                 ),
                 Text(
                   'Spec : 4',
-                  style: TableTextStyle.headerStyle(context),
+                  style: TableTextStyle.headerStyle(),
                 ),
               ],
             ),
@@ -37,8 +35,8 @@ class PsuSerialNumbersTable extends StatelessWidget {
         4,
         (index) => DataRow(
           cells: [
-            OqcTableStyle.getDataCell((index + 1).toString(), context),
-            OqcTableStyle.getDataCell(data.psuSN[index].value, context),
+            OqcTableStyle.getDataCell((index + 1).toString()),
+            OqcTableStyle.getDataCell(data.psuSN[index].value),
           ],
         ),
       ),

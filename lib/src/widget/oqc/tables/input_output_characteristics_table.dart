@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
 import 'package:zerova_oqc_report/src/report/enum/judgement.dart';
 import 'package:zerova_oqc_report/src/report/model/input_output_characteristics.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
@@ -112,5 +110,4 @@ class InputOutputCharacteristicsTable extends StatelessWidget {
       content: dataTable,
     );
   }
-
 }
