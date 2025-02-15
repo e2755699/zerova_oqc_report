@@ -152,14 +152,33 @@ class _OqcReportPageState extends State<OqcReportPage> {
         children: [
           SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.only(top: 48.0, bottom: 80.0),
+              padding: const EdgeInsets.all(80),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  ModelNameAndSerialNumberTable(
-                      model: widget.model, sn: widget.sn),
-                  PsuSerialNumbersTable(widget.psuSerialNumbers!),
-                  SoftwareVersionTable(widget.softwareVersion!),
+                  IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          flex: 1,
+                          child: Column(
+                            children: [
+                              ModelNameAndSerialNumberTable(
+                                model: widget.model,
+                                sn: widget.sn,
+                              ),
+                              PsuSerialNumbersTable(widget.psuSerialNumbers!),
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: SoftwareVersionTable(widget.softwareVersion!),
+                        ),
+                      ],
+                    ),
+                  ),
                   AppearanceStructureInspectionTable(widget.testFunction!),
                   InputOutputCharacteristicsTable(
                       widget.inputOutputCharacteristics!),

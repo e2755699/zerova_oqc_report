@@ -11,14 +11,14 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/',
       builder: (BuildContext context, GoRouterState state) {
-        return HomePage();
+        return const HomePage();
       },
     ),
     GoRoute(
       path: '/camera',
       builder: (BuildContext context, GoRouterState state) {
         final extra = state.extra as Map<String, dynamic>;
-        return  CameraPage(
+        return CameraPage(
           sn: extra['sn'],
           packagingOrAttachment: extra['packagingOrAttachment'],
         );
@@ -36,9 +36,9 @@ final GoRouter appRouter = GoRouter(
           inputOutputCharacteristics: extra['inputOutputCharacteristics'],
           protectionTestResults: extra['protectionTestResults'],
           psuSerialNumbers: extra['psuSerialNumbers'],
-          packageListResult: PackageListResult(),
+          packageListResult: extra['packageListResult'] ?? PackageListResult(),
         );
       },
     ),
   ],
-); 
+);

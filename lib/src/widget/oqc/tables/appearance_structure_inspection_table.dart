@@ -33,18 +33,19 @@ class _AppearanceStructureInspectionTableState
       title: context.tr('appearance_structure_inspection'),
       content: StyledDataTable(
         columns: [
-          OqcTableStyle.getDataColumn('No.'),
-          OqcTableStyle.getDataColumn('Item'),
-          OqcTableStyle.getDataColumn('Details'),
-          OqcTableStyle.getDataColumn('Judgement'),
+          OqcTableStyle.getDataColumn('No.', context),
+          OqcTableStyle.getDataColumn('Item', context),
+          OqcTableStyle.getDataColumn('Details', context),
+          OqcTableStyle.getDataColumn('Judgement', context),
         ],
         rows: List.generate(
           data.testItems.length,
           (index) => DataRow(
             cells: [
-              OqcTableStyle.getDataCell((index + 1).toString()),
-              OqcTableStyle.getDataCell(data.testItems[index].name),
-              OqcTableStyle.getDataCell(data.testItems[index].description),
+              OqcTableStyle.getDataCell((index + 1).toString(), context),
+              OqcTableStyle.getDataCell(data.testItems[index].name, context),
+              OqcTableStyle.getDataCell(
+                  data.testItems[index].description, context),
               DataCell(buildJudgementDropdown(
                 data.testItems[index].judgement,
                 (newValue) {

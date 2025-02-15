@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import 'package:zerova_oqc_report/src/report/enum/judgement.dart';
 import 'package:zerova_oqc_report/src/report/model/protection_function_test_result.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 import 'package:zerova_oqc_report/src/widget/common/table_wrapper.dart';
 import 'package:zerova_oqc_report/src/widget/common/table_helper.dart';
-import 'package:easy_localization/easy_localization.dart';
 
 class HiPotTestTable extends StatefulWidget {
   final ProtectionFunctionTestResult data;
@@ -27,72 +25,55 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
   }
 
   Widget _buildInsulationTestingRecord() {
-    return SizedBox(
-      width: 400,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(
-            child: Text(
-              'Insulation impedance >10MΩ',
-              style: TextStyle(
-                fontSize: TableTextStyle.contentStyle.fontSize,
-              ),
-              textAlign: TextAlign.center,
-            ),
+          const Text(
+            'Insulation impedance >10MΩ',
+            style: TableTextStyle.contentStyle,
           ),
-          Table(
-            border: TableBorder.all(),
-            columnWidths: const {
-              0: FlexColumnWidth(1),
-              1: FlexColumnWidth(1),
-            },
+          const SizedBox(height: 8),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TableRow(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Left Plug:',
-                            style: TableTextStyle.contentStyle.copyWith(
-                              fontWeight: FontWeight.bold,
-                            )),
-                        Text(
-                            'Input/Output: ${data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputOutput.value.toStringAsFixed(2)} MΩ',
-                            style: TableTextStyle.contentStyle),
-                        Text(
-                            'Input/Ground: ${data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputGround.value.toStringAsFixed(2)} MΩ',
-                            style: TableTextStyle.contentStyle),
-                        Text(
-                            'Output/Ground: ${data.hiPotTestResult.insulationImpedanceTest.leftInsulationOutputGround.value.toStringAsFixed(2)} MΩ',
-                            style: TableTextStyle.contentStyle),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Right Plug:',
-                            style: TableTextStyle.contentStyle.copyWith(
-                              fontWeight: FontWeight.bold,
-                            )),
-                        Text(
-                            'Input/Output: ${data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputOutput.value.toStringAsFixed(2)} MΩ',
-                            style: TableTextStyle.contentStyle),
-                        Text(
-                            'Input/Ground: ${data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputGround.value.toStringAsFixed(2)} MΩ',
-                            style: TableTextStyle.contentStyle),
-                        Text(
-                            'Output/Ground: ${data.hiPotTestResult.insulationImpedanceTest.rightInsulationOutputGround.value.toStringAsFixed(2)} MΩ',
-                            style: TableTextStyle.contentStyle),
-                      ],
-                    ),
-                  ),
-                ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Left Plug:',
+                        style: TableTextStyle.contentStyle),
+                    Text(
+                        'Input/Output: ${data.leftSideProtectionFunctionTestResult.insulationImpedanceInputOutput.value} MΩ',
+                        style: TableTextStyle.contentStyle),
+                    Text(
+                        'Input/Ground: ${data.leftSideProtectionFunctionTestResult.insulationImpedanceInputGround.value} MΩ',
+                        style: TableTextStyle.contentStyle),
+                    Text(
+                        'Output/Ground: ${data.leftSideProtectionFunctionTestResult.insulationImpedanceOutputGround.value} MΩ',
+                        style: TableTextStyle.contentStyle),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Right Plug:',
+                        style: TableTextStyle.contentStyle),
+                    Text(
+                        'Input/Output: ${data.rightSideProtectionFunctionTestResult.insulationImpedanceInputOutput.value} MΩ',
+                        style: TableTextStyle.contentStyle),
+                    Text(
+                        'Input/Ground: ${data.rightSideProtectionFunctionTestResult.insulationImpedanceInputGround.value} MΩ',
+                        style: TableTextStyle.contentStyle),
+                    Text(
+                        'Output/Ground: ${data.rightSideProtectionFunctionTestResult.insulationImpedanceOutputGround.value} MΩ',
+                        style: TableTextStyle.contentStyle),
+                  ],
+                ),
               ),
             ],
           ),
@@ -102,75 +83,63 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
   }
 
   Widget _buildLeakageTestingRecord() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Center(
-          child: Text(
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
             'Leakage current <10mA',
             style: TextStyle(
               fontSize: TableTextStyle.contentStyle.fontSize,
               color: Colors.red,
             ),
-            textAlign: TextAlign.center,
           ),
-        ),
-        Table(
-          border: TableBorder.all(),
-          columnWidths: const {
-            0: FlexColumnWidth(1),
-            1: FlexColumnWidth(1),
-          },
-          children: [
-            TableRow(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Left Plug:',
-                          style: TableTextStyle.contentStyle.copyWith(
-                            fontWeight: FontWeight.bold,
-                          )),
-                      Text(
-                          'Input/Output: ${data.hiPotTestResult.insulationVoltageTest.leftInsulationInputOutput.value.toStringAsFixed(2)} mA',
-                          style: TableTextStyle.contentStyle),
-                      Text(
-                          'Input/Ground: ${data.hiPotTestResult.insulationVoltageTest.leftInsulationInputGround.value.toStringAsFixed(2)} mA',
-                          style: TableTextStyle.contentStyle),
-                      Text(
-                          'Output/Ground: ${data.hiPotTestResult.insulationVoltageTest.leftInsulationOutputGround.value.toStringAsFixed(2)} mA',
-                          style: TableTextStyle.contentStyle),
-                    ],
-                  ),
+          const SizedBox(height: 8),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Left Plug:',
+                        style: TableTextStyle.contentStyle),
+                    Text(
+                        'Input/Output: ${data.leftSideProtectionFunctionTestResult.insulationVoltageInputOutput.value} mA',
+                        style: TableTextStyle.contentStyle),
+                    Text(
+                        'Input/Ground: ${data.leftSideProtectionFunctionTestResult.insulationVoltageInputGround.value} mA',
+                        style: TableTextStyle.contentStyle),
+                    Text(
+                        'Output/Ground: ${data.leftSideProtectionFunctionTestResult.insulationVoltageOutputGround.value} mA',
+                        style: TableTextStyle.contentStyle),
+                  ],
                 ),
-                Container(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Right Plug:',
-                          style: TableTextStyle.contentStyle.copyWith(
-                            fontWeight: FontWeight.bold,
-                          )),
-                      Text(
-                          'Input/Output: ${data.hiPotTestResult.insulationVoltageTest.rightInsulationInputOutput.value.toStringAsFixed(2)} mA',
-                          style: TableTextStyle.contentStyle),
-                      Text(
-                          'Input/Ground: ${data.hiPotTestResult.insulationVoltageTest.rightInsulationInputGround.value.toStringAsFixed(2)} mA',
-                          style: TableTextStyle.contentStyle),
-                      Text(
-                          'Output/Ground: ${data.hiPotTestResult.insulationVoltageTest.rightInsulationOutputGround.value.toStringAsFixed(2)} mA',
-                          style: TableTextStyle.contentStyle),
-                    ],
-                  ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Right Plug:',
+                        style: TableTextStyle.contentStyle),
+                    Text(
+                        'Input/Output: ${data.rightSideProtectionFunctionTestResult.insulationVoltageInputOutput.value} mA',
+                        style: TableTextStyle.contentStyle),
+                    Text(
+                        'Input/Ground: ${data.rightSideProtectionFunctionTestResult.insulationVoltageInputGround.value} mA',
+                        style: TableTextStyle.contentStyle),
+                    Text(
+                        'Output/Ground: ${data.rightSideProtectionFunctionTestResult.insulationVoltageOutputGround.value} mA',
+                        style: TableTextStyle.contentStyle),
+                  ],
                 ),
-              ],
-            ),
-          ],
-        ),
-      ],
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -180,77 +149,108 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
       title: 'Hi-Pot Test',
       content: StyledDataTable(
         dataRowMinHeight: 200,
-        dataRowMaxHeight: 230,
-        columnSpacing: 30,
-        columns: const [
+        dataRowMaxHeight: 300,
+        columns: [
           DataColumn(
             label: Text(
               'No.',
-              style: TableTextStyle.headerStyle,
+              style: TableTextStyle.headerStyle(context),
             ),
           ),
           DataColumn(
             label: Text(
               'Test Items',
-              style: TableTextStyle.headerStyle,
+              style: TableTextStyle.headerStyle(context),
             ),
           ),
           DataColumn(
             label: Text(
               'Testing Record',
-              style: TableTextStyle.headerStyle,
+              style: TableTextStyle.headerStyle(context),
             ),
           ),
           DataColumn(
             label: Text(
               'Judgement',
-              style: TableTextStyle.headerStyle,
+              style: TableTextStyle.headerStyle(context),
             ),
           ),
         ],
         rows: [
           DataRow(cells: [
-            const DataCell(Text(
+            DataCell(Text(
               '1',
-              style: TableTextStyle.contentStyle,
+              style: TableTextStyle.contentStyle(context),
             )),
-            const DataCell(Text(
+            DataCell(Text(
               'Insulation Impedance Test.\n\nApply a DC Voltage:\na) Between each circuit.\nb) Between each of the independent circuits and the ground.',
-              style: TableTextStyle.contentStyle,
+              style: TableTextStyle.contentStyle(context),
             )),
             DataCell(_buildInsulationTestingRecord()),
-            DataCell(Text(
-              data.hiPotTestResult.judgement,
-              style: TableTextStyle.contentStyle.copyWith(
-                color: data.hiPotTestResult.judgement == "OK"
-                    ? Colors.green
-                    : Colors.red,
-                fontWeight: FontWeight.bold,
-              ),
+            DataCell(buildJudgementDropdown(
+              data.leftSideProtectionFunctionTestResult.judgement,
+              (newValue) {
+                if (newValue != null) {
+                  setState(() {
+                    // TODO: Update judgement
+                  });
+                }
+              },
             )),
           ]),
           DataRow(cells: [
-            const DataCell(Text(
+            DataCell(Text(
               '2',
-              style: TableTextStyle.contentStyle,
+              style: TableTextStyle.contentStyle(context),
             )),
-            const DataCell(Text(
+            DataCell(Text(
               'Insulation Voltage Test.\n\nApply a DC Voltage:\na) Between each circuit.\nb) Between each of the independent circuits and the ground.',
-              style: TableTextStyle.contentStyle,
+              style: TableTextStyle.contentStyle(context),
             )),
             DataCell(_buildLeakageTestingRecord()),
-            DataCell(Text(
-              data.hiPotTestResult.judgement,
-              style: TableTextStyle.contentStyle.copyWith(
-                color: data.hiPotTestResult.judgement == "OK"
-                    ? Colors.green
-                    : Colors.red,
-                fontWeight: FontWeight.bold,
-              ),
+            DataCell(buildJudgementDropdown(
+              data.rightSideProtectionFunctionTestResult.judgement,
+              (newValue) {
+                if (newValue != null) {
+                  setState(() {
+                    // TODO: Update judgement
+                  });
+                }
+              },
             )),
           ]),
         ],
       ),
+    );
+  }
+
+  Future<void> _generatePdf(BuildContext context) async {
+    final pdf = pw.Document();
+
+    // 添加 PDF 表格
+    pdf.addPage(
+      pw.Page(
+        build: (pw.Context context) {
+          return pw.Table.fromTextArray(
+            border: pw.TableBorder.all(),
+            headers: ['No.', 'S/N'],
+            data: List.generate(
+              data.specialFunctionTestResult.testItems.length,
+              (index) => [
+                (index + 1).toString(),
+                data.specialFunctionTestResult.testItems[index].name,
+                data.specialFunctionTestResult.testItems[index].description,
+                data.specialFunctionTestResult.testItems[index].judgement,
+              ],
+            ),
+          );
+        },
+      ),
+    );
+
+    // 預覽 PDF
+    await Printing.layoutPdf(
+      onLayout: (format) async => pdf.save(),
     );
   }
 }

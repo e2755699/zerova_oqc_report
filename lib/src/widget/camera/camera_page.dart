@@ -30,7 +30,7 @@ class _CameraPageState extends State<CameraPage> with CameraHelper {
   bool _initialized = false;
   bool _previewPaused = false;
   Size? _previewSize;
-  MediaSettings _mediaSettings = const MediaSettings(
+  final MediaSettings _mediaSettings = const MediaSettings(
     resolutionPreset: ResolutionPreset.max,
     fps: 15,
     videoBitrate: 200000,
@@ -94,9 +94,15 @@ class _CameraPageState extends State<CameraPage> with CameraHelper {
     final List<FileSystemEntity> files = directory.listSync();
 
     // Filter out the images from the directory (e.g., .jpg, .png)
-    final imageFiles = files.where((file) {
-      return file is File && (file.path.endsWith('.jpg') || file.path.endsWith('.jpeg') || file.path.endsWith('.png'));
-    }).map((file) => file.path).toList();
+    final imageFiles = files
+        .where((file) {
+          return file is File &&
+              (file.path.endsWith('.jpg') ||
+                  file.path.endsWith('.jpeg') ||
+                  file.path.endsWith('.png'));
+        })
+        .map((file) => file.path)
+        .toList();
 
     if (mounted) {
       setState(() {
@@ -170,7 +176,7 @@ class _CameraPageState extends State<CameraPage> with CameraHelper {
           _cameraIndex = 0;
           _previewSize = null;
           _cameraInfo =
-          'Failed to initialize camera: ${e.code}: ${e.description}';
+              'Failed to initialize camera: ${e.code}: ${e.description}';
         });
       }
     }
@@ -194,7 +200,7 @@ class _CameraPageState extends State<CameraPage> with CameraHelper {
         if (mounted) {
           setState(() {
             _cameraInfo =
-            'Failed to dispose camera: ${e.code}: ${e.description}';
+                'Failed to dispose camera: ${e.code}: ${e.description}';
           });
         }
       }
@@ -217,9 +223,11 @@ class _CameraPageState extends State<CameraPage> with CameraHelper {
 
         final String saveImagesPath;
 
-        if (widget.packagingOrAttachment == 0) { // Packaging
+        if (widget.packagingOrAttachment == 0) {
+          // Packaging
           saveImagesPath = await _getUserAllPhotosPackagingPath(widget.sn);
-        } else if (widget.packagingOrAttachment == 1) { // Attachment
+        } else if (widget.packagingOrAttachment == 1) {
+          // Attachment
           saveImagesPath = await _getUserAllPhotosAttachmentPath(widget.sn);
         } else {
           throw Exception("Didn't contain Packaging Or Attachment");
@@ -286,12 +294,12 @@ class _CameraPageState extends State<CameraPage> with CameraHelper {
   }
 
   final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
-  GlobalKey<ScaffoldMessengerState>();
+      GlobalKey<ScaffoldMessengerState>();
 
   @override
   Widget build(BuildContext context) {
     return MainLayout(
-      title:  context.tr('camera'),
+      title: context.tr('camera'),
       body: ListView(
         children: <Widget>[
           if (_cameras.isEmpty)
@@ -303,7 +311,7 @@ class _CameraPageState extends State<CameraPage> with CameraHelper {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                if(widget.packagingOrAttachment != 0)
+                if (widget.packagingOrAttachment != 0)
                   DropdownButton<String>(
                     hint: const Text('Select Image'),
                     value: _selectedImagePath,
@@ -312,7 +320,8 @@ class _CameraPageState extends State<CameraPage> with CameraHelper {
                         _selectedImagePath = newValue;
                       });
                     },
-                    items: _imagePaths.map<DropdownMenuItem<String>>((String path) {
+                    items: _imagePaths
+                        .map<DropdownMenuItem<String>>((String path) {
                       return DropdownMenuItem<String>(
                         value: path,
                         child: Text(path.split('\\').last),
@@ -334,7 +343,8 @@ class _CameraPageState extends State<CameraPage> with CameraHelper {
                           context,
                           MaterialPageRoute(
                             builder: (context) => ImagePickerScreen(
-                              packagingOrAttachment: widget.packagingOrAttachment,
+                              packagingOrAttachment:
+                                  widget.packagingOrAttachment,
                               sn: widget.sn,
                             ),
                           ),
@@ -356,9 +366,11 @@ class _CameraPageState extends State<CameraPage> with CameraHelper {
                     child: Padding(
                       padding: const EdgeInsets.all(10.0),
                       child: Container(
-                        constraints: const BoxConstraints(maxHeight: 500), // 與相機畫面相同的最大高度
+                        constraints: const BoxConstraints(
+                            maxHeight: 500), // 與相機畫面相同的最大高度
                         child: AspectRatio(
-                          aspectRatio: _previewSize!.width / _previewSize!.height, // 保持相機畫面比例
+                          aspectRatio: _previewSize!.width /
+                              _previewSize!.height, // 保持相機畫面比例
                           child: Image.file(
                             File(_selectedImagePath!),
                             fit: BoxFit.contain, // 確保圖片完整顯示，不被裁切
@@ -374,7 +386,8 @@ class _CameraPageState extends State<CameraPage> with CameraHelper {
                       child: Container(
                         constraints: const BoxConstraints(maxHeight: 500),
                         child: AspectRatio(
-                          aspectRatio: _previewSize!.width / _previewSize!.height,
+                          aspectRatio:
+                              _previewSize!.width / _previewSize!.height,
                           child: _buildPreview(),
                         ),
                       ),
@@ -389,7 +402,7 @@ class _CameraPageState extends State<CameraPage> with CameraHelper {
   }
 }
 
-mixin CameraHelper{
+mixin CameraHelper {
   Future<String> _getOrCreateUserZerovaPath() async {
     final String userProfile = Platform.environment['USERPROFILE'] ?? '';
 
@@ -406,7 +419,6 @@ mixin CameraHelper{
     }
   }
 
-
   Future<String> _getUserComparePath() async {
     final String picturesPath = await _getOrCreateUserZerovaPath();
     final String comparePath = path.join(picturesPath, 'Compare Pictures');
@@ -414,7 +426,8 @@ mixin CameraHelper{
     // 檢查資料夾是否存在，若不存在則建立
     final directory = Directory(comparePath);
     if (!await directory.exists()) {
-      await directory.create(recursive: true); // recursive 為 true 會自動建立所有必要的父資料夾
+      await directory.create(
+          recursive: true); // recursive 為 true 會自動建立所有必要的父資料夾
     }
 
     return comparePath;
@@ -422,7 +435,8 @@ mixin CameraHelper{
 
   Future<String> _getUserAllPhotosPackagingPath(String sn) async {
     final String picturesPath = await _getOrCreateUserZerovaPath();
-    final String allPhotosPackagingPath = path.join(picturesPath, 'All Photos', sn, 'Packaging');
+    final String allPhotosPackagingPath =
+        path.join(picturesPath, 'All Photos', sn, 'Packaging');
 
     // 檢查資料夾是否存在，若不存在則建立
     final directory = Directory(allPhotosPackagingPath);
@@ -435,7 +449,8 @@ mixin CameraHelper{
 
   Future<String> _getUserAllPhotosAttachmentPath(String sn) async {
     final String picturesPath = await _getOrCreateUserZerovaPath();
-    final String allPhotosAttachmentPath = path.join(picturesPath, 'All Photos', sn, 'Attachment');
+    final String allPhotosAttachmentPath =
+        path.join(picturesPath, 'All Photos', sn, 'Attachment');
 
     // 檢查資料夾是否存在，若不存在則建立
     final directory = Directory(allPhotosAttachmentPath);
@@ -448,7 +463,8 @@ mixin CameraHelper{
 
   Future<String> _getUserSelectedPhotosPackagingPath(String sn) async {
     final String picturesPath = await _getOrCreateUserZerovaPath();
-    final String selectedPhotosPackagingPath = path.join(picturesPath, 'Selected Photos', sn, 'Packaging');
+    final String selectedPhotosPackagingPath =
+        path.join(picturesPath, 'Selected Photos', sn, 'Packaging');
 
     // 檢查資料夾是否存在，若不存在則建立
     final directory = Directory(selectedPhotosPackagingPath);
@@ -461,7 +477,8 @@ mixin CameraHelper{
 
   Future<String> _getUserSelectedPhotosAttachmentPath(String sn) async {
     final String picturesPath = await _getOrCreateUserZerovaPath();
-    final String selectedPhotosAttachmentPath = path.join(picturesPath, 'Selected Photos', sn, 'Attachment');
+    final String selectedPhotosAttachmentPath =
+        path.join(picturesPath, 'Selected Photos', sn, 'Attachment');
 
     // 檢查資料夾是否存在，若不存在則建立
     final directory = Directory(selectedPhotosAttachmentPath);
@@ -471,9 +488,7 @@ mixin CameraHelper{
 
     return selectedPhotosAttachmentPath;
   }
-
 }
-
 
 class ImagePickerScreen extends StatefulWidget {
   final int packagingOrAttachment;
@@ -489,7 +504,8 @@ class ImagePickerScreen extends StatefulWidget {
   State<ImagePickerScreen> createState() => _ImagePickerScreenState();
 }
 
-class _ImagePickerScreenState extends State<ImagePickerScreen> with CameraHelper {
+class _ImagePickerScreenState extends State<ImagePickerScreen>
+    with CameraHelper {
   List<String> _imagePaths = [];
   List<bool> _selectedImages = [];
 
@@ -514,9 +530,11 @@ class _ImagePickerScreenState extends State<ImagePickerScreen> with CameraHelper
     try {
       final String picturesPath;
 
-      if (widget.packagingOrAttachment == 0) { // Packaging
+      if (widget.packagingOrAttachment == 0) {
+        // Packaging
         picturesPath = await _getUserAllPhotosPackagingPath(widget.sn);
-      } else if (widget.packagingOrAttachment == 1) { // Attachment
+      } else if (widget.packagingOrAttachment == 1) {
+        // Attachment
         picturesPath = await _getUserAllPhotosAttachmentPath(widget.sn);
       } else {
         throw Exception("Didn't contain Packaging Or Attachment");
@@ -554,9 +572,11 @@ class _ImagePickerScreenState extends State<ImagePickerScreen> with CameraHelper
   Future<void> _saveSelectedImages() async {
     final String saveImagesPath;
 
-    if (widget.packagingOrAttachment == 0) { // Packaging
+    if (widget.packagingOrAttachment == 0) {
+      // Packaging
       saveImagesPath = await _getUserSelectedPhotosPackagingPath(widget.sn);
-    } else if (widget.packagingOrAttachment == 1) { // Attachment
+    } else if (widget.packagingOrAttachment == 1) {
+      // Attachment
       saveImagesPath = await _getUserSelectedPhotosAttachmentPath(widget.sn);
     } else {
       throw Exception("Didn't contain Packaging Or Attachment");
@@ -584,7 +604,8 @@ class _ImagePickerScreenState extends State<ImagePickerScreen> with CameraHelper
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _showImageSelectionDialog() {
@@ -593,7 +614,7 @@ class _ImagePickerScreenState extends State<ImagePickerScreen> with CameraHelper
       builder: (BuildContext context) {
         return Dialog(
           insetPadding: EdgeInsets.zero, // 移除邊距，確保對話框填滿
-          child: Container(
+          child: SizedBox(
             width: MediaQuery.of(context).size.width, // 填滿寬度
             height: MediaQuery.of(context).size.height, // 填滿高度
             child: Column(
@@ -613,48 +634,51 @@ class _ImagePickerScreenState extends State<ImagePickerScreen> with CameraHelper
                 ),
                 Expanded(
                   child: StatefulBuilder(
-                    builder: (BuildContext context, StateSetter dialogSetState) {
+                    builder:
+                        (BuildContext context, StateSetter dialogSetState) {
                       return _imagePaths.isNotEmpty
                           ? GridView.builder(
-                        padding: const EdgeInsets.all(8.0),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 5, // 每行顯示 5 張圖片
-                          crossAxisSpacing: 8,
-                          mainAxisSpacing: 8,
-                        ),
-                        itemCount: _imagePaths.length,
-                        itemBuilder: (context, index) {
-                          return Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              Image.file(
-                                File(_imagePaths[index]),
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                const Icon(Icons.error),
+                              padding: const EdgeInsets.all(8.0),
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 5, // 每行顯示 5 張圖片
+                                crossAxisSpacing: 8,
+                                mainAxisSpacing: 8,
                               ),
-                              Positioned(
-                                top: 8,
-                                right: 8,
-                                child: Checkbox(
-                                  value: _selectedImages[index],
-                                  onChanged: (bool? value) {
-                                    dialogSetState(() {
-                                      _selectedImages[index] = value!;
-                                    });
-                                    setState(() {}); // 確保外部狀態也更新
-                                  },
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      )
+                              itemCount: _imagePaths.length,
+                              itemBuilder: (context, index) {
+                                return Stack(
+                                  fit: StackFit.expand,
+                                  children: [
+                                    Image.file(
+                                      File(_imagePaths[index]),
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              const Icon(Icons.error),
+                                    ),
+                                    Positioned(
+                                      top: 8,
+                                      right: 8,
+                                      child: Checkbox(
+                                        value: _selectedImages[index],
+                                        onChanged: (bool? value) {
+                                          dialogSetState(() {
+                                            _selectedImages[index] = value!;
+                                          });
+                                          setState(() {}); // 確保外部狀態也更新
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            )
                           : const Center(
-                        child: Text(
-                            'No images found in the specified directory.'),
-                        //child: CircularProgressIndicator(), // 顯示加載中的進度條
-                      );
+                              child: Text(
+                                  'No images found in the specified directory.'),
+                              //child: CircularProgressIndicator(), // 顯示加載中的進度條
+                            );
                     },
                   ),
                 ),
@@ -666,15 +690,12 @@ class _ImagePickerScreenState extends State<ImagePickerScreen> with CameraHelper
                       TextButton(
                         onPressed: () {
                           Navigator.of(context).pop(); // 關閉對話框
-                          Navigator.of(context).pop(); // 關閉對話框
                         },
                         child: const Text('Close'),
                       ),
                       ElevatedButton(
                         onPressed: () async {
                           await _saveSelectedImages(); // 儲存所選影像
-                          Navigator.of(context).pop(); // 關閉對話框
-                          Navigator.of(context).pop(); // 關閉對話框
                           Navigator.of(context).pop(); // 關閉對話框
                         },
                         child: const Text('Save Selected Images'),
@@ -704,4 +725,3 @@ class _ImagePickerScreenState extends State<ImagePickerScreen> with CameraHelper
     );
   }
 }
-

@@ -169,8 +169,6 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
 mixin LoadFileHelper {
   Future<void> loadFileModule(
       String sn, String model, BuildContext context) async {
-
-
     //load json from User/Test Result/Zerova/$sn/...
     var filePath = '';
     if (Platform.isMacOS) {
@@ -179,7 +177,8 @@ mixin LoadFileHelper {
           Platform.environment['HOME'] ?? '', 'Test Result', 'Zerova');
     } else if (Platform.isWindows) {
       // Windows 路徑
-      filePath = path.join(Platform.environment['USERPROFILE'] ?? '', 'Test Result', 'Zerova');
+      filePath = path.join(
+          Platform.environment['USERPROFILE'] ?? '', 'Test Result', 'Zerova');
     } else {
       // 其他系統（如 Linux）
       filePath = path.join(
@@ -216,8 +215,7 @@ mixin LoadFileHelper {
       'inputOutputCharacteristics': inputOutputCharacteristics,
       'protectionTestResults': protectionTestResults,
     });
-    return ;
-
+    return;
 
     //call api
     final apiClient = OqcApiClient();
@@ -230,12 +228,12 @@ mixin LoadFileHelper {
     ]).then((res) {
       var psuSerialNumbers = Psuserialnumber.fromJsonList(res[0]);
       var testFunction =
-      AppearanceStructureInspectionFunctionResult.fromJson(res[1]);
+          AppearanceStructureInspectionFunctionResult.fromJson(res[1]);
       var softwareVersion = SoftwareVersion.fromJsonList(res[2]);
       var inputOutputCharacteristics =
-      InputOutputCharacteristics.fromJsonList(res[2]);
+          InputOutputCharacteristics.fromJsonList(res[2]);
       var protectionTestResults =
-      ProtectionFunctionTestResult.fromJsonList(res[2]);
+          ProtectionFunctionTestResult.fromJsonList(res[2]);
       context.push('/oqc-report', extra: {
         'sn': sn,
         'model': model,

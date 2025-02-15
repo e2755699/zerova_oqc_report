@@ -4,9 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
-import 'package:zerova_oqc_report/route/app_router.dart';
 import 'package:zerova_oqc_report/src/repo/sharepoint_uploader.dart';
-import 'package:zerova_oqc_report/src/widget/oqc/tables/package_list_table.dart';
 
 class UploadProgressDialog extends StatefulWidget {
   final int uploadOrDownload;
@@ -73,7 +71,7 @@ class _UploadProgressDialogState extends State<UploadProgressDialog> {
       }
     });
 
-    await Future.delayed(Duration(seconds: 2)); // 顯示 2 秒後自動關閉
+    await Future.delayed(const Duration(seconds: 2)); // 顯示 2 秒後自動關閉
     if (mounted) {
       Navigator.pop(context); // 關閉對話框
     }
@@ -90,7 +88,7 @@ class _UploadProgressDialogState extends State<UploadProgressDialog> {
               : widget.uploadOrDownload == 1
                   ? "檔案下載中"
                   : "處理中...",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
       ),
       content: Column(
@@ -99,29 +97,30 @@ class _UploadProgressDialogState extends State<UploadProgressDialog> {
           if (currentCategory.isNotEmpty) ...[
             Text(
               currentCategory,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center, // **讓文字置中**
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
           ],
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10), // 讓進度條有間距
+            padding: const EdgeInsets.symmetric(horizontal: 10), // 讓進度條有間距
             child: LinearProgressIndicator(value: progress),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
             statusText,
             textAlign: TextAlign.center, // **讓狀態訊息置中**
-            style: TextStyle(fontSize: 16),
+            style: const TextStyle(fontSize: 16),
           ),
         ],
       ),
       actionsAlignment: MainAxisAlignment.center, // **讓按鈕置中**
       actions: [
-        ElevatedButton(
-          onPressed: () => Navigator.pop(context), // 手動關閉視窗
-          child: Text("關閉"),
-        ),
+        if (!isUploading)
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context), // 手動關閉視窗
+            child: const Text("關閉"),
+          ),
       ],
     );
   }

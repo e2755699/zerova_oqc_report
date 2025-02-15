@@ -245,8 +245,8 @@ class PdfGenerator {
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text("S/N  Spec : 4",
-                      style: pw.TextStyle(font: font)),
+                  child:
+                      pw.Text("S/N  Spec : 4", style: pw.TextStyle(font: font)),
                 ),
               ],
             ),

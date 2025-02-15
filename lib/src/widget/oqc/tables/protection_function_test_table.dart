@@ -15,10 +15,12 @@ class ProtectionFunctionTestTable extends StatefulWidget {
   const ProtectionFunctionTestTable(this.data, {super.key});
 
   @override
-  State<ProtectionFunctionTestTable> createState() => _ProtectionFunctionTestTableState();
+  State<ProtectionFunctionTestTable> createState() =>
+      _ProtectionFunctionTestTableState();
 }
 
-class _ProtectionFunctionTestTableState extends State<ProtectionFunctionTestTable> with TableHelper {
+class _ProtectionFunctionTestTableState
+    extends State<ProtectionFunctionTestTable> with TableHelper {
   List<ProtectionFunctionMeasurement> get testItems =>
       widget.data.specialFunctionTestResult.testItems;
 
@@ -30,35 +32,38 @@ class _ProtectionFunctionTestTableState extends State<ProtectionFunctionTestTabl
         dataRowMinHeight: 50.0,
         dataRowMaxHeight: 150.0,
         columns: [
-          OqcTableStyle.getDataColumn('No.'),
-          OqcTableStyle.getDataColumn('Test Items'),
-          OqcTableStyle.getDataColumn('Testing Record'),
-          OqcTableStyle.getDataColumn('Judgement'),
+          OqcTableStyle.getDataColumn('No.', context),
+          OqcTableStyle.getDataColumn('Test Items', context),
+          OqcTableStyle.getDataColumn('Testing Record', context),
+          OqcTableStyle.getDataColumn('Judgement', context),
         ],
         rows: List.generate(
           testItems.length,
           (index) => DataRow(
             cells: [
-              OqcTableStyle.getDataCell((index + 1).toString()),
+              OqcTableStyle.getDataCell((index + 1).toString(), context),
               DataCell(
                 SizedBox(
                   width: 200,
                   child: Text(
                     testItems[index].name,
-                    style: TableTextStyle.contentStyle,
+                    style: TableTextStyle.contentStyle(context),
                   ),
                 ),
               ),
               DataCell(
                 Wrap(
-                  children: [Text(
-                    testItems[index].description,
-                    style: TableTextStyle.contentStyle,
-                  )],
+                  children: [
+                    Text(
+                      testItems[index].description,
+                      style: TableTextStyle.contentStyle(context),
+                    )
+                  ],
                 ),
               ),
               OqcTableStyle.getDataCell(
                 testItems[index].judgement.name.toUpperCase(),
+                context,
                 color: testItems[index].judgement == Judgement.pass
                     ? Colors.green
                     : testItems[index].judgement == Judgement.fail
@@ -72,5 +77,4 @@ class _ProtectionFunctionTestTableState extends State<ProtectionFunctionTestTabl
       ),
     );
   }
-
 }

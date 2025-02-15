@@ -14,19 +14,19 @@ class PsuSerialNumbersTable extends StatelessWidget {
   Widget build(BuildContext context) {
     final dataTable = StyledDataTable(
       columns: [
-        OqcTableStyle.getDataColumn('No.'),
-        const DataColumn(
+        OqcTableStyle.getDataColumn('No.', context),
+        DataColumn(
           label: Expanded(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   'S/N',
-                  style: TableTextStyle.headerStyle,
+                  style: TableTextStyle.headerStyle(context),
                 ),
                 Text(
                   'Spec : 4',
-                  style: TableTextStyle.headerStyle,
+                  style: TableTextStyle.headerStyle(context),
                 ),
               ],
             ),
@@ -37,8 +37,8 @@ class PsuSerialNumbersTable extends StatelessWidget {
         4,
         (index) => DataRow(
           cells: [
-            OqcTableStyle.getDataCell((index + 1).toString()),
-            OqcTableStyle.getDataCell(data.psuSN[index].value),
+            OqcTableStyle.getDataCell((index + 1).toString(), context),
+            OqcTableStyle.getDataCell(data.psuSN[index].value, context),
           ],
         ),
       ),
@@ -49,5 +49,4 @@ class PsuSerialNumbersTable extends StatelessWidget {
       content: dataTable,
     );
   }
-
 }
