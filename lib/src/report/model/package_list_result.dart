@@ -13,12 +13,12 @@ class PackageListResult {
     PackageListResultMeasurement(
       spec: 1,
       key: 1,
-      translationKey: 'rfid_card',
+      translationKey: 'certificate_card',
     ),
-    PackageListResultMeasurement(
+        PackageListResultMeasurement(
       spec: 2,
       key: 2,
-      translationKey: 'certificate_card',
+      translationKey: 'rfid_card',
     ),
     PackageListResultMeasurement(
       spec: 22,

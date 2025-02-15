@@ -7,11 +7,7 @@
   "protection_function_test": "保護機能テスト",
   "package_list": "パッケージリスト",
   "attachment": "添付資料",
-  "rfid_card": "RFIDカード",
-  "certificate_card": "製品認証カード",
-  "bolts_cover": "ネジ組立 M4*12",
-  "cabinet_key": "ボルトカバー",
-  "ac_breaker_key": "ユーザーマニュアル",
+  
   "input_sn_model": "SNモデルを入力",
   "qr_code_scan": "QRコードスキャン",
   "open_camera": "カメラを開く",
@@ -22,5 +18,11 @@
   "cancel": "キャンセル",
   "submit": "送信",
   "submit_success": "SN: {}、モデル: {} が送信されました",
-  "submit_fail": "SN: {}、モデル: {} の送信に失敗しました"
+  "submit_fail": "SN: {}、モデル: {} の送信に失敗しました",
+  "rfid_card": "RFID カード", 
+  "certificate_card": "認証カード",
+  "bolts_cover": "ボルトカバー",
+  "cabinet_key": "鍵",
+  "ac_breaker_key": "AC Breaker's key",
+  "other": "その他"
 }

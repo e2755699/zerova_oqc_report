@@ -16,11 +16,12 @@
   "protection_function_test": "保護功能測試",
   "package_list": "包裝清單",
   "attachment": "附件",
-  "rfid_card": "RFID卡",
-  "certificate_card": "產品認證卡",
-  "bolts_cover": "螺絲組件 M4*12",
-  "cabinet_key": "螺栓蓋",
-  "ac_breaker_key": "使用手冊",
   "input_sn_model": "輸入SN機種",
-  "qr_code_scan": "QR code掃描"
+  "qr_code_scan": "QR code掃描",
+  "certificate_card": "認證卡",
+  "rfid_card": "RFID卡",
+  "bolts_cover": "螺母",
+  "cabinet_key": "機櫃鑰匙",
+  "ac_breaker_key": "AC Breaker's key",
+  "other": "其他"
 } 

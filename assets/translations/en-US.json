@@ -7,11 +7,7 @@
   "protection_function_test": "Protection Function Test",
   "package_list": "Package List",
   "attachment": "Attachment",
-  "rfid_card": "RFID Card",
-  "certificate_card": "Product Certificate Card",
-  "bolts_cover": "Screw Assy M4*12",
-  "cabinet_key": "Bolt Cover",
-  "ac_breaker_key": "User Manual",
+  
   "input_sn_model": "Input SN Model",
   "qr_code_scan": "QR Code Scan",
   "open_camera": "Open Camera",
@@ -22,5 +18,11 @@
   "cancel": "Cancel",
   "submit": "Submit",
   "submit_success": "SN: {}, Model: {} submitted",
-  "submit_fail": "SN: {}, Model: {} submission failed"
+  "submit_fail": "SN: {}, Model: {} submission failed",
+  "certificate_card": "Certificate Card",
+  "rfid_card": "RFID Card",
+  "bolts_cover": "Bolts Cover",
+  "cabinet_key": "Cabinet's key",
+  "ac_breaker_key": "AC Breaker's key",
+  "other": "Other"
 }

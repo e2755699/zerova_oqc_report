@@ -7,11 +7,7 @@
   "protection_function_test": "Kiểm tra chức năng bảo vệ",
   "package_list": "Danh sách đóng gói",
   "attachment": "Tài liệu đính kèm",
-  "rfid_card": "Thẻ RFID",
-  "certificate_card": "Thẻ chứng nhận sản phẩm",
-  "bolts_cover": "Bộ vít M4*12",
-  "cabinet_key": "Nắp bu lông",
-  "ac_breaker_key": "Hướng dẫn sử dụng",
+
   "input_sn_model": "Nhập Model SN",
   "qr_code_scan": "Quét mã QR",
   "open_camera": "Mở máy ảnh",
@@ -22,5 +18,11 @@
   "cancel": "Hủy",
   "submit": "Gửi",
   "submit_success": "SN: {}, Model: {} đã được gửi",
-  "submit_fail": "SN: {}, Model: {} gửi thất bại"
+  "submit_fail": "SN: {}, Model: {} gửi thất bại",
+  "certificate_card": "Thẻ chứng nhận",
+  "rfid_card": "Thẻ RFID",
+  "bolts_cover": "Ốc vít",
+  "cabinet_key": "Chìa khoá tủ máy",
+  "ac_breaker_key": "AC Breaker's key",
+  "other": "Khác"
 }
