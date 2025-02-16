@@ -7,7 +7,9 @@
   "protection_function_test": "Protection Function Test",
   "package_list": "Package List",
   "attachment": "Attachment",
-  
+  "exit": "Exit",
+  "exit_confirm_title": "Confirm Exit",
+  "exit_confirm_message": "Are you sure you want to exit the application?",
   "input_sn_model": "Input SN Model",
   "qr_code_scan": "QR Code Scan",
   "open_camera": "Open Camera",
