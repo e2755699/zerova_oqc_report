@@ -11,7 +11,21 @@ import 'src/config/config_manager.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await windowManager.ensureInitialized();
-  // windowManager.setFullScreen(true);
+
+  WindowOptions windowOptions = const WindowOptions(
+    size: Size(1920, 1080),
+    center: true,
+    backgroundColor: Colors.transparent,
+    skipTaskbar: false,
+    titleBarStyle: TitleBarStyle.normal,
+    title: "Zerova OQC Report System",
+  );
+
+  windowManager.waitUntilReadyToShow(windowOptions, () async {
+    await windowManager.show();
+    await windowManager.focus();
+  });
+
   await EasyLocalization.ensureInitialized();
   await ConfigManager.initialize();
   SharePointUploader(uploadOrDownload: 1, sn: '').startAuthorization();
