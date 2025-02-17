@@ -114,22 +114,4 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
       ],
     );
   }
-
-  /*Future<void> _qr() async {
-    String? res = await SimpleBarcodeScanner.scanBarcode(
-      context,
-      barcodeAppBar: const BarcodeAppBar(
-        appBarTitle: 'Test',
-        centerTitle: false,
-        enableBackButton: true,
-        backButtonIcon: Icon(Icons.arrow_back_ios),
-      ),
-      isShowFlashIcon: true,
-      delayMillis: 500,
-      cameraFace: CameraFace.back,
-      scanFormat: ScanFormat.ONLY_BARCODE,
-    );
-  }*/
-
-  Future<void> loadFile(String sn, String model, BuildContext context) async {}
 }
