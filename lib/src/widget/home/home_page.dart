@@ -216,52 +216,52 @@ mixin LoadFileHelper {
   Future<void> loadFileModule(
       String sn, String model, BuildContext context) async {
     //load json from User/Test Result/Zerova/$sn/...
-    var filePath = '';
-    if (Platform.isMacOS) {
-      // macOS 路徑
-      filePath = path.join(
-          Platform.environment['HOME'] ?? '', 'Test Result', 'Zerova');
-    } else if (Platform.isWindows) {
-      // Windows 路徑
-      filePath = path.join(
-          Platform.environment['USERPROFILE'] ?? '', 'Test Result', 'Zerova');
-    } else {
-      // 其他系統（如 Linux）
-      filePath = path.join(
-          Platform.environment['HOME'] ?? '', 'Test Result', 'Zerova');
-    }
-
-    String jsonContent =
-        await File("$filePath/$sn/T2449A003A1_test.json").readAsString();
-    String testFunctionJsonContent =
-        await File("$filePath/$sn/T2449A003A1_oqc.json").readAsString();
-    String moduleJsonContent =
-        await File("$filePath/$sn/T2449A003A1_keypart.json").readAsString();
-
-    List<dynamic> data = jsonDecode(jsonContent);
-    List<dynamic> testFunctionData = jsonDecode(testFunctionJsonContent);
-    List<dynamic> moduleData = jsonDecode(moduleJsonContent);
-
-    var softwareVersion = SoftwareVersion.fromJsonList(data);
-    var psuSerialNumbers =
-        Psuserialnumber.fromJsonList(moduleData); // 提取多筆 PSU Serial Number
-    var inputOutputCharacteristics =
-        InputOutputCharacteristics.fromJsonList(data);
-    var protectionTestResults =
-        ProtectionFunctionTestResult.fromJsonList(data); // 提取測試結果
-    var testFunction =
-        AppearanceStructureInspectionFunctionResult.fromJson(testFunctionData);
-
-    context.push('/oqc-report', extra: {
-      'sn': sn,
-      'model': model,
-      'psuSerialNumbers': psuSerialNumbers,
-      'softwareVersion': softwareVersion,
-      'testFunction': testFunction,
-      'inputOutputCharacteristics': inputOutputCharacteristics,
-      'protectionTestResults': protectionTestResults,
-    });
-    return;
+    // var filePath = '';
+    // if (Platform.isMacOS) {
+    //   // macOS 路徑
+    //   filePath = path.join(
+    //       Platform.environment['HOME'] ?? '', 'Test Result', 'Zerova');
+    // } else if (Platform.isWindows) {
+    //   // Windows 路徑
+    //   filePath = path.join(
+    //       Platform.environment['USERPROFILE'] ?? '', 'Test Result', 'Zerova');
+    // } else {
+    //   // 其他系統（如 Linux）
+    //   filePath = path.join(
+    //       Platform.environment['HOME'] ?? '', 'Test Result', 'Zerova');
+    // }
+    //
+    // String jsonContent =
+    //     await File("$filePath/$sn/T2449A003A1_test.json").readAsString();
+    // String testFunctionJsonContent =
+    //     await File("$filePath/$sn/T2449A003A1_oqc.json").readAsString();
+    // String moduleJsonContent =
+    //     await File("$filePath/$sn/T2449A003A1_keypart.json").readAsString();
+    //
+    // List<dynamic> data = jsonDecode(jsonContent);
+    // List<dynamic> testFunctionData = jsonDecode(testFunctionJsonContent);
+    // List<dynamic> moduleData = jsonDecode(moduleJsonContent);
+    //
+    // var softwareVersion = SoftwareVersion.fromJsonList(data);
+    // var psuSerialNumbers =
+    //     Psuserialnumber.fromJsonList(moduleData); // 提取多筆 PSU Serial Number
+    // var inputOutputCharacteristics =
+    //     InputOutputCharacteristics.fromJsonList(data);
+    // var protectionTestResults =
+    //     ProtectionFunctionTestResult.fromJsonList(data); // 提取測試結果
+    // var testFunction =
+    //     AppearanceStructureInspectionFunctionResult.fromJson(testFunctionData);
+    //
+    // context.push('/oqc-report', extra: {
+    //   'sn': sn,
+    //   'model': model,
+    //   'psuSerialNumbers': psuSerialNumbers,
+    //   'softwareVersion': softwareVersion,
+    //   'testFunction': testFunction,
+    //   'inputOutputCharacteristics': inputOutputCharacteristics,
+    //   'protectionTestResults': protectionTestResults,
+    // });
+    // return;
 
     //call api
     final apiClient = OqcApiClient();
