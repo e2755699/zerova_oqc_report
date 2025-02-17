@@ -11,10 +11,12 @@ import 'package:zerova_oqc_report/src/report/model/protection_function_test_resu
 import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/report/model/software_version.dart';
 import 'package:zerova_oqc_report/src/report/model/appearance_structure_inspection_function_result.dart';
+import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 import 'package:zerova_oqc_report/src/widget/home/input_model_name_and_sn_dialog.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/oqc_report_page.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:zerova_oqc_report/src/widget/common/custom_app_bar.dart';
+import 'package:window_manager/window_manager.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -72,6 +74,50 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
                   qrcodeScan();
                 },
                 child: Text(context.tr('qr_code_scan')),
+              ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: 300,
+              height: 60,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  textStyle: const TextStyle(fontSize: 20),
+                  backgroundColor: AppColors.grayColor.withOpacity(0.6),
+                ),
+                onPressed: () async {
+                  bool? shouldClose = await showDialog<bool>(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text(context.tr('exit_confirm_title')),
+                        content: Text(context.tr('exit_confirm_message')),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(false),
+                            child: Text(context.tr('cancel')),
+                          ),
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.red,
+                            ),
+                            onPressed: () => Navigator.of(context).pop(true),
+                            child: Text(context.tr('exit')),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+
+                  if (shouldClose == true) {
+                    await windowManager.close();
+                  }
+                },
+                child: Text(
+                  context.tr('exit'),
+                  style: TextStyle(
+                      color: AppColors.blackColor, fontWeight: FontWeight.bold),
+                ),
               ),
             ),
           ],

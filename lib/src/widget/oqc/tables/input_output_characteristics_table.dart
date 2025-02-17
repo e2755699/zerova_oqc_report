@@ -34,10 +34,7 @@ class InputOutputCharacteristicsTable extends StatelessWidget {
                   children: header
                       .map((headerColumn) => Text(
                             headerColumn,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.darkBlueColor,
-                            ),
+                            style: TableTextStyle.headerStyle(),
                           ))
                       .toList(),
                 ),
@@ -47,50 +44,33 @@ class InputOutputCharacteristicsTable extends StatelessWidget {
           inputOutputCharacteristics.inputOutputCharacteristicsSide.map((item) {
         return DataRow(
           cells: [
-            DataCell(Text(
+            OqcTableStyle.getDataCell(
               item.side,
-              textAlign: TextAlign.center,
-            )),
-            DataCell(
-              Text(
-                item.inputVoltage
-                    .map((iv) => "${iv.value.toStringAsFixed(2)} V")
-                    .toList()
-                    .join("\n"),
-                textAlign: TextAlign.center,
-              ),
             ),
-            DataCell(
-              Text(
-                item.inputCurrent
-                    .map((iv) => "${iv.value.toStringAsFixed(2)} A")
-                    .toList()
-                    .join("\n"),
-                textAlign: TextAlign.center,
-              ),
+            OqcTableStyle.getDataCell(
+              item.inputVoltage
+                  .map((iv) => "${iv.value.toStringAsFixed(2)} V")
+                  .toList()
+                  .join("\n"),
             ),
-            // DataCell(RichText(
-            //   text: TextSpan(
-            //       children: item.inputCurrent
-            //           .map((iv) => TextSpan(text: "${iv.value.toStringAsFixed(2)} A"))
-            //           .toList()),
-            //    textAlign: TextAlign.center,),),
-            DataCell(Text(
+            OqcTableStyle.getDataCell(
+              item.inputCurrent
+                  .map((iv) => "${iv.value.toStringAsFixed(2)} A")
+                  .toList()
+                  .join("\n"),
+            ),
+            OqcTableStyle.getDataCell(
               "${item.totalInputPower.value.toStringAsFixed(2)} KW",
-              textAlign: TextAlign.center,
-            )),
-            DataCell(Text(
+            ),
+            OqcTableStyle.getDataCell(
               "${item.outputVoltage.value.toStringAsFixed(2)} V",
-              textAlign: TextAlign.center,
-            )),
-            DataCell(Text(
+            ),
+            OqcTableStyle.getDataCell(
               "${item.outputCurrent.value.toStringAsFixed(2)} A",
-              textAlign: TextAlign.center,
-            )),
-            DataCell(Text(
+            ),
+            OqcTableStyle.getDataCell(
               "${item.totalOutputPower.value.toStringAsFixed(2)} KW",
-              textAlign: TextAlign.center,
-            )),
+            ),
             OqcTableStyle.getDataCell(
               item.judgement.name.toUpperCase(),
               color: item.judgement == Judgement.pass

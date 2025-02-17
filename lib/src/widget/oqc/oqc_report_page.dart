@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'dart:io';
 import 'package:path/path.dart' as path;
+import 'package:window_manager/window_manager.dart';
+import 'package:zerova_oqc_report/src/utils/window_size_manager.dart';
 import 'package:zerova_oqc_report/src/report/model/input_output_characteristics.dart';
 import 'package:zerova_oqc_report/src/report/model/package_list_result.dart';
 import 'package:zerova_oqc_report/src/report/model/protection_function_test_result.dart';
@@ -50,15 +52,28 @@ class OqcReportPage extends StatefulWidget {
   State<OqcReportPage> createState() => _OqcReportPageState();
 }
 
-class _OqcReportPageState extends State<OqcReportPage> {
+class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
   final TextEditingController _picController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    windowManager.addListener(this);
+  }
+
+  @override
   void dispose() {
+    windowManager.removeListener(this);
     _picController.dispose();
     _dateController.dispose();
     super.dispose();
+  }
+
+  @override
+  void onWindowResize() {
+    WindowSizeManager.updateSize(MediaQuery.of(context).size);
+    setState(() {});
   }
 
   Future<void> _generateAndUploadPdf() async {

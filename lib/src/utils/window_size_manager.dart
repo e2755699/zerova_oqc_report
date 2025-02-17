@@ -9,6 +9,6 @@ class WindowSizeManager {
 
   static double getFontSizeMultiplier() {
     if (_aspectRatio == null) return 1.0;
-    return _aspectRatio! < 1 ? 2 / 3 : 1.0;
+    return _aspectRatio! < 1.5 ? 5 / 7 : 1.0;
   }
 }

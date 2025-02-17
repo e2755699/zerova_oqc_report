@@ -20,25 +20,27 @@ mixin TableHelper {
 
   Widget buildJudgementDropdown(
       String currentJudgement, Function(Judgement?) onChanged) {
-    return DropdownButton<Judgement>(
-      value: getJudgementFromString(currentJudgement),
-      items: Judgement.values.map((Judgement value) {
-        return DropdownMenuItem<Judgement>(
-          value: value,
-          child: Text(
-            value.toString().split('.').last.toUpperCase(),
-            style: TableTextStyle.contentStyle().copyWith(
-              color: value == Judgement.pass
-                  ? Colors.green
-                  : value == Judgement.fail
-                      ? Colors.red
-                      : Colors.grey,
-              fontWeight: FontWeight.bold,
+    return Center(
+      child: DropdownButton<Judgement>(
+        value: getJudgementFromString(currentJudgement),
+        items: Judgement.values.map((Judgement value) {
+          return DropdownMenuItem<Judgement>(
+            value: value,
+            child: Text(
+              value.toString().split('.').last.toUpperCase(),
+              style: TableTextStyle.contentStyle().copyWith(
+                color: value == Judgement.pass
+                    ? Colors.green
+                    : value == Judgement.fail
+                        ? Colors.red
+                        : Colors.grey,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-        );
-      }).toList(),
-      onChanged: onChanged,
+          );
+        }).toList(),
+        onChanged: onChanged,
+      ),
     );
   }
 }

@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:window_manager/window_manager.dart';
 import 'package:zerova_oqc_report/route/app_router.dart';
+import 'package:zerova_oqc_report/src/utils/window_size_manager.dart';
+import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 import 'src/config/config_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // 强制横屏模式
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.landscapeLeft,
-    DeviceOrientation.landscapeRight,
-  ]);
-
+  await windowManager.ensureInitialized();
+  // windowManager.setFullScreen(true);
   await EasyLocalization.ensureInitialized();
   await ConfigManager.initialize();
   //SharePointUploader(uploadOrDownload: 1, sn: '').startAuthorization();
@@ -42,13 +40,21 @@ class ZerovaOqcReport extends StatelessWidget {
     return MaterialApp.router(
       title: 'Zerova OQC Report',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        dataTableTheme: DataTableTheme.of(context).copyWith(
+          headingRowAlignment: MainAxisAlignment.center,
+          horizontalMargin: 20,
+          columnSpacing: 10,
+        ),
+        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primaryColor),
         useMaterial3: true,
       ),
       routerConfig: appRouter,
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,
       locale: context.locale,
+      builder: (context, child) {
+        return child ?? const SizedBox();
+      },
     );
   }
 }

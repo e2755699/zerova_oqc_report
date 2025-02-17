@@ -31,9 +31,7 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
           Center(
             child: Text(
               'Insulation impedance >10MΩ',
-              style: TableTextStyle.contentStyle().copyWith(
-                fontSize: TableTextStyle.contentStyle().fontSize,
-              ),
+              style: TableTextStyle.contentStyle(),
               textAlign: TextAlign.center,
             ),
           ),
@@ -177,71 +175,40 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
         dataRowMinHeight: 200,
         dataRowMaxHeight: 230,
         columns: [
-          DataColumn(
-            label: Text(
-              'No.',
-              style: TableTextStyle.headerStyle(),
-            ),
-          ),
-          DataColumn(
-            label: Text(
-              'Test Items',
-              style: TableTextStyle.headerStyle(),
-            ),
-          ),
-          DataColumn(
-            label: Text(
-              'Testing Record',
-              style: TableTextStyle.headerStyle(),
-            ),
-          ),
-          DataColumn(
-            label: Text(
-              'Judgement',
-              style: TableTextStyle.headerStyle(),
-            ),
-          ),
+          OqcTableStyle.getDataColumn('No.'),
+          OqcTableStyle.getDataColumn('Test Items'),
+          OqcTableStyle.getDataColumn('Testing Record'),
+          OqcTableStyle.getDataColumn('Judgement'),
         ],
         rows: [
           DataRow(cells: [
-            DataCell(Text(
-              '1',
-              style: TableTextStyle.contentStyle(),
-            )),
-            DataCell(Text(
+            OqcTableStyle.getDataCell('1'),
+            OqcTableStyle.getDataCell(
               'Insulation Impedance Test.\n\nApply a DC Voltage:\na) Between each circuit.\nb) Between each of the independent circuits and the ground.',
-              style: TableTextStyle.contentStyle(),
-            )),
+            ),
             DataCell(_buildInsulationTestingRecord()),
-            DataCell(Text(
+            OqcTableStyle.getDataCell(
+              //todo judgement是錯的
               data.hiPotTestResult.judgement,
-              style: TableTextStyle.contentStyle().copyWith(
-                color: data.hiPotTestResult.judgement == "OK"
-                    ? Colors.green
-                    : Colors.red,
-                fontWeight: FontWeight.bold,
-              ),
-            )),
+              color: data.hiPotTestResult.judgement == "OK"
+                  ? Colors.green
+                  : Colors.red,
+              fontWeight: FontWeight.bold,
+            ),
           ]),
           DataRow(cells: [
-            DataCell(Text(
-              '2',
-              style: TableTextStyle.contentStyle(),
-            )),
-            DataCell(Text(
+            OqcTableStyle.getDataCell('2'),
+            OqcTableStyle.getDataCell(
               'Insulation Voltage Test.\n\nApply a DC Voltage:\na) Between each circuit.\nb) Between each of the independent circuits and the ground.',
-              style: TableTextStyle.contentStyle(),
-            )),
+            ),
             DataCell(_buildLeakageTestingRecord()),
-            DataCell(Text(
+            OqcTableStyle.getDataCell(
               data.hiPotTestResult.judgement,
-              style: TableTextStyle.contentStyle().copyWith(
-                color: data.hiPotTestResult.judgement == "OK"
-                    ? Colors.green
-                    : Colors.red,
-                fontWeight: FontWeight.bold,
-              ),
-            )),
+              color: data.hiPotTestResult.judgement == "OK"
+                  ? Colors.green
+                  : Colors.red,
+              fontWeight: FontWeight.bold,
+            ),
           ]),
         ],
       ),

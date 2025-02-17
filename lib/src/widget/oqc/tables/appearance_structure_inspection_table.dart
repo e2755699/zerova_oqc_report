@@ -30,6 +30,8 @@ class _AppearanceStructureInspectionTableState
     return TableWrapper(
       title: context.tr('appearance_structure_inspection'),
       content: StyledDataTable(
+        dataRowMinHeight: 40,
+        dataRowMaxHeight: 60,
         columns: [
           OqcTableStyle.getDataColumn('No.'),
           OqcTableStyle.getDataColumn('Item'),

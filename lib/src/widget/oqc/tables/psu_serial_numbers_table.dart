@@ -16,11 +16,14 @@ class PsuSerialNumbersTable extends StatelessWidget {
         DataColumn(
           label: Expanded(
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   'S/N',
                   style: TableTextStyle.headerStyle(),
+                ),
+                const SizedBox(
+                  width: 20,
                 ),
                 Text(
                   'Spec : 4',

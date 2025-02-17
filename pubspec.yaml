@@ -47,6 +47,7 @@ dependencies:
   path: ^1.9.0
   google_fonts: ^6.1.0
   cupertino_icons: ^1.0.6
+  window_manager: ^0.3.8
 
 dev_dependencies:
   flutter_test:

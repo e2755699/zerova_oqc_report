@@ -37,7 +37,7 @@ class StyledCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
               padding: const EdgeInsets.only(bottom: 16),
@@ -91,19 +91,22 @@ class StyledDataTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: DataTable(
-        dataRowMinHeight: dataRowMinHeight,
-        // 设置数据行的最小高度
-        dataRowMaxHeight: dataRowMaxHeight,
-        // 设置数据行的最大高度
-        border: TableBorder.all(
-          color: AppColors.lightBlueColor,
-          width: 1,
+      child: SizedBox(
+        width: 1024,
+        child: DataTable(
+          dataRowMinHeight: dataRowMinHeight,
+          // 设置数据行的最小高度
+          dataRowMaxHeight: dataRowMaxHeight,
+          // 设置数据行的最大高度
+          border: TableBorder.all(
+            color: AppColors.lightBlueColor,
+            width: 1,
+          ),
+          headingRowColor:
+              WidgetStateProperty.all(AppColors.primaryColor.withOpacity(0.1)),
+          columns: columns,
+          rows: rows,
         ),
-        headingRowColor:
-            WidgetStateProperty.all(AppColors.primaryColor.withOpacity(0.1)),
-        columns: columns,
-        rows: rows,
       ),
     );
   }

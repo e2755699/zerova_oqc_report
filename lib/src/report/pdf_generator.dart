@@ -98,120 +98,55 @@ class PdfGenerator {
       ),
     );
 
-    // Content Pages
-    pdf.addPage(
-      pw.MultiPage(
-        maxPages: 60,
-        pageFormat: PdfPageFormat.a4,
-        build: (context) => [
-          // PSU S/N Table
-          if (psuSerialNumbers != null) ...[
-            _buildPsuSerialNumbersTable(psuSerialNumbers, font),
-            pw.SizedBox(height: 60),
-          ],
+    addPage(
+      pdf,
+      pw.Column(children: [
+        _buildPsuSerialNumbersTable(psuSerialNumbers!, font),
+        _buildSoftwareVersionTable(softwareVersion!, font),
+      ]),
+    );
+    addPage(pdf, _buildAppearanceInspectionTable(testFunction!, font));
+    addPage(
+        pdf,
+        pw.Column(children: [
+          _buildInputOutputCharacteristicsTable(
+              inputOutputCharacteristics!, font),
+          _buildBasicFunctionTestTable(
+              inputOutputCharacteristics!.basicFunctionTestResult, font)
+        ]));
+    addPage(
+        pdf, _buildProtectionFunctionTestTable(protectionTestResults!, font));
 
-          // Software Version Table
-          if (softwareVersion != null) ...[
-            _buildSoftwareVersionTable(softwareVersion, font),
-            pw.SizedBox(height: 60),
-          ],
-
-          // Appearance & Structure Inspection Table
-          if (testFunction != null) ...[
-            _buildAppearanceInspectionTable(testFunction, font),
-            pw.SizedBox(height: 60),
-          ],
-
-          // Input & Output Characteristics Table
-          if (inputOutputCharacteristics != null) ...[
-            _buildInputOutputCharacteristicsTable(
-                inputOutputCharacteristics, font),
-            pw.SizedBox(height: 60),
-          ],
-
-          // Basic Function Test Table
-          if (inputOutputCharacteristics?.basicFunctionTestResult != null) ...[
-            _buildBasicFunctionTestTable(
-                inputOutputCharacteristics!.basicFunctionTestResult, font),
-            pw.SizedBox(height: 60),
-          ],
-
-          // Protection Function Test Table
-          if (protectionTestResults != null) ...[
-            _buildProtectionFunctionTestTable(protectionTestResults, font),
-            pw.SizedBox(height: 60),
-          ],
-
-          // Hi-Pot Test Table
-          if (protectionTestResults != null) ...[
-            _buildHiPotTestTable(protectionTestResults, font),
-            pw.SizedBox(height: 60),
-          ],
-
-          // Package List Table
-          if (packageListResult != null) ...[
-            _buildPackageListTable(packageListResult, font, packageListImages),
-            pw.SizedBox(height: 60),
-          ],
-
-          // Attachment Table
-          _buildAttachmentTable(font, attachmentImages),
-          pw.SizedBox(height: 60),
-
-          // Signature Table
-          _buildSignatureTable(pic, date, font),
-        ],
-      ),
+    addPage(
+      pdf,
+      _buildHiPotTestTable(protectionTestResults!, font),
+    );
+    addPage(
+      pdf,
+      _buildPackageListTable(packageListResult!, font, packageListImages),
+    );
+    addPage(
+      pdf,
+      _buildAttachmentTable(font, attachmentImages),
+    );
+    addPage(
+      pdf,
+      _buildSignatureTable(pic, date, font),
     );
 
     return pdf;
   }
 
-  static pw.Widget _buildModelNameAndSerialNumberTable(
-      String modelName, String serialNumber, pw.Font font) {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Text(
-          'Basic Information',
-          style: pw.TextStyle(
-            fontSize: 16,
-            fontWeight: pw.FontWeight.bold,
-            font: font,
-          ),
-        ),
-        pw.SizedBox(height: 10),
-        pw.Table(
-          border: pw.TableBorder.all(),
-          children: [
-            pw.TableRow(
-              children: [
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text('Model Name', style: pw.TextStyle(font: font)),
-                ),
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text(modelName, style: pw.TextStyle(font: font)),
-                ),
-              ],
-            ),
-            pw.TableRow(
-              children: [
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(5),
-                  child:
-                      pw.Text('Serial Number', style: pw.TextStyle(font: font)),
-                ),
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text(serialNumber, style: pw.TextStyle(font: font)),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ],
+  static void addPage(pw.Document pdf, pw.Widget child) {
+    pdf.addPage(
+      pw.Page(
+        build: (pw.Context context) {
+          return pw.Center(
+            child: child,
+          );
+        },
+        pageFormat: PdfPageFormat.a4,
+      ),
     );
   }
 
