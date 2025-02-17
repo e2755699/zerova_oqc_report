@@ -831,7 +831,7 @@ class PdfGenerator {
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text(data.hiPotTestResult.judgement,
+                  child: pw.Text(data.hiPotTestResult.insulationImpedanceTest.judgement.name.toUpperCase(),
                       style: pw.TextStyle(font: font),
                       textAlign: pw.TextAlign.center),
                 ),
@@ -943,7 +943,7 @@ class PdfGenerator {
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text(data.hiPotTestResult.judgement,
+                  child: pw.Text(data.hiPotTestResult.insulationVoltageTest.judgement.name.toUpperCase(),
                       style: pw.TextStyle(font: font),
                       textAlign: pw.TextAlign.center),
                 ),

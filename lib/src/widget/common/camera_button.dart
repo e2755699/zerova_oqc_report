@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 
 class CameraButton extends StatelessWidget {
   final String sn;
@@ -31,7 +32,7 @@ class CameraButton extends StatelessWidget {
         }),
         tooltip: context.tr('open_camera'),
         iconSize: 28,
-        color: Colors.blue,
+        color: AppColors.primaryColor,
       ),
     );
   }

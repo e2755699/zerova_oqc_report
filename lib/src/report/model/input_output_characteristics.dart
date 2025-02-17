@@ -360,23 +360,32 @@ class InputOutputCharacteristicsSide {
   final String side;
 
   Judgement get judgement {
+    int passCount = 0;
     // 檢查所有 inputVoltage 的 judgement
-    bool inputVoltagePass = inputVoltage.every((m) => m.judgement == Judgement.pass);
+    bool inputVoltagePass =
+        inputVoltage.every((m) => m.judgement == Judgement.pass);
     // 檢查所有 inputCurrent 的 judgement
-    bool inputCurrentPass = inputCurrent.every((m) => m.judgement == Judgement.pass);
-    // 檢查其他單一測量值的 judgement
-    bool otherMeasurementsPass = 
-      totalInputPower.judgement == Judgement.pass &&
-      outputVoltage.judgement == Judgement.pass &&
-      outputCurrent.judgement == Judgement.pass &&
-      totalOutputPower.judgement == Judgement.pass;
+    bool inputCurrentPass =
+        inputCurrent.every((m) => m.judgement == Judgement.pass);
+    // 檢查 totalInputPower 的 judgement
+    bool totalInputPowerPass = totalInputPower.judgement == Judgement.pass;
+    // 檢查 outputVoltage 的 judgement
+    bool outputVoltagePass = outputVoltage.judgement == Judgement.pass;
+    // 檢查 outputCurrent 的 judgement
+    bool outputCurrentPass = outputCurrent.judgement == Judgement.pass;
+    // 檢查 totalOutputPower 的 judgement
+    bool totalOutputPowerPass = totalOutputPower.judgement == Judgement.pass;
 
     // 如果所有測量值都通過，返回 OK
-    if (inputVoltagePass && inputCurrentPass && otherMeasurementsPass) {
-      return Judgement.pass;
-    } else {
-      return Judgement.fail;
-    }
+    [
+      inputVoltagePass,
+      inputCurrentPass,
+      totalInputPowerPass,
+      outputVoltagePass,
+      outputCurrentPass,
+      totalOutputPowerPass
+    ].map((judgement) => judgement ? passCount++ : passCount).toList();
+    return passCount > 2 ? Judgement.pass : Judgement.fail;
   }
 
   InputOutputCharacteristicsSide(

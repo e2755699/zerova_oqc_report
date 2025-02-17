@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:zerova_oqc_report/src/report/enum/judgement.dart';
 import 'package:zerova_oqc_report/src/report/model/protection_function_test_result.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 import 'package:zerova_oqc_report/src/widget/common/table_wrapper.dart';
@@ -36,7 +37,7 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
             ),
           ),
           Table(
-            border: TableBorder.all(),
+            border: TableBorder.all(color: AppColors.lightBlueColor),
             columnWidths: const {
               0: FlexColumnWidth(1),
               1: FlexColumnWidth(1),
@@ -109,7 +110,7 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
           ),
         ),
         Table(
-          border: TableBorder.all(),
+          border: TableBorder.all(color: AppColors.lightBlueColor),
           columnWidths: const {
             0: FlexColumnWidth(1),
             1: FlexColumnWidth(1),
@@ -188,9 +189,9 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
             ),
             DataCell(_buildInsulationTestingRecord()),
             OqcTableStyle.getDataCell(
-              //todo judgement是錯的
-              data.hiPotTestResult.judgement,
-              color: data.hiPotTestResult.judgement == "OK"
+              data.hiPotTestResult.insulationImpedanceTest.judgement.name.toUpperCase(),
+              color: data.hiPotTestResult.insulationImpedanceTest.judgement ==
+                      Judgement.pass
                   ? Colors.green
                   : Colors.red,
               fontWeight: FontWeight.bold,
@@ -203,8 +204,9 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
             ),
             DataCell(_buildLeakageTestingRecord()),
             OqcTableStyle.getDataCell(
-              data.hiPotTestResult.judgement,
-              color: data.hiPotTestResult.judgement == "OK"
+              data.hiPotTestResult.insulationVoltageTest.judgement.name.toUpperCase(),
+              color: data.hiPotTestResult.insulationVoltageTest.judgement ==
+                      Judgement.pass
                   ? Colors.green
                   : Colors.red,
               fontWeight: FontWeight.bold,

@@ -375,8 +375,6 @@ class HiPotTestResult {
         insulationImpedanceTest,
         insulationVoltageTest,
       ];
-
-  String get judgement => "OK";
 }
 
 class InsulationTestResult {
@@ -386,19 +384,30 @@ class InsulationTestResult {
   final ProtectionFunctionMeasurement rightInsulationInputOutput;
   final ProtectionFunctionMeasurement rightInsulationInputGround;
   final ProtectionFunctionMeasurement rightInsulationOutputGround;
+  Judgement get judgement {
+    int passCount = 0;
+    if (leftInsulationInputOutput.judgement == Judgement.pass) passCount++;
+    if (leftInsulationInputGround.judgement == Judgement.pass) passCount++;
+    if (leftInsulationOutputGround.judgement == Judgement.pass) passCount++;
+    if (rightInsulationInputOutput.judgement == Judgement.pass) passCount++;
+    if (rightInsulationInputGround.judgement == Judgement.pass) passCount++;
+    if (rightInsulationOutputGround.judgement == Judgement.pass) passCount++;
+    return passCount >= 3 ? Judgement.pass : Judgement.fail;
+  }
 
-  get leftInsulationInputOutputBySide => {
-        'R': [
-          rightInsulationInputOutput,
-          rightInsulationInputGround,
-          rightInsulationOutputGround,
-        ],
-        'L': [
-          leftInsulationInputOutput,
-          leftInsulationInputGround,
-          leftInsulationOutputGround,
-        ]
-      };
+  Map<String, List<ProtectionFunctionMeasurement>>
+      get leftInsulationInputOutputBySide => {
+            'R': [
+              rightInsulationInputOutput,
+              rightInsulationInputGround,
+              rightInsulationOutputGround,
+            ],
+            'L': [
+              leftInsulationInputOutput,
+              leftInsulationInputGround,
+              leftInsulationOutputGround,
+            ]
+          };
 
   InsulationTestResult(
       this.leftInsulationInputOutput,
@@ -407,29 +416,6 @@ class InsulationTestResult {
       this.rightInsulationInputOutput,
       this.rightInsulationInputGround,
       this.rightInsulationOutputGround);
-}
-
-class HiPotTestResultSide2 {
-  final ProtectionFunctionMeasurement leftInputOutput;
-  final ProtectionFunctionMeasurement leftInputGround;
-  final ProtectionFunctionMeasurement leftOutputGround;
-  final ProtectionFunctionMeasurement rightInputOutput;
-  final ProtectionFunctionMeasurement rightInputGround;
-  final ProtectionFunctionMeasurement rightOutputGround;
-
-  final String type;
-
-  String get judgement => "OK";
-
-  HiPotTestResultSide2(
-    this.type,
-    this.leftInputOutput,
-    this.leftInputGround,
-    this.leftOutputGround,
-    this.rightInputOutput,
-    this.rightInputGround,
-    this.rightOutputGround,
-  );
 }
 
 class ProtectionFunctionMeasurement {

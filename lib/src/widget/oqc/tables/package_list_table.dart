@@ -27,7 +27,7 @@ class PackageListTable extends StatelessWidget {
       content: Column(
         children: [
           Table(
-            border: TableBorder.all(),
+            border: TableBorder.all(color: AppColors.lightBlueColor),
             children: [
               TableRow(
                 children: headers
