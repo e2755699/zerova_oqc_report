@@ -11,14 +11,14 @@ class PackageListResult {
 
   static final List<PackageListResultMeasurement> defaultDatas = [
     PackageListResultMeasurement(
-      spec: 1,
+      spec: 2,
       key: 1,
-      translationKey: 'certificate_card',
+      translationKey: 'rfid_card',
     ),
     PackageListResultMeasurement(
-      spec: 2,
+      spec: 1,
       key: 2,
-      translationKey: 'rfid_card',
+      translationKey: 'certificate_card',
     ),
     PackageListResultMeasurement(
       spec: 22,
