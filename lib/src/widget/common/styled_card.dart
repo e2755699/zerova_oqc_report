@@ -7,6 +7,7 @@ class AppColors {
   static const darkBlueColor = Color(0xFF002361); // 深藍色
   static const cyanColor = Color(0xFF008999); // 青色
   static const lightBlueColor = Color(0xFFA7D0E6); // 淺藍色
+  static const fabColor = Color(0xFFF8F9FD);
 }
 
 class StyledCard extends StatelessWidget {

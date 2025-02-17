@@ -10,6 +10,7 @@ import 'package:zerova_oqc_report/src/report/model/protection_function_test_resu
 import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/report/model/software_version.dart';
 import 'package:zerova_oqc_report/src/report/model/appearance_structure_inspection_function_result.dart';
+import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/tables/appearance_structure_inspection_table.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/tables/attachment_table.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/tables/basic_function_test_table.dart';
@@ -161,7 +162,7 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
         },
         icon: const Icon(Icons.upload_file),
         label: Text(context.tr('submit')),
-        backgroundColor: const Color(0xFFF8F9FD),
+        backgroundColor: AppColors.fabColor,
       ),
       body: Stack(
         children: [
