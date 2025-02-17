@@ -100,39 +100,46 @@ class PdfGenerator {
 
     addPage(
       pdf,
-      pw.Column(children: [
-        _buildPsuSerialNumbersTable(psuSerialNumbers!, font),
-        _buildSoftwareVersionTable(softwareVersion!, font),
-      ]),
+      pw.Column(
+        mainAxisAlignment: pw.MainAxisAlignment.center,
+        children: [
+          _buildPsuSerialNumbersTable(psuSerialNumbers!, font),
+          pw.SizedBox(height: 80),
+          _buildSoftwareVersionTable(softwareVersion!, font),
+        ],
+      ),
     );
     addPage(pdf, _buildAppearanceInspectionTable(testFunction!, font));
     addPage(
         pdf,
-        pw.Column(children: [
+        pw.Column(mainAxisAlignment: pw.MainAxisAlignment.center, children: [
           _buildInputOutputCharacteristicsTable(
               inputOutputCharacteristics!, font),
+          pw.SizedBox(height: 80),
           _buildBasicFunctionTestTable(
               inputOutputCharacteristics!.basicFunctionTestResult, font)
         ]));
     addPage(
         pdf, _buildProtectionFunctionTestTable(protectionTestResults!, font));
-
     addPage(
       pdf,
-      _buildHiPotTestTable(protectionTestResults!, font),
+      _buildHiPotTestTable(protectionTestResults, font),
     );
-    addPage(
-      pdf,
-      _buildPackageListTable(packageListResult!, font, packageListImages),
-    );
-    addPage(
-      pdf,
-      _buildAttachmentTable(font, attachmentImages),
-    );
-    addPage(
-      pdf,
-      _buildSignatureTable(pic, date, font),
-    );
+    pdf.addPage(pw.MultiPage(
+      maxPages: 20,
+      build: (context) =>
+          [_buildPackageListTable(packageListResult!, font, packageListImages)],
+      pageFormat: PdfPageFormat.a4,
+    ));
+    pdf.addPage(pw.MultiPage(
+      maxPages: 20,
+      build: (context) => [
+        _buildAttachmentTable(font, attachmentImages),
+        pw.SizedBox(height: 80),
+        _buildSignatureTable(pic, date, font),
+      ],
+      pageFormat: PdfPageFormat.a4,
+    ));
 
     return pdf;
   }
@@ -388,17 +395,17 @@ class PdfGenerator {
 
   static pw.Widget _buildInputOutputCharacteristicsTable(
       InputOutputCharacteristics data, pw.Font font) {
-    final headers = [
-      'Item',
-      'Spec',
-      'Vin',
-      'Iin',
-      'Pin',
-      'Vout',
-      'Iout',
-      'Pout',
-      'Judgement'
+    List<String> headers = [
+      'Item \n Spec',
+      'Vin \n 253V,187V',
+      'Iin \n <230A',
+      'Pin \n <130kW',
+      'Vout \n 969V,931V',
+      'Iout \n 129A,1223A',
+      'Pout \n 122kW,118kW',
+      'Judgement',
     ];
+
     // 定义每列的相对宽度
     final columnWidths = <int, pw.FlexColumnWidth>{
       0: const pw.FlexColumnWidth(0.8), // Item
@@ -432,7 +439,8 @@ class PdfGenerator {
               children: headers
                   .map((header) => pw.Padding(
                         padding: const pw.EdgeInsets.all(5),
-                        child: pw.Text(header, style: pw.TextStyle(font: font)),
+                        child: pw.Text(header,
+                            style: pw.TextStyle(font: font, fontSize: 10)),
                       ))
                   .toList(),
             ),
@@ -440,13 +448,8 @@ class PdfGenerator {
                   children: [
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(5),
-                      child:
-                          pw.Text(item.side, style: pw.TextStyle(font: font)),
-                    ),
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.all(5),
-                      child:
-                          pw.Text('253V,187V', style: pw.TextStyle(font: font)),
+                      child: pw.Text(item.side,
+                          style: pw.TextStyle(font: font, fontSize: 8)),
                     ),
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(5),
@@ -454,7 +457,7 @@ class PdfGenerator {
                         item.inputVoltage
                             .map((iv) => "${iv.value.toStringAsFixed(2)} V")
                             .join("\n"),
-                        style: pw.TextStyle(font: font),
+                        style: pw.TextStyle(font: font, fontSize: 8),
                       ),
                     ),
                     pw.Padding(
@@ -463,37 +466,37 @@ class PdfGenerator {
                         item.inputCurrent
                             .map((ic) => "${ic.value.toStringAsFixed(2)} A")
                             .join("\n"),
-                        style: pw.TextStyle(font: font),
+                        style: pw.TextStyle(font: font, fontSize: 8),
                       ),
                     ),
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(5),
                       child: pw.Text(
                           "${item.totalInputPower.value.toStringAsFixed(2)} KW",
-                          style: pw.TextStyle(font: font)),
+                          style: pw.TextStyle(font: font, fontSize: 8)),
                     ),
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(5),
                       child: pw.Text(
                           "${item.outputVoltage.value.toStringAsFixed(2)} V",
-                          style: pw.TextStyle(font: font)),
+                          style: pw.TextStyle(font: font, fontSize: 8)),
                     ),
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(5),
                       child: pw.Text(
                           "${item.outputCurrent.value.toStringAsFixed(2)} A",
-                          style: pw.TextStyle(font: font)),
+                          style: pw.TextStyle(font: font, fontSize: 8)),
                     ),
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(5),
                       child: pw.Text(
                           "${item.totalOutputPower.value.toStringAsFixed(2)} KW",
-                          style: pw.TextStyle(font: font)),
+                          style: pw.TextStyle(font: font, fontSize: 8)),
                     ),
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(5),
                       child: pw.Text(item.judgement.name.toUpperCase(),
-                          style: pw.TextStyle(font: font)),
+                          style: pw.TextStyle(font: font, fontSize: 8)),
                     ),
                   ],
                 )),
@@ -513,7 +516,7 @@ class PdfGenerator {
     };
 
     return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      crossAxisAlignment: pw.CrossAxisAlignment.center,
       children: [
         pw.Text(
           'Basic Function Test',
@@ -591,8 +594,8 @@ class PdfGenerator {
       ProtectionFunctionTestResult data, pw.Font font) {
     final columnWidths = <int, pw.FlexColumnWidth>{
       0: const pw.FlexColumnWidth(0.5), // No.
-      1: const pw.FlexColumnWidth(1.5), // Test Items
-      2: const pw.FlexColumnWidth(2.0), // Testing Record
+      1: const pw.FlexColumnWidth(1.0), // Test Items
+      2: const pw.FlexColumnWidth(2.5), // Testing Record
       3: const pw.FlexColumnWidth(1.0), // Judgement
     };
 
