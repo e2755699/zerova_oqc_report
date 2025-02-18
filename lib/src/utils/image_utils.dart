@@ -5,7 +5,7 @@ import 'package:path/path.dart' as path;
 class ImageUtils {
   /// 从目录加载并分组图片
   static Future<List<pw.Widget>> loadAndGroupImages(String directoryPath,
-      {int imagesPerRow = 5, double imageHeight = 200}) async {
+      {int imagesPerRow = 2, double imageHeight = 200}) async {
     try {
       final directory = Directory(directoryPath);
       final images = <pw.Widget>[];
@@ -38,10 +38,11 @@ class ImageUtils {
                   pw.Expanded(
                     child: pw.Container(
                       height: imageHeight,
+                      alignment: pw.Alignment.center,
                       padding: const pw.EdgeInsets.all(5),
                       child: pw.Image(
                         image,
-                        fit: pw.BoxFit.contain,
+                        fit: pw.BoxFit.fitWidth,
                       ),
                     ),
                   ),
