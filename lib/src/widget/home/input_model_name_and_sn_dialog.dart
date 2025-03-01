@@ -15,11 +15,21 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
   final _formKey = GlobalKey<FormState>();
   final _snController = TextEditingController();
   final _modelController = TextEditingController();
+  final _modelFocusNode = FocusNode();
+  final _snFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _modelFocusNode.requestFocus();
+  }
 
   @override
   void dispose() {
     _snController.dispose();
     _modelController.dispose();
+    _modelFocusNode.dispose();
+    _snFocusNode.dispose();
     super.dispose();
   }
 
@@ -33,6 +43,7 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
           mainAxisSize: MainAxisSize.min,
           children: [
             TextFormField(
+              focusNode: _modelFocusNode,
               controller: _modelController,
               decoration: InputDecoration(
                 labelText: context.tr('model_name'),
@@ -53,6 +64,7 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
             ),
             const SizedBox(height: 16),
             TextFormField(
+              focusNode: _snFocusNode,
               controller: _snController,
               decoration: InputDecoration(
                 labelText: context.tr('sn'),
@@ -102,7 +114,7 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content:
-                      Text(context.tr('submit_fail', args: [sn, model])),
+                          Text(context.tr('submit_fail', args: [sn, model])),
                     ),
                   );
                 }
