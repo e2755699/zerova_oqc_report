@@ -117,7 +117,7 @@ class PdfGenerator {
               inputOutputCharacteristics!, font),
           pw.SizedBox(height: 80),
           _buildBasicFunctionTestTable(
-              inputOutputCharacteristics!.basicFunctionTestResult, font)
+              inputOutputCharacteristics.basicFunctionTestResult, font)
         ]));
     addPage(
         pdf, _buildProtectionFunctionTestTable(protectionTestResults!, font));
@@ -184,12 +184,15 @@ class PdfGenerator {
               children: [
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text('No.', style: pw.TextStyle(font: font)),
+                  child: pw.Text('No.',
+                      style: pw.TextStyle(font: font),
+                      textAlign: pw.TextAlign.center),
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
-                  child:
-                      pw.Text("S/N  Spec : 4", style: pw.TextStyle(font: font)),
+                  child: pw.Text("S/N  Spec : 4",
+                      style: pw.TextStyle(font: font),
+                      textAlign: pw.TextAlign.center),
                 ),
               ],
             ),
@@ -200,12 +203,14 @@ class PdfGenerator {
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
                     child: pw.Text('${index + 1}',
-                        style: pw.TextStyle(font: font)),
+                        style: pw.TextStyle(font: font),
+                        textAlign: pw.TextAlign.center),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
                     child: pw.Text(data.psuSN[index].value,
-                        style: pw.TextStyle(font: font)),
+                        style: pw.TextStyle(font: font),
+                        textAlign: pw.TextAlign.center),
                   ),
                 ],
               ),
@@ -244,15 +249,21 @@ class PdfGenerator {
               children: [
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text('No.', style: pw.TextStyle(font: font)),
+                  child: pw.Text('No.',
+                      style: pw.TextStyle(font: font),
+                      textAlign: pw.TextAlign.center),
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text('Item', style: pw.TextStyle(font: font)),
+                  child: pw.Text('Item',
+                      style: pw.TextStyle(font: font),
+                      textAlign: pw.TextAlign.center),
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text('Version', style: pw.TextStyle(font: font)),
+                  child: pw.Text('Version',
+                      style: pw.TextStyle(font: font),
+                      textAlign: pw.TextAlign.center),
                 ),
               ],
             ),
@@ -263,17 +274,20 @@ class PdfGenerator {
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
                     child: pw.Text('${index + 1}',
-                        style: pw.TextStyle(font: font)),
+                        style: pw.TextStyle(font: font),
+                        textAlign: pw.TextAlign.center),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
                     child: pw.Text(data.versions[index].name,
-                        style: pw.TextStyle(font: font)),
+                        style: pw.TextStyle(font: font),
+                        textAlign: pw.TextAlign.center),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
                     child: pw.Text(data.versions[index].value,
-                        style: pw.TextStyle(font: font)),
+                        style: pw.TextStyle(font: font),
+                        textAlign: pw.TextAlign.center),
                   ),
                 ],
               ),
@@ -440,7 +454,8 @@ class PdfGenerator {
                   .map((header) => pw.Padding(
                         padding: const pw.EdgeInsets.all(5),
                         child: pw.Text(header,
-                            style: pw.TextStyle(font: font, fontSize: 10)),
+                            style: pw.TextStyle(font: font, fontSize: 10),
+                            textAlign: pw.TextAlign.center),
                       ))
                   .toList(),
             ),
@@ -449,7 +464,8 @@ class PdfGenerator {
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(5),
                       child: pw.Text(item.side,
-                          style: pw.TextStyle(font: font, fontSize: 8)),
+                          style: pw.TextStyle(font: font, fontSize: 8),
+                          textAlign: pw.TextAlign.center),
                     ),
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(5),
@@ -458,6 +474,7 @@ class PdfGenerator {
                             .map((iv) => "${iv.value.toStringAsFixed(2)} V")
                             .join("\n"),
                         style: pw.TextStyle(font: font, fontSize: 8),
+                        textAlign: pw.TextAlign.center,
                       ),
                     ),
                     pw.Padding(
@@ -467,36 +484,42 @@ class PdfGenerator {
                             .map((ic) => "${ic.value.toStringAsFixed(2)} A")
                             .join("\n"),
                         style: pw.TextStyle(font: font, fontSize: 8),
+                        textAlign: pw.TextAlign.center,
                       ),
                     ),
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(5),
                       child: pw.Text(
                           "${item.totalInputPower.value.toStringAsFixed(2)} KW",
-                          style: pw.TextStyle(font: font, fontSize: 8)),
+                          style: pw.TextStyle(font: font, fontSize: 8),
+                          textAlign: pw.TextAlign.center),
                     ),
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(5),
                       child: pw.Text(
                           "${item.outputVoltage.value.toStringAsFixed(2)} V",
-                          style: pw.TextStyle(font: font, fontSize: 8)),
+                          style: pw.TextStyle(font: font, fontSize: 8),
+                          textAlign: pw.TextAlign.center),
                     ),
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(5),
                       child: pw.Text(
                           "${item.outputCurrent.value.toStringAsFixed(2)} A",
-                          style: pw.TextStyle(font: font, fontSize: 8)),
+                          style: pw.TextStyle(font: font, fontSize: 8),
+                          textAlign: pw.TextAlign.center),
                     ),
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(5),
                       child: pw.Text(
                           "${item.totalOutputPower.value.toStringAsFixed(2)} KW",
-                          style: pw.TextStyle(font: font, fontSize: 8)),
+                          style: pw.TextStyle(font: font, fontSize: 8),
+                          textAlign: pw.TextAlign.center),
                     ),
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(5),
                       child: pw.Text(item.judgement.name.toUpperCase(),
-                          style: pw.TextStyle(font: font, fontSize: 8)),
+                          style: pw.TextStyle(font: font, fontSize: 8),
+                          textAlign: pw.TextAlign.center),
                     ),
                   ],
                 )),
@@ -516,7 +539,7 @@ class PdfGenerator {
     };
 
     return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.center,
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
         pw.Text(
           'Basic Function Test',
@@ -535,20 +558,27 @@ class PdfGenerator {
               children: [
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text('No.', style: pw.TextStyle(font: font)),
+                  child: pw.Text('No.',
+                      style: pw.TextStyle(font: font),
+                      textAlign: pw.TextAlign.center),
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text('Test Items', style: pw.TextStyle(font: font)),
+                  child: pw.Text('Test Items',
+                      style: pw.TextStyle(font: font),
+                      textAlign: pw.TextAlign.center),
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text('Testing Record',
-                      style: pw.TextStyle(font: font)),
+                      style: pw.TextStyle(font: font),
+                      textAlign: pw.TextAlign.center),
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text('Judgement', style: pw.TextStyle(font: font)),
+                  child: pw.Text('Judgement',
+                      style: pw.TextStyle(font: font),
+                      textAlign: pw.TextAlign.center),
                 ),
               ],
             ),
@@ -559,12 +589,14 @@ class PdfGenerator {
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
                     child: pw.Text('${index + 1}',
-                        style: pw.TextStyle(font: font)),
+                        style: pw.TextStyle(font: font),
+                        textAlign: pw.TextAlign.center),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
                     child: pw.Text(data.testItems[index].name,
-                        style: pw.TextStyle(font: font)),
+                        style: pw.TextStyle(font: font),
+                        textAlign: pw.TextAlign.center),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
@@ -572,6 +604,7 @@ class PdfGenerator {
                       data.testItems[index].description.replaceAll("{VALUE}",
                           data.testItems[index].value.toStringAsFixed(2)),
                       style: pw.TextStyle(font: font),
+                      textAlign: pw.TextAlign.center,
                     ),
                   ),
                   pw.Padding(
@@ -579,6 +612,7 @@ class PdfGenerator {
                     child: pw.Text(
                       data.testItems[index].judgement.name.toUpperCase(),
                       style: pw.TextStyle(font: font),
+                      textAlign: pw.TextAlign.center,
                     ),
                   ),
                 ],
@@ -619,20 +653,27 @@ class PdfGenerator {
               children: [
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text('No.', style: pw.TextStyle(font: font)),
+                  child: pw.Text('No.',
+                      style: pw.TextStyle(font: font),
+                      textAlign: pw.TextAlign.center),
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text('Test Items', style: pw.TextStyle(font: font)),
+                  child: pw.Text('Test Items',
+                      style: pw.TextStyle(font: font),
+                      textAlign: pw.TextAlign.center),
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text('Testing Record',
-                      style: pw.TextStyle(font: font)),
+                      style: pw.TextStyle(font: font),
+                      textAlign: pw.TextAlign.center),
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text('Judgement', style: pw.TextStyle(font: font)),
+                  child: pw.Text('Judgement',
+                      style: pw.TextStyle(font: font),
+                      textAlign: pw.TextAlign.center),
                 ),
               ],
             ),
@@ -645,23 +686,27 @@ class PdfGenerator {
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(5),
                       child: pw.Text('${index + 1}',
-                          style: pw.TextStyle(font: font)),
+                          style: pw.TextStyle(font: font),
+                          textAlign: pw.TextAlign.center),
                     ),
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(5),
-                      child:
-                          pw.Text(item.name, style: pw.TextStyle(font: font)),
+                      child: pw.Text(item.name,
+                          style: pw.TextStyle(font: font),
+                          textAlign: pw.TextAlign.center),
                     ),
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(5),
                       child: pw.Text(item.description,
-                          style: pw.TextStyle(font: font)),
+                          style: pw.TextStyle(font: font),
+                          textAlign: pw.TextAlign.center),
                     ),
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(5),
                       child: pw.Text(
                         item.judgement.name.toUpperCase(),
                         style: pw.TextStyle(font: font),
+                        textAlign: pw.TextAlign.center,
                       ),
                     ),
                   ],
@@ -743,15 +788,19 @@ class PdfGenerator {
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
                       pw.Text('Insulation Impedance Test.',
-                          style: pw.TextStyle(font: font)),
+                          style: pw.TextStyle(font: font),
+                          textAlign: pw.TextAlign.center),
                       pw.SizedBox(height: 5),
                       pw.Text('Apply a DC Voltage:',
-                          style: pw.TextStyle(font: font)),
+                          style: pw.TextStyle(font: font),
+                          textAlign: pw.TextAlign.center),
                       pw.Text('a) Between each circuit.',
-                          style: pw.TextStyle(font: font)),
+                          style: pw.TextStyle(font: font),
+                          textAlign: pw.TextAlign.center),
                       pw.Text(
                           'b) Between each of the\nindependent circuits and the\nground.',
-                          style: pw.TextStyle(font: font)),
+                          style: pw.TextStyle(font: font),
+                          textAlign: pw.TextAlign.center),
                     ],
                   ),
                 ),
@@ -786,16 +835,20 @@ class PdfGenerator {
                                         style: pw.TextStyle(
                                           font: font,
                                           fontWeight: pw.FontWeight.bold,
-                                        )),
+                                        ),
+                                        textAlign: pw.TextAlign.center),
                                     pw.Text(
                                         'Input/Output: ${data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputOutput.value.toStringAsFixed(2)} MΩ',
-                                        style: pw.TextStyle(font: font)),
+                                        style: pw.TextStyle(font: font),
+                                        textAlign: pw.TextAlign.center),
                                     pw.Text(
                                         'Input/Ground: ${data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputGround.value.toStringAsFixed(2)} MΩ',
-                                        style: pw.TextStyle(font: font)),
+                                        style: pw.TextStyle(font: font),
+                                        textAlign: pw.TextAlign.center),
                                     pw.Text(
                                         'Output/Ground: ${data.hiPotTestResult.insulationImpedanceTest.leftInsulationOutputGround.value.toStringAsFixed(2)} MΩ',
-                                        style: pw.TextStyle(font: font)),
+                                        style: pw.TextStyle(font: font),
+                                        textAlign: pw.TextAlign.center),
                                   ],
                                 ),
                               ),
@@ -809,16 +862,20 @@ class PdfGenerator {
                                         style: pw.TextStyle(
                                           font: font,
                                           fontWeight: pw.FontWeight.bold,
-                                        )),
+                                        ),
+                                        textAlign: pw.TextAlign.center),
                                     pw.Text(
                                         'Input/Output: ${data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputOutput.value.toStringAsFixed(2)} MΩ',
-                                        style: pw.TextStyle(font: font)),
+                                        style: pw.TextStyle(font: font),
+                                        textAlign: pw.TextAlign.center),
                                     pw.Text(
                                         'Input/Ground: ${data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputGround.value.toStringAsFixed(2)} MΩ',
-                                        style: pw.TextStyle(font: font)),
+                                        style: pw.TextStyle(font: font),
+                                        textAlign: pw.TextAlign.center),
                                     pw.Text(
                                         'Output/Ground: ${data.hiPotTestResult.insulationImpedanceTest.rightInsulationOutputGround.value.toStringAsFixed(2)} MΩ',
-                                        style: pw.TextStyle(font: font)),
+                                        style: pw.TextStyle(font: font),
+                                        textAlign: pw.TextAlign.center),
                                   ],
                                 ),
                               ),
@@ -831,7 +888,10 @@ class PdfGenerator {
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text(data.hiPotTestResult.insulationImpedanceTest.judgement.name.toUpperCase(),
+                  child: pw.Text(
+                      data.hiPotTestResult.insulationImpedanceTest.judgement
+                          .name
+                          .toUpperCase(),
                       style: pw.TextStyle(font: font),
                       textAlign: pw.TextAlign.center),
                 ),
@@ -852,15 +912,19 @@ class PdfGenerator {
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
                       pw.Text('Insulation Voltage Test.',
-                          style: pw.TextStyle(font: font)),
+                          style: pw.TextStyle(font: font),
+                          textAlign: pw.TextAlign.center),
                       pw.SizedBox(height: 5),
                       pw.Text('Apply a DC Voltage:',
-                          style: pw.TextStyle(font: font)),
+                          style: pw.TextStyle(font: font),
+                          textAlign: pw.TextAlign.center),
                       pw.Text('a) Between each circuit.',
-                          style: pw.TextStyle(font: font)),
+                          style: pw.TextStyle(font: font),
+                          textAlign: pw.TextAlign.center),
                       pw.Text(
                           'b) Between each of the\nindependent circuits and the\nground.',
-                          style: pw.TextStyle(font: font)),
+                          style: pw.TextStyle(font: font),
+                          textAlign: pw.TextAlign.center),
                     ],
                   ),
                 ),
@@ -898,16 +962,20 @@ class PdfGenerator {
                                         style: pw.TextStyle(
                                           font: font,
                                           fontWeight: pw.FontWeight.bold,
-                                        )),
+                                        ),
+                                        textAlign: pw.TextAlign.center),
                                     pw.Text(
                                         'Input/Output: ${data.hiPotTestResult.insulationVoltageTest.leftInsulationInputOutput.value.toStringAsFixed(2)} mA',
-                                        style: pw.TextStyle(font: font)),
+                                        style: pw.TextStyle(font: font),
+                                        textAlign: pw.TextAlign.center),
                                     pw.Text(
                                         'Input/Ground: ${data.hiPotTestResult.insulationVoltageTest.leftInsulationInputGround.value.toStringAsFixed(2)} mA',
-                                        style: pw.TextStyle(font: font)),
+                                        style: pw.TextStyle(font: font),
+                                        textAlign: pw.TextAlign.center),
                                     pw.Text(
                                         'Output/Ground: ${data.hiPotTestResult.insulationVoltageTest.leftInsulationOutputGround.value.toStringAsFixed(2)} mA',
-                                        style: pw.TextStyle(font: font)),
+                                        style: pw.TextStyle(font: font),
+                                        textAlign: pw.TextAlign.center),
                                   ],
                                 ),
                               ),
@@ -921,16 +989,20 @@ class PdfGenerator {
                                         style: pw.TextStyle(
                                           font: font,
                                           fontWeight: pw.FontWeight.bold,
-                                        )),
+                                        ),
+                                        textAlign: pw.TextAlign.center),
                                     pw.Text(
                                         'Input/Output: ${data.hiPotTestResult.insulationVoltageTest.rightInsulationInputOutput.value.toStringAsFixed(2)} mA',
-                                        style: pw.TextStyle(font: font)),
+                                        style: pw.TextStyle(font: font),
+                                        textAlign: pw.TextAlign.center),
                                     pw.Text(
                                         'Input/Ground: ${data.hiPotTestResult.insulationVoltageTest.rightInsulationInputGround.value.toStringAsFixed(2)} mA',
-                                        style: pw.TextStyle(font: font)),
+                                        style: pw.TextStyle(font: font),
+                                        textAlign: pw.TextAlign.center),
                                     pw.Text(
                                         'Output/Ground: ${data.hiPotTestResult.insulationVoltageTest.rightInsulationOutputGround.value.toStringAsFixed(2)} mA',
-                                        style: pw.TextStyle(font: font)),
+                                        style: pw.TextStyle(font: font),
+                                        textAlign: pw.TextAlign.center),
                                   ],
                                 ),
                               ),
@@ -943,7 +1015,9 @@ class PdfGenerator {
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text(data.hiPotTestResult.insulationVoltageTest.judgement.name.toUpperCase(),
+                  child: pw.Text(
+                      data.hiPotTestResult.insulationVoltageTest.judgement.name
+                          .toUpperCase(),
                       style: pw.TextStyle(font: font),
                       textAlign: pw.TextAlign.center),
                 ),
@@ -984,7 +1058,9 @@ class PdfGenerator {
               children: data.header
                   .map((header) => pw.Padding(
                         padding: const pw.EdgeInsets.all(5),
-                        child: pw.Text(header, style: pw.TextStyle(font: font)),
+                        child: pw.Text(header,
+                            style: pw.TextStyle(font: font),
+                            textAlign: pw.TextAlign.center),
                       ))
                   .toList(),
             ),
@@ -995,23 +1071,27 @@ class PdfGenerator {
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
                     child: pw.Text('${index + 1}',
-                        style: pw.TextStyle(font: font)),
+                        style: pw.TextStyle(font: font),
+                        textAlign: pw.TextAlign.center),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
                     child: pw.Text(
                         data.getEnglishText(data.datas[index].translationKey),
-                        style: pw.TextStyle(font: font)),
+                        style: pw.TextStyle(font: font),
+                        textAlign: pw.TextAlign.center),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
                     child: pw.Text(data.datas[index].spec.toString(),
-                        style: pw.TextStyle(font: font)),
+                        style: pw.TextStyle(font: font),
+                        textAlign: pw.TextAlign.center),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
                     child: pw.Text(data.datas[index].isCheck.value ? '✓' : '',
-                        style: pw.TextStyle(font: font)),
+                        style: pw.TextStyle(font: font),
+                        textAlign: pw.TextAlign.center),
                   ),
                 ],
               ),
@@ -1081,7 +1161,9 @@ class PdfGenerator {
                       borderRadius:
                           const pw.BorderRadius.all(pw.Radius.circular(4)),
                     ),
-                    child: pw.Text(pic, style: pw.TextStyle(font: font)),
+                    child: pw.Text(pic,
+                        style: pw.TextStyle(font: font),
+                        textAlign: pw.TextAlign.center),
                   ),
                 ),
               ],
@@ -1109,7 +1191,9 @@ class PdfGenerator {
                       borderRadius:
                           const pw.BorderRadius.all(pw.Radius.circular(4)),
                     ),
-                    child: pw.Text(date, style: pw.TextStyle(font: font)),
+                    child: pw.Text(date,
+                        style: pw.TextStyle(font: font),
+                        textAlign: pw.TextAlign.center),
                   ),
                 ),
               ],

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:zerova_oqc_report/src/utils/window_size_manager.dart';
 

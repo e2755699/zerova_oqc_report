@@ -115,7 +115,7 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
                 },
                 child: Text(
                   context.tr('exit'),
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppColors.darkBlueColor,
                   ),
                 ),

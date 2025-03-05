@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:path/path.dart' as path;
 
 class ImageUtils {
   /// 从目录加载并分组图片
