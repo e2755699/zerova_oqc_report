@@ -172,19 +172,12 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  IntrinsicHeight(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ModelNameAndSerialNumberTable(
-                          model: widget.model,
-                          sn: widget.sn,
-                        ),
-                        PsuSerialNumbersTable(widget.psuSerialNumbers!),
-                        SoftwareVersionTable(widget.softwareVersion!),
-                      ],
-                    ),
+                  ModelNameAndSerialNumberTable(
+                    model: widget.model,
+                    sn: widget.sn,
                   ),
+                  PsuSerialNumbersTable(widget.psuSerialNumbers!),
+                  SoftwareVersionTable(widget.softwareVersion!),
                   AppearanceStructureInspectionTable(widget.testFunction!),
                   InputOutputCharacteristicsTable(
                       widget.inputOutputCharacteristics!),

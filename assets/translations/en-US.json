@@ -25,6 +25,15 @@
   "rfid_card": "RFID Card",
   "bolts_cover": "Bolts Cover",
   "cabinet_key": "Cabinet's key",
-  "ac_breaker_key": "AC Breaker's key",
-  "other": "Other"
+  "other": "Other",
+  "camera": "Camera",
+  "recheck_cameras": "Re-check available cameras",
+  "select_image": "Select Image",
+  "take_photo": "Take Photo",
+  "next_photo": "Next Photo",
+  "browse_photos": "Browse Photos",
+  "images_saved": "Selected images have been saved!",
+  "select_multiple_images": "Select Multiple Images",
+  "no_images_found": "No images found in the specified directory.",
+  "save_selected_images": "Save Selected Images"
 }

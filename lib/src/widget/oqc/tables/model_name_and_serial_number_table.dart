@@ -14,26 +14,24 @@ class ModelNameAndSerialNumberTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dataTable = StyledDataTable(
-      columns: [
-        OqcTableStyle.getDataColumn('Item'),
-        OqcTableStyle.getDataColumn('Value'),
-      ],
-      rows: [
-        DataRow(cells: [
-          OqcTableStyle.getDataCell('Model Name'),
-          OqcTableStyle.getDataCell(model),
-        ]),
-        DataRow(cells: [
-          OqcTableStyle.getDataCell('Serial Number'),
-          OqcTableStyle.getDataCell(sn),
-        ]),
-      ],
-    );
-
     return TableWrapper(
       title: 'Basic Information',
-      content: dataTable,
+      content: StyledDataTable(
+        columns: [
+          OqcTableStyle.getDataColumn('Item'),
+          OqcTableStyle.getDataColumn('Value'),
+        ],
+        rows: [
+          DataRow(cells: [
+            OqcTableStyle.getDataCell('Model Name'),
+            OqcTableStyle.getDataCell(model),
+          ]),
+          DataRow(cells: [
+            OqcTableStyle.getDataCell('Serial Number'),
+            OqcTableStyle.getDataCell(sn),
+          ]),
+        ],
+      ),
     );
   }
 }

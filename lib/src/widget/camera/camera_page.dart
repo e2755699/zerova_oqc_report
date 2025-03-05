@@ -306,7 +306,7 @@ class _CameraPageState extends State<CameraPage> with ImagePageHelper {
           if (_cameras.isEmpty)
             ElevatedButton(
               onPressed: _fetchCameras,
-              child: const Text('Re-check available cameras'),
+              child: Text(context.tr('recheck_cameras')),
             ),
           if (_cameras.isNotEmpty)
             Row(
@@ -314,7 +314,7 @@ class _CameraPageState extends State<CameraPage> with ImagePageHelper {
               children: <Widget>[
                 if (widget.packagingOrAttachment != 0)
                   DropdownButton<String>(
-                    hint: const Text('Select Image'),
+                    hint: Text(context.tr('select_image')),
                     value: _selectedImagePath,
                     onChanged: (String? newValue) {
                       setState(() {
@@ -333,7 +333,9 @@ class _CameraPageState extends State<CameraPage> with ImagePageHelper {
                   onPressed: _initialized ? _takePicture : null,
                   icon: const Icon(Icons.camera_alt_rounded),
                   label: Text(
-                    _previewPaused ? '下一張照片' : '拍照',
+                    _previewPaused
+                        ? context.tr('next_photo')
+                        : context.tr('take_photo'),
                   ),
                 ),
                 const SizedBox(width: 5),
@@ -353,7 +355,7 @@ class _CameraPageState extends State<CameraPage> with ImagePageHelper {
                         );
                       },
                       icon: const Icon(Icons.image),
-                      label: const Text('瀏覽照片'),
+                      label: Text(context.tr('browse_photos')),
                     );
                   },
                 ),

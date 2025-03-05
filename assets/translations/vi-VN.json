@@ -26,6 +26,15 @@
   "rfid_card": "Thẻ RFID",
   "bolts_cover": "Ốc vít",
   "cabinet_key": "Chìa khoá tủ máy",
-  "ac_breaker_key": "AC Breaker's key",
-  "other": "Khác"
+  "other": "Khác",
+  "camera": "Máy ảnh",
+  "recheck_cameras": "Kiểm tra lại máy ảnh có sẵn",
+  "select_image": "Chọn hình ảnh",
+  "take_photo": "Chụp ảnh",
+  "next_photo": "Ảnh tiếp theo",
+  "browse_photos": "Duyệt ảnh",
+  "images_saved": "Đã lưu các ảnh đã chọn!",
+  "select_multiple_images": "Chọn nhiều ảnh",
+  "no_images_found": "Không tìm thấy ảnh trong thư mục đã chỉ định.",
+  "save_selected_images": "Lưu ảnh đã chọn"
 }

@@ -25,6 +25,15 @@
   "rfid_card": "RFID卡",
   "bolts_cover": "螺母",
   "cabinet_key": "機櫃鑰匙",
-  "ac_breaker_key": "AC Breaker's key",
-  "other": "其他"
+  "other": "其他",
+  "camera": "相機",
+  "recheck_cameras": "重新檢查可用相機",
+  "select_image": "選擇圖片",
+  "take_photo": "拍照",
+  "next_photo": "下一張照片",
+  "browse_photos": "瀏覽照片",
+  "images_saved": "已儲存所選圖片！",
+  "select_multiple_images": "選擇多張圖片",
+  "no_images_found": "在指定目錄中找不到圖片。",
+  "save_selected_images": "儲存所選圖片"
 } 

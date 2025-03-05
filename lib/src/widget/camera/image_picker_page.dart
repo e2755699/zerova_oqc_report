@@ -109,7 +109,7 @@ class _ImagePickerPageState extends State<ImagePickerPage>
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Selected images have been saved!')),
+      SnackBar(content: Text(context.tr('images_saved'))),
     );
   }
 
@@ -121,7 +121,7 @@ class _ImagePickerPageState extends State<ImagePickerPage>
   @override
   Widget build(BuildContext context) {
     return MainLayout(
-      title: 'Select Multiple Images',
+      title: context.tr('select_multiple_images'),
       body: Center(
         child: _imagePaths.isEmpty
             ? const CircularProgressIndicator()
@@ -177,10 +177,8 @@ class _ImagePickerPageState extends State<ImagePickerPage>
                               );
                             },
                           )
-                        : const Center(
-                            child: Text(
-                                'No images found in the specified directory.'),
-                            //child: CircularProgressIndicator(), // 顯示加載中的進度條
+                        : Center(
+                            child: Text(context.tr('no_images_found')),
                           );
                   },
                 ),
@@ -192,7 +190,7 @@ class _ImagePickerPageState extends State<ImagePickerPage>
           Navigator.of(context).pop(); // 關閉對話框
         },
         icon: const Icon(Icons.save),
-        label: Text("Save Selected Image"),
+        label: Text(context.tr('save_selected_images')),
         backgroundColor: AppColors.fabColor,
       ),
     );

@@ -10,7 +10,9 @@ class PsuSerialNumbersTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dataTable = StyledDataTable(
+    return TableWrapper(
+      title: 'PSU S/N',
+      content: StyledDataTable(
       columns: [
         OqcTableStyle.getDataColumn('No.'),
         DataColumn(
@@ -43,11 +45,7 @@ class PsuSerialNumbersTable extends StatelessWidget {
           ],
         ),
       ),
-    );
-
-    return TableWrapper(
-      title: 'PSU S/N',
-      content: dataTable,
+    ),
     );
   }
 }
