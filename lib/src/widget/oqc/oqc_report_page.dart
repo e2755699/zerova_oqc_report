@@ -25,6 +25,9 @@ import 'package:zerova_oqc_report/src/widget/oqc/tables/software_version.dart';
 import 'package:zerova_oqc_report/src/report/pdf_generator.dart';
 import 'package:zerova_oqc_report/src/widget/common/main_layout.dart';
 import 'package:zerova_oqc_report/src/widget/upload/upload.dart';
+import 'package:zerova_oqc_report/src/repo/firebase_service.dart';
+import 'package:zerova_oqc_report/src/report/spec/input_output_characteristics_spec.dart';
+import 'package:zerova_oqc_report/src/report/spec/basic_function_test_spec.dart';
 
 class OqcReportPage extends StatefulWidget {
   const OqcReportPage({
@@ -158,12 +161,43 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           await _generateAndUploadPdf();
-          startUpload(context);
+          //startUpload(context);
+          if (globalInputOutputSpec != null) {
+            final success = await FirebaseService().addOrUpdateSpec(
+              model: widget.model, // 你需要確保這裡有正確的 model 名稱
+              tableName: 'InputOutputCharacteristics',
+              spec: globalInputOutputSpec!.toJson(),
+            );
+
+            if (success) {
+              print('✅ 規格已成功上傳 Firebase');
+            } else {
+              print('❌ 上傳失敗，請檢查網路或 API Key');
+            }
+          } else {
+            print('⚠️ 尚未設定 globalInputOutputSpec');
+          }
+          if (globalBasicFunctionTestSpec != null) {
+            final success = await FirebaseService().addOrUpdateSpec(
+              model: widget.model, // 你需要確保這裡有正確的 model 名稱
+              tableName: 'BasicFunctionTest',
+              spec: globalBasicFunctionTestSpec!.toJson(),
+            );
+
+            if (success) {
+              print('✅ 規格已成功上傳 Firebase');
+            } else {
+              print('❌ 上傳失敗，請檢查網路或 API Key');
+            }
+          } else {
+            print('⚠️ 尚未設定 globalBasicFunctionTestSpec');
+          }
         },
         icon: const Icon(Icons.upload_file),
         label: Text(context.tr('submit')),
         backgroundColor: AppColors.fabColor,
       ),
+
       body: Stack(
         children: [
           SingleChildScrollView(

@@ -4,11 +4,13 @@ import 'package:zerova_oqc_report/src/report/model/protection_function_test_resu
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 import 'package:zerova_oqc_report/src/widget/common/table_wrapper.dart';
 import 'package:zerova_oqc_report/src/widget/common/table_helper.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:zerova_oqc_report/src/widget/common/global_state.dart';
 
 class ProtectionFunctionTestTable extends StatefulWidget {
   final ProtectionFunctionTestResult data;
-
-  const ProtectionFunctionTestTable(this.data, {super.key});
+  final bool isEditing;
+  const ProtectionFunctionTestTable(this.data, {super.key, this.isEditing = false});
 
   @override
   State<ProtectionFunctionTestTable> createState() =>
@@ -22,8 +24,15 @@ class _ProtectionFunctionTestTableState
 
   @override
   Widget build(BuildContext context) {
+    return ValueListenableBuilder<int>(
+        valueListenable: globalEditModeNotifier,
+        builder: (context, editMode, _) {
+      return ValueListenableBuilder<int>(
+          valueListenable: permissions,
+          builder: (context, permission, _) {
+        final isEditable = editMode == 1 && (permission == 1 || permission == 2);
     return TableWrapper(
-      title: 'Protection Function Test',
+      title: context.tr('protection_function_test'),
       content: StyledDataTable(
         dataRowMinHeight: 50.0,
         dataRowMaxHeight: 150.0,
@@ -44,6 +53,7 @@ class _ProtectionFunctionTestTableState
                   child: Text(
                     testItems[index].name,
                     style: TableTextStyle.contentStyle(),
+                    textAlign: TextAlign.center,
                   ),
                 ),
               ),
@@ -53,11 +63,41 @@ class _ProtectionFunctionTestTableState
                     Text(
                       testItems[index].description,
                       style: TableTextStyle.contentStyle(),
+                      textAlign: TextAlign.start,
                     )
                   ],
                 ),
               ),
-              OqcTableStyle.getDataCell(
+              isEditable
+                  ? DataCell(
+                DropdownButton<Judgement>(
+                  value: testItems[index].judgement,
+                  items: Judgement.values.map((j) {
+                    return DropdownMenuItem(
+                      value: j,
+                      child: Text(
+                        j.name.toUpperCase(),
+                        style: TextStyle(
+                          color: j == Judgement.pass
+                              ? Colors.green
+                              : j == Judgement.fail
+                              ? Colors.red
+                              : Colors.grey,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        testItems[index].judgement = value;
+                      });
+                    }
+                  },
+                ),
+              )
+                  : OqcTableStyle.getDataCell(
                 testItems[index].judgement.name.toUpperCase(),
                 color: testItems[index].judgement == Judgement.pass
                     ? Colors.green
@@ -70,6 +110,10 @@ class _ProtectionFunctionTestTableState
           ),
         ),
       ),
+    );
+          },
+      );
+        },
     );
   }
 }

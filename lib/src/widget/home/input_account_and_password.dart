@@ -1,19 +1,17 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:zerova_oqc_report/src/widget/home/home_page.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:zerova_oqc_report/src/repo/firebase_service.dart';
-import 'package:zerova_oqc_report/src/report/spec/input_output_characteristics_spec.dart';
+import 'package:zerova_oqc_report/src/widget/common/global_state.dart';
 
-class InputModelNameAndSnDialog extends StatefulWidget {
-  const InputModelNameAndSnDialog({super.key});
+class InputAccountAndPassword extends StatefulWidget {
+  const InputAccountAndPassword({super.key});
 
   @override
-  State<InputModelNameAndSnDialog> createState() =>
-      _InputModelNameAndSnDialogState();
+  State<InputAccountAndPassword> createState() =>
+      _InputAccountAndPasswordState();
 }
 
-class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
+class _InputAccountAndPasswordState extends State<InputAccountAndPassword>
     with LoadFileHelper {
   final _formKey = GlobalKey<FormState>();
   final _snController = TextEditingController();
@@ -39,7 +37,7 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(context.tr('input_sn_model')),
+      title: Text(context.tr('input_account_password')),
       content: Form(
         key: _formKey,
         child: Column(
@@ -49,8 +47,8 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
               focusNode: _modelFocusNode,
               controller: _modelController,
               decoration: InputDecoration(
-                labelText: context.tr('model_name'),
-                hintText: context.tr('please_input_model_name'),
+                labelText: context.tr('account'),
+                hintText: context.tr('please_input_account'),
                 prefixIcon: const Icon(Icons.text_fields),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10.0),
@@ -60,7 +58,7 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return context.tr('please_input_model_name');
+                  return context.tr('please_input_account');
                 }
                 return null;
               },
@@ -70,8 +68,8 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
               focusNode: _snFocusNode,
               controller: _snController,
               decoration: InputDecoration(
-                labelText: context.tr('sn'),
-                hintText: context.tr('please_input_sn'),
+                labelText: context.tr('pwd'),
+                hintText: context.tr('please_input_pwd'),
                 prefixIcon: const Icon(Icons.numbers),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10.0),
@@ -81,7 +79,7 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return context.tr('please_input_sn');
+                  return context.tr('please_input_pwd');
                 }
                 return null;
               },
@@ -96,21 +94,28 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
           },
           child: Text(context.tr('cancel')),
         ),
-        ElevatedButton(
+        TextButton(
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
-              final sn = _snController.text;
-              final model = _modelController.text;
-              await fetchAndPrintInputOutputCharacteristicsSpecs(model);
-              await fetchAndPrintBasicFunctionTestSpecs(model);
-
-              await loadFileModule(sn, model, context).then((_) {
-                //fetchAndPrintSpecs(sn, model);
+              final pwd = _snController.text;
+              final account = _modelController.text;
+              if (pwd == 'admin' && account == 'admin') {
+                permissions.value = 1;
+              }
+              else if (pwd == 'user' && account == 'user') {
+                permissions.value = 2;
+              }
+              else{
+                permissions.value = 0;
+              }
+              print("permissions is now: $permissions.value");
+              Navigator.of(context).pop();
+              /*await loadFileModule(pwd, account, context).then((_) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content:
-                          Text(context.tr('submit_success', args: [sn, model])),
+                      Text(context.tr('submit_success', args: [pwd, account])),
                     ),
                   );
                   Navigator.of(context).pop();
@@ -120,18 +125,16 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content:
-                          Text(context.tr('submit_fail', args: [sn, model])),
+                      Text(context.tr('submit_fail', args: [pwd, account])),
                     ),
                   );
                 }
-              });
+              });*/
             }
           },
-
           child: Text(context.tr('submit')),
         ),
       ],
     );
   }
-  // 獨立 async 函式，撈資料並 print 出來
 }

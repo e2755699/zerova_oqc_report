@@ -6,7 +6,7 @@ class Psuserialnumber {
   /// 從 JSON 數據清單提取並生成多筆 PSU SN
   static Psuserialnumber fromJsonList(List<dynamic> data) {
     List<SerialNumber> serialNumbers = [];
-    double spec = 4;
+    double spec = 12;
     for (var item in data) {
       String? spcDesc = item['ITEM_PART_SPECS'];
       String? spcValue = item['ITEM_PART_SN']; // 確保 spcValue 是 String 類型
@@ -28,7 +28,7 @@ class Psuserialnumber {
 
 class SerialNumber {
   final double spec;
-  final String value;
+   String value;
   final String key;
   final String name;
 

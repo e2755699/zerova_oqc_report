@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 import 'package:zerova_oqc_report/src/widget/common/table_wrapper.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class ModelNameAndSerialNumberTable extends StatelessWidget {
   final String model;
@@ -15,7 +16,7 @@ class ModelNameAndSerialNumberTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TableWrapper(
-      title: 'Basic Information',
+      title: context.tr('basic_info'),
       content: StyledDataTable(
         columns: [
           OqcTableStyle.getDataColumn('Item'),

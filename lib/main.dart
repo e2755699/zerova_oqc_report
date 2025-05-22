@@ -4,6 +4,7 @@ import 'package:window_manager/window_manager.dart';
 import 'package:zerova_oqc_report/route/app_router.dart';
 import 'package:zerova_oqc_report/src/repo/sharepoint_uploader.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
+import 'package:zerova_oqc_report/src/repo/firebase_service.dart';
 import 'src/config/config_manager.dart';
 
 void main() async {
@@ -26,7 +27,13 @@ void main() async {
 
   await EasyLocalization.ensureInitialized();
   await ConfigManager.initialize();
-  SharePointUploader(uploadOrDownload: 1, sn: '').startAuthorization();
+  SharePointUploader(uploadOrDownload: 1, sn: '').startAuthorization(
+    categoryTranslations: {
+      "packageing_photo": "Packageing Photo ",
+      "appearance_photo": "Appearance Photo ",
+      "oqc_report": "OQC Report ",
+    },
+  );
 
   runApp(EasyLocalization(
     supportedLocales: const [

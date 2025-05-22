@@ -24,34 +24,43 @@ class BasicFunctionTestResult {
 
 
 class BasicFunctionMeasurement {
-  final double spec;
-  final double value;
-  final double count;
-  final String key;
-  final String name;
-  final String description;
+  double spec;
+  double value;
+  double count;
+  String key;
+  String name;
+  String description;
+  Judgement judgement;
+ // String defaultSpecText;
 
-  final Judgement judgement;
-
-  BasicFunctionMeasurement(
-      {required this.spec,
-        required this.value,
-        required this.count,
-        required this.key,
-        required this.name,
-        required this.description,
-        required this.judgement});
+  BasicFunctionMeasurement({
+    required this.spec,
+    required this.value,
+    required this.count,
+    required this.key,
+    required this.name,
+    required this.description,
+    required this.judgement,
+    //required this.defaultSpecText,
+  });
 
   factory BasicFunctionMeasurement.empty() {
     return BasicFunctionMeasurement(
-        spec: 0,
-        value: 0,
-        count: 0,
-        key: "",
-        name: "",
-        description: '',
-        judgement: Judgement.fail);
+      spec: 0,
+      value: 0,
+      count: 0,
+      key: "",
+      name: "",
+      description: '',
+      judgement: Judgement.fail,
+     // defaultSpecText: '',
+    );
   }
 
-  String get getReportValue => description.replaceAll("{VALUE}", value.toStringAsFixed(2));
+  String get getReportValue =>
+      description.replaceAll("{VALUE}", value.toStringAsFixed(2));
+
+  void setReportValue(String text) {
+    value = double.tryParse(text) ?? 0;
+  }
 }

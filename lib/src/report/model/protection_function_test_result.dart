@@ -424,7 +424,7 @@ class ProtectionFunctionMeasurement {
   final String key;
   final String name;
   final String description;
-  final Judgement judgement;
+  Judgement judgement;
 
   ProtectionFunctionMeasurement({
     required this.spec,

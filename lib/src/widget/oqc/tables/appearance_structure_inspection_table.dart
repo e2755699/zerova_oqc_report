@@ -44,7 +44,12 @@ class _AppearanceStructureInspectionTableState
             cells: [
               OqcTableStyle.getDataCell((index + 1).toString()),
               OqcTableStyle.getDataCell(data.testItems[index].name),
-              OqcTableStyle.getDataCell(data.testItems[index].description),
+              DataCell(
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(data.testItems[index].description),
+                ),
+              ),
               DataCell(buildJudgementDropdown(
                 data.testItems[index].judgement,
                 (newValue) {

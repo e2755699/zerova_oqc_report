@@ -48,15 +48,15 @@ class _SignatureTableState extends State<SignatureTable> {
   @override
   Widget build(BuildContext context) {
     return TableWrapper(
-      title: 'Signature',
+      title: context.tr('signature'),
       content: Column(
         children: [
           Row(
             children: [
-              const SizedBox(
+              SizedBox(
                 width: 100, // 固定標籤寬度
                 child: Text(
-                  'PIC : ',
+                  context.tr('name'),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -79,10 +79,10 @@ class _SignatureTableState extends State<SignatureTable> {
           const SizedBox(height: 16),
           Row(
             children: [
-              const SizedBox(
+              SizedBox(
                 width: 100, // 固定標籤寬度
                 child: Text(
-                  'Date : ',
+                  context.tr('date'),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,

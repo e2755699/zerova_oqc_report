@@ -130,9 +130,9 @@ class SoftwareVersion {
 }
 
 class Version {
-  final String value;  // value 類型由 double 改為 String
-  final String key;
-  final String name;
+   String value;  // value 類型由 double 改為 String
+   String key;
+   String name;
 
   Version({
     required this.value,

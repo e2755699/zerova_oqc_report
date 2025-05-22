@@ -16,6 +16,7 @@ import 'package:path/path.dart' as path;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 import 'package:zerova_oqc_report/src/utils/image_utils.dart';
+import 'package:zerova_oqc_report/src/report/spec/input_output_characteristics_spec.dart';
 
 class PdfGenerator {
   static Future<pw.Document> generateOqcReport({
@@ -105,10 +106,12 @@ class PdfGenerator {
         children: [
           _buildPsuSerialNumbersTable(psuSerialNumbers!, font),
           pw.SizedBox(height: 80),
-          _buildSoftwareVersionTable(softwareVersion!, font),
+          //_buildSoftwareVersionTable(softwareVersion!, font),
+          //pw.SizedBox(height: 80),
         ],
       ),
     );
+    addPage(pdf, _buildSoftwareVersionTable(softwareVersion!, font));
     addPage(pdf, _buildAppearanceInspectionTable(testFunction!, font));
     addPage(
         pdf,
@@ -190,14 +193,14 @@ class PdfGenerator {
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text("S/N  Spec : 4",
+                  child: pw.Text("S/N  Spec : 12",
                       style: pw.TextStyle(font: font),
                       textAlign: pw.TextAlign.center),
                 ),
               ],
             ),
             ...List.generate(
-              4,
+              data.psuSN.length,
               (index) => pw.TableRow(
                 children: [
                   pw.Padding(
@@ -376,7 +379,7 @@ class PdfGenerator {
                     child: pw.Text(
                       data.testItems[index].name,
                       style: pw.TextStyle(font: font, fontSize: 10),
-                      textAlign: pw.TextAlign.left,
+                      textAlign: pw.TextAlign.center,
                     ),
                   ),
                   pw.Padding(
@@ -409,28 +412,22 @@ class PdfGenerator {
 
   static pw.Widget _buildInputOutputCharacteristicsTable(
       InputOutputCharacteristics data, pw.Font font) {
+
     List<String> headers = [
       'Item \n Spec',
-      'Vin \n 253V,187V',
-      'Iin \n <230A',
-      'Pin \n <130kW',
-      'Vout \n 969V,931V',
-      'Iout \n 129A,1223A',
-      'Pout \n 122kW,118kW',
+      'Pin \n ${globalInputOutputSpec?.pin ?? ""}',
+      'Vout \n ${globalInputOutputSpec?.vout ?? ""}',
+      'Iout \n ${globalInputOutputSpec?.iout ?? ""}',
+      'Pout \n ${globalInputOutputSpec?.pout ?? ""}',
       'Judgement',
     ];
-
-    // 定义每列的相对宽度
     final columnWidths = <int, pw.FlexColumnWidth>{
       0: const pw.FlexColumnWidth(0.8), // Item
-      1: const pw.FlexColumnWidth(1.2), // Spec
-      2: const pw.FlexColumnWidth(1.2), // Vin
-      3: const pw.FlexColumnWidth(1.2), // Iin
-      4: const pw.FlexColumnWidth(1.0), // Pin
-      5: const pw.FlexColumnWidth(1.0), // Vout
-      6: const pw.FlexColumnWidth(1.0), // Iout
-      7: const pw.FlexColumnWidth(1.0), // Pout
-      8: const pw.FlexColumnWidth(1.2), // Judgement
+      1: const pw.FlexColumnWidth(1.0), // Pin
+      2: const pw.FlexColumnWidth(1.0), // Vout
+      3: const pw.FlexColumnWidth(1.0), // Iout
+      4: const pw.FlexColumnWidth(1.0), // Pout
+      5: const pw.FlexColumnWidth(1.2), // Judgement
     };
 
     return pw.Column(
@@ -452,77 +449,57 @@ class PdfGenerator {
             pw.TableRow(
               children: headers
                   .map((header) => pw.Padding(
-                        padding: const pw.EdgeInsets.all(5),
-                        child: pw.Text(header,
-                            style: pw.TextStyle(font: font, fontSize: 10),
-                            textAlign: pw.TextAlign.center),
-                      ))
+                padding: const pw.EdgeInsets.all(5),
+                child: pw.Text(header,
+                    style: pw.TextStyle(font: font, fontSize: 10),
+                    textAlign: pw.TextAlign.center),
+              ))
                   .toList(),
             ),
             ...data.inputOutputCharacteristicsSide.map((item) => pw.TableRow(
-                  children: [
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.all(5),
-                      child: pw.Text(item.side,
-                          style: pw.TextStyle(font: font, fontSize: 8),
-                          textAlign: pw.TextAlign.center),
-                    ),
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.all(5),
-                      child: pw.Text(
-                        item.inputVoltage
-                            .map((iv) => "${iv.value.toStringAsFixed(2)} V")
-                            .join("\n"),
-                        style: pw.TextStyle(font: font, fontSize: 8),
-                        textAlign: pw.TextAlign.center,
-                      ),
-                    ),
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.all(5),
-                      child: pw.Text(
-                        item.inputCurrent
-                            .map((ic) => "${ic.value.toStringAsFixed(2)} A")
-                            .join("\n"),
-                        style: pw.TextStyle(font: font, fontSize: 8),
-                        textAlign: pw.TextAlign.center,
-                      ),
-                    ),
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.all(5),
-                      child: pw.Text(
-                          "${item.totalInputPower.value.toStringAsFixed(2)} KW",
-                          style: pw.TextStyle(font: font, fontSize: 8),
-                          textAlign: pw.TextAlign.center),
-                    ),
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.all(5),
-                      child: pw.Text(
-                          "${item.outputVoltage.value.toStringAsFixed(2)} V",
-                          style: pw.TextStyle(font: font, fontSize: 8),
-                          textAlign: pw.TextAlign.center),
-                    ),
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.all(5),
-                      child: pw.Text(
-                          "${item.outputCurrent.value.toStringAsFixed(2)} A",
-                          style: pw.TextStyle(font: font, fontSize: 8),
-                          textAlign: pw.TextAlign.center),
-                    ),
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.all(5),
-                      child: pw.Text(
-                          "${item.totalOutputPower.value.toStringAsFixed(2)} KW",
-                          style: pw.TextStyle(font: font, fontSize: 8),
-                          textAlign: pw.TextAlign.center),
-                    ),
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.all(5),
-                      child: pw.Text(item.judgement.name.toUpperCase(),
-                          style: pw.TextStyle(font: font, fontSize: 8),
-                          textAlign: pw.TextAlign.center),
-                    ),
-                  ],
-                )),
+              children: [
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(5),
+                  child: pw.Text(item.side,
+                      style: pw.TextStyle(font: font, fontSize: 8),
+                      textAlign: pw.TextAlign.center),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(5),
+                  child: pw.Text(
+                      "${item.totalInputPower.value.toStringAsFixed(2)} KW",
+                      style: pw.TextStyle(font: font, fontSize: 8),
+                      textAlign: pw.TextAlign.center),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(5),
+                  child: pw.Text(
+                      "${item.outputVoltage.value.toStringAsFixed(2)} V",
+                      style: pw.TextStyle(font: font, fontSize: 8),
+                      textAlign: pw.TextAlign.center),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(5),
+                  child: pw.Text(
+                      "${item.outputCurrent.value.toStringAsFixed(2)} A",
+                      style: pw.TextStyle(font: font, fontSize: 8),
+                      textAlign: pw.TextAlign.center),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(5),
+                  child: pw.Text(
+                      "${item.totalOutputPower.value.toStringAsFixed(2)} KW",
+                      style: pw.TextStyle(font: font, fontSize: 8),
+                      textAlign: pw.TextAlign.center),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(5),
+                  child: pw.Text(item.judgement.name.toUpperCase(),
+                      style: pw.TextStyle(font: font, fontSize: 8),
+                      textAlign: pw.TextAlign.center),
+                ),
+              ],
+            )),
           ],
         ),
       ],
@@ -604,7 +581,7 @@ class PdfGenerator {
                       data.testItems[index].description.replaceAll("{VALUE}",
                           data.testItems[index].value.toStringAsFixed(2)),
                       style: pw.TextStyle(font: font),
-                      textAlign: pw.TextAlign.center,
+                      textAlign: pw.TextAlign.start,
                     ),
                   ),
                   pw.Padding(
@@ -699,7 +676,7 @@ class PdfGenerator {
                       padding: const pw.EdgeInsets.all(5),
                       child: pw.Text(item.description,
                           style: pw.TextStyle(font: font),
-                          textAlign: pw.TextAlign.center),
+                          textAlign: pw.TextAlign.start),
                     ),
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(5),
@@ -789,18 +766,18 @@ class PdfGenerator {
                     children: [
                       pw.Text('Insulation Impedance Test.',
                           style: pw.TextStyle(font: font),
-                          textAlign: pw.TextAlign.center),
+                          textAlign: pw.TextAlign.start),
                       pw.SizedBox(height: 5),
                       pw.Text('Apply a DC Voltage:',
                           style: pw.TextStyle(font: font),
-                          textAlign: pw.TextAlign.center),
+                          textAlign: pw.TextAlign.start),
                       pw.Text('a) Between each circuit.',
                           style: pw.TextStyle(font: font),
-                          textAlign: pw.TextAlign.center),
+                          textAlign: pw.TextAlign.start),
                       pw.Text(
-                          'b) Between each of the\nindependent circuits and the\nground.',
+                          'b) Between each of the independent circuits and the ground.',
                           style: pw.TextStyle(font: font),
-                          textAlign: pw.TextAlign.center),
+                          textAlign: pw.TextAlign.start),
                     ],
                   ),
                 ),
@@ -913,18 +890,18 @@ class PdfGenerator {
                     children: [
                       pw.Text('Insulation Voltage Test.',
                           style: pw.TextStyle(font: font),
-                          textAlign: pw.TextAlign.center),
+                          textAlign: pw.TextAlign.start),
                       pw.SizedBox(height: 5),
                       pw.Text('Apply a DC Voltage:',
                           style: pw.TextStyle(font: font),
-                          textAlign: pw.TextAlign.center),
+                          textAlign: pw.TextAlign.start),
                       pw.Text('a) Between each circuit.',
                           style: pw.TextStyle(font: font),
-                          textAlign: pw.TextAlign.center),
+                          textAlign: pw.TextAlign.start),
                       pw.Text(
-                          'b) Between each of the\nindependent circuits and the\nground.',
+                          'b) Between each of the independent circuits and the ground.',
                           style: pw.TextStyle(font: font),
-                          textAlign: pw.TextAlign.center),
+                          textAlign: pw.TextAlign.start),
                     ],
                   ),
                 ),

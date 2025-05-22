@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:zerova_oqc_report/src/widget/common/global_state.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
   final TextStyle? titleStyle;
   final List<Widget>? additionalActions;
   final Widget? leading;
+  final bool isEditing;
+  final VoidCallback? onEditModeToggle;
 
   const CustomAppBar({
     super.key,
@@ -13,6 +16,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.titleStyle,
     this.additionalActions,
     this.leading,
+    this.isEditing = false,
+    this.onEditModeToggle,
   });
 
   @override
@@ -33,19 +38,34 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       leading: leading,
       title: title != null
           ? Text(
-              title!,
-              style: titleStyle ??
-                  const TextStyle(
-                    fontFamily: 'Roboto',
-                    fontSize: 32,
-                    fontWeight: FontWeight.w700,
-                    height: 1.2,
-                    textBaseline: TextBaseline.alphabetic,
-                  ),
-            )
+        title!,
+        style: titleStyle ??
+            const TextStyle(
+              fontFamily: 'Roboto',
+              fontSize: 32,
+              fontWeight: FontWeight.w700,
+              height: 1.2,
+              textBaseline: TextBaseline.alphabetic,
+            ),
+      )
           : null,
       actions: [
         if (additionalActions != null) ...additionalActions!,
+        IconButton(
+          icon: Icon(isEditing ? Icons.edit_off : Icons.edit),
+          //onPressed: onEditModeToggle ?? () {},
+          onPressed: () {
+            // 切換全域變數
+            globalEditModeNotifier.value = globalEditModeNotifier.value == 0 ? 1 : 0;  // 更新 globalEditModeNotifier
+            print("globalEditMode is now: $globalEditModeNotifier.value");
+
+            // 呼叫原本的切換函式（如果有的話）
+            if (onEditModeToggle != null) {
+              onEditModeToggle!();
+            }
+          },
+          tooltip: isEditing ? '關閉編輯模式' : '開啟編輯模式',
+        ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: _buildLanguageDropdownButton(context),
@@ -109,3 +129,4 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => const Size.fromHeight(84);
 }
+

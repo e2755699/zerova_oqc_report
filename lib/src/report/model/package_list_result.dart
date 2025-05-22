@@ -18,7 +18,7 @@ class PackageListResult {
     PackageListResultMeasurement(
       spec: 1,
       key: 2,
-      translationKey: 'certificate_card',
+      translationKey: 'product_certificate_card',
     ),
     PackageListResultMeasurement(
       spec: 22,
@@ -28,12 +28,12 @@ class PackageListResult {
     PackageListResultMeasurement(
       spec: 4,
       key: 4,
-      translationKey: 'cabinet_key',
+      translationKey: 'screw_assy_m4_12',
     ),
     PackageListResultMeasurement(
       spec: 1,
       key: 5,
-      translationKey: 'ac_breaker_key',
+      translationKey: 'user_manual',
     ),
   ];
 
@@ -60,11 +60,11 @@ class PackageListResult {
   }
 
   static final Map<String, String> englishMapping = {
-    'certificate_card': 'Certificate Card',
     'rfid_card': 'RFID Card',
+    'product_certificate_card': 'Product Certificate Card',
+    'screw_assy_m4_12': "Screw Assy M4*12",
     'bolts_cover': 'Bolts Cover',
-    'cabinet_key': "Cabinet's key",
-    'ac_breaker_key': "AC Breaker's key",
+    'user_manual': "User Manual",
     'others': 'Others',
   };
 
@@ -74,9 +74,9 @@ class PackageListResult {
 }
 
 class PackageListResultMeasurement {
-  final int spec;
+   int spec;
   final int key;
-  final String translationKey;
+   String translationKey;
   final ValueNotifier<bool> isCheck;
 
   PackageListResultMeasurement({

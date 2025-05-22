@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:zerova_oqc_report/src/repo/sharepoint_uploader.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class UploadProgressDialog extends StatefulWidget {
   final int uploadOrDownload;
@@ -31,12 +32,32 @@ class UploadProgressDialog extends StatefulWidget {
 class _UploadProgressDialogState extends State<UploadProgressDialog> {
   double progress = 0.0;
   String currentCategory = "";
-  String statusText = "初始化中...";
+  String statusText =  "Initializing...";
   bool isUploading = true;
+
+  // 明確宣告 categoryTranslations，並在 didChangeDependencies 中初始化
+  Map<String, String> categoryTranslations = {};
 
   @override
   void initState() {
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // 在 didChangeDependencies 中安全地初始化翻譯字串
+    setState(() {
+      statusText = context.tr('initializing');
+      categoryTranslations = {
+        "packageing_photo": context.tr('packageing_photo'),
+        "appearance_photo": context.tr('appearance_photo'),
+        "oqc_report": context.tr('oqc_report'),
+      };
+    });
+
+    // 在初始化翻譯字串後再開始上傳處理，避免 context 未就緒的錯誤
     startUploadProcess();
   }
 
@@ -47,9 +68,10 @@ class _UploadProgressDialogState extends State<UploadProgressDialog> {
           currentCategory = category;
           progress = total > 0 ? current / total : 0.0;
           statusText =
-              "$category 上傳進度: $current / $total (${(progress * 100).toStringAsFixed(2)}%)";
+              "$category" + context.tr('upload_progress') + "$current / $total (${(progress * 100).toStringAsFixed(2)}%)";
         });
       },
+      categoryTranslations: categoryTranslations,
     );
 
     // 當所有上傳完成後，顯示完成訊息並自動關閉
@@ -59,10 +81,10 @@ class _UploadProgressDialogState extends State<UploadProgressDialog> {
       progress = 1.0;
       if (widget.uploadOrDownload == 0) {
         //0:Upload  1:Download
-        statusText = "🎉 上傳完成！";
+        statusText = "🎉" + context.tr('upload_complete');  //上傳完成！
       } else if (widget.uploadOrDownload == 1) {
         //0:Upload  1:Download
-        statusText = "🎉 下載完成！";
+        statusText = "🎉" + context.tr('download_complete');//下載完成！
       }
     });
 
@@ -79,10 +101,10 @@ class _UploadProgressDialogState extends State<UploadProgressDialog> {
         // **讓標題置中**
         child: Text(
           widget.uploadOrDownload == 0
-              ? "檔案上傳中"
+              ? context.tr('uploading_file') //檔案上傳中
               : widget.uploadOrDownload == 1
-                  ? "檔案下載中"
-                  : "處理中...",
+                  ? context.tr('downloading_file') //檔案下載中
+                  : context.tr('processing'), //處理中...
           style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
       ),
@@ -113,7 +135,7 @@ class _UploadProgressDialogState extends State<UploadProgressDialog> {
       actions: [
         ElevatedButton(
           onPressed: () => Navigator.pop(context), // 手動關閉視窗
-          child: const Text("關閉"),
+          child: Text(context.tr('close')),
         ),
       ],
     );

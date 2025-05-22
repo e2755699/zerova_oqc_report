@@ -4,6 +4,8 @@ import 'package:zerova_oqc_report/src/report/model/protection_function_test_resu
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 import 'package:zerova_oqc_report/src/widget/common/table_wrapper.dart';
 import 'package:zerova_oqc_report/src/widget/common/table_helper.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:zerova_oqc_report/src/widget/common/global_state.dart';
 
 class HiPotTestTable extends StatefulWidget {
   final ProtectionFunctionTestResult data;
@@ -24,6 +26,7 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
   }
 
   Widget _buildInsulationTestingRecord() {
+
     return SizedBox(
       width: 400,
       child: Column(
@@ -170,8 +173,15 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
 
   @override
   Widget build(BuildContext context) {
+    return ValueListenableBuilder<int>(
+        valueListenable: globalEditModeNotifier,
+        builder: (context, editMode, _) {
+      return ValueListenableBuilder<int>(
+          valueListenable: permissions,
+          builder: (context, permission, _) {
+        final isEditable = editMode == 1 && (permission == 1 || permission == 2);
     return TableWrapper(
-      title: 'Hi-Pot Test',
+      title: context.tr('hipot_test'),
       content: StyledDataTable(
         dataRowMinHeight: 200,
         dataRowMaxHeight: 230,
@@ -214,6 +224,10 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
           ]),
         ],
       ),
+    );
+          },
+      );
+        },
     );
   }
 }

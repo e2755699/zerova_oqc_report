@@ -1,5 +1,7 @@
 import 'package:zerova_oqc_report/src/report/enum/judgement.dart';
 import 'package:zerova_oqc_report/src/report/model/basic_function_test_result.dart';
+import 'package:zerova_oqc_report/src/report/spec/basic_function_test_spec.dart';
+import 'package:zerova_oqc_report/src/widget/oqc/tables/basic_function_test_table.dart';
 
 class InputOutputCharacteristics {
   final InputOutputCharacteristicsSide leftSideInputOutputCharacteristics;
@@ -267,6 +269,7 @@ class InputOutputCharacteristics {
               name: "EFF",
               description: 'Spec: >94% \n Efficiency: {VALUE} %',
               judgement: spcValue <= spec ? Judgement.fail : Judgement.pass,
+              //defaultSpecText: _defaultSpec[1] ?? '>94%',
             );
           }
         } else if (spcDesc.contains("PowerFactor")) {
@@ -281,6 +284,7 @@ class InputOutputCharacteristics {
               name: "PF",
               description: 'Spec: ≧ 0.99 \n PF: {VALUE} %',
               judgement: spcValue < spec ? Judgement.fail : Judgement.pass,
+             // defaultSpecText: _defaultSpec[2] ?? '≧ 0.99',
             );
           }
         } else if (spcDesc.contains("THD")) {
@@ -295,6 +299,7 @@ class InputOutputCharacteristics {
               name: "Harmonic",
               description: 'Spec: <5% \n THD: {VALUE} %',
               judgement: spcValue >= spec ? Judgement.fail : Judgement.pass,
+             // defaultSpecText: _defaultSpec[3] ?? '<5%',
             );
           }
         } else if (spcDesc.contains("Standby_Total_Input_Power")) {
@@ -309,6 +314,7 @@ class InputOutputCharacteristics {
               name: "Standby Power",
               description: 'Spec: <100W \n Standby Power: {VALUE} W',
               judgement: spcValue >= spec ? Judgement.fail : Judgement.pass,
+             // defaultSpecText: _defaultSpec[4] ?? '<100W',
             );
           }
         }
@@ -359,24 +365,25 @@ class InputOutputCharacteristicsSide {
 
   final String side;
 
+  Judgement? _manualJudgement; // 新增：人工修改的結果，預設 null
+
+  // getter: 如果有人工結果，回傳人工結果；沒的話回傳自動判斷
   Judgement get judgement {
+    if (_manualJudgement != null) {
+      return _manualJudgement!;
+    }
+
+    // 自動判斷邏輯（你原本的判斷）
     int passCount = 0;
-    // 檢查所有 inputVoltage 的 judgement
     bool inputVoltagePass =
-        inputVoltage.every((m) => m.judgement == Judgement.pass);
-    // 檢查所有 inputCurrent 的 judgement
+    inputVoltage.every((m) => m.judgement == Judgement.pass);
     bool inputCurrentPass =
-        inputCurrent.every((m) => m.judgement == Judgement.pass);
-    // 檢查 totalInputPower 的 judgement
+    inputCurrent.every((m) => m.judgement == Judgement.pass);
     bool totalInputPowerPass = totalInputPower.judgement == Judgement.pass;
-    // 檢查 outputVoltage 的 judgement
     bool outputVoltagePass = outputVoltage.judgement == Judgement.pass;
-    // 檢查 outputCurrent 的 judgement
     bool outputCurrentPass = outputCurrent.judgement == Judgement.pass;
-    // 檢查 totalOutputPower 的 judgement
     bool totalOutputPowerPass = totalOutputPower.judgement == Judgement.pass;
 
-    // 如果所有測量值都通過，返回 OK
     [
       inputVoltagePass,
       inputCurrentPass,
@@ -384,10 +391,19 @@ class InputOutputCharacteristicsSide {
       outputVoltagePass,
       outputCurrentPass,
       totalOutputPowerPass
-    ].map((judgement) => judgement ? passCount++ : passCount).toList();
+    ].forEach((passed) {
+      if (passed) passCount++;
+    });
+
     return passCount > 2 ? Judgement.pass : Judgement.fail;
   }
 
+  // setter: 用於人工修改結果
+  set judgement(Judgement value) {
+    _manualJudgement = value;
+  }
+
+  // 建構子
   InputOutputCharacteristicsSide(
       this.side,
       this.inputVoltage,
@@ -398,15 +414,15 @@ class InputOutputCharacteristicsSide {
       this.totalOutputPower);
 }
 
-class InputOutputMeasurement {
-  final double spec;
-  final double value;
-  final double count;
-  final String key;
-  final String name;
-  final String description;
 
-  final Judgement judgement;
+class InputOutputMeasurement {
+  double spec;
+  double value;
+  double count;
+  String key;
+  String name;
+  String description;
+  Judgement judgement;
 
   InputOutputMeasurement(
       {required this.spec,

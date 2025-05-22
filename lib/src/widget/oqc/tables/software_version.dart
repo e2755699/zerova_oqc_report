@@ -5,41 +5,97 @@ import 'package:zerova_oqc_report/src/report/model/software_version.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 import 'package:zerova_oqc_report/src/widget/common/table_wrapper.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:zerova_oqc_report/src/widget/common/global_state.dart';
 
-class SoftwareVersionTable extends StatelessWidget {
+class SoftwareVersionTable extends StatefulWidget {
   final SoftwareVersion data;
 
   const SoftwareVersionTable(this.data, {super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final dataTable = StyledDataTable(
-      columns: [
-        OqcTableStyle.getDataColumn('No.'),
-        OqcTableStyle.getDataColumn('Item'),
-        OqcTableStyle.getDataColumn('Version'),
-      ],
-      rows: List.generate(
-          data.versions.length,
-          (index) => DataRow(
-                cells: [
-                  OqcTableStyle.getDataCell((index + 1).toString()),
-                  OqcTableStyle.getDataCell(data.versions[index].name),
-                  OqcTableStyle.getDataCell(data.versions[index].value),
-                ],
-              )),
-    );
+  State<SoftwareVersionTable> createState() => _SoftwareVersionTableState();
+}
 
-    return TableWrapper(
-      title: context.tr('software_version'),
-      content: dataTable,
+class _SoftwareVersionTableState extends State<SoftwareVersionTable> {
+  late List<TextEditingController> _controllers;
+
+  @override
+  void initState() {
+    super.initState();
+    _controllers = widget.data.versions
+        .map((v) => TextEditingController(text: v.value))
+        .toList();
+  }
+
+  @override
+  void dispose() {
+    for (var controller in _controllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<int>(
+      valueListenable: globalEditModeNotifier,
+      builder: (context, editMode, _) {
+        return ValueListenableBuilder<int>(
+          valueListenable: permissions,
+          builder: (context, permission, _) {
+            final isEditable =
+                editMode == 1 && (permission == 1 || permission == 2);
+
+            final dataTable = StyledDataTable(
+              columns: [
+                OqcTableStyle.getDataColumn('No.'),
+                OqcTableStyle.getDataColumn('Item'),
+                OqcTableStyle.getDataColumn('Version'),
+              ],
+              rows: List.generate(widget.data.versions.length, (index) {
+                final version = widget.data.versions[index];
+
+                return DataRow(cells: [
+                  OqcTableStyle.getDataCell((index + 1).toString()),
+                  OqcTableStyle.getDataCell(version.name),
+                  DataCell(
+                    isEditable
+                        ? TextFormField(
+                      controller: _controllers[index],
+                      decoration: const InputDecoration(
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(
+                            vertical: 6, horizontal: 8),
+                        border: OutlineInputBorder(),
+                        //hintText: 'Enter version',
+                      ),
+                      onChanged: (val) {
+                        setState(() {
+                          widget.data.versions[index].value = val;
+                        });
+                      },
+                    )
+                        : OqcTableStyle
+                        .getDataCell(widget.data.versions[index].value)
+                        .child,
+                  ),
+                ]);
+              }),
+            );
+
+            return TableWrapper(
+              title: context.tr('software_version'),
+              content: dataTable,
+            );
+          },
+        );
+      },
     );
   }
 
   Future<void> _generatePdf(BuildContext context) async {
     final pdf = pw.Document();
 
-    // 添加 PDF 表格
     pdf.addPage(
       pw.Page(
         build: (pw.Context context) {
@@ -47,11 +103,11 @@ class SoftwareVersionTable extends StatelessWidget {
             border: pw.TableBorder.all(),
             headers: ['No.', 'Item', 'Version'],
             data: List.generate(
-              data.versions.length,
-              (index) => [
+              widget.data.versions.length,
+                  (index) => [
                 (index + 1).toString(),
-                data.versions[index].name,
-                data.versions[index].value,
+                widget.data.versions[index].name,
+                widget.data.versions[index].value,
               ],
             ),
           );
@@ -59,7 +115,6 @@ class SoftwareVersionTable extends StatelessWidget {
       ),
     );
 
-    // 預覽 PDF
     await Printing.layoutPdf(
       onLayout: (format) async => pdf.save(),
     );
