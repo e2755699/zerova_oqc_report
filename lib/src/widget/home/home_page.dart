@@ -331,11 +331,11 @@ mixin LoadFileHelper {
     }
 
     String jsonContent =
-        await File("$filePath/$sn/T2415A053A0_test.json").readAsString();
+        await File("$filePath/$sn/T2449A003A1_test.json").readAsString();
     String testFunctionJsonContent =
-        await File("$filePath/$sn/T2415A053A0_oqc.json").readAsString();
+        await File("$filePath/$sn/T2449A003A1_oqc.json").readAsString();
     String moduleJsonContent =
-        await File("$filePath/$sn/T2415A053A0_keypart.json").readAsString();
+        await File("$filePath/$sn/T2449A003A1_keypart.json").readAsString();
 
     List<dynamic> data = jsonDecode(jsonContent);
     List<dynamic> testFunctionData = jsonDecode(testFunctionJsonContent);
