@@ -103,9 +103,9 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
               final model = _modelController.text;
               await fetchAndPrintInputOutputCharacteristicsSpecs(model);
               await fetchAndPrintBasicFunctionTestSpecs(model);
+              await fetchAndPrintHipotTestSpecs(model);
 
               await loadFileModule(sn, model, context).then((_) {
-                //fetchAndPrintSpecs(sn, model);
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(

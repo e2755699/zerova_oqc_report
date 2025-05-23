@@ -384,6 +384,9 @@ class InsulationTestResult {
   final ProtectionFunctionMeasurement rightInsulationInputOutput;
   final ProtectionFunctionMeasurement rightInsulationInputGround;
   final ProtectionFunctionMeasurement rightInsulationOutputGround;
+
+  Judgement storedJudgement;
+
   Judgement get judgement {
     int passCount = 0;
     if (leftInsulationInputOutput.judgement == Judgement.pass) passCount++;
@@ -415,12 +418,16 @@ class InsulationTestResult {
       this.leftInsulationOutputGround,
       this.rightInsulationInputOutput,
       this.rightInsulationInputGround,
-      this.rightInsulationOutputGround);
+      this.rightInsulationOutputGround) : storedJudgement = Judgement.unknown;
+
+  void updateStoredJudgement() {
+    storedJudgement = judgement;
+  }
 }
 
 class ProtectionFunctionMeasurement {
   final double spec;
-  final double value;
+   double value;
   final String key;
   final String name;
   final String description;

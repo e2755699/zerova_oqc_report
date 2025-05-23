@@ -28,6 +28,7 @@ import 'package:zerova_oqc_report/src/widget/upload/upload.dart';
 import 'package:zerova_oqc_report/src/repo/firebase_service.dart';
 import 'package:zerova_oqc_report/src/report/spec/input_output_characteristics_spec.dart';
 import 'package:zerova_oqc_report/src/report/spec/basic_function_test_spec.dart';
+import 'package:zerova_oqc_report/src/report/spec/hipot_test_spec.dart';
 
 class OqcReportPage extends StatefulWidget {
   const OqcReportPage({
@@ -161,7 +162,7 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           await _generateAndUploadPdf();
-          //startUpload(context);
+          startUpload(context);
           if (globalInputOutputSpec != null) {
             final success = await FirebaseService().addOrUpdateSpec(
               model: widget.model, // 你需要確保這裡有正確的 model 名稱
@@ -191,6 +192,21 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
             }
           } else {
             print('⚠️ 尚未設定 globalBasicFunctionTestSpec');
+          }
+          if (globalHipotTestSpec != null) {
+            final success = await FirebaseService().addOrUpdateSpec(
+              model: widget.model, // 你需要確保這裡有正確的 model 名稱
+              tableName: 'HipotTestSpec',
+              spec: globalHipotTestSpec!.toJson(),
+            );
+
+            if (success) {
+              print('✅ 規格已成功上傳 Firebase');
+            } else {
+              print('❌ 上傳失敗，請檢查網路或 API Key');
+            }
+          } else {
+            print('⚠️ 尚未設定 globalHipotTestSpec');
           }
         },
         icon: const Icon(Icons.upload_file),

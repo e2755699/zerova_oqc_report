@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:zerova_oqc_report/src/widget/common/table_wrapper.dart';
 import 'package:zerova_oqc_report/src/repo/sharepoint_uploader.dart';
 import 'package:zerova_oqc_report/src/report/spec/input_output_characteristics_spec.dart';
+import 'package:zerova_oqc_report/src/report/spec/hipot_test_spec.dart';
 
 /// 附件表格
 class AttachmentTable extends StatelessWidget {
@@ -14,7 +15,7 @@ class AttachmentTable extends StatelessWidget {
     super.key,
     required this.sn,
   });
-  void someFunction() {
+ /* void someFunction() {
     if (globalInputOutputSpec != null) {
       print(globalInputOutputSpec!.vin);
       print(globalInputOutputSpec!.iin);
@@ -25,7 +26,16 @@ class AttachmentTable extends StatelessWidget {
     } else {
       print('資料還沒載入');
     }
+  }*/
+  void someFunction() {
+    if (globalInputOutputSpec != null) {
+      print(globalHipotTestSpec!.insulationimpedancespec);
+      print(globalHipotTestSpec!.leakagecurrentspec);
+    } else {
+      print('資料還沒載入');
+    }
   }
+
   @override
   Widget build(BuildContext context) {
     return TableWrapper(

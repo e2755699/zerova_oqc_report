@@ -17,6 +17,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 import 'package:zerova_oqc_report/src/utils/image_utils.dart';
 import 'package:zerova_oqc_report/src/report/spec/input_output_characteristics_spec.dart';
+import 'package:zerova_oqc_report/src/report/spec/hipot_test_spec.dart';
 
 class PdfGenerator {
   static Future<pw.Document> generateOqcReport({
@@ -788,7 +789,7 @@ class PdfGenerator {
                     children: [
                       pw.Center(
                         child: pw.Text(
-                          'Insulation impedance >10MΩ',
+                          'Insulation impedance > ${globalHipotTestSpec?.insulationimpedancespec?.toStringAsFixed(0) ?? '10'} MΩ',
                           style: pw.TextStyle(font: font),
                           textAlign: pw.TextAlign.center,
                         ),
@@ -866,7 +867,7 @@ class PdfGenerator {
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text(
-                      data.hiPotTestResult.insulationImpedanceTest.judgement
+                      data.hiPotTestResult.insulationImpedanceTest.storedJudgement
                           .name
                           .toUpperCase(),
                       style: pw.TextStyle(font: font),
@@ -912,7 +913,7 @@ class PdfGenerator {
                     children: [
                       pw.Center(
                         child: pw.Text(
-                          'Leakage current <10mA',
+                          'Leakage current < ${globalHipotTestSpec?.leakagecurrentspec?.toStringAsFixed(0) ?? '10'} mA',
                           style: pw.TextStyle(
                             font: font,
                             color: PdfColors.red,
@@ -993,7 +994,7 @@ class PdfGenerator {
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text(
-                      data.hiPotTestResult.insulationVoltageTest.judgement.name
+                      data.hiPotTestResult.insulationVoltageTest.storedJudgement.name
                           .toUpperCase(),
                       style: pw.TextStyle(font: font),
                       textAlign: pw.TextAlign.center),

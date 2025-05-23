@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:zerova_oqc_report/src/report/spec/input_output_characteristics_spec.dart';
 import 'package:zerova_oqc_report/src/report/spec/basic_function_test_spec.dart';
+import 'package:zerova_oqc_report/src/report/spec/hipot_test_spec.dart';
 
 class FirebaseService {
   final String projectId = 'oqcreport-87e5a';
@@ -179,8 +180,30 @@ Future<void> fetchAndPrintBasicFunctionTestSpecs(String model) async {
     // 把資料存到全域變數
     globalBasicFunctionTestSpec = BasicFunctionTestSpec.fromJson(specMap);
 
-    print('=== InputOutputCharacteristics ===');
+    print('=== BasicFunctionTest ===');
     print(globalBasicFunctionTestSpec); // 直接印出全域變數內容
+  }
+  for (var entry in specs.entries) {
+    print('=== ${entry.key} ===');
+    print(jsonEncode(entry.value));
+  }
+}
+
+Future<void> fetchAndPrintHipotTestSpecs(String model) async {
+  final firebaseService = FirebaseService();
+  final tableNames = ['HipotTestSpec'];
+
+  final specs = await firebaseService.getAllSpecs(
+    model: model,
+    tableNames: tableNames,
+  );
+  final specMap = specs['HipotTestSpec'];
+  if (specMap != null) {
+    // 把資料存到全域變數
+    globalHipotTestSpec = HipotTestSpec.fromJson(specMap);
+
+    print('=== HipotTestSpec ===');
+    print(globalHipotTestSpec); // 直接印出全域變數內容
   }
   for (var entry in specs.entries) {
     print('=== ${entry.key} ===');
