@@ -601,13 +601,13 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
                 cells: [
                   editableCell("L_0", item.side, false),
                   editableCell("L_3", item.totalInputPower.value.toStringAsFixed(2), isEditable,
-                      suffix: ' KW'),
+                      suffix: ' kW'),
                   editableCell("L_4", item.outputVoltage.value.toStringAsFixed(2), isEditable,
                       suffix: ' V'),
                   editableCell("L_5", item.outputCurrent.value.toStringAsFixed(2), isEditable,
                       suffix: ' A'),
                   editableCell("L_6", item.totalOutputPower.value.toStringAsFixed(2), isEditable,
-                      suffix: ' KW'),
+                      suffix: ' kW'),
                   DataCell(
                     Center(
                       child: isEditable
@@ -663,13 +663,13 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
                 cells: [
                   editableCell("R_0", item.side, false),
                   editableCell("R_3", item.totalInputPower.value.toStringAsFixed(2), isEditable,
-                      suffix: ' KW'),
+                      suffix: ' kW'),
                   editableCell("R_4", item.outputVoltage.value.toStringAsFixed(2), isEditable,
                       suffix: ' V'),
                   editableCell("R_5", item.outputCurrent.value.toStringAsFixed(2), isEditable,
                       suffix: ' A'),
                   editableCell("R_6", item.totalOutputPower.value.toStringAsFixed(2), isEditable,
-                      suffix: ' KW'),
+                      suffix: ' kW'),
                   DataCell(
                     Center(
                       child: isEditable
@@ -760,12 +760,27 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
               onChanged: (newValue) {
                 setState(() {
                   _cellInputs[rowKey] = newValue;
+                  int? index;
 
+                  // 處理 R0_3、R1_4 等格式
                   final rowMatch = RegExp(r'R(\d+)_\d+').firstMatch(rowKey);
                   if (rowMatch != null) {
-                    final index = int.parse(rowMatch.group(1)!);
-                    final side = widget.inputOutputCharacteristics.inputOutputCharacteristicsSide[index];
+                    index = int.tryParse(rowMatch.group(1)!);
+                  }
 
+                  // 處理 L_3 → index = 0
+                  if (rowKey.startsWith('L_')) {
+                    index = 0;
+                  }
+
+                  // 處理 R_3 → index = 1
+                  if (rowKey.startsWith('R_')) {
+                    index = 1;
+                  }
+                  if (index != null &&
+                      index >= 0 &&
+                      index < widget.inputOutputCharacteristics.inputOutputCharacteristicsSide.length){
+                    final side = widget.inputOutputCharacteristics.inputOutputCharacteristicsSide[index];
                     if (rowKey.endsWith('_3')) {
                       final parsed = double.tryParse(newValue);
                       if (parsed != null) side.totalInputPower.value = parsed;
