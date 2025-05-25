@@ -101,16 +101,26 @@ class _InputAccountAndPasswordState extends State<InputAccountAndPassword>
               final account = _modelController.text;
               if (pwd == 'admin' && account == 'admin') {
                 permissions.value = 1;
-              }
-              else if (pwd == 'user' && account == 'user') {
+              } else if (pwd == 'user' && account == 'user') {
                 permissions.value = 2;
-              }
-              else{
+              } else {
                 permissions.value = 0;
               }
-              print("permissions is now: $permissions.value");
-              Navigator.of(context).pop();
-              /*await loadFileModule(pwd, account, context).then((_) {
+              print("permissions is now: ${permissions.value}");
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      permissions.value == 1 
+                          ? context.tr('login_success_admin')
+                          : permissions.value == 2 
+                              ? context.tr('login_success_operator')
+                              : context.tr('login_success_guest')
+                    ),
+                  ),
+                );
+                Navigator.of(context).pop();
+              } /*await loadFileModule(pwd, account, context).then((_) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
