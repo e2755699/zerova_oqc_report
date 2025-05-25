@@ -172,7 +172,7 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
             );
 
             if (success) {
-              print('✅ 規格已成功上傳 Firebase');
+              print('✅ 規格已成功上傳 ');
             } else {
               print('❌ 上傳失敗，請檢查網路或 API Key');
             }

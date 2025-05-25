@@ -33,7 +33,13 @@ class MainLayout extends StatelessWidget {
           child: IconButton(
             padding: EdgeInsets.zero,
             icon: const Icon(Icons.arrow_back_outlined),
-            onPressed: () => context.pop(),
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/');
+              }
+            },
           ),
         ) : null),
         additionalActions: additionalActions,
