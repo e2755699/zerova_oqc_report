@@ -19,6 +19,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:zerova_oqc_report/src/widget/common/custom_app_bar.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:zerova_oqc_report/src/widget/common/send_email_service.dart';
+import 'package:zerova_oqc_report/src/widget/common/global_state.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -79,7 +80,36 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
               ),
             ),
             const SizedBox(height: 20),
-            // 按鈕1: 輸入SN機種
+            // Model Spec Template 按鈕 (只有管理員可見)
+            ValueListenableBuilder<int>(
+              valueListenable: permissions,
+              builder: (context, value, child) {
+                if (value == 1) { // 只有管理員 (permissions == 1) 可見
+                  return Column(
+                    children: [
+                      SizedBox(
+                        width: 300,
+                        height: 60,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            textStyle: const TextStyle(fontSize: 20),
+                            backgroundColor: Colors.amber,
+                          ),
+                          onPressed: () {
+                            context.go('/model-spec-template');
+                          },
+                          child: Text(context.tr('model_spec_template')),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  );
+                } else {
+                  return const SizedBox.shrink(); // 非管理員不顯示
+                }
+              },
+            ),
+            // 按鈕2: 輸入SN機種
             SizedBox(
               width: 300, // 增加按鈕寬度
               height: 60, // 增加按鈕高度
@@ -100,7 +130,7 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
             ),
             const SizedBox(height: 20),
 
-            // 按鈕2: QR Scan
+            // 按鈕3: QR Scan
             SizedBox(
               width: 300, // 增加按鈕寬度
               height: 60, // 增加按鈕高度

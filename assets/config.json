@@ -1,0 +1,8 @@
+{
+  "clientId": "a66968aa-0b06-46b5-be07-1453aa2b5427",
+  "clientSecret": "PV68Q~yc.Crr8b_SpliE57XQJTh9jIkhRFkfUauc",
+  "tenantId": "65a97312-0e38-4ac7-b923-4e3737fb402e",
+  "redirectUri": "http://localhost:8000/callback",
+  "siteId": "phihong666.sharepoint.com,5d15176f-54bb-4c3b-976b-625313f854bf,1419d2ad-d720-409f-b2b9-5c964ac9629e",
+  "driveId": "b!bxcVXbtUO0yXa2JTE_hUv63SGRQg159AsrlclkrJYp4SVeWUkLLJR6xfCNOrFGQg"
+} 

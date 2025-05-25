@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:zerova_oqc_report/src/report/model/package_list_result.dart';
+import 'package:zerova_oqc_report/src/widget/admin/model_spec_template_page.dart';
 import 'package:zerova_oqc_report/src/widget/camera/camera_page.dart';
 import 'package:zerova_oqc_report/src/widget/home/home_page.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/oqc_report_page.dart';
@@ -38,6 +39,12 @@ final GoRouter appRouter = GoRouter(
           psuSerialNumbers: extra['psuSerialNumbers'],
           packageListResult: extra['packageListResult'] ?? PackageListResult(),
         );
+      },
+    ),
+    GoRoute(
+      path: '/model-spec-template',
+      builder: (BuildContext context, GoRouterState state) {
+        return const ModelSpecTemplatePage();
       },
     ),
   ],
