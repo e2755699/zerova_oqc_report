@@ -27,13 +27,13 @@ void main() async {
 
   await EasyLocalization.ensureInitialized();
   await ConfigManager.initialize();
-  /*SharePointUploader(uploadOrDownload: 1, sn: '').startAuthorization(
+  SharePointUploader(uploadOrDownload: 1, sn: '').startAuthorization(
     categoryTranslations: {
       "packageing_photo": "Packageing Photo ",
       "appearance_photo": "Appearance Photo ",
       "oqc_report": "OQC Report ",
     },
-  );*/
+  );
 
   runApp(EasyLocalization(
     supportedLocales: const [

@@ -7,6 +7,7 @@ import 'package:zerova_oqc_report/src/report/enum/judgement.dart';
 import 'package:zerova_oqc_report/src/widget/common/table_helper.dart';
 import 'package:zerova_oqc_report/src/widget/common/global_state.dart';
 import 'package:zerova_oqc_report/src/report/spec/basic_function_test_spec.dart';
+import 'package:flutter/services.dart';
 
 class BasicFunctionTestTable extends StatefulWidget {
   final BasicFunctionTestResult data;
@@ -28,17 +29,30 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
   final List<String> valueLabels = ['Efficiency:', 'PF:', 'THD:', 'Standby Power:'];
   final List<String> valueUnits = ['%', '%', '%', 'W'];
 
-  // 取用全域Spec，回傳 Map<int, String>，key是欄位序號
-  Map<int, String> get _defaultSpec {
+  double _defaultIfEmptyDouble(double? value, double defaultValue) {
+    return (value == null || value.isNaN) ? defaultValue : value;
+  }
+
+  Map<int, double> get _defaultSpec {
     final spec = globalBasicFunctionTestSpec;
     return {
-      1: _defaultIfEmpty(spec?.eff, '>94%'),
-      2: _defaultIfEmpty(spec?.pf, '≧ 0.99'),
-      3: _defaultIfEmpty(spec?.thd, '<5%'),
-      4: _defaultIfEmpty(spec?.sp, '<100W'),
+      // Left Side
+      1: _defaultIfEmptyDouble(spec?.eff, 94),
+      2: _defaultIfEmptyDouble(spec?.pf, 0.99),
+      3: _defaultIfEmptyDouble(spec?.thd, 5),
+      4: _defaultIfEmptyDouble(spec?.sp, 100),
     };
   }
-  void updateGlobalSpec(int index, String value) {
+  void initializeGlobalSpec() {
+    globalBasicFunctionTestSpec = BasicFunctionTestSpec(
+      // Left Side
+      eff: _defaultSpec[1] ?? 94,
+      pf: _defaultSpec[2] ?? 0.99,
+      thd: _defaultSpec[3] ?? 5,
+      sp: _defaultSpec[4] ?? 100,
+    );
+  }
+  void updateGlobalSpec(int index, double value) {
     switch (index) {
       case 0:
         globalBasicFunctionTestSpec = globalBasicFunctionTestSpec!.copyWith(eff: value);
@@ -54,26 +68,25 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
         break;
     }
   }
-  String _defaultIfEmpty(String? value, String defaultValue) {
-    if (value == null || value.trim().isEmpty) {
-      return defaultValue;
-    }
-    return value;
-  }
 
-  void initializeGlobalSpec() {
-    globalBasicFunctionTestSpec = BasicFunctionTestSpec(
-      eff: _defaultSpec[1] ?? '>94%',
-      pf: _defaultSpec[2] ?? '≧ 0.99',
-      thd: _defaultSpec[3] ?? '<5%',
-      sp: _defaultSpec[4] ?? '<100W',
-    );
+  String getSpecLabel(int index) {
+    switch (index) {
+      case 0:
+        return 'spec: >';
+      case 1:
+        return 'spec: ≧';
+      case 2:
+      case 3:
+        return 'spec: <';
+      default:
+        return 'spec:';
+    }
   }
 
   @override
+  @override
   void initState() {
     super.initState();
-
     initializeGlobalSpec();
 
     data = widget.data;
@@ -81,21 +94,40 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
     _reportValues = List.generate(
       data.testItems.length,
           (index) {
-        String specText = _defaultSpec[index + 1] ?? '';
+        String specValue = _defaultSpec[index + 1]?.toString() ?? '';
 
-        // 將 double 轉成字串，且只保留小數點兩位
+        // 設定符號依照 index
+        String specPrefix;
+        switch (index) {
+          case 0:
+            specPrefix = '> ';  // 第1列
+            break;
+          case 1:
+            specPrefix = '≧ ';  // 第2列
+            break;
+          case 2:
+          case 3:
+            specPrefix = '< ';  // 第3、4列
+            break;
+          default:
+            specPrefix = '';   // 其他預設為空
+        }
+
+        // 數值與單位
         double rawValue = data.testItems[index].value;
         String valueText = rawValue.toStringAsFixed(2);
-
-        // 初始化 description
         String label = valueLabels.length > index ? valueLabels[index] : '';
         String unit = valueUnits.length > index ? valueUnits[index] : '';
-        data.testItems[index].description = 'Spec: $specText\n$label $valueText$unit';
 
-        return [specText, valueText];
+        // description 組合內容
+        data.testItems[index].description =
+        'Spec: $specPrefix$specValue$unit\n$label $valueText$unit';
+
+        return [specValue, valueText];
       },
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -138,7 +170,7 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Text(
-                                  'spec:',
+                                  getSpecLabel(index),
                                   style: TableTextStyle.contentStyle(),
                                 ),
                                 const SizedBox(width: 8),
@@ -146,41 +178,67 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
                                     ? Expanded(
                                   child: TextFormField(
                                     initialValue: _reportValues[index][0],
+                                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                                    ],
                                     decoration: const InputDecoration(
                                       isDense: true,
-                                      contentPadding: EdgeInsets.symmetric(
-                                          vertical: 6, horizontal: 8),
+                                      contentPadding: EdgeInsets.symmetric(vertical: 6, horizontal: 8),
                                       border: OutlineInputBorder(),
                                     ),
                                     onChanged: (value) {
-                                      setState(() {
-                                        _reportValues[index][0] = value;
+                                      final doubleValue = double.tryParse(value);
+                                      if (doubleValue != null) {
+                                        setState(() {
+                                          _reportValues[index][0] = value;
+                                          updateGlobalSpec(index, doubleValue);
 
-                                        // 更新全域 Spec
-                                        updateGlobalSpec(index, value);
+                                          // 其他同步更新描述等
+                                          final specText = _reportValues[index][0];
+                                          final valueText = _reportValues[index][1];
+                                          final label = valueLabels.length > index ? valueLabels[index] : '';
+                                          final unit = valueUnits.length > index ? valueUnits[index] : '';
 
-                                        // 同步更新 description
-                                        final specText = _reportValues[index][0];
-                                        final valueText = _reportValues[index][1];
-                                        final label = valueLabels.length > index
-                                            ? valueLabels[index]
-                                            : '';
-                                        final unit = valueUnits.length > index
-                                            ? valueUnits[index]
-                                            : '';
+                                          // 指定符號 prefix
+                                          String specPrefix;
+                                          switch (index) {
+                                            case 0:
+                                              specPrefix = '> ';
+                                              break;
+                                            case 1:
+                                              specPrefix = '≧ ';
+                                              break;
+                                            case 2:
+                                            case 3:
+                                              specPrefix = '< ';
+                                              break;
+                                            default:
+                                              specPrefix = '';
+                                          }
 
-                                        data.testItems[index].description =
-                                        'Spec: $specText\n$label $valueText$unit';
-                                      });
+                                          data.testItems[index].description =
+                                          'Spec: $specPrefix$specText$unit\n$label $valueText$unit';
+                                        });
+                                      }
+                                      // 如果轉換失敗可以忽略或做錯誤處理
                                     },
+
                                   ),
                                 )
                                     : Text(
                                   _reportValues[index][0],
                                   style: TableTextStyle.contentStyle(),
                                 ),
+                                const SizedBox(width: 8),
+                                // 單位獨立顯示
+                                Text(
+                                  valueUnits.length > index ? valueUnits[index] : '',
+                                  style: TableTextStyle.contentStyle(),
+                                ),
                               ],
                             ),
+
                             const SizedBox(height: 8),
                             // 第二欄 Value + Label + Unit
                             isEditable
@@ -209,17 +267,31 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
                                         // 同步更新 description
                                         final specText = _reportValues[index][0];
                                         final valueText = _reportValues[index][1];
-                                        final label = valueLabels.length > index
-                                            ? valueLabels[index]
-                                            : '';
-                                        final unit = valueUnits.length > index
-                                            ? valueUnits[index]
-                                            : '';
+                                        final label = valueLabels.length > index ? valueLabels[index] : '';
+                                        final unit = valueUnits.length > index ? valueUnits[index] : '';
+
+                                        // 決定 spec 符號
+                                        String specPrefix;
+                                        switch (index) {
+                                          case 0:
+                                            specPrefix = '> ';
+                                            break;
+                                          case 1:
+                                            specPrefix = '≧ ';
+                                            break;
+                                          case 2:
+                                          case 3:
+                                            specPrefix = '< ';
+                                            break;
+                                          default:
+                                            specPrefix = '';
+                                        }
 
                                         data.testItems[index].description =
-                                        'Spec: $specText\n$label $valueText$unit';
+                                        'Spec: $specPrefix$specText$unit\n$label $valueText$unit';
                                       });
                                     },
+
                                   ),
                                 ),
                                 Text(

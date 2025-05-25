@@ -413,23 +413,91 @@ class PdfGenerator {
 
   static pw.Widget _buildInputOutputCharacteristicsTable(
       InputOutputCharacteristics data, pw.Font font) {
+    final spec = globalInputOutputSpec;
 
-    List<String> headers = [
+    String formatSpec(num? upper, num? lower, String unit) {
+      final upperStr = upper?.toStringAsFixed(0) ?? "-";
+      final lowerStr = lower?.toStringAsFixed(0) ?? "-";
+      return "$upperStr$unit, $lowerStr$unit";
+    }
+
+    // Header for Left Spec
+    List<String> leftHeaders = [
       'Item \n Spec',
-      'Pin \n ${globalInputOutputSpec?.pin ?? ""}',
-      'Vout \n ${globalInputOutputSpec?.vout ?? ""}',
-      'Iout \n ${globalInputOutputSpec?.iout ?? ""}',
-      'Pout \n ${globalInputOutputSpec?.pout ?? ""}',
+      'Pin \n ${formatSpec(spec?.leftPinUpperbound, spec?.leftPinLowerbound, 'kW')}',
+      'Vout \n ${formatSpec(spec?.leftVoutUpperbound, spec?.leftVoutLowerbound, 'V')}',
+      'Iout \n ${formatSpec(spec?.leftIoutUpperbound, spec?.leftIoutLowerbound, 'A')}',
+      'Pout \n ${formatSpec(spec?.leftPoutUpperbound, spec?.leftPoutLowerbound, 'kW')}',
       'Judgement',
     ];
+
+    // Header for Right Spec
+    List<String> rightHeaders = [
+      'Item \n Spec',
+      'Pin \n ${formatSpec(spec?.rightPinUpperbound, spec?.rightPinLowerbound, 'kW')}',
+      'Vout \n ${formatSpec(spec?.rightVoutUpperbound, spec?.rightVoutLowerbound, 'V')}',
+      'Iout \n ${formatSpec(spec?.rightIoutUpperbound, spec?.rightIoutLowerbound, 'A')}',
+      'Pout \n ${formatSpec(spec?.rightPoutUpperbound, spec?.rightPoutLowerbound, 'kW')}',
+      'Judgement',
+    ];
+
     final columnWidths = <int, pw.FlexColumnWidth>{
-      0: const pw.FlexColumnWidth(0.8), // Item
-      1: const pw.FlexColumnWidth(1.0), // Pin
-      2: const pw.FlexColumnWidth(1.0), // Vout
-      3: const pw.FlexColumnWidth(1.0), // Iout
-      4: const pw.FlexColumnWidth(1.0), // Pout
-      5: const pw.FlexColumnWidth(1.2), // Judgement
+      0: const pw.FlexColumnWidth(0.8),
+      1: const pw.FlexColumnWidth(1.0),
+      2: const pw.FlexColumnWidth(1.0),
+      3: const pw.FlexColumnWidth(1.0),
+      4: const pw.FlexColumnWidth(1.0),
+      5: const pw.FlexColumnWidth(1.2),
     };
+
+    // 收集 table row
+    final List<pw.TableRow> tableRows = [];
+
+    // ➤ 加入 Left Header
+    tableRows.add(
+      pw.TableRow(
+        children: leftHeaders
+            .map((header) => pw.Padding(
+          padding: const pw.EdgeInsets.all(5),
+          child: pw.Text(
+            header,
+            style: pw.TextStyle(font: font, fontSize: 10),
+            textAlign: pw.TextAlign.center,
+          ),
+        ))
+            .toList(),
+      ),
+    );
+
+    // ➤ 加入 Left 資料列
+    final left = data.inputOutputCharacteristicsSide.firstWhere(
+          (item) => item.side.toLowerCase().contains('left'),
+      orElse: () => data.inputOutputCharacteristicsSide.first,
+    );
+    tableRows.add(_buildDataRow(left, font));
+
+    // ➤ 加入 Right Header
+    tableRows.add(
+      pw.TableRow(
+        children: rightHeaders
+            .map((header) => pw.Padding(
+          padding: const pw.EdgeInsets.all(5),
+          child: pw.Text(
+            header,
+            style: pw.TextStyle(font: font, fontSize: 10),
+            textAlign: pw.TextAlign.center,
+          ),
+        ))
+            .toList(),
+      ),
+    );
+
+    // ➤ 加入 Right 資料列
+    final right = data.inputOutputCharacteristicsSide.firstWhere(
+          (item) => item.side.toLowerCase().contains('right'),
+      orElse: () => data.inputOutputCharacteristicsSide.last,
+    );
+    tableRows.add(_buildDataRow(right, font));
 
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -446,62 +514,51 @@ class PdfGenerator {
         pw.Table(
           columnWidths: columnWidths,
           border: pw.TableBorder.all(),
-          children: [
-            pw.TableRow(
-              children: headers
-                  .map((header) => pw.Padding(
-                padding: const pw.EdgeInsets.all(5),
-                child: pw.Text(header,
-                    style: pw.TextStyle(font: font, fontSize: 10),
-                    textAlign: pw.TextAlign.center),
-              ))
-                  .toList(),
-            ),
-            ...data.inputOutputCharacteristicsSide.map((item) => pw.TableRow(
-              children: [
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text(item.side,
-                      style: pw.TextStyle(font: font, fontSize: 8),
-                      textAlign: pw.TextAlign.center),
-                ),
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text(
-                      "${item.totalInputPower.value.toStringAsFixed(2)} KW",
-                      style: pw.TextStyle(font: font, fontSize: 8),
-                      textAlign: pw.TextAlign.center),
-                ),
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text(
-                      "${item.outputVoltage.value.toStringAsFixed(2)} V",
-                      style: pw.TextStyle(font: font, fontSize: 8),
-                      textAlign: pw.TextAlign.center),
-                ),
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text(
-                      "${item.outputCurrent.value.toStringAsFixed(2)} A",
-                      style: pw.TextStyle(font: font, fontSize: 8),
-                      textAlign: pw.TextAlign.center),
-                ),
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text(
-                      "${item.totalOutputPower.value.toStringAsFixed(2)} KW",
-                      style: pw.TextStyle(font: font, fontSize: 8),
-                      textAlign: pw.TextAlign.center),
-                ),
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text(item.judgement.name.toUpperCase(),
-                      style: pw.TextStyle(font: font, fontSize: 8),
-                      textAlign: pw.TextAlign.center),
-                ),
-              ],
-            )),
-          ],
+          children: tableRows,
+        ),
+      ],
+    );
+  }
+
+  static pw.TableRow _buildDataRow(
+      InputOutputCharacteristicsSide item, pw.Font font) {
+    return pw.TableRow(
+      children: [
+        pw.Padding(
+          padding: const pw.EdgeInsets.all(5),
+          child: pw.Text(item.side,
+              style: pw.TextStyle(font: font, fontSize: 8),
+              textAlign: pw.TextAlign.center),
+        ),
+        pw.Padding(
+          padding: const pw.EdgeInsets.all(5),
+          child: pw.Text("${item.totalInputPower.value.toStringAsFixed(2)} kW",
+              style: pw.TextStyle(font: font, fontSize: 8),
+              textAlign: pw.TextAlign.center),
+        ),
+        pw.Padding(
+          padding: const pw.EdgeInsets.all(5),
+          child: pw.Text("${item.outputVoltage.value.toStringAsFixed(2)} V",
+              style: pw.TextStyle(font: font, fontSize: 8),
+              textAlign: pw.TextAlign.center),
+        ),
+        pw.Padding(
+          padding: const pw.EdgeInsets.all(5),
+          child: pw.Text("${item.outputCurrent.value.toStringAsFixed(2)} A",
+              style: pw.TextStyle(font: font, fontSize: 8),
+              textAlign: pw.TextAlign.center),
+        ),
+        pw.Padding(
+          padding: const pw.EdgeInsets.all(5),
+          child: pw.Text("${item.totalOutputPower.value.toStringAsFixed(2)} kW",
+              style: pw.TextStyle(font: font, fontSize: 8),
+              textAlign: pw.TextAlign.center),
+        ),
+        pw.Padding(
+          padding: const pw.EdgeInsets.all(5),
+          child: pw.Text(item.judgement.name.toUpperCase(),
+              style: pw.TextStyle(font: font, fontSize: 8),
+              textAlign: pw.TextAlign.center),
         ),
       ],
     );

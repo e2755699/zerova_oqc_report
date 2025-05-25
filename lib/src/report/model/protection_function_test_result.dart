@@ -1,4 +1,5 @@
 import 'package:zerova_oqc_report/src/report/enum/judgement.dart';
+import 'package:zerova_oqc_report/src/report/spec/hipot_test_spec.dart';
 
 class ProtectionFunctionTestResult {
   final HiPotTestResult hiPotTestResult;
@@ -50,7 +51,7 @@ class ProtectionFunctionTestResult {
 
       if (spcDesc != null && spcItem != null) {
         if (spcItem.contains("Data_1")) {
-          double spec = 10;
+          double spec = globalHipotTestSpec!.insulationimpedancespec;
           if (spcItem.contains("Seq.2")) {
             if (leftInsulationImpedanceInputOutputValue > spcValue) {
               leftInsulationImpedanceInputOutputValue = spcValue;
@@ -61,7 +62,7 @@ class ProtectionFunctionTestResult {
               key: spcItem,
               name: "IIIO",
               description: '',
-              judgement: leftInsulationImpedanceInputOutputValue >= spec
+              judgement: leftInsulationImpedanceInputOutputValue > spec
                   ? Judgement.pass
                   : Judgement.fail,
             );
@@ -75,13 +76,13 @@ class ProtectionFunctionTestResult {
               key: spcItem,
               name: "IIIO",
               description: '',
-              judgement: rightInsulationImpedanceInputOutputValue >= spec
+              judgement: rightInsulationImpedanceInputOutputValue > spec
                   ? Judgement.pass
                   : Judgement.fail,
             );
           }
         } else if (spcItem.contains("Data_2")) {
-          double spec = 10;
+          double spec = globalHipotTestSpec!.insulationimpedancespec;
           if (spcItem.contains("Seq.2")) {
             if (leftInsulationImpedanceInputGroundValue > spcValue) {
               leftInsulationImpedanceInputGroundValue = spcValue;
@@ -92,7 +93,7 @@ class ProtectionFunctionTestResult {
               key: spcItem,
               name: "IIIG",
               description: '',
-              judgement: leftInsulationImpedanceInputGroundValue >= spec
+              judgement: leftInsulationImpedanceInputGroundValue > spec
                   ? Judgement.pass
                   : Judgement.fail,
             );
@@ -106,13 +107,13 @@ class ProtectionFunctionTestResult {
               key: spcItem,
               name: "IIIG",
               description: '',
-              judgement: rightInsulationImpedanceInputGroundValue >= spec
+              judgement: rightInsulationImpedanceInputGroundValue > spec
                   ? Judgement.pass
                   : Judgement.fail,
             );
           }
         } else if (spcItem.contains("Data_3")) {
-          double spec = 10;
+          double spec = globalHipotTestSpec!.insulationimpedancespec;
           if (spcItem.contains("Seq.2")) {
             if (leftInsulationImpedanceOutputGroundValue > spcValue) {
               leftInsulationImpedanceOutputGroundValue = spcValue;
@@ -123,7 +124,7 @@ class ProtectionFunctionTestResult {
               key: spcItem,
               name: "IIOG",
               description: '',
-              judgement: leftInsulationImpedanceOutputGroundValue >= spec
+              judgement: leftInsulationImpedanceOutputGroundValue > spec
                   ? Judgement.pass
                   : Judgement.fail,
             );
@@ -138,13 +139,13 @@ class ProtectionFunctionTestResult {
               key: spcItem,
               name: "IIOG",
               description: '',
-              judgement: rightInsulationImpedanceOutputGroundValue >= spec
+              judgement: rightInsulationImpedanceOutputGroundValue > spec
                   ? Judgement.pass
                   : Judgement.fail,
             );
           }
         } else if (spcItem.contains("Data_4")) {
-          double spec = 10;
+          double spec = globalHipotTestSpec!.leakagecurrentspec;
           if (spcItem.contains("Seq.2")) {
             if (leftInsulationVoltageInputOutputValue > spcValue) {
               leftInsulationVoltageInputOutputValue = spcValue;
@@ -155,7 +156,7 @@ class ProtectionFunctionTestResult {
               key: spcItem,
               name: "IVIO",
               description: '',
-              judgement: leftInsulationVoltageInputOutputValue >= spec
+              judgement: leftInsulationVoltageInputOutputValue < spec
                   ? Judgement.pass
                   : Judgement.fail,
             );
@@ -169,13 +170,13 @@ class ProtectionFunctionTestResult {
               key: spcItem,
               name: "IVIO",
               description: '',
-              judgement: rightInsulationVoltageInputOutputValue >= spec
+              judgement: rightInsulationVoltageInputOutputValue < spec
                   ? Judgement.pass
                   : Judgement.fail,
             );
           }
         } else if (spcItem.contains("Data_5")) {
-          double spec = 10;
+          double spec = globalHipotTestSpec!.leakagecurrentspec;
           if (spcItem.contains("Seq.2")) {
             if (leftInsulationVoltageInputGroundValue > spcValue) {
               leftInsulationVoltageInputGroundValue = spcValue;
@@ -186,7 +187,7 @@ class ProtectionFunctionTestResult {
               key: spcItem,
               name: "IVIG",
               description: '',
-              judgement: leftInsulationVoltageInputGroundValue >= spec
+              judgement: leftInsulationVoltageInputGroundValue < spec
                   ? Judgement.pass
                   : Judgement.fail,
             );
@@ -200,13 +201,13 @@ class ProtectionFunctionTestResult {
               key: spcItem,
               name: "IVIG",
               description: '',
-              judgement: rightInsulationVoltageInputGroundValue >= spec
+              judgement: rightInsulationVoltageInputGroundValue < spec
                   ? Judgement.pass
                   : Judgement.fail,
             );
           }
         } else if (spcItem.contains("Data_6")) {
-          double spec = 10;
+          double spec = globalHipotTestSpec!.leakagecurrentspec;
           if (spcItem.contains("Seq.2")) {
             if (leftInsulationVoltageOutputGroundValue > spcValue) {
               leftInsulationVoltageOutputGroundValue = spcValue;
@@ -217,7 +218,7 @@ class ProtectionFunctionTestResult {
               key: spcItem,
               name: "IVOG",
               description: '',
-              judgement: leftInsulationVoltageOutputGroundValue >= spec
+              judgement: leftInsulationVoltageOutputGroundValue < spec
                   ? Judgement.pass
                   : Judgement.fail,
             );
@@ -231,7 +232,7 @@ class ProtectionFunctionTestResult {
               key: spcItem,
               name: "IVOG",
               description: '',
-              judgement: rightInsulationVoltageOutputGroundValue >= spec
+              judgement: rightInsulationVoltageOutputGroundValue < spec
                   ? Judgement.pass
                   : Judgement.fail,
             );

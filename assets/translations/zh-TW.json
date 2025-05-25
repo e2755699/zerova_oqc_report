@@ -29,7 +29,7 @@
   "submit_fail": "序號: {}, 型號: {} 提交失敗",
   "input_account_password": "輸入帳號密碼",
   "input_sn_model": "輸入SN機種",
-  "qr_code_scan": "QR code掃描",
+  "qr_code_scan": "QR code",
   "rfid_card": "RFID卡",
   "product_certificate_card": "產品驗證卡",
   "screw_assy_m4_12": "螺絲組件 M4*12",

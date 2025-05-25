@@ -2,10 +2,10 @@
 // 假設它長這樣（你可以換成你自己完整的實作）
 
 class BasicFunctionTestSpec {
-  final String eff;
-  final String pf;
-  final String thd;
-  final String sp;
+   double eff;
+   double pf;
+   double thd;
+   double sp;
 
   BasicFunctionTestSpec({
     required this.eff,
@@ -14,35 +14,41 @@ class BasicFunctionTestSpec {
     required this.sp,
   });
 
-  factory BasicFunctionTestSpec.fromJson(Map<String, dynamic> json) {
-    return BasicFunctionTestSpec(
-      eff: json['EFF'] ?? '',
-      pf: json['PF'] ?? '',
-      thd: json['THD'] ?? '',
-      sp: json['SP'] ?? '',
-    );
-  }
+   factory BasicFunctionTestSpec.fromJson(Map<String, dynamic> json) {
+     double parseDouble(dynamic value) {
+       return (value is num)
+           ? value.toDouble()
+           : double.tryParse(value.toString()) ?? double.nan;
+     }
+     return BasicFunctionTestSpec(
+       eff: parseDouble(json['EFF']),
+       pf: parseDouble(json['PF']),
+       thd: parseDouble(json['THD']),
+       sp: parseDouble(json['SP']),
+     );
+   }
 
-  BasicFunctionTestSpec copyWith({
-    String? eff,
-    String? pf,
-    String? thd,
-    String? sp,
-  }) {
-    return BasicFunctionTestSpec(
-      eff: eff ?? this.eff,
-      pf: pf ?? this.pf,
-      thd: thd ?? this.thd,
-      sp: sp ?? this.sp,
-    );
-  }
+   BasicFunctionTestSpec copyWith({
+     double? eff,
+     double? pf,
+     double? thd,
+     double? sp,
+   }) {
+     return BasicFunctionTestSpec(
+       eff: eff ?? this.eff,
+       pf: pf ?? this.pf,
+       thd: thd ?? this.thd,
+       sp: sp ?? this.sp,
+     );
+   }
 
-  Map<String, dynamic> toJson() => {
-    'EFF': eff,
-    'PF': pf,
-    'THD': thd,
-    'SP': sp,
-  };
+
+   Map<String, dynamic> toJson() => {
+     'EFF': eff,
+     'PF': pf,
+     'THD': thd,
+     'SP': sp,
+   };
 
   @override
   String toString() {
