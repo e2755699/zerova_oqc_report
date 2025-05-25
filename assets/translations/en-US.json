@@ -29,6 +29,7 @@
   "login_success_admin": "Login successful. Permission: Administrator",
   "login_success_operator": "Login successful. Permission: Operator",
   "login_success_guest": "Login successful. Permission: Guest",
+  "model_spec_template": "Model Specification Template Management",
   "rfid_card": "RFID Card",
   "product_certificate_card": "Product Certificate Card",
   "screw_assy_m4_12": "Screw Assy M4*12",

@@ -30,6 +30,7 @@
   "login_success_admin": "您已成功登入，權限：管理者",
   "login_success_operator": "您已成功登入，權限：操作員",
   "login_success_guest": "您已成功登入，權限：訪客",
+  "model_spec_template": "模型規格模板管理",
   "input_account_password": "權限管理",
   "input_sn_model": "輸入SN機種",
   "qr_code_scan": "QR code",

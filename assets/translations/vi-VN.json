@@ -29,6 +29,7 @@
   "login_success_admin": "Đăng nhập thành công. Quyền: Quản trị viên",
   "login_success_operator": "Đăng nhập thành công. Quyền: Người vận hành",
   "login_success_guest": "Đăng nhập thành công. Quyền: Khách",
+  "model_spec_template": "Quản lý mẫu thông số kỹ thuật mô hình",
   "rfid_card": "Thẻ RFID",
   "product_certificate_card": "Thẻ chứng nhận sản phẩm",
   "screw_assy_m4_12": "Bộ phận vít M4*12",

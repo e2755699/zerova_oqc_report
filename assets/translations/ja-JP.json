@@ -29,6 +29,7 @@
   "login_success_admin": "ログイン成功。権限：管理者",
   "login_success_operator": "ログイン成功。権限：オペレーター",
   "login_success_guest": "ログイン成功。権限：ゲスト",
+  "model_spec_template": "モデル仕様テンプレート管理",
   "rfid_card": "RFIDカード",
   "product_certificate_card": "製品認証カード",
   "screw_assy_m4_12": "ネジ　M4*12",
