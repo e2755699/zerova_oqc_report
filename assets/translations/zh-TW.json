@@ -27,7 +27,7 @@
   "exit_confirm_message": "確定要離開應用程式嗎？",
   "submit_success": "序號: {}, 型號: {} 已提交",
   "submit_fail": "序號: {}, 型號: {} 提交失敗",
-  "input_account_password": "輸入帳號密碼",
+  "input_account_password": "權限管理",
   "input_sn_model": "輸入SN機種",
   "qr_code_scan": "QR code",
   "rfid_card": "RFID卡",

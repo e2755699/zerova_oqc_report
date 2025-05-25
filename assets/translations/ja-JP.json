@@ -10,6 +10,7 @@
   "hipot_test": "耐電圧試験",
   "package_list": "梱包リスト",
   "attachment": "添付資料",
+  "input_account_password": "権限管理",
   "input_sn_model": "SNモデル入力",
   "qr_code_scan": "QRコードスキャン",
   "open_camera": "カメラを開く",

@@ -8,6 +8,7 @@ import 'package:zerova_oqc_report/src/widget/common/global_state.dart';
 import 'package:zerova_oqc_report/src/report/spec/input_output_characteristics_spec.dart';
 import 'package:zerova_oqc_report/src/widget/common/table_helper.dart';
 import 'package:flutter/services.dart';
+import 'package:zerova_oqc_report/src/report/spec/FailCountStore.dart';
 
 class InputOutputCharacteristicsTable extends StatefulWidget {
   final InputOutputCharacteristics inputOutputCharacteristics;
@@ -63,6 +64,17 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
     }
   }
 
+  void someFunction2() {
+    // 讀取
+    int currentFailCount = FailCountStore.getCount('InputOutputCharacteristics');
+    print('現在 InputOutputCharacteristics 失敗數量: $currentFailCount');
+
+    // 增加
+    FailCountStore.increment('InputOutputCharacteristics');
+
+    // 再讀取看看
+    print('更新後的失敗數量: ${FailCountStore.inputOutputCharacteristics}');
+  }
 
   double _defaultIfEmptyDouble(double? value, double defaultValue) {
     return (value == null || value.isNaN) ? defaultValue : value;
@@ -231,6 +243,7 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
     super.initState();
     initializeGlobalSpec();
     someFunction();
+    someFunction2();
 
     for (var i = 1; i <= 24; i++) {
       _focusNodes[i] = FocusNode();

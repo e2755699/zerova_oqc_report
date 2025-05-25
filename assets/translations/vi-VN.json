@@ -10,6 +10,7 @@
   "hipot_test": "Kiểm tra điện áp cao",
   "package_list": "Danh sách đóng gói",
   "attachment": "Tài liệu đính kèm",
+  "input_account_password": "Quản lý quyền",
   "input_sn_model": "Nhập Model SN",
   "qr_code_scan": "Quét mã QR",
   "open_camera": "Mở máy ảnh",

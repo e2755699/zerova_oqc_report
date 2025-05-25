@@ -29,6 +29,7 @@ import 'package:zerova_oqc_report/src/repo/firebase_service.dart';
 import 'package:zerova_oqc_report/src/report/spec/input_output_characteristics_spec.dart';
 import 'package:zerova_oqc_report/src/report/spec/basic_function_test_spec.dart';
 import 'package:zerova_oqc_report/src/report/spec/hipot_test_spec.dart';
+import 'package:zerova_oqc_report/src/report/spec/FailCountStore.dart';
 
 class OqcReportPage extends StatefulWidget {
   const OqcReportPage({
@@ -208,6 +209,37 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
           } else {
             print('⚠️ 尚未設定 globalHipotTestSpec');
           }
+
+
+          final tableNames = [
+            'AppearanceStructureInspectionFunction',
+            'InputOutputCharacteristics',
+            'BasicFunctionTest',
+            'HipotTestSpec',
+          ];
+
+          for (final tableName in tableNames) {
+            final failCount = FailCountStore.getCount(tableName);
+
+            // 如果有值就上傳
+            if (failCount != null) { // failCount 是 int，不會是 null，這裡可改成 failCount > 0 或 failCount >= 0 視需求
+              final success = await FirebaseService().addOrUpdateFailCount(
+                model: widget.model,
+                serialNumber: widget.sn,
+                tableName: tableName,
+                failCount: failCount,
+              );
+
+              if (success) {
+                print('✅ $tableName 規格已成功上傳 Firebase');
+              } else {
+                print('❌ $tableName 上傳失敗，請檢查網路或 API Key');
+              }
+            } else {
+              print('⚠️ 尚未設定 $tableName');
+            }
+          }
+
         },
         icon: const Icon(Icons.upload_file),
         label: Text(context.tr('submit')),

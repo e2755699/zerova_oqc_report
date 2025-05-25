@@ -18,6 +18,7 @@ import 'package:zerova_oqc_report/src/widget/oqc/oqc_report_page.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:zerova_oqc_report/src/widget/common/custom_app_bar.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:zerova_oqc_report/src/widget/common/send_email_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -43,7 +44,22 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
               height: 300, // 調整LOGO大小
             ),
             const SizedBox(height: 40),
-            // 按鈕1: 輸入SN機種
+            // 按鈕Mail
+            /*SizedBox(
+              width: 300,
+              height: 60,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  textStyle: const TextStyle(fontSize: 20),
+                ),
+                onPressed: () async {
+                  await SendEmailService.sendMail();
+                },
+                child: const Text('Send Mail'),
+              ),
+            ),
+            const SizedBox(height: 20),*/
+            // 按鈕1: 輸入帳號密碼
             SizedBox(
               width: 300, // 增加按鈕寬度
               height: 60, // 增加按鈕高度

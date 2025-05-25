@@ -101,9 +101,11 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
             if (_formKey.currentState!.validate()) {
               final sn = _snController.text;
               final model = _modelController.text;
+
               await fetchAndPrintInputOutputCharacteristicsSpecs(model);
               await fetchAndPrintBasicFunctionTestSpecs(model);
               await fetchAndPrintHipotTestSpecs(model);
+              await fetchFailCountsForDevice(model,sn);
 
               await loadFileModule(sn, model, context).then((_) {
                 if (context.mounted) {

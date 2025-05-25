@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:zerova_oqc_report/src/report/spec/input_output_characteristics_spec.dart';
 import 'package:zerova_oqc_report/src/report/spec/basic_function_test_spec.dart';
 import 'package:zerova_oqc_report/src/report/spec/hipot_test_spec.dart';
+import 'package:zerova_oqc_report/src/report/spec/FailCountStore.dart';
 
 class FirebaseService {
   final String projectId = 'oqcreport-87e5a';
@@ -35,6 +36,36 @@ class FirebaseService {
     print('🔥 Body: ${response.body}');
     return response.statusCode == 200;
   }
+  /// 新增或更新 fail count 到 /failcounts/{model}/{serialNumber}/{tableName}
+  Future<bool> addOrUpdateFailCount({
+    required String model,
+    required String serialNumber,
+    required String tableName,
+    required int failCount,
+  }) async {
+    final url =
+        'https://firestore.googleapis.com/v1/projects/$projectId/databases/(default)/documents/failcounts/$model/$serialNumber/$tableName?key=$apiKey';
+
+    final body = json.encode({
+      "fields": {
+        "failCount": {
+          "integerValue": failCount.toString(),
+        },
+      },
+    });
+
+    final response = await http.patch(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: body,
+    );
+
+    print('🚀 FailCount Upload Status: ${response.statusCode}');
+    print('🚀 Response Body: ${response.body}');
+
+    return response.statusCode == 200;
+  }
+
 
   /// 讀取多個 tableName 的 spec，回傳 Map<tableName, spec>
   Future<Map<String, Map<String, dynamic>>> getAllSpecs({
@@ -68,6 +99,40 @@ class FirebaseService {
         result[tableName] = {};
       } else {
         throw Exception('Failed to load $tableName spec, statusCode=${response.statusCode}');
+      }
+    }
+
+    return result;
+  }
+
+  /// 讀取多個 table 的 fail count，回傳 Map<tableName, count>
+  Future<Map<String, int>> getAllFailCounts({
+    required String model,
+    required String serialNumber,
+    required List<String> tableNames,
+  }) async {
+    final result = <String, int>{};
+
+    for (final tableName in tableNames) {
+      final url =
+          'https://firestore.googleapis.com/v1/projects/$projectId/databases/(default)/documents/failcounts/$model/$serialNumber/$tableName?key=$apiKey';
+
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final fields = data['fields'] ?? {};
+        final countField = fields['failCount'];
+        if (countField != null && countField is Map && countField['integerValue'] != null) {
+          result[tableName] = int.tryParse(countField['integerValue']) ?? 0;
+        } else {
+          result[tableName] = 0;
+        }
+      } else if (response.statusCode == 404) {
+        // 文件不存在就預設為 0
+        result[tableName] = 0;
+      } else {
+        throw Exception('Failed to load fail count for $tableName, statusCode=${response.statusCode}');
       }
     }
 
@@ -210,3 +275,26 @@ Future<void> fetchAndPrintHipotTestSpecs(String model) async {
     print(jsonEncode(entry.value));
   }
 }
+
+Future<void> fetchFailCountsForDevice(String model, String serialNumber) async {
+  final firebaseService = FirebaseService();
+  final tableNames = [
+    'AppearanceStructureInspectionFunction',
+    'InputOutputCharacteristics',
+    'BasicFunctionTest',
+    'HipotTestSpec',
+  ];
+
+  final failCounts = await firebaseService.getAllFailCounts(
+    model: model,
+    serialNumber: serialNumber,
+    tableNames: tableNames,
+  );
+
+  // 把讀到的 fail count 寫入 FailCountStore 全域變數
+  for (final entry in failCounts.entries) {
+    FailCountStore.setCount(entry.key, entry.value);
+    print('❌ ${entry.key}: ${entry.value} fails');
+  }
+}
+
