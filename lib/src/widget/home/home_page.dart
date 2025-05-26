@@ -20,6 +20,7 @@ import 'package:zerova_oqc_report/src/widget/common/custom_app_bar.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:zerova_oqc_report/src/widget/common/send_email_service.dart';
 import 'package:zerova_oqc_report/src/widget/common/global_state.dart';
+import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -362,79 +363,160 @@ mixin LoadFileHelper {
       String sn, String model, BuildContext context) async {
     //load json from User/Test Result/Zerova/$sn/...
     var filePath = '';
+    var logFilePath = '';
     if (Platform.isMacOS) {
       // macOS 路徑
       filePath = path.join(
           Platform.environment['HOME'] ?? '', 'Test Result', 'Zerova');
+      logFilePath = path.join(
+          Platform.environment['HOME'] ?? '', 'Test Result', 'Zerova', 'logs');
     } else if (Platform.isWindows) {
       // Windows 路徑
       filePath = path.join(
           Platform.environment['USERPROFILE'] ?? '', 'Test Result', 'Zerova');
+      logFilePath = path.join(
+          Platform.environment['USERPROFILE'] ?? '', 'Test Result', 'Zerova', 'logs');
     } else {
       // 其他系統（如 Linux）
       filePath = path.join(
           Platform.environment['HOME'] ?? '', 'Test Result', 'Zerova');
+      logFilePath = path.join(
+          Platform.environment['HOME'] ?? '', 'Test Result', 'Zerova', 'logs');
     }
 
-    String jsonContent =
-        await File("$filePath/$sn/T2449A003A1_test.json").readAsString();
-    String testFunctionJsonContent =
-        await File("$filePath/$sn/T2449A003A1_oqc.json").readAsString();
-    String moduleJsonContent =
-        await File("$filePath/$sn/T2449A003A1_keypart.json").readAsString();
+    // 確保日誌目錄存在
+    final logDirectory = Directory(logFilePath);
+    if (!await logDirectory.exists()) {
+      await logDirectory.create(recursive: true);
+    }
 
-    List<dynamic> data = jsonDecode(jsonContent);
-    List<dynamic> testFunctionData = jsonDecode(testFunctionJsonContent);
-    List<dynamic> moduleData = jsonDecode(moduleJsonContent);
+    // 建立日誌檔案
+    final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+    final logFile = File(path.join(logFilePath, 'api_log_${sn}_$timestamp.txt'));
+    
+     try {
+    //   // 嘗試從本地文件加載數據
+    //   try {
+    //     String jsonContent =
+    //         await File("$filePath/$sn/T2449A003A1_test.json").readAsString();
+    //     String testFunctionJsonContent =
+    //         await File("$filePath/$sn/T2449A003A1_oqc.json").readAsString();
+    //     String moduleJsonContent =
+    //         await File("$filePath/$sn/T2449A003A1_keypart.json").readAsString();
+    //
+    //     await logFile.writeAsString('成功從本地文件加載數據\n', mode: FileMode.append);
+    //     await logFile.writeAsString('test.json 文件內容: $jsonContent\n', mode: FileMode.append);
+    //     await logFile.writeAsString('oqc.json 文件內容: $testFunctionJsonContent\n', mode: FileMode.append);
+    //     await logFile.writeAsString('keypart.json 文件內容: $moduleJsonContent\n', mode: FileMode.append);
+    //
+    //     List<dynamic> data = jsonDecode(jsonContent);
+    //     List<dynamic> testFunctionData = jsonDecode(testFunctionJsonContent);
+    //     List<dynamic> moduleData = jsonDecode(moduleJsonContent);
+    //
+    //     var softwareVersion = SoftwareVersion.fromJsonList(data);
+    //     var psuSerialNumbers =
+    //         Psuserialnumber.fromJsonList(moduleData); // 提取多筆 PSU Serial Number
+    //     var inputOutputCharacteristics =
+    //         InputOutputCharacteristics.fromJsonList(data);
+    //     var protectionTestResults =
+    //         ProtectionFunctionTestResult.fromJsonList(data); // 提取測試結果
+    //     var testFunction =
+    //         AppearanceStructureInspectionFunctionResult.fromJson(testFunctionData);
+    //
+    //     context.push('/oqc-report', extra: {
+    //       'sn': sn,
+    //       'model': model,
+    //       'psuSerialNumbers': psuSerialNumbers,
+    //       'softwareVersion': softwareVersion,
+    //       'testFunction': testFunction,
+    //       'inputOutputCharacteristics': inputOutputCharacteristics,
+    //       'protectionTestResults': protectionTestResults,
+    //     });
+    //     return;
+    //   } catch (e) {
+    //     await logFile.writeAsString('從本地文件加載數據失敗: $e\n', mode: FileMode.append);
+    //     await logFile.writeAsString('嘗試從 API 獲取數據...\n', mode: FileMode.append);
+    //   }
 
-    var softwareVersion = SoftwareVersion.fromJsonList(data);
-    var psuSerialNumbers =
-        Psuserialnumber.fromJsonList(moduleData); // 提取多筆 PSU Serial Number
-    var inputOutputCharacteristics =
-        InputOutputCharacteristics.fromJsonList(data);
-    var protectionTestResults =
-        ProtectionFunctionTestResult.fromJsonList(data); // 提取測試結果
-    var testFunction =
-        AppearanceStructureInspectionFunctionResult.fromJson(testFunctionData);
+      //call api
+      final apiClient = OqcApiClient();
+      await logFile.writeAsString('開始呼叫 API 獲取數據，SN: $sn, 型號: $model\n', mode: FileMode.append);
 
-    context.push('/oqc-report', extra: {
-      'sn': sn,
-      'model': model,
-      'psuSerialNumbers': psuSerialNumbers,
-      'softwareVersion': softwareVersion,
-      'testFunction': testFunction,
-      'inputOutputCharacteristics': inputOutputCharacteristics,
-      'protectionTestResults': protectionTestResults,
-    });
-    return;
-
-    //call api
-    final apiClient = OqcApiClient();
-
-    // 將 model 和 serialNumber 打印到 console
-    await Future.wait<List<dynamic>>([
-      apiClient.fetchAndSaveKeyPartData(sn),
-      apiClient.fetchAndSaveOqcData(sn),
-      apiClient.fetchAndSaveTestData(sn)
-    ]).then((res) {
-      var psuSerialNumbers = Psuserialnumber.fromJsonList(res[0]);
-      var testFunction =
-          AppearanceStructureInspectionFunctionResult.fromJson(res[1]);
-      var softwareVersion = SoftwareVersion.fromJsonList(res[2]);
-      var inputOutputCharacteristics =
-          InputOutputCharacteristics.fromJsonList(res[2]);
-      var protectionTestResults =
-          ProtectionFunctionTestResult.fromJsonList(res[2]);
-      context.push('/oqc-report', extra: {
-        'sn': sn,
-        'model': model,
-        'psuSerialNumbers': psuSerialNumbers,
-        'softwareVersion': softwareVersion,
-        'testFunction': testFunction,
-        'inputOutputCharacteristics': inputOutputCharacteristics,
-        'protectionTestResults': protectionTestResults,
-      });
-    });
+      // 單獨處理每個 API 呼叫，以便記錄詳細信息
+      try {
+        await logFile.writeAsString('正在呼叫 fetchAndSaveKeyPartData API...\n', mode: FileMode.append);
+        final keyPartData = await apiClient.fetchAndSaveKeyPartData(sn);
+        await logFile.writeAsString('fetchAndSaveKeyPartData API 呼叫成功\n', mode: FileMode.append);
+        await logFile.writeAsString('返回數據: ${jsonEncode(keyPartData)}\n', mode: FileMode.append);
+        var psuSerialNumbers = Psuserialnumber.fromJsonList(keyPartData);
+        
+        await logFile.writeAsString('正在呼叫 fetchAndSaveOqcData API...\n', mode: FileMode.append);
+        final oqcData = await apiClient.fetchAndSaveOqcData(sn);
+        await logFile.writeAsString('fetchAndSaveOqcData API 呼叫成功\n', mode: FileMode.append);
+        await logFile.writeAsString('返回數據: ${jsonEncode(oqcData)}\n', mode: FileMode.append);
+        var testFunction = AppearanceStructureInspectionFunctionResult.fromJson(oqcData);
+        
+        await logFile.writeAsString('正在呼叫 fetchAndSaveTestData API...\n', mode: FileMode.append);
+        final testData = await apiClient.fetchAndSaveTestData(sn);
+        await logFile.writeAsString('fetchAndSaveTestData API 呼叫成功\n', mode: FileMode.append);
+        await logFile.writeAsString('返回數據: ${jsonEncode(testData)}\n', mode: FileMode.append);
+        var softwareVersion = SoftwareVersion.fromJsonList(testData);
+        var inputOutputCharacteristics = InputOutputCharacteristics.fromJsonList(testData);
+        var protectionTestResults = ProtectionFunctionTestResult.fromJsonList(testData);
+        
+        await logFile.writeAsString('所有 API 呼叫成功，正在導航到 OQC 報告頁面\n', mode: FileMode.append);
+        
+        context.push('/oqc-report', extra: {
+          'sn': sn,
+          'model': model,
+          'psuSerialNumbers': psuSerialNumbers,
+          'softwareVersion': softwareVersion,
+          'testFunction': testFunction,
+          'inputOutputCharacteristics': inputOutputCharacteristics,
+          'protectionTestResults': protectionTestResults,
+        });
+        
+      } catch (e) {
+        await logFile.writeAsString('API 呼叫過程中發生錯誤: $e\n', mode: FileMode.append);
+        
+        // 顯示錯誤對話框
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text(context.tr('error')),
+              content: Text('${context.tr('api_error')}: $e'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(context.tr('ok')),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    } catch (e) {
+      // 記錄整體處理過程中的任何錯誤
+      await logFile.writeAsString('處理過程中發生未預期的錯誤: $e\n', mode: FileMode.append);
+      
+      // 顯示錯誤對話框
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(context.tr('error')),
+            content: Text('${context.tr('unexpected_error')}: $e'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(context.tr('ok')),
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 }
 

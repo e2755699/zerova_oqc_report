@@ -63,5 +63,9 @@
   "uploading_file": "檔案上傳中...",
   "downloading_file": "檔案下載中...",
   "processing": "處理中...",
-  "qrcode_back": "返回"
+  "qrcode_back": "返回",
+  "error": "錯誤",
+  "api_error": "API 調用錯誤",
+  "unexpected_error": "意外錯誤",
+  "ok": "確定"
 } 

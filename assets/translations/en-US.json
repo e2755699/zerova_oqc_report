@@ -59,5 +59,9 @@
   "uploading_file": "Uploading file...",
   "downloading_file": "Downloading file...",
   "processing": "Processing...",
-  "qrcode_back": "Return"
+  "qrcode_back": "Return",
+  "error": "Error",
+  "api_error": "API Call Error",
+  "unexpected_error": "Unexpected Error",
+  "ok": "OK"
 }
