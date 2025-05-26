@@ -31,11 +31,11 @@ class OqcApiClient {
       } else {
         print("無法取得資料，狀態碼: ${response.statusCode}");
         print("回應內容: ${response.body}");
-        throw Exception();
+        throw Exception("status code ${response.statusCode} response.body: ${response.body}");
       }
     } catch (e) {
       print("發生錯誤: $e");
-      throw Exception();
+      rethrow;
     }
   }
 
@@ -59,11 +59,11 @@ class OqcApiClient {
       } else {
         print("無法取得資料，狀態碼: ${response.statusCode}");
         print("回應內容: ${response.body}");
-        throw Exception();
+        throw Exception("status code ${response.statusCode} response.body: ${response.body}");
       }
     } catch (e) {
       print("發生錯誤: $e");
-      throw Exception();
+      rethrow;
     }
   }
 
@@ -87,11 +87,11 @@ class OqcApiClient {
       } else {
         print("無法取得資料，狀態碼: ${response.statusCode}");
         print("回應內容: ${response.body}");
-        throw Exception();
+        throw Exception("status code ${response.statusCode} response.body: ${response.body}");
       }
     } catch (e) {
       print("發生錯誤: $e");
-      throw Exception();
+      rethrow;
     }
   }
 }

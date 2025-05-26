@@ -476,8 +476,8 @@ mixin LoadFileHelper {
           'protectionTestResults': protectionTestResults,
         });
         
-      } catch (e) {
-        await logFile.writeAsString('API 呼叫過程中發生錯誤: $e\n', mode: FileMode.append);
+      } catch (e,st) {
+        await logFile.writeAsString('API 呼叫過程中發生錯誤: $e\n , st : $st', mode: FileMode.append);
         
         // 顯示錯誤對話框
         showDialog(
