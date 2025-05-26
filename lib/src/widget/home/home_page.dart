@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart' as path;
+import 'package:zerova_oqc_report/src/repo/firebase_service.dart';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -31,6 +32,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with LoadFileHelper {
   String result = '';
+  bool isLoading = false; // 添加 loading 狀態變數
   @override
   Widget build(BuildContext context) {
     final currentLocale = context.locale;
@@ -73,7 +75,7 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {
-                                    return const InputAccountAndPassword(); // 彈出視窗
+                      return const InputAccountAndPassword(); // 彈出視窗
                     },
                   );
                 },
@@ -85,7 +87,8 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
             ValueListenableBuilder<int>(
               valueListenable: permissions,
               builder: (context, value, child) {
-                if (value == 1) { // 只有管理員 (permissions == 1) 可見
+                if (value == 1) {
+                  // 只有管理員 (permissions == 1) 可見
                   return Column(
                     children: [
                       SizedBox(
@@ -118,14 +121,16 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
                 style: ElevatedButton.styleFrom(
                   textStyle: const TextStyle(fontSize: 20), // 增加文字大小
                 ),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return const InputModelNameAndSnDialog(); // 彈出視窗
-                    },
-                  );
-                },
+                onPressed: isLoading
+                    ? null
+                    : () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return const InputModelNameAndSnDialog(); // 彈出視窗
+                          },
+                        );
+                      },
                 child: Text(context.tr('input_sn_model')),
               ),
             ),
@@ -136,37 +141,65 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
               width: 300, // 增加按鈕寬度
               height: 60, // 增加按鈕高度
               child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    textStyle: const TextStyle(fontSize: 20), // 增加文字大小
-                  ),
-                  onPressed: () async {
-                    final res = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const BarcodeScannerScreen(),
-                      ),
-                    );
-                    if (res != null) {
-                      setState(() {
-                        result = res;
-                        print(result);
-                      });
-                      String model = '';
-                      String serialNumber = '';
+                style: ElevatedButton.styleFrom(
+                  textStyle: const TextStyle(fontSize: 20), // 增加文字大小
+                ),
+                onPressed: isLoading
+                    ? null // 如果正在加載，禁用按鈕
+                    : () async {
+                        setState(() {
+                          isLoading = true; // 開始加載
+                        });
+                        try {
+                          final res = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const BarcodeScannerScreen(),
+                            ),
+                          );
+                          if (res != null) {
+                            setState(() {
+                              result = res;
+                              print(result);
+                            });
+                            String model = '';
+                            String serialNumber = '';
 
-                      List<String> parts = res.split(RegExp(r'\s+'));
-                      if (parts.length >= 2) {
-                        model = parts[0];
-                        serialNumber = parts[1];
-                      } else {
-                        model = res;
-                        serialNumber = '';
-                      }
+                            List<String> parts = res.split(RegExp(r'\s+'));
+                            if (parts.length >= 2) {
+                              model = parts[0];
+                              serialNumber = parts[1];
+                            } else {
+                              model = res;
+                              serialNumber = '';
+                            }
 
-                      await loadFileModule(serialNumber, model, context);
-                    }
-                  },
-                  child: Text(context.tr('qr_code_scan')),
+                            await loadFileModule(serialNumber, model, context);
+                          }
+                        } finally {
+                          setState(() {
+                            isLoading = false; // 結束加載
+                          });
+                        }
+                      },
+                child: isLoading
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 3,
+                            ),
+                          ),
+                          SizedBox(width: 10),
+                          Text(context.tr('processing')),
+                        ],
+                      )
+                    : Text(context.tr('qr_code_scan')),
               ),
             ),
             const SizedBox(height: 20),
@@ -250,6 +283,72 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
       serialNumber = ''; // 若分割後不足兩部分，則 part2 保持空字串
     }
 
+    // 建立日誌檔案
+    var logFilePath = '';
+    if (Platform.isMacOS) {
+      logFilePath = path.join(
+          Platform.environment['HOME'] ?? '', 'Test Result', 'Zerova', 'logs');
+    } else if (Platform.isWindows) {
+      logFilePath = path.join(Platform.environment['USERPROFILE'] ?? '',
+          'Test Result', 'Zerova', 'logs');
+    } else {
+      logFilePath = path.join(
+          Platform.environment['HOME'] ?? '', 'Test Result', 'Zerova', 'logs');
+    }
+    final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+    final logFile = File(path.join(
+        logFilePath, 'spec_log_${serialNumber}_${model}_$timestamp.txt'));
+    await logFile.writeAsString('開始獲取 $model 型號的規格數據...\n',
+        mode: FileMode.append);
+
+    try {
+      await logFile.writeAsString('嘗試獲取 InputOutputCharacteristicsSpecs...\n',
+          mode: FileMode.append);
+      await fetchAndPrintInputOutputCharacteristicsSpecs(model);
+      await logFile.writeAsString('成功獲取 InputOutputCharacteristicsSpecs\n',
+          mode: FileMode.append);
+    } catch (e, st) {
+      await logFile.writeAsString('獲取 InputOutputCharacteristicsSpecs 失敗: $e\n',
+          mode: FileMode.append);
+      await logFile.writeAsString('堆疊追蹤: $st\n', mode: FileMode.append);
+    }
+
+    try {
+      await logFile.writeAsString('嘗試獲取 BasicFunctionTestSpecs...\n',
+          mode: FileMode.append);
+      await fetchAndPrintBasicFunctionTestSpecs(model);
+      await logFile.writeAsString('成功獲取 BasicFunctionTestSpecs\n',
+          mode: FileMode.append);
+    } catch (e, st) {
+      await logFile.writeAsString('獲取 BasicFunctionTestSpecs 失敗: $e\n',
+          mode: FileMode.append);
+      await logFile.writeAsString('堆疊追蹤: $st\n', mode: FileMode.append);
+    }
+
+    try {
+      await logFile.writeAsString('嘗試獲取 HipotTestSpecs...\n',
+          mode: FileMode.append);
+      await fetchAndPrintHipotTestSpecs(model);
+      await logFile.writeAsString('成功獲取 HipotTestSpecs\n',
+          mode: FileMode.append);
+    } catch (e, st) {
+      await logFile.writeAsString('獲取 HipotTestSpecs 失敗: $e\n',
+          mode: FileMode.append);
+      await logFile.writeAsString('堆疊追蹤: $st\n', mode: FileMode.append);
+    }
+
+    try {
+      await logFile.writeAsString('嘗試獲取 FailCountsForDevice...\n',
+          mode: FileMode.append);
+      await fetchFailCountsForDevice(model, serialNumber);
+      await logFile.writeAsString('成功獲取 FailCountsForDevice\n',
+          mode: FileMode.append);
+    } catch (e, st) {
+      await logFile.writeAsString('獲取 FailCountsForDevice 失敗: $e\n',
+          mode: FileMode.append);
+      await logFile.writeAsString('堆疊追蹤: $st\n', mode: FileMode.append);
+    }
+
     await loadFileModule(serialNumber, model, context);
   }
 
@@ -305,6 +404,7 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
     );
   }
 }
+
 mixin LoadFileHelper2 {
   Future<void> loadFileModule2(
       String sn, String model, BuildContext context) async {
@@ -325,11 +425,11 @@ mixin LoadFileHelper2 {
     }
 
     String jsonContent =
-    await File("$filePath/$sn/T2449A003A1_test.json").readAsString();
+        await File("$filePath/$sn/T2449A003A1_test.json").readAsString();
     String testFunctionJsonContent =
-    await File("$filePath/$sn/T2449A003A1_oqc.json").readAsString();
+        await File("$filePath/$sn/T2449A003A1_oqc.json").readAsString();
     String moduleJsonContent =
-    await File("$filePath/$sn/T2449A003A1_keypart.json").readAsString();
+        await File("$filePath/$sn/T2449A003A1_keypart.json").readAsString();
 
     List<dynamic> data = jsonDecode(jsonContent);
     List<dynamic> testFunctionData = jsonDecode(testFunctionJsonContent);
@@ -337,13 +437,13 @@ mixin LoadFileHelper2 {
 
     var softwareVersion = SoftwareVersion.fromJsonList(data);
     var psuSerialNumbers =
-    Psuserialnumber.fromJsonList(moduleData); // 提取多筆 PSU Serial Number
+        Psuserialnumber.fromJsonList(moduleData); // 提取多筆 PSU Serial Number
     var inputOutputCharacteristics =
-    InputOutputCharacteristics.fromJsonList(data);
+        InputOutputCharacteristics.fromJsonList(data);
     var protectionTestResults =
-    ProtectionFunctionTestResult.fromJsonList(data); // 提取測試結果
+        ProtectionFunctionTestResult.fromJsonList(data); // 提取測試結果
     var testFunction =
-    AppearanceStructureInspectionFunctionResult.fromJson(testFunctionData);
+        AppearanceStructureInspectionFunctionResult.fromJson(testFunctionData);
 
     context.push('/oqc-report', extra: {
       'sn': sn,
@@ -374,8 +474,8 @@ mixin LoadFileHelper {
       // Windows 路徑
       filePath = path.join(
           Platform.environment['USERPROFILE'] ?? '', 'Test Result', 'Zerova');
-      logFilePath = path.join(
-          Platform.environment['USERPROFILE'] ?? '', 'Test Result', 'Zerova', 'logs');
+      logFilePath = path.join(Platform.environment['USERPROFILE'] ?? '',
+          'Test Result', 'Zerova', 'logs');
     } else {
       // 其他系統（如 Linux）
       filePath = path.join(
@@ -392,80 +492,95 @@ mixin LoadFileHelper {
 
     // 建立日誌檔案
     final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
-    final logFile = File(path.join(logFilePath, 'api_log_${sn}_$timestamp.txt'));
-    
-     try {
-    //   // 嘗試從本地文件加載數據
-    //   try {
-    //     String jsonContent =
-    //         await File("$filePath/$sn/T2449A003A1_test.json").readAsString();
-    //     String testFunctionJsonContent =
-    //         await File("$filePath/$sn/T2449A003A1_oqc.json").readAsString();
-    //     String moduleJsonContent =
-    //         await File("$filePath/$sn/T2449A003A1_keypart.json").readAsString();
-    //
-    //     await logFile.writeAsString('成功從本地文件加載數據\n', mode: FileMode.append);
-    //     await logFile.writeAsString('test.json 文件內容: $jsonContent\n', mode: FileMode.append);
-    //     await logFile.writeAsString('oqc.json 文件內容: $testFunctionJsonContent\n', mode: FileMode.append);
-    //     await logFile.writeAsString('keypart.json 文件內容: $moduleJsonContent\n', mode: FileMode.append);
-    //
-    //     List<dynamic> data = jsonDecode(jsonContent);
-    //     List<dynamic> testFunctionData = jsonDecode(testFunctionJsonContent);
-    //     List<dynamic> moduleData = jsonDecode(moduleJsonContent);
-    //
-    //     var softwareVersion = SoftwareVersion.fromJsonList(data);
-    //     var psuSerialNumbers =
-    //         Psuserialnumber.fromJsonList(moduleData); // 提取多筆 PSU Serial Number
-    //     var inputOutputCharacteristics =
-    //         InputOutputCharacteristics.fromJsonList(data);
-    //     var protectionTestResults =
-    //         ProtectionFunctionTestResult.fromJsonList(data); // 提取測試結果
-    //     var testFunction =
-    //         AppearanceStructureInspectionFunctionResult.fromJson(testFunctionData);
-    //
-    //     context.push('/oqc-report', extra: {
-    //       'sn': sn,
-    //       'model': model,
-    //       'psuSerialNumbers': psuSerialNumbers,
-    //       'softwareVersion': softwareVersion,
-    //       'testFunction': testFunction,
-    //       'inputOutputCharacteristics': inputOutputCharacteristics,
-    //       'protectionTestResults': protectionTestResults,
-    //     });
-    //     return;
-    //   } catch (e) {
-    //     await logFile.writeAsString('從本地文件加載數據失敗: $e\n', mode: FileMode.append);
-    //     await logFile.writeAsString('嘗試從 API 獲取數據...\n', mode: FileMode.append);
-    //   }
+    final logFile =
+        File(path.join(logFilePath, 'api_log_${sn}_$timestamp.txt'));
+
+    try {
+      //   // 嘗試從本地文件加載數據
+      //   try {
+      //     String jsonContent =
+      //         await File("$filePath/$sn/T2449A003A1_test.json").readAsString();
+      //     String testFunctionJsonContent =
+      //         await File("$filePath/$sn/T2449A003A1_oqc.json").readAsString();
+      //     String moduleJsonContent =
+      //         await File("$filePath/$sn/T2449A003A1_keypart.json").readAsString();
+      //
+      //     await logFile.writeAsString('成功從本地文件加載數據\n', mode: FileMode.append);
+      //     await logFile.writeAsString('test.json 文件內容: $jsonContent\n', mode: FileMode.append);
+      //     await logFile.writeAsString('oqc.json 文件內容: $testFunctionJsonContent\n', mode: FileMode.append);
+      //     await logFile.writeAsString('keypart.json 文件內容: $moduleJsonContent\n', mode: FileMode.append);
+      //
+      //     List<dynamic> data = jsonDecode(jsonContent);
+      //     List<dynamic> testFunctionData = jsonDecode(testFunctionJsonContent);
+      //     List<dynamic> moduleData = jsonDecode(moduleJsonContent);
+      //
+      //     var softwareVersion = SoftwareVersion.fromJsonList(data);
+      //     var psuSerialNumbers =
+      //         Psuserialnumber.fromJsonList(moduleData); // 提取多筆 PSU Serial Number
+      //     var inputOutputCharacteristics =
+      //         InputOutputCharacteristics.fromJsonList(data);
+      //     var protectionTestResults =
+      //         ProtectionFunctionTestResult.fromJsonList(data); // 提取測試結果
+      //     var testFunction =
+      //         AppearanceStructureInspectionFunctionResult.fromJson(testFunctionData);
+      //
+      //     context.push('/oqc-report', extra: {
+      //       'sn': sn,
+      //       'model': model,
+      //       'psuSerialNumbers': psuSerialNumbers,
+      //       'softwareVersion': softwareVersion,
+      //       'testFunction': testFunction,
+      //       'inputOutputCharacteristics': inputOutputCharacteristics,
+      //       'protectionTestResults': protectionTestResults,
+      //     });
+      //     return;
+      //   } catch (e) {
+      //     await logFile.writeAsString('從本地文件加載數據失敗: $e\n', mode: FileMode.append);
+      //     await logFile.writeAsString('嘗試從 API 獲取數據...\n', mode: FileMode.append);
+      //   }
 
       //call api
       final apiClient = OqcApiClient();
-      await logFile.writeAsString('開始呼叫 API 獲取數據，SN: $sn, 型號: $model\n', mode: FileMode.append);
+      await logFile.writeAsString('開始呼叫 API 獲取數據，SN: $sn, 型號: $model\n',
+          mode: FileMode.append);
 
       // 單獨處理每個 API 呼叫，以便記錄詳細信息
       try {
-        await logFile.writeAsString('正在呼叫 fetchAndSaveKeyPartData API...\n', mode: FileMode.append);
+        await logFile.writeAsString('正在呼叫 fetchAndSaveKeyPartData API...\n',
+            mode: FileMode.append);
         final keyPartData = await apiClient.fetchAndSaveKeyPartData(sn);
-        await logFile.writeAsString('fetchAndSaveKeyPartData API 呼叫成功\n', mode: FileMode.append);
-        await logFile.writeAsString('返回數據: ${jsonEncode(keyPartData)}\n', mode: FileMode.append);
+        await logFile.writeAsString('fetchAndSaveKeyPartData API 呼叫成功\n',
+            mode: FileMode.append);
+        await logFile.writeAsString('返回數據: ${jsonEncode(keyPartData)}\n',
+            mode: FileMode.append);
         var psuSerialNumbers = Psuserialnumber.fromJsonList(keyPartData);
-        
-        await logFile.writeAsString('正在呼叫 fetchAndSaveOqcData API...\n', mode: FileMode.append);
+
+        await logFile.writeAsString('正在呼叫 fetchAndSaveOqcData API...\n',
+            mode: FileMode.append);
         final oqcData = await apiClient.fetchAndSaveOqcData(sn);
-        await logFile.writeAsString('fetchAndSaveOqcData API 呼叫成功\n', mode: FileMode.append);
-        await logFile.writeAsString('返回數據: ${jsonEncode(oqcData)}\n', mode: FileMode.append);
-        var testFunction = AppearanceStructureInspectionFunctionResult.fromJson(oqcData);
-        
-        await logFile.writeAsString('正在呼叫 fetchAndSaveTestData API...\n', mode: FileMode.append);
+        await logFile.writeAsString('fetchAndSaveOqcData API 呼叫成功\n',
+            mode: FileMode.append);
+        await logFile.writeAsString('返回數據: ${jsonEncode(oqcData)}\n',
+            mode: FileMode.append);
+        var testFunction =
+            AppearanceStructureInspectionFunctionResult.fromJson(oqcData);
+
+        await logFile.writeAsString('正在呼叫 fetchAndSaveTestData API...\n',
+            mode: FileMode.append);
         final testData = await apiClient.fetchAndSaveTestData(sn);
-        await logFile.writeAsString('fetchAndSaveTestData API 呼叫成功\n', mode: FileMode.append);
-        await logFile.writeAsString('返回數據: ${jsonEncode(testData)}\n', mode: FileMode.append);
+        await logFile.writeAsString('fetchAndSaveTestData API 呼叫成功\n',
+            mode: FileMode.append);
+        await logFile.writeAsString('返回數據: ${jsonEncode(testData)}\n',
+            mode: FileMode.append);
         var softwareVersion = SoftwareVersion.fromJsonList(testData);
-        var inputOutputCharacteristics = InputOutputCharacteristics.fromJsonList(testData);
-        var protectionTestResults = ProtectionFunctionTestResult.fromJsonList(testData);
-        
-        await logFile.writeAsString('所有 API 呼叫成功，正在導航到 OQC 報告頁面\n', mode: FileMode.append);
-        
+        var inputOutputCharacteristics =
+            InputOutputCharacteristics.fromJsonList(testData);
+        var protectionTestResults =
+            ProtectionFunctionTestResult.fromJsonList(testData);
+
+        await logFile.writeAsString('所有 API 呼叫成功，正在導航到 OQC 報告頁面\n',
+            mode: FileMode.append);
+
         context.push('/oqc-report', extra: {
           'sn': sn,
           'model': model,
@@ -475,10 +590,10 @@ mixin LoadFileHelper {
           'inputOutputCharacteristics': inputOutputCharacteristics,
           'protectionTestResults': protectionTestResults,
         });
-        
-      } catch (e,st) {
-        await logFile.writeAsString('API 呼叫過程中發生錯誤: $e\n , st : $st', mode: FileMode.append);
-        
+      } catch (e, st) {
+        await logFile.writeAsString('API 呼叫過程中發生錯誤: $e\n , st : $st',
+            mode: FileMode.append);
+
         // 顯示錯誤對話框
         showDialog(
           context: context,
@@ -499,7 +614,7 @@ mixin LoadFileHelper {
     } catch (e) {
       // 記錄整體處理過程中的任何錯誤
       await logFile.writeAsString('處理過程中發生未預期的錯誤: $e\n', mode: FileMode.append);
-      
+
       // 顯示錯誤對話框
       showDialog(
         context: context,
@@ -541,9 +656,12 @@ class BarcodeScannerScreen extends StatelessWidget {
                   Navigator.pop(context); // 返回上一頁
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black, // 黑底
-                  textStyle: const TextStyle(fontSize: 20, color: Colors.white), // 白字
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  backgroundColor: Colors.black,
+                  // 黑底
+                  textStyle: const TextStyle(fontSize: 20, color: Colors.white),
+                  // 白字
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
