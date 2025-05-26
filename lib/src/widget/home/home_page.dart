@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart' as path;
+import 'package:zerova_oqc_report/src/repo/firebase_service.dart';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -31,7 +32,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with LoadFileHelper {
   String result = '';
-
+  bool isLoading = false; // 添加 loading 狀態變數
   @override
   Widget build(BuildContext context) {
     final currentLocale = context.locale;
@@ -120,14 +121,16 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
                 style: ElevatedButton.styleFrom(
                   textStyle: const TextStyle(fontSize: 20), // 增加文字大小
                 ),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return const InputModelNameAndSnDialog(); // 彈出視窗
-                    },
-                  );
-                },
+                onPressed: isLoading
+                    ? null
+                    : () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return const InputModelNameAndSnDialog(); // 彈出視窗
+                          },
+                        );
+                      },
                 child: Text(context.tr('input_sn_model')),
               ),
             ),
@@ -141,34 +144,62 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
                 style: ElevatedButton.styleFrom(
                   textStyle: const TextStyle(fontSize: 20), // 增加文字大小
                 ),
-                onPressed: () async {
-                  final res = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const BarcodeScannerScreen(),
-                    ),
-                  );
-                  if (res != null) {
-                    setState(() {
-                      result = res;
-                      print(result);
-                    });
-                    String model = '';
-                    String serialNumber = '';
+                onPressed: isLoading
+                    ? null // 如果正在加載，禁用按鈕
+                    : () async {
+                        setState(() {
+                          isLoading = true; // 開始加載
+                        });
+                        try {
+                          final res = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const BarcodeScannerScreen(),
+                            ),
+                          );
+                          if (res != null) {
+                            setState(() {
+                              result = res;
+                              print(result);
+                            });
+                            String model = '';
+                            String serialNumber = '';
 
-                    List<String> parts = res.split(RegExp(r'\s+'));
-                    if (parts.length >= 2) {
-                      model = parts[0];
-                      serialNumber = parts[1];
-                    } else {
-                      model = res;
-                      serialNumber = '';
-                    }
+                            List<String> parts = res.split(RegExp(r'\s+'));
+                            if (parts.length >= 2) {
+                              model = parts[0];
+                              serialNumber = parts[1];
+                            } else {
+                              model = res;
+                              serialNumber = '';
+                            }
 
-                    await loadFileModule(serialNumber, model, context);
-                  }
-                },
-                child: Text(context.tr('qr_code_scan')),
+                            await loadFileModule(serialNumber, model, context);
+                          }
+                        } finally {
+                          setState(() {
+                            isLoading = false; // 結束加載
+                          });
+                        }
+                      },
+                child: isLoading
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 3,
+                            ),
+                          ),
+                          SizedBox(width: 10),
+                          Text(context.tr('processing')),
+                        ],
+                      )
+                    : Text(context.tr('qr_code_scan')),
               ),
             ),
             const SizedBox(height: 20),
@@ -250,6 +281,72 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
     } else {
       model = res;
       serialNumber = ''; // 若分割後不足兩部分，則 part2 保持空字串
+    }
+
+    // 建立日誌檔案
+    var logFilePath = '';
+    if (Platform.isMacOS) {
+      logFilePath = path.join(
+          Platform.environment['HOME'] ?? '', 'Test Result', 'Zerova', 'logs');
+    } else if (Platform.isWindows) {
+      logFilePath = path.join(Platform.environment['USERPROFILE'] ?? '',
+          'Test Result', 'Zerova', 'logs');
+    } else {
+      logFilePath = path.join(
+          Platform.environment['HOME'] ?? '', 'Test Result', 'Zerova', 'logs');
+    }
+    final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+    final logFile = File(path.join(
+        logFilePath, 'spec_log_${serialNumber}_${model}_$timestamp.txt'));
+    await logFile.writeAsString('開始獲取 $model 型號的規格數據...\n',
+        mode: FileMode.append);
+
+    try {
+      await logFile.writeAsString('嘗試獲取 InputOutputCharacteristicsSpecs...\n',
+          mode: FileMode.append);
+      await fetchAndPrintInputOutputCharacteristicsSpecs(model);
+      await logFile.writeAsString('成功獲取 InputOutputCharacteristicsSpecs\n',
+          mode: FileMode.append);
+    } catch (e, st) {
+      await logFile.writeAsString('獲取 InputOutputCharacteristicsSpecs 失敗: $e\n',
+          mode: FileMode.append);
+      await logFile.writeAsString('堆疊追蹤: $st\n', mode: FileMode.append);
+    }
+
+    try {
+      await logFile.writeAsString('嘗試獲取 BasicFunctionTestSpecs...\n',
+          mode: FileMode.append);
+      await fetchAndPrintBasicFunctionTestSpecs(model);
+      await logFile.writeAsString('成功獲取 BasicFunctionTestSpecs\n',
+          mode: FileMode.append);
+    } catch (e, st) {
+      await logFile.writeAsString('獲取 BasicFunctionTestSpecs 失敗: $e\n',
+          mode: FileMode.append);
+      await logFile.writeAsString('堆疊追蹤: $st\n', mode: FileMode.append);
+    }
+
+    try {
+      await logFile.writeAsString('嘗試獲取 HipotTestSpecs...\n',
+          mode: FileMode.append);
+      await fetchAndPrintHipotTestSpecs(model);
+      await logFile.writeAsString('成功獲取 HipotTestSpecs\n',
+          mode: FileMode.append);
+    } catch (e, st) {
+      await logFile.writeAsString('獲取 HipotTestSpecs 失敗: $e\n',
+          mode: FileMode.append);
+      await logFile.writeAsString('堆疊追蹤: $st\n', mode: FileMode.append);
+    }
+
+    try {
+      await logFile.writeAsString('嘗試獲取 FailCountsForDevice...\n',
+          mode: FileMode.append);
+      await fetchFailCountsForDevice(model, serialNumber);
+      await logFile.writeAsString('成功獲取 FailCountsForDevice\n',
+          mode: FileMode.append);
+    } catch (e, st) {
+      await logFile.writeAsString('獲取 FailCountsForDevice 失敗: $e\n',
+          mode: FileMode.append);
+      await logFile.writeAsString('堆疊追蹤: $st\n', mode: FileMode.append);
     }
 
     await loadFileModule(serialNumber, model, context);
