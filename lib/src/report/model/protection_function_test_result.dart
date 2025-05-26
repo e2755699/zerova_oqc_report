@@ -54,7 +54,7 @@ class ProtectionFunctionTestResult {
           double spec = globalHipotTestSpec!.insulationimpedancespec;
           if (spcItem.contains("Seq.2")) {
             if (leftInsulationImpedanceInputOutputValue > spcValue) {
-              leftInsulationImpedanceInputOutputValue = spcValue;
+              leftInsulationImpedanceInputOutputValue = spcValue /1000;
             }
             leftInsulationImpedanceInputOutput = ProtectionFunctionMeasurement(
               spec: spec,
@@ -68,7 +68,7 @@ class ProtectionFunctionTestResult {
             );
           } else if (spcItem.contains("Seq.4")) {
             if (rightInsulationImpedanceInputOutputValue > spcValue) {
-              rightInsulationImpedanceInputOutputValue = spcValue;
+              rightInsulationImpedanceInputOutputValue = spcValue/1000;
             }
             rightInsulationImpedanceInputOutput = ProtectionFunctionMeasurement(
               spec: spec,
@@ -85,7 +85,7 @@ class ProtectionFunctionTestResult {
           double spec = globalHipotTestSpec!.insulationimpedancespec;
           if (spcItem.contains("Seq.2")) {
             if (leftInsulationImpedanceInputGroundValue > spcValue) {
-              leftInsulationImpedanceInputGroundValue = spcValue;
+              leftInsulationImpedanceInputGroundValue = spcValue/1000;
             }
             leftInsulationImpedanceInputGround = ProtectionFunctionMeasurement(
               spec: spec,
@@ -99,7 +99,7 @@ class ProtectionFunctionTestResult {
             );
           } else if (spcItem.contains("Seq.4")) {
             if (rightInsulationImpedanceInputGroundValue > spcValue) {
-              rightInsulationImpedanceInputGroundValue = spcValue;
+              rightInsulationImpedanceInputGroundValue = spcValue/1000;
             }
             rightInsulationImpedanceInputGround = ProtectionFunctionMeasurement(
               spec: spec,
@@ -116,7 +116,7 @@ class ProtectionFunctionTestResult {
           double spec = globalHipotTestSpec!.insulationimpedancespec;
           if (spcItem.contains("Seq.2")) {
             if (leftInsulationImpedanceOutputGroundValue > spcValue) {
-              leftInsulationImpedanceOutputGroundValue = spcValue;
+              leftInsulationImpedanceOutputGroundValue = spcValue/1000;
             }
             leftInsulationImpedanceOutputGround = ProtectionFunctionMeasurement(
               spec: spec,
@@ -130,7 +130,7 @@ class ProtectionFunctionTestResult {
             );
           } else if (spcItem.contains("Seq.4")) {
             if (rightInsulationImpedanceOutputGroundValue > spcValue) {
-              rightInsulationImpedanceOutputGroundValue = spcValue;
+              rightInsulationImpedanceOutputGroundValue = spcValue/1000;
             }
             rightInsulationImpedanceOutputGround =
                 ProtectionFunctionMeasurement(
@@ -148,7 +148,7 @@ class ProtectionFunctionTestResult {
           double spec = globalHipotTestSpec!.leakagecurrentspec;
           if (spcItem.contains("Seq.2")) {
             if (leftInsulationVoltageInputOutputValue > spcValue) {
-              leftInsulationVoltageInputOutputValue = spcValue;
+              leftInsulationVoltageInputOutputValue = spcValue/1000;
             }
             leftInsulationVoltageInputOutput = ProtectionFunctionMeasurement(
               spec: spec,
@@ -162,7 +162,7 @@ class ProtectionFunctionTestResult {
             );
           } else if (spcItem.contains("Seq.4")) {
             if (rightInsulationVoltageInputOutputValue > spcValue) {
-              rightInsulationVoltageInputOutputValue = spcValue;
+              rightInsulationVoltageInputOutputValue = spcValue/1000;
             }
             rightInsulationVoltageInputOutput = ProtectionFunctionMeasurement(
               spec: spec,
@@ -179,7 +179,7 @@ class ProtectionFunctionTestResult {
           double spec = globalHipotTestSpec!.leakagecurrentspec;
           if (spcItem.contains("Seq.2")) {
             if (leftInsulationVoltageInputGroundValue > spcValue) {
-              leftInsulationVoltageInputGroundValue = spcValue;
+              leftInsulationVoltageInputGroundValue = spcValue/1000;
             }
             leftInsulationVoltageInputGround = ProtectionFunctionMeasurement(
               spec: spec,
@@ -193,7 +193,7 @@ class ProtectionFunctionTestResult {
             );
           } else if (spcItem.contains("Seq.4")) {
             if (rightInsulationVoltageInputGroundValue > spcValue) {
-              rightInsulationVoltageInputGroundValue = spcValue;
+              rightInsulationVoltageInputGroundValue = spcValue/1000;
             }
             rightInsulationVoltageInputGround = ProtectionFunctionMeasurement(
               spec: spec,
@@ -210,7 +210,7 @@ class ProtectionFunctionTestResult {
           double spec = globalHipotTestSpec!.leakagecurrentspec;
           if (spcItem.contains("Seq.2")) {
             if (leftInsulationVoltageOutputGroundValue > spcValue) {
-              leftInsulationVoltageOutputGroundValue = spcValue;
+              leftInsulationVoltageOutputGroundValue = spcValue/1000;
             }
             leftInsulationVoltageOutputGround = ProtectionFunctionMeasurement(
               spec: spec,
@@ -224,7 +224,7 @@ class ProtectionFunctionTestResult {
             );
           } else if (spcItem.contains("Seq.4")) {
             if (rightInsulationVoltageOutputGroundValue > spcValue) {
-              rightInsulationVoltageOutputGroundValue = spcValue;
+              rightInsulationVoltageOutputGroundValue = spcValue/1000;
             }
             rightInsulationVoltageOutputGround = ProtectionFunctionMeasurement(
               spec: spec,
