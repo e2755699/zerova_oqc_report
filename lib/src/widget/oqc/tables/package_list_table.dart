@@ -27,6 +27,7 @@ class PackageListTable extends StatelessWidget {
           valueListenable: permissions,
           builder: (context, permission, _) {
             final isEditable = editMode == 1 && (permission == 1 || permission == 2);
+            final isHeaderEditable = editMode == 1 && permission == 1;
             return TableWrapper(
               title: context.tr('package_list'),
               titleAction: Row(
@@ -74,7 +75,7 @@ class PackageListTable extends StatelessWidget {
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Center(
-                                child: isEditable
+                                child: isHeaderEditable
                                     ? TextFormField(
                                   initialValue: entry.value.translationKey.tr(),
                                   textAlign: TextAlign.center,
@@ -98,7 +99,7 @@ class PackageListTable extends StatelessWidget {
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Center(
-                                child: isEditable
+                                child: isHeaderEditable
                                     ? SizedBox(
                                   width: 120, // 你可以調整這個寬度
                                   height: 36,
