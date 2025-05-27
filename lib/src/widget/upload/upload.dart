@@ -5,23 +5,27 @@ import 'package:easy_localization/easy_localization.dart';
 class UploadProgressDialog extends StatefulWidget {
   final int uploadOrDownload;
   final String sn;
+  final String model;
   final SharePointUploader uploader;
 
   const UploadProgressDialog({
     super.key,
     required this.uploadOrDownload,
     required this.sn,
+    required this.model,
     required this.uploader,
   });
 
   factory UploadProgressDialog.create({
     required int uploadOrDownload,
     required String sn,
+    required String model,
   }) {
     return UploadProgressDialog(
       uploadOrDownload: uploadOrDownload,
       sn: sn,
-      uploader: SharePointUploader(uploadOrDownload: uploadOrDownload, sn: sn),
+      model: model,
+      uploader: SharePointUploader(uploadOrDownload: uploadOrDownload, sn: sn, model: model),
     );
   }
 

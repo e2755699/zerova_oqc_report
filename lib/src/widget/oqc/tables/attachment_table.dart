@@ -10,10 +10,12 @@ import 'package:zerova_oqc_report/src/report/spec/hipot_test_spec.dart';
 /// 附件表格
 class AttachmentTable extends StatelessWidget {
   final String sn;
+  final String model;
 
   const AttachmentTable({
     super.key,
     required this.sn,
+    required this.model,
   });
  /* void someFunction() {
     if (globalInputOutputSpec != null) {
@@ -48,7 +50,7 @@ class AttachmentTable extends StatelessWidget {
             tooltip: 'Download to SharePoint',
             onPressed: () {
               //someFunction();
-              SharePointUploader(uploadOrDownload: 3, sn: sn).startAuthorization(
+              SharePointUploader(uploadOrDownload: 3, sn: sn, model: '').startAuthorization(
                 categoryTranslations: {
                   //"packageing_photo": "Packageing Photo ",
                   "appearance_photo": "Appearance Photo ",
@@ -59,6 +61,7 @@ class AttachmentTable extends StatelessWidget {
           ),
           CameraButton(
             sn: sn,
+            model: model,
             packagingOrAttachment: 1,
           ),
         ],

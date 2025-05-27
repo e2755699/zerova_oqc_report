@@ -5,12 +5,14 @@ import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 
 class CameraButton extends StatelessWidget {
   final String sn;
+  final String model;
   final int packagingOrAttachment;
   final VoidCallback? callBack;
 
   const CameraButton({
     super.key,
     required this.sn,
+    required this.model,
     required this.packagingOrAttachment,
     this.callBack,
   });
@@ -26,6 +28,7 @@ class CameraButton extends StatelessWidget {
         icon: const Icon(Icons.camera_alt),
         onPressed: () => context.push('/camera', extra: {
           'sn': sn,
+          'model': model,
           'packagingOrAttachment': packagingOrAttachment,
         }).then((value) {
           callBack?.call();

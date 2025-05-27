@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:zerova_oqc_report/src/report/spec/package_list_spec.dart';
 
 class PackageListResult {
   static final List<String> defaultHeader = [

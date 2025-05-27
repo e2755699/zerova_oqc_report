@@ -12,11 +12,13 @@ import 'package:zerova_oqc_report/src/widget/common/main_layout.dart';
 class CameraPage extends StatefulWidget {
   final int packagingOrAttachment; // 0:Packaging  1:Attachment
   final String sn;
+  final String model;
 
   const CameraPage({
     super.key,
     required this.packagingOrAttachment,
     required this.sn,
+    required this.model,
   });
 
   @override
@@ -90,7 +92,7 @@ class _CameraPageState extends State<CameraPage> with ImagePageHelper {
   }
 
   Future<void> _loadImages() async {
-    final String picturesPath = await getUserComparePath();
+    final String picturesPath = await getUserComparePath(widget.model);
     final directory = Directory(picturesPath);
     final List<FileSystemEntity> files = directory.listSync();
 

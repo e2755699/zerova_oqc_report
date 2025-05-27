@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 import 'package:zerova_oqc_report/src/widget/common/table_wrapper.dart';
+import 'package:zerova_oqc_report/src/report/spec/account_data.dart';
 
 class SignatureTable extends StatefulWidget {
   final TextEditingController _picController;
@@ -43,6 +44,9 @@ class _SignatureTableState extends State<SignatureTable> {
     // 設定預設日期為今天
     widget._dateController.text =
         DateFormat('yyyy-MM-dd').format(_selectedDate);
+
+    // 設定預設簽名人姓名為目前登入帳號對應的 name
+    widget._picController.text = currentUser?['name'] ?? '';
   }
 
   @override

@@ -17,8 +17,11 @@ class SharePointUploader {
 
   final int uploadOrDownload;
   final String sn;
+  final String model;
 
-  SharePointUploader({required this.uploadOrDownload, required this.sn});
+  static final Set<String> _downloadedModels = {};
+
+  SharePointUploader({required this.uploadOrDownload, required this.sn, required this.model});
   /*Future<String> _getUserPicturesPath(String subDirectory) async {
     // 獲取當前使用者的根目錄
     final String userProfile = Platform.environment['USERPROFILE'] ?? '';
@@ -31,6 +34,15 @@ class SharePointUploader {
       throw Exception("Unable to find the user profile directory.");
     }
   }*/
+
+  bool hasDownloaded(String model) {
+    if (_downloadedModels.contains(model)) {
+      print("已下載過 $model，不再重複下載");
+      print("目前已下載過的 models: ${_downloadedModels.join(', ')}");
+      return true;
+    }
+    return false;
+  }
 
   Future<String> _getOrCreateUserZerovaPath() async {
     final String userProfile = Platform.environment['USERPROFILE'] ?? '';
@@ -69,6 +81,10 @@ class SharePointUploader {
     // } else {
     //   print("無法獲取 Access Token");
     // }
+    if (uploadOrDownload == 1 && hasDownloaded(model)) {
+      return;
+    }
+
 
     final authUrl = Uri.https(
       "login.microsoftonline.com",
@@ -375,50 +391,74 @@ class SharePointUploader {
 
   Future<void> downloadComparePictures(String accessToken) async {
     final String zerovaPath = await _getOrCreateUserZerovaPath();
-    final String directoryPath = path.join(zerovaPath, 'Compare Pictures');
-    final listFilesUrl =
-        "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/Jackalope/外觀參考照片:/children";
+    String modelNameUsed = model; // 預設使用傳入的 model 名稱
 
-    final response = await http.get(
+    // 建立初始要查詢的 SharePoint 路徑
+    String listFilesUrl =
+        "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/Jackalope/外觀參考照片/$model:/children";
+
+    // 發送查詢請求
+    var response = await http.get(
       Uri.parse(listFilesUrl),
       headers: {"Authorization": "Bearer $accessToken"},
     );
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      final List files = data['value'];
+    // 如果找不到該 model 資料夾，改抓 default
+    if (response.statusCode == 404) {
+      print("找不到目錄 $model，改用 default");
 
-      if (files.isEmpty) {
-        print("測試用資料夾中沒有檔案");
+      modelNameUsed = "default";
+      listFilesUrl =
+      "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/Jackalope/外觀參考照片/default:/children";
+
+      response = await http.get(
+        Uri.parse(listFilesUrl),
+        headers: {"Authorization": "Bearer $accessToken"},
+      );
+
+      if (response.statusCode != 200) {
+        print("default 資料夾也找不到: ${response.statusCode} ${response.body}");
         return;
       }
+    }
 
-      final directory = Directory(directoryPath);
-      if (!directory.existsSync()) {
-        directory.createSync(recursive: true); // 建立目標資料夾
-      }
+    // 成功取得檔案清單
+    final data = json.decode(response.body);
+    final List files = data['value'];
 
-      for (var file in files) {
-        final fileName = file['name'];
-        final downloadUrl = file['@microsoft.graph.downloadUrl'];
+    if (files.isEmpty) {
+      print("參考照片資料夾（$modelNameUsed）中沒有檔案");
+      return;
+    }
 
-        if (downloadUrl != null) {
-          try {
-            final fileResponse = await http.get(Uri.parse(downloadUrl));
-            final filePath = "${directory.path}/$fileName";
-            final localFile = File(filePath);
-            localFile.writeAsBytesSync(fileResponse.bodyBytes);
+    // 根據實際使用的 model 建立儲存路徑
+    final String directoryPath = path.join(zerovaPath, 'Compare Pictures', modelNameUsed);
+    final directory = Directory(directoryPath);
+    if (!directory.existsSync()) {
+      directory.createSync(recursive: true);
+    }
 
-            print("檔案下載成功: $fileName");
-          } catch (e) {
-            print("檔案下載失敗: $fileName - $e");
-          }
+    for (var file in files) {
+      final fileName = file['name'];
+      final downloadUrl = file['@microsoft.graph.downloadUrl'];
+
+      if (downloadUrl != null) {
+        try {
+          final fileResponse = await http.get(Uri.parse(downloadUrl));
+          final filePath = "${directory.path}/$fileName";
+          final localFile = File(filePath);
+          localFile.writeAsBytesSync(fileResponse.bodyBytes);
+
+          print("檔案下載成功: $fileName");
+        } catch (e) {
+          print("檔案下載失敗: $fileName - $e");
         }
       }
-    } else {
-      print("無法取得檔案清單: ${response.statusCode} ${response.body}");
     }
+    //記錄這個 model 已經下載過
+    _downloadedModels.add(model);
   }
+
   Future<void> downloadPhoneAttachmentPictures(String accessToken) async {
     final String zerovaPath = await _getOrCreateUserZerovaPath();
     final String directoryPath = path.join(zerovaPath, 'All Photos/$sn/Attachment');
@@ -511,6 +551,7 @@ class SharePointUploader {
       print("無法取得檔案清單: ${response.statusCode} ${response.body}");
     }
   }
+
 /*
   Future<void> uploadSelectedPackagingPhotos(String accessToken) async {
     final String zerovaPath = await _getOrCreateUserZerovaPath();

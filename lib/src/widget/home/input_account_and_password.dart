@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:zerova_oqc_report/src/widget/home/home_page.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:zerova_oqc_report/src/widget/common/global_state.dart';
+import 'package:zerova_oqc_report/src/report/spec/account_data.dart';
 
 class InputAccountAndPassword extends StatefulWidget {
   const InputAccountAndPassword({super.key});
@@ -97,49 +98,34 @@ class _InputAccountAndPasswordState extends State<InputAccountAndPassword>
         TextButton(
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
-              final pwd = _snController.text;
               final account = _modelController.text;
-              if (pwd == 'admin' && account == 'admin') {
-                permissions.value = 1;
-              } else if (pwd == 'user' && account == 'user') {
-                permissions.value = 2;
+              final pwd = _snController.text;
+
+              if (accountList.containsKey(account) &&
+                  accountList[account]!['pwd'] == pwd) {
+                permissions.value = accountList[account]!['permission'];
+                currentAccount = account; // ⬅️ 設定目前帳號
+                final userName = accountList[account]!['name'];
+                print("登入成功：$userName，權限：${permissions.value}");
               } else {
                 permissions.value = 0;
+                print("登入失敗");
               }
-              print("permissions is now: ${permissions.value}");
+
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      permissions.value == 1 
+                      permissions.value == 1
                           ? context.tr('login_success_admin')
-                          : permissions.value == 2 
-                              ? context.tr('login_success_operator')
-                              : context.tr('login_success_guest')
+                          : permissions.value == 2
+                          ? context.tr('login_success_operator')
+                          : context.tr('login_success_guest'),
                     ),
                   ),
                 );
                 Navigator.of(context).pop();
-              } /*await loadFileModule(pwd, account, context).then((_) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content:
-                      Text(context.tr('submit_success', args: [pwd, account])),
-                    ),
-                  );
-                  Navigator.of(context).pop();
-                }
-              }).onError((e, st) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content:
-                      Text(context.tr('submit_fail', args: [pwd, account])),
-                    ),
-                  );
-                }
-              });*/
+              }
             }
           },
           child: Text(context.tr('submit')),

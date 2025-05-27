@@ -29,6 +29,7 @@ import 'package:zerova_oqc_report/src/repo/firebase_service.dart';
 import 'package:zerova_oqc_report/src/report/spec/input_output_characteristics_spec.dart';
 import 'package:zerova_oqc_report/src/report/spec/basic_function_test_spec.dart';
 import 'package:zerova_oqc_report/src/report/spec/hipot_test_spec.dart';
+import 'package:zerova_oqc_report/src/report/spec/package_list_spec.dart';
 import 'package:zerova_oqc_report/src/report/spec/FailCountStore.dart';
 
 class OqcReportPage extends StatefulWidget {
@@ -150,6 +151,7 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
         return UploadProgressDialog.create(
           uploadOrDownload: 0,
           sn: widget.sn,
+          model: widget.model,
         );
       },
     );
@@ -163,6 +165,7 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           await _generateAndUploadPdf();
+          //bill
           startUpload(context);
           if (globalInputOutputSpec != null) {
             final success = await FirebaseService().addOrUpdateSpec(
@@ -209,7 +212,21 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
           } else {
             print('⚠️ 尚未設定 globalHipotTestSpec');
           }
+          if (globalPackageListSpec != null) {
+            final success = await FirebaseService().addOrUpdateSpec(
+              model: widget.model, // 你需要確保這裡有正確的 model 名稱
+              tableName: 'PackageListSpec',
+              spec: globalPackageListSpec!.toJson(),
+            );
 
+            if (success) {
+              print('✅ 規格已成功上傳 Firebase');
+            } else {
+              print('❌ 上傳失敗，請檢查網路或 API Key');
+            }
+          } else {
+            print('⚠️ 尚未設定 globalPackageListSpec');
+          }
 
           final tableNames = [
             'AppearanceStructureInspectionFunction',
@@ -274,9 +291,11 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
                   PackageListTable(
                     widget.packageListResult!,
                     sn: widget.sn,
+                    model: widget.model,
                   ),
                   AttachmentTable(
                     sn: widget.sn,
+                    model: widget.model,
                   ),
                   SignatureTable(
                     picController: _picController,

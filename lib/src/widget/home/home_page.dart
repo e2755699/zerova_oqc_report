@@ -21,7 +21,9 @@ import 'package:zerova_oqc_report/src/widget/common/custom_app_bar.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:zerova_oqc_report/src/widget/common/send_email_service.dart';
 import 'package:zerova_oqc_report/src/widget/common/global_state.dart';
+import 'package:zerova_oqc_report/src/report/spec/package_list_spec.dart';
 import 'package:intl/intl.dart';
+import 'package:zerova_oqc_report/src/repo/sharepoint_uploader.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -147,6 +149,7 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
                 onPressed: isLoading
                     ? null // 如果正在加載，禁用按鈕
                     : () async {
+                        globalPackageListSpecInitialized = false;
                         setState(() {
                           isLoading = true; // 開始加載
                         });
@@ -163,7 +166,7 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
                               result = res;
                               print(result);
                             });
-                            String model = '';
+                            /*String model = '';
                             String serialNumber = '';
 
                             List<String> parts = res.split(RegExp(r'\s+'));
@@ -174,6 +177,25 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
                               model = res;
                               serialNumber = '';
                             }
+                            */
+
+                            //String? tres = "EV100T2449A003A1";  // 或是 "EV100\nT2449A003A1"
+                            String model = "";
+                            String serialNumber = "";
+
+                            if (res != null) {
+                              final cleanedRes = res.replaceAll(RegExp(r'\s+'), '');
+
+                              if (cleanedRes.length >= 11) {
+                                serialNumber = cleanedRes.substring(cleanedRes.length - 11); // T2449A003A1
+                                model = cleanedRes.substring(0, cleanedRes.length - 11);     // EV100
+                              } else {
+                                print("錯誤：字串長度不足 11 碼");
+                              }
+                            }
+
+                            print("Model: $model");
+                            print("Serial Number: $serialNumber");
 
                             await loadFileModule(serialNumber, model, context);
                           }
@@ -270,7 +292,7 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
       cameraFace: CameraFace.back,
       scanFormat: ScanFormat.ONLY_BARCODE,
     );
-
+/*
     String model = "";
     String serialNumber = "";
     // 將 result 拆成兩部分
@@ -282,6 +304,25 @@ class _HomePageState extends State<HomePage> with LoadFileHelper {
       model = res;
       serialNumber = ''; // 若分割後不足兩部分，則 part2 保持空字串
     }
+*/
+    //String res = "EV100T2449A003A1";
+    String model = "";
+    String serialNumber = "";
+
+    if (res != null) {
+      final cleanedRes = res.replaceAll(RegExp(r'\s+'), '');
+
+      if (cleanedRes.length >= 11) {
+        serialNumber = cleanedRes.substring(cleanedRes.length - 11); // T2449A003A1
+        model = cleanedRes.substring(0, cleanedRes.length - 11);     // EV100
+      } else {
+        print("錯誤：字串長度不足 11 碼");
+      }
+    }
+
+    print("Model: $model");
+    print("Serial Number: $serialNumber");
+
 
     // 建立日誌檔案
     var logFilePath = '';
@@ -484,6 +525,15 @@ mixin LoadFileHelper {
           Platform.environment['HOME'] ?? '', 'Test Result', 'Zerova', 'logs');
     }
 
+
+    //bill
+    SharePointUploader(uploadOrDownload: 1, sn: '', model: model).startAuthorization(
+      categoryTranslations: {
+        "packageing_photo": "Packageing Photo ",
+        "appearance_photo": "Appearance Photo ",
+        "oqc_report": "OQC Report ",
+      },
+    );
     // 確保日誌目錄存在
     final logDirectory = Directory(logFilePath);
     if (!await logDirectory.exists()) {
@@ -496,7 +546,8 @@ mixin LoadFileHelper {
         File(path.join(logFilePath, 'api_log_${sn}_$timestamp.txt'));
 
     try {
-      /*
+      //bill
+/*
        // 嘗試從本地文件加載數據
        try {
          String jsonContent =
@@ -539,8 +590,8 @@ mixin LoadFileHelper {
          await logFile.writeAsString('從本地文件加載數據失敗: $e\n', mode: FileMode.append);
          await logFile.writeAsString('嘗試從 API 獲取數據...\n', mode: FileMode.append);
        }
-*/
 
+*/
       //call api
       final apiClient = OqcApiClient();
       await logFile.writeAsString('開始呼叫 API 獲取數據，SN: $sn, 型號: $model\n',

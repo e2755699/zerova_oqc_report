@@ -21,6 +21,7 @@ final GoRouter appRouter = GoRouter(
         final extra = state.extra as Map<String, dynamic>;
         return CameraPage(
           sn: extra['sn'],
+          model: extra['model'],
           packagingOrAttachment: extra['packagingOrAttachment'],
         );
       },

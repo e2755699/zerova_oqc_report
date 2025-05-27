@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:zerova_oqc_report/src/utils/image_utils.dart';
 import 'package:zerova_oqc_report/src/report/spec/input_output_characteristics_spec.dart';
 import 'package:zerova_oqc_report/src/report/spec/hipot_test_spec.dart';
+import 'package:zerova_oqc_report/src/report/spec/package_list_spec.dart';
 
 class PdfGenerator {
   static Future<pw.Document> generateOqcReport({
@@ -1073,6 +1074,8 @@ class PdfGenerator {
       3: const pw.FlexColumnWidth(0.8), // Check
     };
 
+    final spec = globalPackageListSpec;
+
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
@@ -1112,15 +1115,48 @@ class PdfGenerator {
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
                     child: pw.Text(
-                        data.getEnglishText(data.datas[index].translationKey),
-                        style: pw.TextStyle(font: font),
-                        textAlign: pw.TextAlign.center),
+                          () {
+                        switch (index + 1) {
+                          case 1:
+                            return spec?.rfidcard ?? '';
+                          case 2:
+                            return spec?.productcertificatecard ?? '';
+                          case 3:
+                            return spec?.screwassym4 ?? '';
+                          case 4:
+                            return spec?.boltscover ?? '';
+                          case 5:
+                            return spec?.usermanual ?? '';
+                          default:
+                            return '';
+                        }
+                      }(),
+                      style: pw.TextStyle(font: font),
+                      textAlign: pw.TextAlign.center,
+                    ),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
-                    child: pw.Text(data.datas[index].spec.toString(),
-                        style: pw.TextStyle(font: font),
-                        textAlign: pw.TextAlign.center),
+                    child: pw.Text(
+                          () {
+                        switch (index + 1) { // 注意原本你拿的 index 是從0開始，若跟之前getSpecText對應，需+1
+                          case 1:
+                            return spec?.rfidcardspec?.toString() ?? '';
+                          case 2:
+                            return spec?.productcertificatecardspec?.toString() ?? '';
+                          case 3:
+                            return spec?.screwassym4spec?.toString() ?? '';
+                          case 4:
+                            return spec?.boltscoverspec?.toString() ?? '';
+                          case 5:
+                            return spec?.usermanualspec?.toString() ?? '';
+                          default:
+                            return '';
+                        }
+                      }(),
+                      style: pw.TextStyle(font: font),
+                      textAlign: pw.TextAlign.center,
+                    ),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
@@ -1139,6 +1175,23 @@ class PdfGenerator {
         ],
       ],
     );
+  }
+
+  String getSpecText(int index, PackageListSpec spec) {
+    switch (index) {
+      case 1:
+        return spec.rfidcard ?? '';
+      case 2:
+        return spec.productcertificatecard ?? '';
+      case 3:
+        return spec.screwassym4 ?? '';
+      case 4:
+        return spec.boltscover ?? '';
+      case 5:
+        return spec.usermanual ?? '';
+      default:
+        return '';
+    }
   }
 
   static pw.Widget _buildAttachmentTable(pw.Font font, List<pw.Widget> images) {

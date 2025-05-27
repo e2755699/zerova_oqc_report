@@ -32,13 +32,14 @@ void main() async {
 
   await EasyLocalization.ensureInitialized();
   await ConfigManager.initialize();
-  SharePointUploader(uploadOrDownload: 1, sn: '').startAuthorization(
+  //bill
+  /*SharePointUploader(uploadOrDownload: 1, sn: '', model: model).startAuthorization(
     categoryTranslations: {
       "packageing_photo": "Packageing Photo ",
       "appearance_photo": "Appearance Photo ",
       "oqc_report": "OQC Report ",
     },
-  );
+  );*/
 
   runApp(EasyLocalization(
     supportedLocales: const [

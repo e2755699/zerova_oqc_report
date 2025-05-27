@@ -18,7 +18,27 @@ mixin ImagePageHelper {
     }
   }
 
-  Future<String> getUserComparePath() async {
+  Future<String> getUserComparePath(String model) async {
+    final String picturesPath = await getOrCreateUserZerovaPath();
+
+    // 先嘗試用 model 建立路徑
+    String comparePath = path.join(picturesPath, 'Compare Pictures', model);
+    final directory = Directory(comparePath);
+
+    // 如果資料夾不存在，改用 default
+    if (!await directory.exists()) {
+      print("找不到 $model 資料夾，改用 default");
+      comparePath = path.join(picturesPath, 'Compare Pictures', 'default');
+      final defaultDir = Directory(comparePath);
+      if (!await defaultDir.exists()) {
+        // 如果 default 也不存在，則建立 default 資料夾
+        await defaultDir.create(recursive: true);
+      }
+    }
+
+    return comparePath;
+  }
+  /*Future<String> getUserComparePath() async {
     final String picturesPath = await getOrCreateUserZerovaPath();
     final String comparePath = path.join(picturesPath, 'Compare Pictures');
 
@@ -30,8 +50,7 @@ mixin ImagePageHelper {
     }
 
     return comparePath;
-  }
-
+  }*/
   Future<String> getUserAllPhotosPackagingPath(String sn) async {
     final String picturesPath = await getOrCreateUserZerovaPath();
     final String allPhotosPackagingPath =

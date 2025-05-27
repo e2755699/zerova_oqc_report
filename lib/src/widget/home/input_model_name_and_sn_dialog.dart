@@ -4,6 +4,7 @@ import 'package:zerova_oqc_report/src/widget/home/home_page.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:zerova_oqc_report/src/repo/firebase_service.dart';
 import 'package:zerova_oqc_report/src/report/spec/input_output_characteristics_spec.dart';
+import 'package:zerova_oqc_report/src/report/spec/package_list_spec.dart';
 import 'dart:io';
 import 'package:path/path.dart' as path;
 
@@ -114,6 +115,7 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
         ),
         ElevatedButton(
           onPressed: isLoading ? null : () async {
+            globalPackageListSpecInitialized = false;
             if (_formKey.currentState!.validate()) {
               setState(() {
                 isLoading = true;
@@ -170,6 +172,15 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
                   await logFile.writeAsString('成功獲取 HipotTestSpecs\n', mode: FileMode.append);
                 } catch (e, st) {
                   await logFile.writeAsString('獲取 HipotTestSpecs 失敗: $e\n', mode: FileMode.append);
+                  await logFile.writeAsString('堆疊追蹤: $st\n', mode: FileMode.append);
+                }
+
+                try {
+                  await logFile.writeAsString('嘗試獲取 PackageListSpec...\n', mode: FileMode.append);
+                  await fetchAndPrintPackageListSpecs(model);
+                  await logFile.writeAsString('成功獲取 PackageListSpec\n', mode: FileMode.append);
+                } catch (e, st) {
+                  await logFile.writeAsString('獲取 PackageListSpec 失敗: $e\n', mode: FileMode.append);
                   await logFile.writeAsString('堆疊追蹤: $st\n', mode: FileMode.append);
                 }
 
