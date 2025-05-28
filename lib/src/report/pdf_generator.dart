@@ -847,7 +847,7 @@ class PdfGenerator {
                     children: [
                       pw.Center(
                         child: pw.Text(
-                          'Insulation impedance > ${globalHipotTestSpec?.insulationimpedancespec?.toStringAsFixed(0) ?? '10'} MΩ',
+                          'Insulation impedance > ${globalHipotTestSpec?.insulationimpedancespec?.toStringAsFixed(2) ?? '10'} MΩ',
                           style: pw.TextStyle(font: font),
                           textAlign: pw.TextAlign.center,
                         ),
@@ -971,7 +971,7 @@ class PdfGenerator {
                     children: [
                       pw.Center(
                         child: pw.Text(
-                          'Leakage current < ${globalHipotTestSpec?.leakagecurrentspec?.toStringAsFixed(0) ?? '10'} mA',
+                          'Leakage current < ${globalHipotTestSpec?.leakagecurrentspec?.toStringAsFixed(2) ?? '10'} mA',
                           style: pw.TextStyle(
                             font: font,
                             color: PdfColors.red,

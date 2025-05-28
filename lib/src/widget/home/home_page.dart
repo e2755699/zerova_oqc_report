@@ -590,8 +590,8 @@ mixin LoadFileHelper {
          await logFile.writeAsString('從本地文件加載數據失敗: $e\n', mode: FileMode.append);
          await logFile.writeAsString('嘗試從 API 獲取數據...\n', mode: FileMode.append);
        }
-
 */
+
       //call api
       final apiClient = OqcApiClient();
       await logFile.writeAsString('開始呼叫 API 獲取數據，SN: $sn, 型號: $model\n',

@@ -124,7 +124,7 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
               ],
             )
                 : Text(
-              'Insulation impedance > ${globalHipotTestSpec?.insulationimpedancespec?.toStringAsFixed(0) ?? '10'} MΩ',
+              'Insulation impedance > ${globalHipotTestSpec?.insulationimpedancespec?.toStringAsFixed(2) ?? '10'} MΩ',
               style: TableTextStyle.contentStyle(),
               textAlign: TextAlign.center,
             ),
@@ -376,7 +376,7 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
             ],
           )
               : Text(
-            'Leakage current < ${globalHipotTestSpec?.leakagecurrentspec?.toStringAsFixed(0) ?? '10'} mA',
+            'Leakage current < ${globalHipotTestSpec?.leakagecurrentspec?.toStringAsFixed(2) ?? '10'} mA',
             style: TableTextStyle.contentStyle().copyWith(color: Colors.red),
             textAlign: TextAlign.center,
           ),
