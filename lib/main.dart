@@ -32,7 +32,7 @@ void main() async {
 
   await EasyLocalization.ensureInitialized();
   await ConfigManager.initialize();
-  //bill
+
   /*SharePointUploader(uploadOrDownload: 1, sn: '', model: model).startAuthorization(
     categoryTranslations: {
       "packageing_photo": "Packageing Photo ",

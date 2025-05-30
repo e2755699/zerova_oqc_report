@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:zerova_oqc_report/src/report/spec/psu_serial_numbers_spec.dart';
 import 'package:zerova_oqc_report/src/report/spec/input_output_characteristics_spec.dart';
 import 'package:zerova_oqc_report/src/report/spec/basic_function_test_spec.dart';
 import 'package:zerova_oqc_report/src/report/spec/hipot_test_spec.dart';
@@ -205,6 +206,28 @@ class FirebaseService {
       }
     });
     return result;
+  }
+}
+
+Future<void> fetchAndPsuSerialNumSpecs(String model) async {
+  final firebaseService = FirebaseService();
+  final tableNames = ['PsuSerialNumSpec'];
+
+  final specs = await firebaseService.getAllSpecs(
+    model: model,
+    tableNames: tableNames,
+  );
+  final specMap = specs['PsuSerialNumSpec'];
+  if (specMap != null) {
+    // 把資料存到全域變數
+    globalPsuSerialNumSpec = PsuSerialNumSpec.fromJson(specMap);
+
+    print('=== PsuSerialNumSpec ===');
+    print(globalPsuSerialNumSpec); // 直接印出全域變數內容
+  }
+  for (var entry in specs.entries) {
+    print('=== ${entry.key} ===');
+    print(jsonEncode(entry.value));
   }
 }
 

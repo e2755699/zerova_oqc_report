@@ -526,7 +526,7 @@ mixin LoadFileHelper {
     }
 
 
-    //bill
+    //bill2
     SharePointUploader(uploadOrDownload: 1, sn: '', model: model).startAuthorization(
       categoryTranslations: {
         "packageing_photo": "Packageing Photo ",
@@ -546,7 +546,7 @@ mixin LoadFileHelper {
         File(path.join(logFilePath, 'api_log_${sn}_$timestamp.txt'));
 
     try {
-      //bill
+      //bill3
 /*
        // 嘗試從本地文件加載數據
        try {
@@ -590,8 +590,8 @@ mixin LoadFileHelper {
          await logFile.writeAsString('從本地文件加載數據失敗: $e\n', mode: FileMode.append);
          await logFile.writeAsString('嘗試從 API 獲取數據...\n', mode: FileMode.append);
        }
-*/
 
+*/
       //call api
       final apiClient = OqcApiClient();
       await logFile.writeAsString('開始呼叫 API 獲取數據，SN: $sn, 型號: $model\n',

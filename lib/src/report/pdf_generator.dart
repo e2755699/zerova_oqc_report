@@ -16,6 +16,7 @@ import 'package:path/path.dart' as path;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 import 'package:zerova_oqc_report/src/utils/image_utils.dart';
+import 'package:zerova_oqc_report/src/report/spec/psu_serial_numbers_spec.dart';
 import 'package:zerova_oqc_report/src/report/spec/input_output_characteristics_spec.dart';
 import 'package:zerova_oqc_report/src/report/spec/hipot_test_spec.dart';
 import 'package:zerova_oqc_report/src/report/spec/package_list_spec.dart';
@@ -101,18 +102,18 @@ class PdfGenerator {
       ),
     );
 
-    addPage(
-      pdf,
-      pw.Column(
-        mainAxisAlignment: pw.MainAxisAlignment.center,
-        children: [
-          _buildPsuSerialNumbersTable(psuSerialNumbers!, font),
-          pw.SizedBox(height: 80),
-          //_buildSoftwareVersionTable(softwareVersion!, font),
-          //pw.SizedBox(height: 80),
-        ],
-      ),
-    );
+    if (psuSerialNumbers != null) {
+      pdf.addPage(
+        pw.MultiPage(
+          pageFormat: PdfPageFormat.a4,
+          build: (context) => [
+            _buildPsuSerialNumbersTable(psuSerialNumbers, font),
+            //pw.SizedBox(height: 80),
+          ],
+        ),
+      );
+    }
+
     addPage(pdf, _buildSoftwareVersionTable(softwareVersion!, font));
     addPage(pdf, _buildAppearanceInspectionTable(testFunction!, font));
     addPage(
@@ -168,6 +169,7 @@ class PdfGenerator {
       0: const pw.FlexColumnWidth(0.5), // No.
       1: const pw.FlexColumnWidth(3.0), // S/N
     };
+    final totalQty = globalPsuSerialNumSpec?.qty ?? 12;
 
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -195,15 +197,25 @@ class PdfGenerator {
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text("S/N  Spec : 12",
-                      style: pw.TextStyle(font: font),
-                      textAlign: pw.TextAlign.center),
+                  child: pw.Text(
+                    "S/N  Q'ty : $totalQty",
+                    style: pw.TextStyle(font: font),
+                    textAlign: pw.TextAlign.center,
+                  ),
                 ),
               ],
             ),
-            ...List.generate(
-              data.psuSN.length,
-              (index) => pw.TableRow(
+          ],
+        ),
+        ...List.generate(totalQty, (index) {
+          // 多這一段，檢查是不是最後一列
+          final isLast = index == totalQty - 1;
+
+          return pw.Table(
+            columnWidths: columnWidths,
+            border: pw.TableBorder.all(),
+            children: [
+              pw.TableRow(
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
@@ -213,15 +225,17 @@ class PdfGenerator {
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
-                    child: pw.Text(data.psuSN[index].value,
+                    child: pw.Text(
+                        index < data.psuSN.length ? data.psuSN[index].value : '',
                         style: pw.TextStyle(font: font),
                         textAlign: pw.TextAlign.center),
                   ),
                 ],
               ),
-            ),
-          ],
-        ),
+            ],
+          );
+        }),
+
       ],
     );
   }

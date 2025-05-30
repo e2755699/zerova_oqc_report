@@ -149,6 +149,15 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
                 await logFile.writeAsString('開始獲取 $model 型號的規格數據...\n', mode: FileMode.append);
 
                 try {
+                  await logFile.writeAsString('嘗試獲取 PackageListSpec...\n', mode: FileMode.append);
+                  await fetchAndPsuSerialNumSpecs(model);
+                  await logFile.writeAsString('成功獲取 PackageListSpec\n', mode: FileMode.append);
+                } catch (e, st) {
+                  await logFile.writeAsString('獲取 PackageListSpec 失敗: $e\n', mode: FileMode.append);
+                  await logFile.writeAsString('堆疊追蹤: $st\n', mode: FileMode.append);
+                }
+
+                try {
                   await logFile.writeAsString('嘗試獲取 InputOutputCharacteristicsSpecs...\n', mode: FileMode.append);
                   await fetchAndPrintInputOutputCharacteristicsSpecs(model);
                   await logFile.writeAsString('成功獲取 InputOutputCharacteristicsSpecs\n', mode: FileMode.append);
