@@ -46,14 +46,29 @@ class _ProtectionFunctionTestTableState
           testItems.length,
           (index) => DataRow(
             cells: [
-              OqcTableStyle.getDataCell((index + 1).toString()),
+              DataCell(
+                Container(
+                  width: 80,
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                  child: Center(
+                    child: Text(
+                      (index + 1).toString(),
+                      style: TableTextStyle.contentStyle(),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              ),
               DataCell(
                 SizedBox(
                   width: 200,
-                  child: Text(
-                    testItems[index].name,
-                    style: TableTextStyle.contentStyle(),
-                    textAlign: TextAlign.center,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                    child: Text(
+                      testItems[index].name,
+                      style: TableTextStyle.contentStyle(),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
               ),

@@ -11,8 +11,7 @@ class InputAccountAndPassword extends StatefulWidget {
       _InputAccountAndPasswordState();
 }
 
-class _InputAccountAndPasswordState extends State<InputAccountAndPassword>
-    with LoadFileHelper {
+class _InputAccountAndPasswordState extends State<InputAccountAndPassword> {
   final _formKey = GlobalKey<FormState>();
   final _snController = TextEditingController();
   final _modelController = TextEditingController();
@@ -110,13 +109,11 @@ class _InputAccountAndPasswordState extends State<InputAccountAndPassword>
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(
-                      permissions.value == 1 
-                          ? context.tr('login_success_admin')
-                          : permissions.value == 2 
-                              ? context.tr('login_success_operator')
-                              : context.tr('login_success_guest')
-                    ),
+                    content: Text(permissions.value == 1
+                        ? context.tr('login_success_admin')
+                        : permissions.value == 2
+                            ? context.tr('login_success_operator')
+                            : context.tr('login_success_guest')),
                   ),
                 );
                 Navigator.of(context).pop();

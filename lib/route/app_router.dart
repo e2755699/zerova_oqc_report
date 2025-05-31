@@ -4,6 +4,7 @@ import 'package:zerova_oqc_report/src/report/model/package_list_result.dart';
 import 'package:zerova_oqc_report/src/widget/admin/model_spec_template_page.dart';
 import 'package:zerova_oqc_report/src/widget/camera/camera_page.dart';
 import 'package:zerova_oqc_report/src/widget/home/home_page.dart';
+import 'package:zerova_oqc_report/src/widget/oqc/oqc_model.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/oqc_report_page.dart';
 
 /// 應用程序路由配置
@@ -30,14 +31,7 @@ final GoRouter appRouter = GoRouter(
       builder: (BuildContext context, GoRouterState state) {
         final extra = state.extra as Map<String, dynamic>;
         return OqcReportPage(
-          sn: extra['sn'],
-          model: extra['model'],
-          softwareVersion: extra['softwareVersion'],
-          testFunction: extra['testFunction'],
-          inputOutputCharacteristics: extra['inputOutputCharacteristics'],
-          protectionTestResults: extra['protectionTestResults'],
-          psuSerialNumbers: extra['psuSerialNumbers'],
-          packageListResult: extra['packageListResult'] ?? PackageListResult(),
+          oqcModel: extra['oqcModel'] as OqcModel,
         );
       },
     ),

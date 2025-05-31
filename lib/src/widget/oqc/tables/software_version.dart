@@ -4,6 +4,7 @@ import 'package:printing/printing.dart';
 import 'package:zerova_oqc_report/src/report/model/software_version.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 import 'package:zerova_oqc_report/src/widget/common/table_wrapper.dart';
+import 'package:zerova_oqc_report/src/widget/common/oqc_text_field.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:zerova_oqc_report/src/widget/common/global_state.dart';
 
@@ -60,21 +61,14 @@ class _SoftwareVersionTableState extends State<SoftwareVersionTable> {
                   OqcTableStyle.getDataCell(version.name),
                   DataCell(
                     isEditable
-                        ? TextFormField(
-                      controller: _controllers[index],
-                      decoration: const InputDecoration(
-                        isDense: true,
-                        contentPadding: EdgeInsets.symmetric(
-                            vertical: 6, horizontal: 8),
-                        border: OutlineInputBorder(),
-                        //hintText: 'Enter version',
-                      ),
-                      onChanged: (val) {
-                        setState(() {
-                          widget.data.versions[index].value = val;
-                        });
-                      },
-                    )
+                        ? OqcTextField(
+                            controller: _controllers[index],
+                            onChanged: (val) {
+                              setState(() {
+                                widget.data.versions[index].value = val;
+                              });
+                            },
+                          )
                         : OqcTableStyle
                         .getDataCell(widget.data.versions[index].value)
                         .child,
