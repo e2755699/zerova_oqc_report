@@ -78,7 +78,7 @@ class OqcTableStyle {
               color: color,
               fontWeight: fontWeight,
             ),
-            textAlign: TextAlign.center,
+            textAlign: TextAlign.left,
             softWrap: true,
             overflow: TextOverflow.visible,
           ),
