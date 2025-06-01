@@ -73,14 +73,10 @@ class _ProtectionFunctionTestTableState
                 ),
               ),
               DataCell(
-                Wrap(
-                  children: [
-                    Text(
-                      testItems[index].description,
-                      style: TableTextStyle.contentStyle(),
-                      textAlign: TextAlign.start,
-                    )
-                  ],
+                Text(
+                  testItems[index].description,
+                  style: TableTextStyle.contentStyle(),
+                  textAlign: TextAlign.start,
                 ),
               ),
               isEditable
