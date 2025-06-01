@@ -8,6 +8,7 @@ class PackageListSpec {
   String boltscover;
   String usermanual;
 
+  
   int? rfidcardspec;
   int? productcertificatecardspec;
   int? screwassym4spec;
