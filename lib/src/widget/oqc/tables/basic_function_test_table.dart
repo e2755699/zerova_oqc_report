@@ -151,8 +151,8 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
           builder: (context, permission, _) {
             final isEditable =
                 editMode == 1 && (permission == 1 || permission == 2);
-            final isHeaderEditable = editMode == 1 && permission == 1;
-
+            //final isHeaderEditable = editMode == 1 && permission == 1;
+            final isHeaderEditable = false;
             final dataTable = StyledDataTable(
               dataRowMinHeight: 50,
               dataRowMaxHeight: 80,
@@ -179,9 +179,11 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             // 第一欄 Spec
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
+                        Padding(
+                        padding: const EdgeInsets.only(left: 12.0), // 根據需要調整左邊距
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 Text(
                                   getSpecLabel(index),
@@ -189,7 +191,7 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
                                   textAlign: TextAlign.center,
                                 ),
                                 const SizedBox(width: 8),
-                                isEditable
+                                isHeaderEditable
                                     ? Expanded(
                                         child: OqcTextField(
                                           padding: const EdgeInsets.symmetric(
@@ -268,12 +270,14 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
                                 ),
                               ],
                             ),
-
+                        ),
                             const SizedBox(height: 8),
                             // 第二欄 Value + Label + Unit
-                            Row(
-                              crossAxisAlignment:  CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
+                      Padding(
+                        padding: const EdgeInsets.only(left: 12.0), // 根據需要調整左邊距
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 Text(
                                   valueLabels.length > index
@@ -342,6 +346,7 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
                                   textAlign: TextAlign.center,
                                 ),
                               ],
+                        ),
                             ),
                           ],
                         ),

@@ -84,7 +84,8 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
           valueListenable: permissions,
           builder: (context, permission, _) {
             final isEditable = editMode == 1 && (permission == 1 || permission == 2);
-            final isHeaderEditable = editMode == 1 && permission == 1;
+            //final isHeaderEditable = editMode == 1 && permission == 1;
+            final isHeaderEditable = false;
     return SizedBox(
       width: 400,
       child: Column(
@@ -154,8 +155,14 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                         ),
                         const SizedBox(height: 8),
                         isEditable
-                            ? OqcTextField(
-                                hintText: 'Input/Output (MΩ)',
+                            ? TextField(
+                          textAlign: TextAlign.center,
+                          decoration: const InputDecoration(
+                            labelText: 'Input/Output (MΩ)',
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                            contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                          ),
                                 controller: TextEditingController(
                                   text: data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputOutput.value.toStringAsFixed(2),
                                 ),
@@ -174,8 +181,14 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                               ),
                         const SizedBox(height: 8),
                         isEditable
-                            ? OqcTextField(
-                                hintText: 'Input/Ground (MΩ)',
+                            ? TextField(
+                          textAlign: TextAlign.center,
+                          decoration: const InputDecoration(
+                            labelText: 'Input/Ground (MΩ)',
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                             contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                          ),
                                 controller: TextEditingController(
                                   text: data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputGround.value.toStringAsFixed(2),
                                 ),
@@ -194,8 +207,14 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                               ),
                         const SizedBox(height: 8),
                         isEditable
-                            ? OqcTextField(
-                                hintText: 'Output/Ground (MΩ)',
+                            ? TextField(
+                          textAlign: TextAlign.center,
+                          decoration: const InputDecoration(
+                            labelText: 'Output/Ground (MΩ)',
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                             contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                          ),
                                 controller: TextEditingController(
                                   text: data.hiPotTestResult.insulationImpedanceTest.leftInsulationOutputGround.value.toStringAsFixed(2),
                                 ),
@@ -230,8 +249,14 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                         ),
                         const SizedBox(height: 8),
                         isEditable
-                            ? OqcTextField(
-                                hintText: 'Input/Output (MΩ)',
+                            ? TextField(
+                          textAlign: TextAlign.center,
+                          decoration: const InputDecoration(
+                            labelText: 'Input/Output (MΩ)',
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                             contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                          ),
                                 controller: TextEditingController(
                                   text: data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputOutput.value.toStringAsFixed(2),
                                 ),
@@ -250,8 +275,14 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                               ),
                         const SizedBox(height: 8),
                         isEditable
-                            ? OqcTextField(
-                                hintText: 'Input/Ground (MΩ)',
+                            ? TextField(
+                          textAlign: TextAlign.center,
+                          decoration: const InputDecoration(
+                            labelText: 'Input/Ground (MΩ)',
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                             contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                          ),
                                 controller: TextEditingController(
                                   text: data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputGround.value.toStringAsFixed(2),
                                 ),
@@ -270,8 +301,14 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                               ),
                         const SizedBox(height: 8),
                         isEditable
-                            ? OqcTextField(
-                                hintText: 'Output/Ground (MΩ)',
+                            ? TextField(
+                          textAlign: TextAlign.center,
+                          decoration: const InputDecoration(
+                            labelText: 'Output/Ground (MΩ)',
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                            // contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                          ),
                                 controller: TextEditingController(
                                   text: data.hiPotTestResult.insulationImpedanceTest.rightInsulationOutputGround.value.toStringAsFixed(2),
                                 ),
@@ -314,7 +351,8 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
           valueListenable: permissions,
           builder: (context, permission, _) {
             final isEditable = editMode == 1 && (permission == 1 || permission == 2);
-            final isHeaderEditable = editMode == 1 && permission == 1;
+            //final isHeaderEditable = editMode == 1 && permission == 1;
+            final isHeaderEditable = false;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -383,8 +421,14 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                       ),
                       const SizedBox(height: 8),
                       isEditable
-                          ? OqcTextField(
-                              hintText: 'Input/Output (mA)',
+                          ? TextField(
+                        textAlign: TextAlign.center,
+                        decoration: const InputDecoration(
+                          labelText: 'Input/Output (mA)',
+                          border: OutlineInputBorder(),
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                        ),
                               controller: TextEditingController(
                                 text: data.hiPotTestResult.insulationVoltageTest.leftInsulationInputOutput.value.toStringAsFixed(2),
                               ),
@@ -403,8 +447,14 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                             ),
                       const SizedBox(height: 8),
                       isEditable
-                          ? OqcTextField(
-                              hintText: 'Input/Ground (mA)',
+                          ? TextField(
+                        textAlign: TextAlign.center,
+                        decoration: const InputDecoration(
+                          labelText: 'Input/Ground (mA)',
+                          border: OutlineInputBorder(),
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                        ),
                               controller: TextEditingController(
                                 text: data.hiPotTestResult.insulationVoltageTest.leftInsulationInputGround.value.toStringAsFixed(2),
                               ),
@@ -423,8 +473,14 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                             ),
                       const SizedBox(height: 8),
                       isEditable
-                          ? OqcTextField(
-                              hintText: 'Output/Ground (mA)',
+                          ? TextField(
+                        textAlign: TextAlign.center,
+                        decoration: const InputDecoration(
+                          labelText: 'Output/Ground (mA)',
+                          border: OutlineInputBorder(),
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                        ),
                               controller: TextEditingController(
                                 text: data.hiPotTestResult.insulationVoltageTest.leftInsulationOutputGround.value.toStringAsFixed(2),
                               ),
@@ -459,8 +515,14 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                       ),
                       const SizedBox(height: 8),
                       isEditable
-                          ? OqcTextField(
-                              hintText: 'Input/Output (mA)',
+                          ? TextField(
+                        textAlign: TextAlign.center,
+                        decoration: const InputDecoration(
+                          labelText: 'Input/Output (mA)',
+                          border: OutlineInputBorder(),
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                        ),
                               controller: TextEditingController(
                                 text: data.hiPotTestResult.insulationVoltageTest.rightInsulationInputOutput.value.toStringAsFixed(2),
                               ),
@@ -479,8 +541,14 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                             ),
                       const SizedBox(height: 8),
                       isEditable
-                          ? OqcTextField(
-                              hintText: 'Input/Ground (mA)',
+                          ? TextField(
+                        textAlign: TextAlign.center,
+                        decoration: const InputDecoration(
+                          labelText: 'Input/Ground (mA)',
+                          border: OutlineInputBorder(),
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                        ),
                               controller: TextEditingController(
                                 text: data.hiPotTestResult.insulationVoltageTest.rightInsulationInputGround.value.toStringAsFixed(2),
                               ),
@@ -499,8 +567,14 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                             ),
                       const SizedBox(height: 8),
                       isEditable
-                          ? OqcTextField(
-                              hintText: 'Output/Ground (mA)',
+                          ? TextField(
+                        textAlign: TextAlign.center,
+                        decoration: const InputDecoration(
+                          labelText: 'Output/Ground (mA)',
+                          border: OutlineInputBorder(),
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                        ),
                               controller: TextEditingController(
                                 text: data.hiPotTestResult.insulationVoltageTest.rightInsulationOutputGround.value.toStringAsFixed(2),
                               ),
@@ -544,8 +618,8 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
           valueListenable: permissions,
           builder: (context, permission, _) {
             final isEditable = editMode == 1 && (permission == 1 || permission == 2);
-            final isHeaderEditable = editMode == 1 && permission == 1;
-
+            //final isHeaderEditable = editMode == 1 && permission == 1;
+            final isHeaderEditable = false;
             return TableWrapper(
               title: context.tr('hipot_test'),
               content: StyledDataTable(

@@ -339,8 +339,8 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
           valueListenable: permissions,
           builder: (context, permission, _) {
             final isEditable = editMode == 1 && (permission == 1 || permission == 2);
-            final isHeaderEditable = editMode == 1 && permission == 1;
-
+            //final isHeaderEditable = editMode == 1 && permission == 1;
+            final isHeaderEditable = false;
 
             // 你的 headerColumns (完全照你給的程式碼)
             final leftHeaderColumns = leftHeaders.asMap().entries.map((entry) {
