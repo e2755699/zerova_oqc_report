@@ -17,7 +17,8 @@ class ModelSpecTemplatePage extends StatefulWidget {
   State<ModelSpecTemplatePage> createState() => _ModelSpecTemplatePageState();
 }
 
-class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage> with SingleTickerProviderStateMixin {
+class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
+    with SingleTickerProviderStateMixin {
   final TextEditingController _modelController = TextEditingController();
   final List<String> _modelList = [];
   String? _selectedModel;
@@ -50,13 +51,13 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage> with Sing
       setState(() {
         _isLoading = true;
       });
-      
-      // 這裡應該從 Firebase 或其他資料來源獲取模型列表
-      // 但由於目前沒有這個功能，先使用假資料
-      await Future.delayed(const Duration(milliseconds: 500));
-      
+
+      // 從Firebase獲取模型列表
+      final firebaseService = FirebaseService();
+      final models = await firebaseService.getModelList();
+
       setState(() {
-        _modelList.addAll(['T2449A003A1', 'T2450B001A2', 'T2451C002A3']);
+        _modelList.addAll(models);
         _isLoading = false;
       });
     } catch (e) {
@@ -79,7 +80,11 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage> with Sing
       });
 
       final firebaseService = FirebaseService();
-      final tableNames = ['InputOutputCharacteristics', 'BasicFunctionTest', 'HipotTestSpec'];
+      final tableNames = [
+        'InputOutputCharacteristics',
+        'BasicFunctionTest',
+        'HipotTestSpec'
+      ];
 
       final specs = await firebaseService.getAllSpecs(
         model: model,
@@ -96,18 +101,30 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage> with Sing
         } else {
           // 預設值
           _inputOutputSpec = InputOutputCharacteristicsSpec(
-            leftVinLowerbound: 0, leftVinUpperbound: 0,
-            leftIinLowerbound: 0, leftIinUpperbound: 0,
-            leftPinLowerbound: 0, leftPinUpperbound: 0,
-            leftVoutLowerbound: 0, leftVoutUpperbound: 0,
-            leftIoutLowerbound: 0, leftIoutUpperbound: 0,
-            leftPoutLowerbound: 0, leftPoutUpperbound: 0,
-            rightVinLowerbound: 0, rightVinUpperbound: 0,
-            rightIinLowerbound: 0, rightIinUpperbound: 0,
-            rightPinLowerbound: 0, rightPinUpperbound: 0,
-            rightVoutLowerbound: 0, rightVoutUpperbound: 0,
-            rightIoutLowerbound: 0, rightIoutUpperbound: 0,
-            rightPoutLowerbound: 0, rightPoutUpperbound: 0,
+            leftVinLowerbound: 0,
+            leftVinUpperbound: 0,
+            leftIinLowerbound: 0,
+            leftIinUpperbound: 0,
+            leftPinLowerbound: 0,
+            leftPinUpperbound: 0,
+            leftVoutLowerbound: 0,
+            leftVoutUpperbound: 0,
+            leftIoutLowerbound: 0,
+            leftIoutUpperbound: 0,
+            leftPoutLowerbound: 0,
+            leftPoutUpperbound: 0,
+            rightVinLowerbound: 0,
+            rightVinUpperbound: 0,
+            rightIinLowerbound: 0,
+            rightIinUpperbound: 0,
+            rightPinLowerbound: 0,
+            rightPinUpperbound: 0,
+            rightVoutLowerbound: 0,
+            rightVoutUpperbound: 0,
+            rightIoutLowerbound: 0,
+            rightIoutUpperbound: 0,
+            rightPoutLowerbound: 0,
+            rightPoutUpperbound: 0,
           );
         }
 
@@ -115,18 +132,16 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage> with Sing
           _basicFunctionSpec = BasicFunctionTestSpec.fromJson(bfSpecMap);
         } else {
           // 預設值
-          _basicFunctionSpec = BasicFunctionTestSpec(
-            eff: 0, pf: 0, thd: 0, sp: 0
-          );
+          _basicFunctionSpec =
+              BasicFunctionTestSpec(eff: 0, pf: 0, thd: 0, sp: 0);
         }
 
         if (htSpecMap != null && htSpecMap.isNotEmpty) {
           _hipotTestSpec = HipotTestSpec.fromJson(htSpecMap);
         } else {
           // 預設值
-          _hipotTestSpec = HipotTestSpec(
-            insulationimpedancespec: 0, leakagecurrentspec: 0
-          );
+          _hipotTestSpec =
+              HipotTestSpec(insulationimpedancespec: 0, leakagecurrentspec: 0);
         }
 
         _isLoading = false;
@@ -153,7 +168,7 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage> with Sing
     }
 
     final model = _isNewModel ? _modelController.text : _selectedModel!;
-    
+
     if (model.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('模型名稱不能為空')),
@@ -167,7 +182,7 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage> with Sing
       });
 
       final firebaseService = FirebaseService();
-      
+
       // 保存 InputOutputCharacteristics 規格
       if (_inputOutputSpec != null) {
         await firebaseService.addOrUpdateSpec(
@@ -176,7 +191,7 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage> with Sing
           spec: _inputOutputSpec!.toJson(),
         );
       }
-      
+
       // 保存 BasicFunctionTest 規格
       if (_basicFunctionSpec != null) {
         await firebaseService.addOrUpdateSpec(
@@ -185,7 +200,7 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage> with Sing
           spec: _basicFunctionSpec!.toJson(),
         );
       }
-      
+
       // 保存 HipotTestSpec 規格
       if (_hipotTestSpec != null) {
         await firebaseService.addOrUpdateSpec(
@@ -239,7 +254,8 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage> with Sing
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('確認刪除'),
-        content: Text('確定要刪除 $_selectedModel 的所有規格嗎？此操作無法恢復。'),
+        content: Text(
+            '確定要刪除 $_selectedModel 的所有規格嗎？此操作無法恢復。\n\n將刪除以下內容：\n• 輸入輸出特性規格\n• 基本功能測試規格\n• 耐壓測試規格\n• 相關的失敗計數記錄'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -261,23 +277,60 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage> with Sing
         _isLoading = true;
       });
 
-      // 這裡應該實現刪除模型規格的邏輯
-      // 由於 Firebase API 不直接支援刪除文件，我們可以用空規格覆蓋，或者自定義一個刪除標記
-      
-      // 從列表中移除
-      setState(() {
-        _modelList.remove(_selectedModel);
-        _selectedModel = null;
-        _inputOutputSpec = null;
-        _basicFunctionSpec = null;
-        _hipotTestSpec = null;
-        _isLoading = false;
-      });
+      final firebaseService = FirebaseService();
 
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('模型規格已成功刪除')),
-        );
+      // 刪除模型的所有規格文件
+      final deleteSpecsSuccess = await firebaseService.deleteAllModelSpecs(
+        model: _selectedModel!,
+      );
+
+      // 刪除模型的所有fail count記錄
+      // final deleteFailCountsSuccess =
+      //     await firebaseService.deleteAllModelFailCounts(
+      //   model: _selectedModel!,
+      // );
+
+      // 檢查刪除結果
+      if (deleteSpecsSuccess) {
+        // 從本地列表中移除模型
+        setState(() {
+          _modelList.remove(_selectedModel);
+          final deletedModel = _selectedModel;
+          _selectedModel = null;
+          _inputOutputSpec = null;
+          _basicFunctionSpec = null;
+          _hipotTestSpec = null;
+          _isLoading = false;
+        });
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('模型 $_selectedModel 的所有規格已成功刪除')),
+          );
+        }
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+
+        // 顯示部分成功的訊息
+        String message = '刪除完成，但有些項目可能失敗：';
+        if (!deleteSpecsSuccess) {
+          message += '\n• 規格文件刪除失敗';
+        }
+        // if (!deleteFailCountsSuccess) {
+        //   message += '\n• 失敗計數記錄刪除失敗';
+        // }
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(message),
+              backgroundColor: Colors.orange,
+              duration: const Duration(seconds: 5),
+            ),
+          );
+        }
       }
     } catch (e) {
       setState(() {
@@ -318,8 +371,7 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage> with Sing
                 children: [
                   _buildModelSelector(),
                   const SizedBox(height: 20),
-                  if (_selectedModel != null || _isNewModel)
-                    _buildTabContent(),
+                  if (_selectedModel != null || _isNewModel) _buildTabContent(),
                 ],
               ),
             ),
@@ -393,7 +445,8 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage> with Sing
                   icon: Icon(_isNewModel ? Icons.list : Icons.add),
                   label: Text(_isNewModel ? '選擇現有模型' : '新增模型'),
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                   ),
                 ),
               ],
@@ -478,4 +531,4 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage> with Sing
       ),
     );
   }
-} 
+}

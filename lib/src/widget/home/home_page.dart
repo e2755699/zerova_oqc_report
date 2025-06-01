@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:zerova_oqc_report/src/mixin/load_file_helper.dart';
 import 'package:zerova_oqc_report/src/repo/firebase_service.dart';
@@ -81,7 +82,7 @@ class _HomePageState extends State<HomePage> with LoadFileHelper<HomePage> {
             ValueListenableBuilder<int>(
               valueListenable: permissions,
               builder: (context, value, child) {
-                if (value == 1) {
+                if (value == 1 || kDebugMode) {
                   // 只有管理員 (permissions == 1) 可見
                   return Column(
                     children: [

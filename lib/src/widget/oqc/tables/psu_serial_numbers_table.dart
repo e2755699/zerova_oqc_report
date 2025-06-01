@@ -59,7 +59,7 @@ class _PsuSerialNumbersTableState extends State<PsuSerialNumbersTable> {
       // 新增 controllers，初始值取自 data.psuSN (有資料就帶入，無資料就空字串)
       _controllers.addAll(List.generate(
         newQty - oldLength,
-            (i) {
+        (i) {
           final index = oldLength + i;
           return TextEditingController(
             text: index < widget.data.psuSN.length
@@ -86,7 +86,7 @@ class _PsuSerialNumbersTableState extends State<PsuSerialNumbersTable> {
 
     _controllers = List.generate(
       qty,
-          (i) => TextEditingController(
+      (i) => TextEditingController(
         text: i < widget.data.psuSN.length ? widget.data.psuSN[i].value : '',
       ),
     );
@@ -111,7 +111,8 @@ class _PsuSerialNumbersTableState extends State<PsuSerialNumbersTable> {
         return ValueListenableBuilder<int>(
           valueListenable: permissions,
           builder: (context, permission, _) {
-            final isEditable = editMode == 1 && (permission == 1 || permission == 2);
+            final isEditable =
+                editMode == 1 && (permission == 1 || permission == 2);
             final isHeaderEditable = editMode == 1 && permission == 1;
 
             final qty = globalPsuSerialNumSpec?.qty ?? 12;
@@ -128,37 +129,37 @@ class _PsuSerialNumbersTableState extends State<PsuSerialNumbersTable> {
                         children: [
                           Text('S/N', style: TableTextStyle.headerStyle()),
                           const SizedBox(width: 20),
-                          if (isHeaderEditable)
-                            ...[
-                              Text("Q'ty : ", style: TableTextStyle.headerStyle()),
-                              const SizedBox(width: 4),
-                              SizedBox(
-                                width: 60,
-                                height: 28,
-                                child: TextFormField(
-                                  controller: _headerController,
-                                  style: TableTextStyle.headerStyle(),
-                                  textAlign: TextAlign.center,
-                                  decoration: const InputDecoration(
-                                    isDense: true,
-                                    contentPadding:
-                                    EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-                                    border: OutlineInputBorder(),
-                                  ),
-                                  keyboardType: TextInputType.number,
-                                  onChanged: (val) {
-                                    final parsed = int.tryParse(val);
-                                    if (parsed != null && parsed >= 0) {
-                                      setState(() {
-                                        updateQtyAndControllers(parsed);
-                                      });
-                                    }
-                                  },
+                          if (isHeaderEditable) ...[
+                            Text("Q'ty : ",
+                                style: TableTextStyle.headerStyle()),
+                            const SizedBox(width: 4),
+                            SizedBox(
+                              width: 60,
+                              height: 28,
+                              child: TextFormField(
+                                controller: _headerController,
+                                style: TableTextStyle.headerStyle(),
+                                textAlign: TextAlign.center,
+                                decoration: const InputDecoration(
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.symmetric(
+                                      vertical: 4, horizontal: 4),
+                                  border: OutlineInputBorder(),
                                 ),
+                                keyboardType: TextInputType.number,
+                                onChanged: (val) {
+                                  final parsed = int.tryParse(val);
+                                  if (parsed != null && parsed >= 0) {
+                                    setState(() {
+                                      updateQtyAndControllers(parsed);
+                                    });
+                                  }
+                                },
                               ),
-                            ]
-                          else
-                            Text("Q'ty : $qty", style: TableTextStyle.headerStyle()),
+                            ),
+                          ] else
+                            Text("Q'ty : $qty",
+                                style: TableTextStyle.headerStyle()),
                         ],
                       ),
                     ),
@@ -172,40 +173,34 @@ class _PsuSerialNumbersTableState extends State<PsuSerialNumbersTable> {
                       OqcTableStyle.getDataCell((index + 1).toString()),
                       DataCell(
                         isEditable
-                            ? TextFormField(
-                            controller: controller,
-                            decoration: const InputDecoration(
-                              isDense: true,
-                              contentPadding:
-                              EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-                              border: OutlineInputBorder(),
-                            ),
-                            onChanged: (val) {
-                              if (val.trim().isNotEmpty) {
-                                if (index < widget.data.psuSN.length) {
-                                  widget.data.psuSN[index].value = val;
-                                } else {
-                                  // 先補滿到 index
-                                  while (widget.data.psuSN.length <= index) {
-                                    widget.data.psuSN.add(
-                                      SerialNumber(
-                                        spec: 12,
-                                        value: '', // 空值先填，等會下面會被填入 val
-                                        key: "PSU SN",
-                                        name: "PSU",
-                                      ),
-                                    );
+                            ? OqcTextField(
+                                controller: _controllers[index],
+                                onChanged: (val) {
+                                  if (val.trim().isNotEmpty) {
+                                    if (index < widget.data.psuSN.length) {
+                                      widget.data.psuSN[index].value = val;
+                                    } else {
+                                      // 先補滿到 index
+                                      while (
+                                          widget.data.psuSN.length <= index) {
+                                        widget.data.psuSN.add(
+                                          SerialNumber(
+                                            spec: 12,
+                                            value: '', // 空值先填，等會下面會被填入 val
+                                            key: "PSU SN",
+                                            name: "PSU",
+                                          ),
+                                        );
+                                      }
+                                      widget.data.psuSN[index].value = val;
+                                    }
                                   }
-                                  widget.data.psuSN[index].value = val;
-                                }
-                              }
-                            }
-                        )
+                                })
                             : OqcTableStyle.getDataCell(
-                          index < widget.data.psuSN.length
-                              ? widget.data.psuSN[index].value
-                              : controller.text,
-                        ).child,
+                                index < widget.data.psuSN.length
+                                    ? widget.data.psuSN[index].value
+                                    : controller.text,
+                              ).child,
                       ),
                     ],
                   );

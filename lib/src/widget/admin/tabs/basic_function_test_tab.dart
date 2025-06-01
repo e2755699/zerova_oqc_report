@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:zerova_oqc_report/src/report/spec/basic_function_test_spec.dart';
+import 'package:zerova_oqc_report/src/widget/common/spec_input_field.dart';
 
 class BasicFunctionTestTab extends StatefulWidget {
   final BasicFunctionTestSpec? spec;
@@ -55,9 +56,9 @@ class _BasicFunctionTestTabState extends State<BasicFunctionTestTab> {
 
   void _updateSpec(String field, String value) {
     final doubleValue = double.tryParse(value) ?? 0.0;
-    
+
     BasicFunctionTestSpec newSpec;
-    
+
     switch (field) {
       case 'eff':
         newSpec = _spec.copyWith(eff: doubleValue);
@@ -74,7 +75,7 @@ class _BasicFunctionTestTabState extends State<BasicFunctionTestTab> {
       default:
         return;
     }
-    
+
     _spec = newSpec;
     widget.onChanged(newSpec);
   }
@@ -108,13 +109,33 @@ class _BasicFunctionTestTabState extends State<BasicFunctionTestTab> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    _buildInputField('效率 (EFF)', '%', _effController),
+                    LabeledSpecInputField(
+                      label: '效率 (EFF)',
+                      unit: '%',
+                      controller: _effController,
+                      isRequired: true,
+                    ),
                     const SizedBox(height: 16),
-                    _buildInputField('功率因素 (PF)', '', _pfController),
+                    LabeledSpecInputField(
+                      label: '功率因素 (PF)',
+                      unit: '',
+                      controller: _pfController,
+                      isRequired: true,
+                    ),
                     const SizedBox(height: 16),
-                    _buildInputField('總諧波失真 (THD)', '%', _thdController),
+                    LabeledSpecInputField(
+                      label: '總諧波失真 (THD)',
+                      unit: '%',
+                      controller: _thdController,
+                      isRequired: true,
+                    ),
                     const SizedBox(height: 16),
-                    _buildInputField('待機功率 (SP)', 'W', _spController),
+                    LabeledSpecInputField(
+                      label: '待機功率 (SP)',
+                      unit: 'W',
+                      controller: _spController,
+                      isRequired: true,
+                    ),
                   ],
                 ),
               ),
@@ -124,26 +145,4 @@ class _BasicFunctionTestTabState extends State<BasicFunctionTestTab> {
       ),
     );
   }
-
-  Widget _buildInputField(String label, String unit, TextEditingController controller) {
-    return Row(
-      children: [
-        SizedBox(
-          width: 150,
-          child: Text(label),
-        ),
-        Expanded(
-          child: TextField(
-            controller: controller,
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              suffixText: unit,
-            ),
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          ),
-        ),
-      ],
-    );
-  }
-} 
+}

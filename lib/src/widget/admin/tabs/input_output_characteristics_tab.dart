@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:zerova_oqc_report/src/report/spec/input_output_characteristics_spec.dart';
+import 'package:zerova_oqc_report/src/widget/common/spec_input_field.dart';
 
 class InputOutputCharacteristicsTab extends StatefulWidget {
   final InputOutputCharacteristicsSpec? spec;
@@ -12,10 +13,12 @@ class InputOutputCharacteristicsTab extends StatefulWidget {
   });
 
   @override
-  State<InputOutputCharacteristicsTab> createState() => _InputOutputCharacteristicsTabState();
+  State<InputOutputCharacteristicsTab> createState() =>
+      _InputOutputCharacteristicsTabState();
 }
 
-class _InputOutputCharacteristicsTabState extends State<InputOutputCharacteristicsTab> {
+class _InputOutputCharacteristicsTabState
+    extends State<InputOutputCharacteristicsTab> {
   late InputOutputCharacteristicsSpec _spec;
 
   final Map<String, TextEditingController> _controllers = {};
@@ -37,23 +40,35 @@ class _InputOutputCharacteristicsTabState extends State<InputOutputCharacteristi
   void _initializeSpec() {
     _spec = widget.spec ??
         InputOutputCharacteristicsSpec(
-          leftVinLowerbound: 0, leftVinUpperbound: 0,
-          leftIinLowerbound: 0, leftIinUpperbound: 0,
-          leftPinLowerbound: 0, leftPinUpperbound: 0,
-          leftVoutLowerbound: 0, leftVoutUpperbound: 0,
-          leftIoutLowerbound: 0, leftIoutUpperbound: 0,
-          leftPoutLowerbound: 0, leftPoutUpperbound: 0,
-          rightVinLowerbound: 0, rightVinUpperbound: 0,
-          rightIinLowerbound: 0, rightIinUpperbound: 0,
-          rightPinLowerbound: 0, rightPinUpperbound: 0,
-          rightVoutLowerbound: 0, rightVoutUpperbound: 0,
-          rightIoutLowerbound: 0, rightIoutUpperbound: 0,
-          rightPoutLowerbound: 0, rightPoutUpperbound: 0,
+          leftVinLowerbound: 0,
+          leftVinUpperbound: 0,
+          leftIinLowerbound: 0,
+          leftIinUpperbound: 0,
+          leftPinLowerbound: 0,
+          leftPinUpperbound: 0,
+          leftVoutLowerbound: 0,
+          leftVoutUpperbound: 0,
+          leftIoutLowerbound: 0,
+          leftIoutUpperbound: 0,
+          leftPoutLowerbound: 0,
+          leftPoutUpperbound: 0,
+          rightVinLowerbound: 0,
+          rightVinUpperbound: 0,
+          rightIinLowerbound: 0,
+          rightIinUpperbound: 0,
+          rightPinLowerbound: 0,
+          rightPinUpperbound: 0,
+          rightVoutLowerbound: 0,
+          rightVoutUpperbound: 0,
+          rightIoutLowerbound: 0,
+          rightIoutUpperbound: 0,
+          rightPoutLowerbound: 0,
+          rightPoutUpperbound: 0,
         );
 
     // 初始化控制器
     _controllers.clear();
-    
+
     // 左側輸入特性
     _initController('leftVinLowerbound', _spec.leftVinLowerbound);
     _initController('leftVinUpperbound', _spec.leftVinUpperbound);
@@ -61,7 +76,7 @@ class _InputOutputCharacteristicsTabState extends State<InputOutputCharacteristi
     _initController('leftIinUpperbound', _spec.leftIinUpperbound);
     _initController('leftPinLowerbound', _spec.leftPinLowerbound);
     _initController('leftPinUpperbound', _spec.leftPinUpperbound);
-    
+
     // 左側輸出特性
     _initController('leftVoutLowerbound', _spec.leftVoutLowerbound);
     _initController('leftVoutUpperbound', _spec.leftVoutUpperbound);
@@ -69,7 +84,7 @@ class _InputOutputCharacteristicsTabState extends State<InputOutputCharacteristi
     _initController('leftIoutUpperbound', _spec.leftIoutUpperbound);
     _initController('leftPoutLowerbound', _spec.leftPoutLowerbound);
     _initController('leftPoutUpperbound', _spec.leftPoutUpperbound);
-    
+
     // 右側輸入特性
     _initController('rightVinLowerbound', _spec.rightVinLowerbound);
     _initController('rightVinUpperbound', _spec.rightVinUpperbound);
@@ -77,7 +92,7 @@ class _InputOutputCharacteristicsTabState extends State<InputOutputCharacteristi
     _initController('rightIinUpperbound', _spec.rightIinUpperbound);
     _initController('rightPinLowerbound', _spec.rightPinLowerbound);
     _initController('rightPinUpperbound', _spec.rightPinUpperbound);
-    
+
     // 右側輸出特性
     _initController('rightVoutLowerbound', _spec.rightVoutLowerbound);
     _initController('rightVoutUpperbound', _spec.rightVoutUpperbound);
@@ -96,9 +111,9 @@ class _InputOutputCharacteristicsTabState extends State<InputOutputCharacteristi
 
   void _updateSpec(String field, String value) {
     final doubleValue = double.tryParse(value) ?? 0.0;
-    
+
     InputOutputCharacteristicsSpec newSpec;
-    
+
     switch (field) {
       // 左側輸入特性
       case 'leftVinLowerbound':
@@ -119,7 +134,7 @@ class _InputOutputCharacteristicsTabState extends State<InputOutputCharacteristi
       case 'leftPinUpperbound':
         newSpec = _spec.copyWith(leftPinUpperbound: doubleValue);
         break;
-      
+
       // 左側輸出特性
       case 'leftVoutLowerbound':
         newSpec = _spec.copyWith(leftVoutLowerbound: doubleValue);
@@ -139,7 +154,7 @@ class _InputOutputCharacteristicsTabState extends State<InputOutputCharacteristi
       case 'leftPoutUpperbound':
         newSpec = _spec.copyWith(leftPoutUpperbound: doubleValue);
         break;
-      
+
       // 右側輸入特性
       case 'rightVinLowerbound':
         newSpec = _spec.copyWith(rightVinLowerbound: doubleValue);
@@ -159,7 +174,7 @@ class _InputOutputCharacteristicsTabState extends State<InputOutputCharacteristi
       case 'rightPinUpperbound':
         newSpec = _spec.copyWith(rightPinUpperbound: doubleValue);
         break;
-      
+
       // 右側輸出特性
       case 'rightVoutLowerbound':
         newSpec = _spec.copyWith(rightVoutLowerbound: doubleValue);
@@ -179,11 +194,11 @@ class _InputOutputCharacteristicsTabState extends State<InputOutputCharacteristi
       case 'rightPoutUpperbound':
         newSpec = _spec.copyWith(rightPoutUpperbound: doubleValue);
         break;
-      
+
       default:
         return;
     }
-    
+
     _spec = newSpec;
     widget.onChanged(newSpec);
   }
@@ -230,21 +245,20 @@ class _InputOutputCharacteristicsTabState extends State<InputOutputCharacteristi
                               ),
                               const SizedBox(height: 8),
                               _buildRangeInputs(
-                                'Vin', 'V', 
-                                _controllers['leftVinLowerbound']!, 
-                                _controllers['leftVinUpperbound']!
-                              ),
+                                  'Vin',
+                                  'V',
+                                  _controllers['leftVinLowerbound']!,
+                                  _controllers['leftVinUpperbound']!),
                               _buildRangeInputs(
-                                'Iin', 'A', 
-                                _controllers['leftIinLowerbound']!, 
-                                _controllers['leftIinUpperbound']!
-                              ),
+                                  'Iin',
+                                  'A',
+                                  _controllers['leftIinLowerbound']!,
+                                  _controllers['leftIinUpperbound']!),
                               _buildRangeInputs(
-                                'Pin', 'W', 
-                                _controllers['leftPinLowerbound']!, 
-                                _controllers['leftPinUpperbound']!
-                              ),
-                              
+                                  'Pin',
+                                  'W',
+                                  _controllers['leftPinLowerbound']!,
+                                  _controllers['leftPinUpperbound']!),
                               const SizedBox(height: 16),
                               Text(
                                 '左側輸出特性',
@@ -252,26 +266,26 @@ class _InputOutputCharacteristicsTabState extends State<InputOutputCharacteristi
                               ),
                               const SizedBox(height: 8),
                               _buildRangeInputs(
-                                'Vout', 'V', 
-                                _controllers['leftVoutLowerbound']!, 
-                                _controllers['leftVoutUpperbound']!
-                              ),
+                                  'Vout',
+                                  'V',
+                                  _controllers['leftVoutLowerbound']!,
+                                  _controllers['leftVoutUpperbound']!),
                               _buildRangeInputs(
-                                'Iout', 'A', 
-                                _controllers['leftIoutLowerbound']!, 
-                                _controllers['leftIoutUpperbound']!
-                              ),
+                                  'Iout',
+                                  'A',
+                                  _controllers['leftIoutLowerbound']!,
+                                  _controllers['leftIoutUpperbound']!),
                               _buildRangeInputs(
-                                'Pout', 'W', 
-                                _controllers['leftPoutLowerbound']!, 
-                                _controllers['leftPoutUpperbound']!
-                              ),
+                                  'Pout',
+                                  'W',
+                                  _controllers['leftPoutLowerbound']!,
+                                  _controllers['leftPoutUpperbound']!),
                             ],
                           ),
                         ),
-                        
+
                         const SizedBox(width: 32),
-                        
+
                         // 右側規格
                         Expanded(
                           child: Column(
@@ -283,21 +297,20 @@ class _InputOutputCharacteristicsTabState extends State<InputOutputCharacteristi
                               ),
                               const SizedBox(height: 8),
                               _buildRangeInputs(
-                                'Vin', 'V', 
-                                _controllers['rightVinLowerbound']!, 
-                                _controllers['rightVinUpperbound']!
-                              ),
+                                  'Vin',
+                                  'V',
+                                  _controllers['rightVinLowerbound']!,
+                                  _controllers['rightVinUpperbound']!),
                               _buildRangeInputs(
-                                'Iin', 'A', 
-                                _controllers['rightIinLowerbound']!, 
-                                _controllers['rightIinUpperbound']!
-                              ),
+                                  'Iin',
+                                  'A',
+                                  _controllers['rightIinLowerbound']!,
+                                  _controllers['rightIinUpperbound']!),
                               _buildRangeInputs(
-                                'Pin', 'W', 
-                                _controllers['rightPinLowerbound']!, 
-                                _controllers['rightPinUpperbound']!
-                              ),
-                              
+                                  'Pin',
+                                  'W',
+                                  _controllers['rightPinLowerbound']!,
+                                  _controllers['rightPinUpperbound']!),
                               const SizedBox(height: 16),
                               Text(
                                 '右側輸出特性',
@@ -305,20 +318,20 @@ class _InputOutputCharacteristicsTabState extends State<InputOutputCharacteristi
                               ),
                               const SizedBox(height: 8),
                               _buildRangeInputs(
-                                'Vout', 'V', 
-                                _controllers['rightVoutLowerbound']!, 
-                                _controllers['rightVoutUpperbound']!
-                              ),
+                                  'Vout',
+                                  'V',
+                                  _controllers['rightVoutLowerbound']!,
+                                  _controllers['rightVoutUpperbound']!),
                               _buildRangeInputs(
-                                'Iout', 'A', 
-                                _controllers['rightIoutLowerbound']!, 
-                                _controllers['rightIoutUpperbound']!
-                              ),
+                                  'Iout',
+                                  'A',
+                                  _controllers['rightIoutLowerbound']!,
+                                  _controllers['rightIoutUpperbound']!),
                               _buildRangeInputs(
-                                'Pout', 'W', 
-                                _controllers['rightPoutLowerbound']!, 
-                                _controllers['rightPoutUpperbound']!
-                              ),
+                                  'Pout',
+                                  'W',
+                                  _controllers['rightPoutLowerbound']!,
+                                  _controllers['rightPoutUpperbound']!),
                             ],
                           ),
                         ),
@@ -335,46 +348,19 @@ class _InputOutputCharacteristicsTabState extends State<InputOutputCharacteristi
   }
 
   Widget _buildRangeInputs(
-    String label, 
-    String unit, 
-    TextEditingController lowerController, 
-    TextEditingController upperController
-  ) {
+      String label,
+      String unit,
+      TextEditingController lowerController,
+      TextEditingController upperController) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 80,
-            child: Text('$label ($unit):'),
-          ),
-          Expanded(
-            child: TextField(
-              controller: lowerController,
-              decoration: InputDecoration(
-                labelText: '下限',
-                border: const OutlineInputBorder(),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                suffixText: unit,
-              ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: TextField(
-              controller: upperController,
-              decoration: InputDecoration(
-                labelText: '上限',
-                border: const OutlineInputBorder(),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                suffixText: unit,
-              ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            ),
-          ),
-        ],
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: RangeSpecInputField(
+        label: '$label ($unit)',
+        unit: unit,
+        lowerController: lowerController,
+        upperController: upperController,
+        isRequired: true,
       ),
     );
   }
-} 
+}
