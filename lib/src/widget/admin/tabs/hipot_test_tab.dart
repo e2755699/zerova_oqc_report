@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:zerova_oqc_report/src/report/spec/hipot_test_spec.dart';
+import 'package:zerova_oqc_report/src/widget/common/spec_input_field.dart';
 
 class HipotTestTab extends StatefulWidget {
   final HipotTestSpec? spec;
@@ -36,22 +37,27 @@ class _HipotTestTabState extends State<HipotTestTab> {
   }
 
   void _initializeSpec() {
-    _spec = widget.spec ?? HipotTestSpec(insulationimpedancespec: 0, leakagecurrentspec: 0);
+    _spec = widget.spec ??
+        HipotTestSpec(insulationimpedancespec: 0, leakagecurrentspec: 0);
 
     // 初始化控制器
-    _insulationController = TextEditingController(text: _spec.insulationimpedancespec.toString());
-    _leakageController = TextEditingController(text: _spec.leakagecurrentspec.toString());
+    _insulationController =
+        TextEditingController(text: _spec.insulationimpedancespec.toString());
+    _leakageController =
+        TextEditingController(text: _spec.leakagecurrentspec.toString());
 
     // 添加監聽器
-    _insulationController.addListener(() => _updateSpec('insulation', _insulationController.text));
-    _leakageController.addListener(() => _updateSpec('leakage', _leakageController.text));
+    _insulationController.addListener(
+        () => _updateSpec('insulation', _insulationController.text));
+    _leakageController
+        .addListener(() => _updateSpec('leakage', _leakageController.text));
   }
 
   void _updateSpec(String field, String value) {
     final doubleValue = double.tryParse(value) ?? 0.0;
-    
+
     HipotTestSpec newSpec;
-    
+
     switch (field) {
       case 'insulation':
         newSpec = _spec.copyWith(insulationimpedancespec: doubleValue);
@@ -62,7 +68,7 @@ class _HipotTestTabState extends State<HipotTestTab> {
       default:
         return;
     }
-    
+
     _spec = newSpec;
     widget.onChanged(newSpec);
   }
@@ -94,9 +100,19 @@ class _HipotTestTabState extends State<HipotTestTab> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    _buildInputField('絕緣阻抗規格', 'MΩ', _insulationController),
+                    LabeledSpecInputField(
+                      label: '絕緣阻抗規格',
+                      unit: 'MΩ',
+                      controller: _insulationController,
+                      isRequired: true,
+                    ),
                     const SizedBox(height: 16),
-                    _buildInputField('漏電流規格', 'mA', _leakageController),
+                    LabeledSpecInputField(
+                      label: '漏電流規格',
+                      unit: 'mA',
+                      controller: _leakageController,
+                      isRequired: true,
+                    ),
                   ],
                 ),
               ),
@@ -106,26 +122,4 @@ class _HipotTestTabState extends State<HipotTestTab> {
       ),
     );
   }
-
-  Widget _buildInputField(String label, String unit, TextEditingController controller) {
-    return Row(
-      children: [
-        SizedBox(
-          width: 150,
-          child: Text(label),
-        ),
-        Expanded(
-          child: TextField(
-            controller: controller,
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              suffixText: unit,
-            ),
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          ),
-        ),
-      ],
-    );
-  }
-} 
+}
