@@ -28,7 +28,12 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
   /// 存每一行兩個欄位的字串，index 0: spec, index 1: value
   late List<List<String>> _reportValues;
 
-  final List<String> valueLabels = ['Efficiency:', 'PF:', 'THD:', 'Standby Power:'];
+  final List<String> valueLabels = [
+    'Efficiency:',
+    'PF:',
+    'THD:',
+    'Standby Power:'
+  ];
   final List<String> valueUnits = ['%', '%', '%', 'W'];
 
   double _defaultIfEmptyDouble(double? value, double defaultValue) {
@@ -45,6 +50,7 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
       4: _defaultIfEmptyDouble(spec?.sp, 100),
     };
   }
+
   void initializeGlobalSpec() {
     globalBasicFunctionTestSpec = BasicFunctionTestSpec(
       // Left Side
@@ -54,19 +60,24 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
       sp: _defaultSpec[4] ?? 100,
     );
   }
+
   void updateGlobalSpec(int index, double value) {
     switch (index) {
       case 0:
-        globalBasicFunctionTestSpec = globalBasicFunctionTestSpec!.copyWith(eff: value);
+        globalBasicFunctionTestSpec =
+            globalBasicFunctionTestSpec!.copyWith(eff: value);
         break;
       case 1:
-        globalBasicFunctionTestSpec = globalBasicFunctionTestSpec!.copyWith(pf: value);
+        globalBasicFunctionTestSpec =
+            globalBasicFunctionTestSpec!.copyWith(pf: value);
         break;
       case 2:
-        globalBasicFunctionTestSpec = globalBasicFunctionTestSpec!.copyWith(thd: value);
+        globalBasicFunctionTestSpec =
+            globalBasicFunctionTestSpec!.copyWith(thd: value);
         break;
       case 3:
-        globalBasicFunctionTestSpec = globalBasicFunctionTestSpec!.copyWith(sp: value);
+        globalBasicFunctionTestSpec =
+            globalBasicFunctionTestSpec!.copyWith(sp: value);
         break;
     }
   }
@@ -95,24 +106,24 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
 
     _reportValues = List.generate(
       data.testItems.length,
-          (index) {
+      (index) {
         String specValue = _defaultSpec[index + 1]?.toString() ?? '';
 
         // 設定符號依照 index
         String specPrefix;
         switch (index) {
           case 0:
-            specPrefix = '> ';  // 第1列
+            specPrefix = '> '; // 第1列
             break;
           case 1:
-            specPrefix = '≧ ';  // 第2列
+            specPrefix = '≧ '; // 第2列
             break;
           case 2:
           case 3:
-            specPrefix = '< ';  // 第3、4列
+            specPrefix = '< '; // 第3、4列
             break;
           default:
-            specPrefix = '';   // 其他預設為空
+            specPrefix = ''; // 其他預設為空
         }
 
         // 數值與單位
@@ -123,13 +134,12 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
 
         // description 組合內容
         data.testItems[index].description =
-        'Spec: $specPrefix$specValue$unit\n$label $valueText$unit';
+            'Spec: $specPrefix$specValue$unit\n$label $valueText$unit';
 
         return [specValue, valueText];
       },
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -139,7 +149,8 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
         return ValueListenableBuilder<int>(
           valueListenable: permissions,
           builder: (context, permission, _) {
-            final isEditable = editMode == 1 && (permission == 1 || permission == 2);
+            final isEditable =
+                editMode == 1 && (permission == 1 || permission == 2);
             final isHeaderEditable = editMode == 1 && permission == 1;
 
             final dataTable = StyledDataTable(
@@ -153,7 +164,7 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
               ],
               rows: List.generate(
                 data.testItems.length,
-                    (index) => DataRow(
+                (index) => DataRow(
                   cells: [
                     OqcTableStyle.getDataCell((index + 1).toString()),
                     OqcTableStyle.getDataCell(data.testItems[index].name),
@@ -178,64 +189,81 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
                                   textAlign: TextAlign.center,
                                 ),
                                 const SizedBox(width: 8),
-                                isHeaderEditable
+                                isEditable
                                     ? Expanded(
-                                  child: OqcTextField(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                                    initialValue: _reportValues[index][0],
-                                    keyboardType: TextInputType.numberWithOptions(decimal: true),
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
-                                    ],
-                                    onChanged: (value) {
-                                      final doubleValue = double.tryParse(value);
-                                      if (doubleValue != null) {
-                                        setState(() {
-                                          _reportValues[index][0] = value;
-                                          updateGlobalSpec(index, doubleValue);
+                                        child: OqcTextField(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 8),
+                                          initialValue: _reportValues[index][0],
+                                          keyboardType:
+                                              TextInputType.numberWithOptions(
+                                                  decimal: true),
+                                          inputFormatters: [
+                                            FilteringTextInputFormatter.allow(
+                                                RegExp(r'^\d*\.?\d*')),
+                                          ],
+                                          onChanged: (value) {
+                                            final doubleValue =
+                                                double.tryParse(value);
+                                            if (doubleValue != null) {
+                                              setState(() {
+                                                _reportValues[index][0] = value;
+                                                updateGlobalSpec(
+                                                    index, doubleValue);
 
-                                          // 其他同步更新描述等
-                                          final specText = _reportValues[index][0];
-                                          final valueText = _reportValues[index][1];
-                                          final label = valueLabels.length > index ? valueLabels[index] : '';
-                                          final unit = valueUnits.length > index ? valueUnits[index] : '';
+                                                // 其他同步更新描述等
+                                                final specText =
+                                                    _reportValues[index][0];
+                                                final valueText =
+                                                    _reportValues[index][1];
+                                                final label =
+                                                    valueLabels.length > index
+                                                        ? valueLabels[index]
+                                                        : '';
+                                                final unit =
+                                                    valueUnits.length > index
+                                                        ? valueUnits[index]
+                                                        : '';
 
-                                          // 指定符號 prefix
-                                          String specPrefix;
-                                          switch (index) {
-                                            case 0:
-                                              specPrefix = '> ';
-                                              break;
-                                            case 1:
-                                              specPrefix = '≧ ';
-                                              break;
-                                            case 2:
-                                            case 3:
-                                              specPrefix = '< ';
-                                              break;
-                                            default:
-                                              specPrefix = '';
-                                          }
+                                                // 指定符號 prefix
+                                                String specPrefix;
+                                                switch (index) {
+                                                  case 0:
+                                                    specPrefix = '> ';
+                                                    break;
+                                                  case 1:
+                                                    specPrefix = '≧ ';
+                                                    break;
+                                                  case 2:
+                                                  case 3:
+                                                    specPrefix = '< ';
+                                                    break;
+                                                  default:
+                                                    specPrefix = '';
+                                                }
 
-                                          data.testItems[index].description =
-                                          'Spec: $specPrefix$specText$unit\n$label $valueText$unit';
-                                        });
-                                      }
-                                      // 如果轉換失敗可以忽略或做錯誤處理
-                                    },
-                                  ),
-                                )
+                                                data.testItems[index]
+                                                        .description =
+                                                    'Spec: $specPrefix$specText$unit\n$label $valueText$unit';
+                                              });
+                                            }
+                                            // 如果轉換失敗可以忽略或做錯誤處理
+                                          },
+                                        ),
+                                      )
                                     : Center(
-                                  child: Text(
-                                    _reportValues[index][0],
-                                    style: TableTextStyle.contentStyle(),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
+                                        child: Text(
+                                          _reportValues[index][0],
+                                          style: TableTextStyle.contentStyle(),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
                                 const SizedBox(width: 8),
                                 // 單位獨立顯示
                                 Text(
-                                  valueUnits.length > index ? valueUnits[index] : '',
+                                  valueUnits.length > index
+                                      ? valueUnits[index]
+                                      : '',
                                   style: TableTextStyle.contentStyle(),
                                 ),
                               ],
@@ -243,8 +271,9 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
 
                             const SizedBox(height: 8),
                             // 第二欄 Value + Label + Unit
-                            isEditable
-                                ? Row(
+                            Row(
+                              crossAxisAlignment:  CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
                                   valueLabels.length > index
@@ -254,68 +283,61 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
                                   textAlign: TextAlign.center,
                                 ),
                                 const SizedBox(width: 8),
-                                Expanded(
-                                  child: OqcTextField(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                                    initialValue: _reportValues[index][1],
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _reportValues[index][1] = value;
+                                isEditable
+                                    ? Expanded(
+                                        child: OqcTextField(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8),
+                                        initialValue: _reportValues[index][1],
+                                        onChanged: (value) {
+                                          setState(() {
+                                            _reportValues[index][1] = value;
 
-                                        // 同步更新 description
-                                        final specText = _reportValues[index][0];
-                                        final valueText = _reportValues[index][1];
-                                        final label = valueLabels.length > index ? valueLabels[index] : '';
-                                        final unit = valueUnits.length > index ? valueUnits[index] : '';
+                                            // 同步更新 description
+                                            final specText =
+                                                _reportValues[index][0];
+                                            final valueText =
+                                                _reportValues[index][1];
+                                            final label =
+                                                valueLabels.length > index
+                                                    ? valueLabels[index]
+                                                    : '';
+                                            final unit =
+                                                valueUnits.length > index
+                                                    ? valueUnits[index]
+                                                    : '';
 
-                                        // 決定 spec 符號
-                                        String specPrefix;
-                                        switch (index) {
-                                          case 0:
-                                            specPrefix = '> ';
-                                            break;
-                                          case 1:
-                                            specPrefix = '≧ ';
-                                            break;
-                                          case 2:
-                                          case 3:
-                                            specPrefix = '< ';
-                                            break;
-                                          default:
-                                            specPrefix = '';
-                                        }
+                                            // 決定 spec 符號
+                                            String specPrefix;
+                                            switch (index) {
+                                              case 0:
+                                                specPrefix = '> ';
+                                                break;
+                                              case 1:
+                                                specPrefix = '≧ ';
+                                                break;
+                                              case 2:
+                                              case 3:
+                                                specPrefix = '< ';
+                                                break;
+                                              default:
+                                                specPrefix = '';
+                                            }
 
-                                        data.testItems[index].description =
-                                        'Spec: $specPrefix$specText$unit\n$label $valueText$unit';
-                                      });
-                                    },
-                                  ),
-                                ),
+                                            data.testItems[index].description =
+                                                'Spec: $specPrefix$specText$unit\n$label $valueText$unit';
+                                          });
+                                        },
+                                      ))
+                                    : Text(
+                                        _reportValues[index][1],
+                                        style: TableTextStyle.contentStyle(),
+                                        textAlign: TextAlign.center,
+                                      ),
                                 Text(
-                                  valueUnits.length > index ? valueUnits[index] : '',
-                                  style: TableTextStyle.contentStyle(),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
-                            )
-                                : Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  valueLabels.length > index ? valueLabels[index] : '',
-                                  style: TableTextStyle.contentStyle(),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  _reportValues[index][1],
-                                  style: TableTextStyle.contentStyle(),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  valueUnits.length > index ? valueUnits[index] : '',
+                                  valueUnits.length > index
+                                      ? valueUnits[index]
+                                      : '',
                                   style: TableTextStyle.contentStyle(),
                                   textAlign: TextAlign.center,
                                 ),
@@ -328,18 +350,19 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
 
                     isEditable
                         ? DataCell(
-                      JudgementDropdown(
-                        value: data.testItems[index].judgement,
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() {
-                              data.testItems[index].judgement = value;
-                            });
-                          }
-                        },
-                      ),
-                    )
-                        : OqcTableStyle.getJudgementCell(data.testItems[index].judgement),
+                            JudgementDropdown(
+                              value: data.testItems[index].judgement,
+                              onChanged: (value) {
+                                if (value != null) {
+                                  setState(() {
+                                    data.testItems[index].judgement = value;
+                                  });
+                                }
+                              },
+                            ),
+                          )
+                        : OqcTableStyle.getJudgementCell(
+                            data.testItems[index].judgement),
                   ],
                 ),
               ),
