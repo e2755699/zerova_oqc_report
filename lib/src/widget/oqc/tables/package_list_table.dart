@@ -46,9 +46,7 @@ class PackageListTable extends StatelessWidget {
       final measurements = PackageListSpecGlobal.get().measurements;
 
       final initialItems = <ItemData>[];
-      print("'yyyyyyyyyy: ");
       if (measurements.isNotEmpty) {
-        print("'xxxxxxxxxxxxx: ");
         for (int i = 0; i < measurements.length; i++) {
           final m = measurements[i];
           print('itemName: ${m.itemName}, quantity: ${m.quantity}, isChecked: ${m.isCheck.value}');
@@ -81,31 +79,32 @@ class PackageListTable extends StatelessWidget {
           valueListenable: permissions,
           builder: (context, permission, _) {
             final isEditable = editMode == 1 && (permission == 1 || permission == 2);
+            final isHeaderEditable = editMode == 1 && permission == 1;
             return TableWrapper(
               title: context.tr('package_list'),
               titleAction: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.add),
-                    tooltip: 'Add Item',
-                    onPressed: () {
-                      items.value = List.from(items.value)..add(ItemData());
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.remove),
-                    tooltip: 'Remove Item',
+                  if (isHeaderEditable)
+                    IconButton(
+                      icon: const Icon(Icons.add),
+                      tooltip: 'Add Item',
+                      onPressed: () {
+                        items.value = List.from(items.value)..add(ItemData());
+                      },
+                    ),
+                  if (isHeaderEditable)
+                    IconButton(
+                      icon: const Icon(Icons.remove),
+                      tooltip: 'Remove Item',
                       onPressed: () {
                         if (items.value.isNotEmpty) {
                           final lastIndex = items.value.length - 1;
                           items.value = List.from(items.value)..removeLast();
-                          data.removeMeasurementAt(lastIndex); // <-- 同步刪除測量資料
-
-                          //PackageListSpecStore.instance.packageListData = data;
+                          data.removeMeasurementAt(lastIndex);
                         }
-                      }
-                  ),
+                      },
+                    ),
                   IconButton(
                     icon: const Icon(Icons.cloud_download),
                     tooltip: 'Download to SharePoint',
@@ -113,11 +112,6 @@ class PackageListTable extends StatelessWidget {
                       for (var m in PackageListSpecGlobal.get().measurements) {
                         print('itemName: ${m.itemName}, quantity: ${m.quantity}, isChecked: ${m.isCheck.value}');
                       }
-                      /*SharePointUploader(uploadOrDownload: 2, sn: sn, model: '').startAuthorization(
-                        categoryTranslations: {
-                          "packageing_photo": "Packageing Photo",
-                        },
-                      );*/
                     },
                   ),
                   CameraButton(
@@ -127,6 +121,7 @@ class PackageListTable extends StatelessWidget {
                   ),
                 ],
               ),
+
               content: Column(
                 children: [
                   ValueListenableBuilder<List<ItemData>>(
@@ -169,7 +164,7 @@ class PackageListTable extends StatelessWidget {
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Center(
-                                    child: isEditable
+                                    child: isHeaderEditable
                                         ? TextFormField(
                                       initialValue: item.name,
                                       decoration: const InputDecoration(
@@ -190,7 +185,7 @@ class PackageListTable extends StatelessWidget {
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Center(
-                                    child: isEditable
+                                    child: isHeaderEditable
                                         ? TextFormField(
                                       initialValue: item.quantity,
                                       keyboardType: TextInputType.number,
