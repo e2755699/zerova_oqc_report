@@ -172,32 +172,40 @@ class _PsuSerialNumbersTableState extends State<PsuSerialNumbersTable> {
                       OqcTableStyle.getDataCell((index + 1).toString()),
                       DataCell(
                         isEditable
-                            ? OqcTextField(
-                                controller: _controllers[index],
-                                onChanged: (val) {
-                                  if (val.trim().isNotEmpty) {
-                                    if (index < widget.data.psuSN.length) {
-                                      widget.data.psuSN[index].value = val;
-                                    } else {
-                                      // 先補滿到 index
-                                      while (widget.data.psuSN.length <= index) {
-                                        widget.data.psuSN.add(
-                                          SerialNumber(
-                                            spec: 12,
-                                            value: '', // 空值先填，等會下面會被填入 val
-                                            key: "PSU SN",
-                                            name: "PSU",
-                                          ),
-                                        );
-                                      }
-                                      widget.data.psuSN[index].value = val;
-                                    }
+                            ? TextFormField(
+                            controller: controller,
+                            decoration: const InputDecoration(
+                              isDense: true,
+                              contentPadding:
+                              EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                              border: OutlineInputBorder(),
+                            ),
+                            onChanged: (val) {
+                              if (val.trim().isNotEmpty) {
+                                if (index < widget.data.psuSN.length) {
+                                  widget.data.psuSN[index].value = val;
+                                } else {
+                                  // 先補滿到 index
+                                  while (widget.data.psuSN.length <= index) {
+                                    widget.data.psuSN.add(
+                                      SerialNumber(
+                                        spec: 12,
+                                        value: '', // 空值先填，等會下面會被填入 val
+                                        key: "PSU SN",
+                                        name: "PSU",
+                                      ),
+                                    );
                                   }
-                                },
-                              )
-                            : OqcTableStyle
-                                .getDataCell(widget.data.psuSN[index].value)
-                                .child,
+                                  widget.data.psuSN[index].value = val;
+                                }
+                              }
+                            }
+                        )
+                            : OqcTableStyle.getDataCell(
+                          index < widget.data.psuSN.length
+                              ? widget.data.psuSN[index].value
+                              : controller.text,
+                        ).child,
                       ),
                     ],
                   );

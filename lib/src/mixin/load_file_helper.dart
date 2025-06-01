@@ -14,6 +14,7 @@ import 'package:zerova_oqc_report/src/report/model/appearance_structure_inspecti
 import 'package:zerova_oqc_report/src/widget/oqc/oqc_model.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:intl/intl.dart';
+import 'package:zerova_oqc_report/src/repo/sharepoint_uploader.dart';
 
 mixin LoadFileHelper<K extends StatefulWidget> on State<K> {
   Future<void> loadFileHelper(String sn, String model) async {
@@ -38,6 +39,15 @@ mixin LoadFileHelper<K extends StatefulWidget> on State<K> {
       logFilePath = path.join(
           Platform.environment['HOME'] ?? '', 'Test Result', 'Zerova', 'logs');
     }
+
+    //bill2
+    SharePointUploader(uploadOrDownload: 1, sn: '', model: model).startAuthorization(
+      categoryTranslations: {
+        "packageing_photo": "Packageing Photo ",
+        "appearance_photo": "Appearance Photo ",
+        "oqc_report": "OQC Report ",
+      },
+    );
 
     // 確保日誌目錄存在
     final logDirectory = Directory(logFilePath);
