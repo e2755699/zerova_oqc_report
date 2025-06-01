@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:zerova_oqc_report/src/repo/firebase_service.dart';
 import 'dart:io';
 import 'package:path/path.dart' as path;
+import 'package:zerova_oqc_report/src/report/model/package_list_result.dart';
 import 'package:zerova_oqc_report/src/report/spec/new_package_list_spec.dart.dart';
 
 class InputModelNameAndSnDialog extends StatefulWidget {
@@ -39,6 +40,8 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
   }
 
   Future<void> _submitForm() async {
+    globalPackageListSpecInitialized = false;
+
     if (_formKey.currentState!.validate()) {
       setState(() {
         isLoading = true;
@@ -114,7 +117,34 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
         try {
           await logFile.writeAsString('嘗試獲取 PackageListSpec...\n',
               mode: FileMode.append);
-          await fetchAndPrintPackageListSpecs(model);
+          final spec = await fetchPackageListSpec(model);
+          if (spec != null) {
+            print('PackageListSpec spec (raw Map): $spec');
+            final data = PackageListResult();
+            final packageListResult = packageListResultFromSpecDataWithUpdate(spec);
+            PackageListSpecGlobal.set(packageListResult);
+            final measurements2 = PackageListSpecGlobal.get().measurements;
+
+            for (int i = 0; i < measurements2.length; i++) {
+              final m = measurements2[i];
+              print('itemName: ${m.itemName}, quantity: ${m.quantity}, isChecked: ${m.isCheck.value}');
+
+              data.updateOrAddMeasurement(
+                index: i,
+                name: m.itemName,
+                quantity: m.quantity,
+                isChecked: m.isCheck.value,
+              );
+            }
+
+            final measurements = packageListResult.measurements;
+            for (var m in measurements) {
+              print('itemName: ${m.itemName}, quantity: ${m.quantity}, isChecked: ${m.isCheck.value}');
+            }
+          } else {
+            PackageListSpecGlobal.set(PackageListResult()); // 重設為空的 result
+            print('No PackageListSpec spec found for model $model');
+          }
           await logFile.writeAsString('成功獲取 PackageListSpec\n',
               mode: FileMode.append);
         } catch (e, st) {
@@ -122,6 +152,8 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
               mode: FileMode.append);
           await logFile.writeAsString('堆疊追蹤: $st\n', mode: FileMode.append);
         }
+
+
 
         try {
           await logFile.writeAsString('嘗試獲取 FailCountsForDevice...\n',
@@ -269,7 +301,6 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
           onPressed: isLoading
               ? null
               : () async {
-            globalPackageListSpecInitialized = false;
                   if (_formKey.currentState!.validate()) {
                     await _submitForm();
                   }
