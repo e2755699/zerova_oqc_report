@@ -4,12 +4,14 @@ import 'package:zerova_oqc_report/src/report/spec/input_output_characteristics_s
 import 'package:zerova_oqc_report/src/report/spec/basic_function_test_spec.dart';
 import 'package:zerova_oqc_report/src/report/spec/hipot_test_spec.dart';
 import 'package:zerova_oqc_report/src/report/spec/psu_serial_numbers_spec.dart';
+import 'package:zerova_oqc_report/src/report/model/package_list_result.dart';
 import 'package:zerova_oqc_report/src/repo/firebase_service.dart';
 import 'package:zerova_oqc_report/src/widget/common/main_layout.dart';
 import 'package:zerova_oqc_report/src/widget/admin/tabs/input_output_characteristics_tab.dart';
 import 'package:zerova_oqc_report/src/widget/admin/tabs/basic_function_test_tab.dart';
 import 'package:zerova_oqc_report/src/widget/admin/tabs/hipot_test_tab.dart';
 import 'package:zerova_oqc_report/src/widget/admin/tabs/psu_serial_num_tab.dart';
+import 'package:zerova_oqc_report/src/widget/admin/tabs/package_list_tab.dart';
 
 class ModelSpecTemplatePage extends StatefulWidget {
   const ModelSpecTemplatePage({super.key});
@@ -33,11 +35,12 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
   BasicFunctionTestSpec? _basicFunctionSpec;
   HipotTestSpec? _hipotTestSpec;
   PsuSerialNumSpec? _psuSerialNumSpec;
+  PackageListResult? _packageListSpec;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
     _tabController!.addListener(_onTabChanged);
     _loadModelList();
   }
@@ -104,6 +107,9 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
         model: model,
         tableNames: tableNames,
       );
+
+      // 載入 PackageListSpec
+      final packageListResult = await fetchPackageListSpec(model);
 
       setState(() {
         final ioSpecMap = specs['InputOutputCharacteristics'];
@@ -174,6 +180,13 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
           // 根據PSU SN.txt的預設值
           _psuSerialNumSpec = PsuSerialNumSpec(qty: 12 // PSU數量預設為12
               );
+        }
+
+        if (packageListResult != null) {
+          _packageListSpec = packageListResult;
+        } else {
+          // 建立預設的 PackageListResult
+          _packageListSpec = PackageListResult();
         }
 
         _isLoading = false;
@@ -251,6 +264,15 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
         );
       }
 
+      // 保存 PackageListSpec 規格
+      if (_packageListSpec != null) {
+        await uploadPackageListSpec(
+          model: model,
+          tableName: 'PackageListSpec',
+          packageListResult: _packageListSpec!,
+        );
+      }
+
       // 如果是新模型，添加到列表中
       if (_isNewModel && !_modelList.contains(model)) {
         setState(() {
@@ -296,7 +318,7 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
       builder: (context) => AlertDialog(
         title: const Text('確認刪除'),
         content: Text(
-            '確定要刪除 $_selectedModel 的所有規格嗎？此操作無法恢復。\n\n將刪除以下內容：\n• 輸入輸出特性規格\n• 基本功能測試規格\n• 耐壓測試規格\n• PSU序號規格\n• 相關的失敗計數記錄'),
+            '確定要刪除 $_selectedModel 的所有規格嗎？此操作無法恢復。\n\n將刪除以下內容：\n• 輸入輸出特性規格\n• 基本功能測試規格\n• 耐壓測試規格\n• PSU序號規格\n• 包裝清單規格\n• 相關的失敗計數記錄'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -325,12 +347,6 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
         model: _selectedModel!,
       );
 
-      // 刪除模型的所有fail count記錄
-      // final deleteFailCountsSuccess =
-      //     await firebaseService.deleteAllModelFailCounts(
-      //   model: _selectedModel!,
-      // );
-
       // 檢查刪除結果
       if (deleteSpecsSuccess) {
         // 從本地列表中移除模型
@@ -342,6 +358,7 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
           _basicFunctionSpec = null;
           _hipotTestSpec = null;
           _psuSerialNumSpec = null;
+          _packageListSpec = null;
           _isLoading = false;
         });
 
@@ -360,9 +377,6 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
         if (!deleteSpecsSuccess) {
           message += '\n• 規格文件刪除失敗';
         }
-        // if (!deleteFailCountsSuccess) {
-        //   message += '\n• 失敗計數記錄刪除失敗';
-        // }
 
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -436,6 +450,8 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
             );
         _psuSerialNumSpec = PsuSerialNumSpec(qty: 12 // PSU數量預設為12
             );
+
+        _packageListSpec = PackageListResult(); // 建立新的 PackageListResult
 
         _isLoading = false;
       });
@@ -554,6 +570,7 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
             Tab(text: '基本功能測試'),
             Tab(text: '耐壓測試'),
             Tab(text: 'PSU序號'),
+            Tab(text: '包裝清單'),
           ],
         ),
         SizedBox(
@@ -583,6 +600,12 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
                 spec: _psuSerialNumSpec,
                 onChanged: (newSpec) {
                   _psuSerialNumSpec = newSpec;
+                },
+              ),
+              PackageListTab(
+                spec: _packageListSpec,
+                onChanged: (newSpec) {
+                  _packageListSpec = newSpec;
                 },
               ),
             ],
