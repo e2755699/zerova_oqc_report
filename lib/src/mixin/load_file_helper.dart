@@ -141,7 +141,7 @@ mixin LoadFileHelper<K extends StatefulWidget> on State<K> {
     // 改為從專案目錄下的test_data讀取數據
     String projectDir = Directory.current.path;
     String testDataPath =
-        path.join(projectDir, 'Test Result', 'Zerova', 'test_data', sn);
+        path.join(projectDir, 'Test Result', 'Zerova', sn);
 
     String jsonContent =
         await File(path.join(testDataPath, 'T2449A003A1_test.json'))
