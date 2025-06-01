@@ -2,7 +2,7 @@
 
 **檔案路徑**: `lib/src/widget/admin/model_spec_template_page.dart`  
 **用途**: 管理產品模型規格模板的管理員界面  
-**版本**: 1.3.0  
+**版本**: 1.4.0  
 **作者**: Zerova OQC Team  
 
 ---
@@ -46,6 +46,7 @@
   - 輸入輸出特性 (InputOutputCharacteristics)
   - 基本功能測試 (BasicFunctionTest)
   - 耐壓測試 (HipotTest)
+  - PSU序號規格 (PsuSerialNum) 🆕
 - **即時編輯**: 支援即時修改規格參數
 - **預設值處理**: 為新模型提供合理的預設規格值
 
@@ -77,9 +78,10 @@ graph TB
     C --> E[InputOutputCharacteristicsTab]
     C --> F[BasicFunctionTestTab]
     C --> G[HipotTestTab]
+    C --> H[PsuSerialNumTab]
     
-    D --> H[SaveButton]
-    D --> I[DeleteButton]
+    D --> I[SaveButton]
+    D --> J[DeleteButton]
 ```
 
 ### 狀態管理
@@ -90,7 +92,7 @@ graph TB
 | `_selectedModel` | `String?` | 當前選擇的模型 |
 | `_isLoading` | `bool` | 載入狀態指示器 |
 | `_isNewModel` | `bool` | 新增模型模式開關 |
-| `_tabController` | `TabController?` | 標籤頁控制器 |
+| `_tabController` | `TabController?` | 標籤頁控制器 (4個標籤) |
 
 ---
 
@@ -114,6 +116,14 @@ class InputOutputCharacteristicsSpec {
 }
 ```
 
+**預設值** (v1.4.0):
+- 左/右側輸入電壓：187-253V
+- 左/右側輸入電流：0-230A
+- 左/右側輸入功率：0-130W
+- 左/右側輸出電壓：931-969V
+- 左/右側輸出電流：123-129A
+- 左/右側輸出功率：118-122W
+
 #### 2. BasicFunctionTestSpec
 ```dart
 class BasicFunctionTestSpec {
@@ -124,6 +134,12 @@ class BasicFunctionTestSpec {
 }
 ```
 
+**預設值** (v1.4.0):
+- 效率：94%
+- 功率因子：0.99
+- 總諧波失真：5%
+- 軟啟動時間：100ms
+
 #### 3. HipotTestSpec
 ```dart
 class HipotTestSpec {
@@ -131,6 +147,20 @@ class HipotTestSpec {
   double leakagecurrentspec;       // 漏電流規格
 }
 ```
+
+**預設值** (v1.4.0):
+- 絕緣阻抗規格：10 MΩ
+- 漏電流規格：10 mA
+
+#### 4. PsuSerialNumSpec 🆕
+```dart
+class PsuSerialNumSpec {
+  int? qty;  // PSU數量規格
+}
+```
+
+**預設值** (v1.4.0):
+- PSU數量：12個
 
 ### Firebase 數據結構
 
@@ -141,7 +171,9 @@ models/
 │   │   └── spec/
 │   ├── BasicFunctionTest/
 │   │   └── spec/
-│   └── HipotTestSpec/
+│   ├── HipotTestSpec/
+│   │   └── spec/
+│   └── PsuSerialNumSpec/
 │       └── spec/
 ```
 
@@ -200,7 +232,7 @@ Widget _buildModelSelector() {
 
 **功能**: 提供分類的規格編輯界面
 
-**結構**:
+**結構** (v1.4.0 更新):
 ```dart
 TabBarView(
   children: [
@@ -210,9 +242,16 @@ TabBarView(
     ),
     BasicFunctionTestTab(...),
     HipotTestTab(...),
+    PsuSerialNumTab(...), // 🆕 新增的PSU序號標籤頁
   ],
 )
 ```
+
+**標籤頁列表**:
+1. **輸入輸出特性**: 電壓、電流、功率範圍設定
+2. **基本功能測試**: 效率、功率因子等參數
+3. **耐壓測試**: 絕緣阻抗和漏電流規格
+4. **PSU序號** 🆕: PSU數量設定
 
 #### 3. 浮動操作按鈕 (`_buildFABs`)
 
@@ -268,6 +307,7 @@ LabeledSpecInputField(
 **使用場景**:
 - `HipotTestTab`: 耐壓測試規格輸入
 - `BasicFunctionTestTab`: 基本功能測試參數
+- `PsuSerialNumTab` 🆕: PSU序號數量設定
 
 ### RangeSpecInputField
 
@@ -310,7 +350,7 @@ SpecInputUtils.setControllerNumber(controller, 123.45);
 | 組件 | 使用場景 | 主要特色 | 適用頁面 |
 |------|----------|----------|----------|
 | `SpecInputField` | 基礎數值輸入 | 簡單統一的樣式 | 所有規格頁面 |
-| `LabeledSpecInputField` | 標籤+輸入框 | 左側標籤顯示 | Hipot, BasicFunction |
+| `LabeledSpecInputField` | 標籤+輸入框 | 左側標籤顯示 | Hipot, BasicFunction, PsuSerialNum |
 | `RangeSpecInputField` | 範圍輸入 | 下限-上限配對 | InputOutput |
 
 ---
@@ -330,21 +370,29 @@ Future<void> _loadModelList() async {
 }
 ```
 
-#### 2. 載入模型規格
+#### 2. 載入模型規格 (v1.4.0 更新)
 ```dart
 Future<void> _loadModelSpecs(String model) async {
   final specs = await firebaseService.getAllSpecs(
     model: model,
-    tableNames: ['InputOutputCharacteristics', 'BasicFunctionTest', 'HipotTestSpec'],
+    tableNames: [
+      'InputOutputCharacteristics', 
+      'BasicFunctionTest', 
+      'HipotTestSpec',
+      'PsuSerialNumSpec'  // 🆕 新增PSU序號規格
+    ],
   );
   
   // 轉換並設置規格對象
   _inputOutputSpec = InputOutputCharacteristicsSpec.fromJson(specs['InputOutputCharacteristics']);
+  _basicFunctionSpec = BasicFunctionTestSpec.fromJson(specs['BasicFunctionTest']);
+  _hipotTestSpec = HipotTestSpec.fromJson(specs['HipotTestSpec']);
+  _psuSerialNumSpec = PsuSerialNumSpec.fromJson(specs['PsuSerialNumSpec']); // 🆕
   // ...
 }
 ```
 
-#### 3. 保存模型規格
+#### 3. 保存模型規格 (v1.4.0 更新)
 ```dart
 Future<void> _saveModelSpecs() async {
   final firebaseService = FirebaseService();
@@ -355,6 +403,15 @@ Future<void> _saveModelSpecs() async {
     tableName: 'InputOutputCharacteristics',
     spec: _inputOutputSpec!.toJson(),
   );
+  
+  // 🆕 保存PSU序號規格
+  if (_psuSerialNumSpec != null) {
+    await firebaseService.addOrUpdateSpec(
+      model: model,
+      tableName: 'PsuSerialNumSpec',
+      spec: _psuSerialNumSpec!.toJson(),
+    );
+  }
   // ...
 }
 ```
@@ -386,7 +443,7 @@ Navigator.push(
 // 5. 點擊保存按鈕
 ```
 
-### 程式化操作範例
+### 程式化操作範例 (v1.4.0 更新)
 
 ```dart
 class ExampleUsage {
@@ -394,18 +451,28 @@ class ExampleUsage {
   Future<void> createNewModelSpec() async {
     final page = ModelSpecTemplatePage();
     
-    // 模擬新增模型
+    // 模擬新增模型 (使用新的預設值)
     final newSpec = InputOutputCharacteristicsSpec(
-      leftVinLowerbound: 100,
-      leftVinUpperbound: 240,
+      leftVinLowerbound: 187,  // 🆕 更新的預設值
+      leftVinUpperbound: 253,  // 🆕 更新的預設值
       // ... 其他參數
     );
+    
+    // 🆕 創建PSU序號規格
+    final psuSpec = PsuSerialNumSpec(qty: 12);
     
     // 保存到 Firebase
     await FirebaseService().addOrUpdateSpec(
       model: 'NEW_MODEL_001',
       tableName: 'InputOutputCharacteristics',
       spec: newSpec.toJson(),
+    );
+    
+    // 🆕 保存PSU序號規格
+    await FirebaseService().addOrUpdateSpec(
+      model: 'NEW_MODEL_001',
+      tableName: 'PsuSerialNumSpec',
+      spec: psuSpec.toJson(),
     );
   }
 }
@@ -453,13 +520,13 @@ Future<void> _saveModelSpecs() async {
 }
 ```
 
-#### 3. 刪除確認
+#### 3. 刪除確認 (v1.4.0 更新)
 ```dart
 final confirm = await showDialog<bool>(
   context: context,
   builder: (context) => AlertDialog(
     title: const Text('確認刪除'),
-    content: Text('確定要刪除 $_selectedModel 的所有規格嗎？此操作無法恢復。'),
+    content: Text('確定要刪除 $_selectedModel 的所有規格嗎？此操作無法恢復。\n\n將刪除以下內容：\n• 輸入輸出特性規格\n• 基本功能測試規格\n• 耐壓測試規格\n• PSU序號規格\n• 相關的失敗計數記錄'), // 🆕 包含PSU序號規格
     actions: [
       TextButton(onPressed: () => Navigator.pop(context, false), child: Text('取消')),
       TextButton(onPressed: () => Navigator.pop(context, true), child: Text('刪除')),
@@ -532,15 +599,18 @@ TextField(
 )
 ```
 
-### 4. 數據一致性
+### 4. 數據一致性 (v1.4.0 更新)
 
 ```dart
 // 提供合理的預設值
 _inputOutputSpec = InputOutputCharacteristicsSpec(
-  leftVinLowerbound: 0,
-  leftVinUpperbound: 0,
+  leftVinLowerbound: 187,  // 🆕 實際的預設值
+  leftVinUpperbound: 253,  // 🆕 實際的預設值
   // ...
 );
+
+// 🆕 PSU序號規格預設值
+_psuSerialNumSpec = PsuSerialNumSpec(qty: 12);
 
 // 數據驗證
 if (specMap != null && specMap.isNotEmpty) {
@@ -605,6 +675,7 @@ Widget _buildInputField(String label, String unit, TextEditingController control
 - [Firebase Service 文檔](./FirebaseService.md)
 - [資料結構文檔](./DataStructure.md)
 - [UI 組件庫文檔](./UIComponents.md)
+- [PSU序號規格文檔](./PsuSerialNumSpec.md) 🆕
 - [OQC 系統總覽](../README.md)
 
 ---
@@ -617,9 +688,10 @@ Widget _buildInputField(String label, String unit, TextEditingController control
 | 1.1.0 | 2024-01-15 | 新增模型自動發現功能 |
 | 1.2.0 | 2024-02-01 | 改進錯誤處理和使用者體驗 |
 | 1.3.0 | 2024-02-15 | 重構使用共用組件，提高代碼複用性 |
+| 1.4.0 | 2024-12-19 | 🆕 新增PSU序號規格支援，更新預設值，4個標籤頁界面 |
 
 ---
 
 **維護者**: Zerova OQC Team  
-**最後更新**: 2024-02-15  
+**最後更新**: 2024-12-19  
 **許可證**: MIT License 

@@ -149,6 +149,11 @@ default/
 - 絕緣阻抗規格
 - 漏電流規格
 
+#### PSU序號規格 (PSU Serial Number) 🆕
+- PSU數量 (Quantity) - 設定每個產品型號的PSU配置數量
+- 預設值：12個
+- 影響：PSU序號表格顯示行數、生產批次管理
+
 ## 🔄 API 接口
 
 ### FirebaseService 主要方法
