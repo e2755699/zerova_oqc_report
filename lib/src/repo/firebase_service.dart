@@ -9,7 +9,34 @@ import 'package:zerova_oqc_report/src/report/spec/FailCountStore.dart';
 
 class FirebaseService {
   final String projectId = 'oqcreport-87e5a';
-  final String apiKey = 'AIzaSyBzlul4mftI7HHJnj48I2aUs2nV154x0iI'; // 替換為你的 API Key
+  final String apiKey =
+      'AIzaSyBzlul4mftI7HHJnj48I2aUs2nV154x0iI'; // 替換為你的 API Key
+
+  /// 取得所有模型列表
+  Future<List<String>> getModelList() async {
+    final url =
+        'https://firestore.googleapis.com/v1/projects/$projectId/databases/(default)/documents/models?key=$apiKey';
+
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final documents = data['documents'] as List<dynamic>? ?? [];
+
+      // 從文檔路徑中提取模型名稱
+      final modelList = documents.map<String>((doc) {
+        final String name = doc['name'] as String;
+        // 路徑格式為 "projects/{project}/databases/(default)/documents/models/{modelId}"
+        final segments = name.split('/');
+        return segments.last;
+      }).toList();
+
+      return modelList;
+    } else {
+      throw Exception(
+          'Failed to load model list, statusCode=${response.statusCode}');
+    }
+  }
 
   /// 新增或更新某個 model/SN/tableName 的 spec 文件
   Future<bool> addOrUpdateSpec({
@@ -38,6 +65,7 @@ class FirebaseService {
     print('🔥 Body: ${response.body}');
     return response.statusCode == 200;
   }
+
   /// 新增或更新 fail count 到 /failcounts/{model}/{serialNumber}/{tableName}
   Future<bool> addOrUpdateFailCount({
     required String model,
@@ -68,7 +96,6 @@ class FirebaseService {
     return response.statusCode == 200;
   }
 
-
   /// 讀取多個 tableName 的 spec，回傳 Map<tableName, spec>
   Future<Map<String, Map<String, dynamic>>> getAllSpecs({
     required String model,
@@ -89,7 +116,8 @@ class FirebaseService {
         if (specField != null && specField is Map) {
           final fieldsMap = specField['mapValue']?['fields'];
           if (fieldsMap != null && fieldsMap is Map<String, dynamic>) {
-            result[tableName] = _fromFirestoreFields(Map<String, dynamic>.from(fieldsMap));
+            result[tableName] =
+                _fromFirestoreFields(Map<String, dynamic>.from(fieldsMap));
           } else {
             result[tableName] = {};
           }
@@ -100,7 +128,8 @@ class FirebaseService {
         // 文件不存在
         result[tableName] = {};
       } else {
-        throw Exception('Failed to load $tableName spec, statusCode=${response.statusCode}');
+        throw Exception(
+            'Failed to load $tableName spec, statusCode=${response.statusCode}');
       }
     }
 
@@ -125,7 +154,9 @@ class FirebaseService {
         final data = json.decode(response.body);
         final fields = data['fields'] ?? {};
         final countField = fields['failCount'];
-        if (countField != null && countField is Map && countField['integerValue'] != null) {
+        if (countField != null &&
+            countField is Map &&
+            countField['integerValue'] != null) {
           result[tableName] = int.tryParse(countField['integerValue']) ?? 0;
         } else {
           result[tableName] = 0;
@@ -134,7 +165,8 @@ class FirebaseService {
         // 文件不存在就預設為 0
         result[tableName] = 0;
       } else {
-        throw Exception('Failed to load fail count for $tableName, statusCode=${response.statusCode}');
+        throw Exception(
+            'Failed to load fail count for $tableName, statusCode=${response.statusCode}');
       }
     }
 
@@ -153,7 +185,9 @@ class FirebaseService {
       } else if (value is bool) {
         fields[key] = {"booleanValue": value};
       } else if (value is Map<String, dynamic>) {
-        fields[key] = {"mapValue": {"fields": _toFirestoreFields(value)}};
+        fields[key] = {
+          "mapValue": {"fields": _toFirestoreFields(value)}
+        };
       } else if (value is List) {
         fields[key] = {
           "arrayValue": {
@@ -163,7 +197,9 @@ class FirebaseService {
               if (e is double) return {"doubleValue": e};
               if (e is bool) return {"booleanValue": e};
               if (e is Map<String, dynamic>) {
-                return {"mapValue": {"fields": _toFirestoreFields(e)}};
+                return {
+                  "mapValue": {"fields": _toFirestoreFields(e)}
+                };
               }
               return {"nullValue": null};
             }).toList()
@@ -188,16 +224,19 @@ class FirebaseService {
       } else if (value.containsKey('booleanValue')) {
         result[key] = value['booleanValue'];
       } else if (value.containsKey('mapValue')) {
-        result[key] = _fromFirestoreFields(Map<String, dynamic>.from(value['mapValue']['fields']));
+        result[key] = _fromFirestoreFields(
+            Map<String, dynamic>.from(value['mapValue']['fields']));
       } else if (value.containsKey('arrayValue')) {
         final list = value['arrayValue']['values'] as List<dynamic>? ?? [];
         result[key] = list.map((e) {
           if (e.containsKey('stringValue')) return e['stringValue'];
-          if (e.containsKey('integerValue')) return int.tryParse(e['integerValue']) ?? 0;
+          if (e.containsKey('integerValue'))
+            return int.tryParse(e['integerValue']) ?? 0;
           if (e.containsKey('doubleValue')) return e['doubleValue'];
           if (e.containsKey('booleanValue')) return e['booleanValue'];
           if (e.containsKey('mapValue')) {
-            return _fromFirestoreFields(Map<String, dynamic>.from(e['mapValue']['fields']));
+            return _fromFirestoreFields(
+                Map<String, dynamic>.from(e['mapValue']['fields']));
           }
           return null;
         }).toList();
@@ -343,4 +382,3 @@ Future<void> fetchFailCountsForDevice(String model, String serialNumber) async {
     print('❌ ${entry.key}: ${entry.value} fails');
   }
 }
-
