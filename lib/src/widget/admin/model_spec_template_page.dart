@@ -476,25 +476,19 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
               InputOutputCharacteristicsTab(
                 spec: _inputOutputSpec,
                 onChanged: (newSpec) {
-                  setState(() {
-                    _inputOutputSpec = newSpec;
-                  });
+                  _inputOutputSpec = newSpec;
                 },
               ),
               BasicFunctionTestTab(
                 spec: _basicFunctionSpec,
                 onChanged: (newSpec) {
-                  setState(() {
-                    _basicFunctionSpec = newSpec;
-                  });
+                  _basicFunctionSpec = newSpec;
                 },
               ),
               HipotTestTab(
                 spec: _hipotTestSpec,
                 onChanged: (newSpec) {
-                  setState(() {
-                    _hipotTestSpec = newSpec;
-                  });
+                  _hipotTestSpec = newSpec;
                 },
               ),
             ],
