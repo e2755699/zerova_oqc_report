@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:zerova_oqc_report/src/report/model/package_list_result.dart';
 import 'package:zerova_oqc_report/src/report/spec/new_package_list_spec.dart.dart';
+import 'package:zerova_oqc_report/src/report/spec/package_list_spec.dart';
 
 class InputModelNameAndSnDialog extends StatefulWidget {
   const InputModelNameAndSnDialog({super.key});
