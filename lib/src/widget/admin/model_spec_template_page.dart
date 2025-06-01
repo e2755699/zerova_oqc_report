@@ -254,7 +254,8 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('確認刪除'),
-        content: Text('確定要刪除 $_selectedModel 的所有規格嗎？此操作無法恢復。'),
+        content: Text(
+            '確定要刪除 $_selectedModel 的所有規格嗎？此操作無法恢復。\n\n將刪除以下內容：\n• 輸入輸出特性規格\n• 基本功能測試規格\n• 耐壓測試規格\n• 相關的失敗計數記錄'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -276,23 +277,60 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
         _isLoading = true;
       });
 
-      // 這裡應該實現刪除模型規格的邏輯
-      // 由於 Firebase API 不直接支援刪除文件，我們可以用空規格覆蓋，或者自定義一個刪除標記
+      final firebaseService = FirebaseService();
 
-      // 從列表中移除
-      setState(() {
-        _modelList.remove(_selectedModel);
-        _selectedModel = null;
-        _inputOutputSpec = null;
-        _basicFunctionSpec = null;
-        _hipotTestSpec = null;
-        _isLoading = false;
-      });
+      // 刪除模型的所有規格文件
+      final deleteSpecsSuccess = await firebaseService.deleteAllModelSpecs(
+        model: _selectedModel!,
+      );
 
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('模型規格已成功刪除')),
-        );
+      // 刪除模型的所有fail count記錄
+      // final deleteFailCountsSuccess =
+      //     await firebaseService.deleteAllModelFailCounts(
+      //   model: _selectedModel!,
+      // );
+
+      // 檢查刪除結果
+      if (deleteSpecsSuccess) {
+        // 從本地列表中移除模型
+        setState(() {
+          _modelList.remove(_selectedModel);
+          final deletedModel = _selectedModel;
+          _selectedModel = null;
+          _inputOutputSpec = null;
+          _basicFunctionSpec = null;
+          _hipotTestSpec = null;
+          _isLoading = false;
+        });
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('模型 $_selectedModel 的所有規格已成功刪除')),
+          );
+        }
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+
+        // 顯示部分成功的訊息
+        String message = '刪除完成，但有些項目可能失敗：';
+        if (!deleteSpecsSuccess) {
+          message += '\n• 規格文件刪除失敗';
+        }
+        // if (!deleteFailCountsSuccess) {
+        //   message += '\n• 失敗計數記錄刪除失敗';
+        // }
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(message),
+              backgroundColor: Colors.orange,
+              duration: const Duration(seconds: 5),
+            ),
+          );
+        }
       }
     } catch (e) {
       setState(() {

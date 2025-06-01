@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// 規格輸入欄位的共用組件
 /// 用於統一管理所有規格頁面中的數值輸入欄位
@@ -30,6 +31,9 @@ class SpecInputField extends StatelessWidget {
   /// 輸入驗證
   final String? Function(String?)? validator;
 
+  /// 是否顯示清除按鈕
+  final bool showClearButton;
+
   const SpecInputField({
     super.key,
     required this.label,
@@ -41,28 +45,67 @@ class SpecInputField extends StatelessWidget {
     this.enabled = true,
     this.onChanged,
     this.validator,
+    this.showClearButton = true,
   });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: width,
-      child: TextField(
-        controller: controller,
-        enabled: enabled,
-        decoration: InputDecoration(
-          labelText: _buildLabel(),
-          hintText: hintText,
-          border: const OutlineInputBorder(),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          suffixText: unit,
-          filled: !enabled,
-          fillColor: enabled ? null : Colors.grey[100],
-        ),
-        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        onChanged: onChanged,
+      child: ValueListenableBuilder<TextEditingValue>(
+        valueListenable: controller,
+        builder: (context, value, child) {
+          return TextField(
+            controller: controller,
+            enabled: enabled,
+            decoration: InputDecoration(
+              labelText: _buildLabel(),
+              hintText: hintText,
+              border: const OutlineInputBorder(),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              suffixText: unit,
+              suffixIcon: _buildSuffixIcon(),
+              filled: !enabled,
+              fillColor: enabled ? null : Colors.grey[100],
+            ),
+            keyboardType: TextInputType.number,
+            inputFormatters: [
+              // 允許數字、小數點和負號
+              FilteringTextInputFormatter.allow(RegExp(r'^-?[0-9]*\.?[0-9]*')),
+            ],
+            textInputAction: TextInputAction.done,
+            onChanged: onChanged,
+          );
+        },
       ),
+    );
+  }
+
+  /// 構建後綴圖標（清除按鈕）
+  Widget? _buildSuffixIcon() {
+    if (!showClearButton || !enabled) return null;
+
+    return ValueListenableBuilder<TextEditingValue>(
+      valueListenable: controller,
+      builder: (context, value, child) {
+        if (value.text.isEmpty) return const SizedBox.shrink();
+
+        return IconButton(
+          icon: const Icon(Icons.clear, size: 18),
+          onPressed: () {
+            controller.clear();
+            if (onChanged != null) {
+              onChanged!('');
+            }
+          },
+          tooltip: '清除',
+          constraints: const BoxConstraints(
+            minHeight: 32,
+            minWidth: 32,
+          ),
+        );
+      },
     );
   }
 
@@ -102,6 +145,9 @@ class LabeledSpecInputField extends StatelessWidget {
   /// 值變更回調
   final ValueChanged<String>? onChanged;
 
+  /// 是否顯示清除按鈕
+  final bool showClearButton;
+
   const LabeledSpecInputField({
     super.key,
     required this.label,
@@ -112,6 +158,7 @@ class LabeledSpecInputField extends StatelessWidget {
     this.hintText,
     this.enabled = true,
     this.onChanged,
+    this.showClearButton = true,
   });
 
   @override
@@ -135,6 +182,7 @@ class LabeledSpecInputField extends StatelessWidget {
             hintText: hintText,
             enabled: enabled,
             onChanged: onChanged,
+            showClearButton: showClearButton,
           ),
         ),
       ],
@@ -177,6 +225,9 @@ class RangeSpecInputField extends StatelessWidget {
   /// 上限變更回調
   final ValueChanged<String>? onUpperChanged;
 
+  /// 是否顯示清除按鈕
+  final bool showClearButton;
+
   const RangeSpecInputField({
     super.key,
     required this.label,
@@ -187,6 +238,7 @@ class RangeSpecInputField extends StatelessWidget {
     this.enabled = true,
     this.onLowerChanged,
     this.onUpperChanged,
+    this.showClearButton = true,
   });
 
   @override
@@ -211,6 +263,7 @@ class RangeSpecInputField extends StatelessWidget {
                 unit: unit,
                 enabled: enabled,
                 onChanged: onLowerChanged,
+                showClearButton: showClearButton,
               ),
             ),
             const SizedBox(width: 16),
@@ -226,6 +279,7 @@ class RangeSpecInputField extends StatelessWidget {
                 unit: unit,
                 enabled: enabled,
                 onChanged: onUpperChanged,
+                showClearButton: showClearButton,
               ),
             ),
           ],

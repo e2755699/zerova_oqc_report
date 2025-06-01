@@ -343,6 +343,153 @@ class FirebaseService {
     });
     return result;
   }
+
+  /// 刪除特定模型和表格名稱的規格文件
+  Future<bool> deleteSpec({
+    required String model,
+    required String tableName,
+  }) async {
+    final url =
+        'https://firestore.googleapis.com/v1/projects/$projectId/databases/(default)/documents/models/$model/$tableName/spec?key=$apiKey';
+
+    final response = await http.delete(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    print('🗑️ Delete Spec Status: ${response.statusCode}');
+    print('🗑️ Response Body: ${response.body}');
+
+    return response.statusCode == 200 ||
+        response.statusCode == 404; // 404表示已經不存在，也算成功
+  }
+
+  /// 刪除特定模型的所有規格文件
+  Future<bool> deleteAllModelSpecs({
+    required String model,
+  }) async {
+    try {
+      final tableNames = [
+        'InputOutputCharacteristics',
+        'BasicFunctionTest',
+        'HipotTestSpec',
+        'PsuSerialNumSpec',
+        'PackageListSpec'
+      ];
+
+      bool allSuccess = true;
+
+      // 刪除所有規格類型
+      for (final tableName in tableNames) {
+        try {
+          final success = await deleteSpec(model: model, tableName: tableName);
+          if (!success) {
+            print('⚠️ 刪除 $model/$tableName 失敗');
+            allSuccess = false;
+          }
+        } catch (e) {
+          print('⚠️ 刪除 $model/$tableName 異常: $e');
+          allSuccess = false;
+        }
+      }
+
+      return allSuccess;
+    } catch (e) {
+      print('❌ 刪除模型 $model 所有規格失敗: $e');
+      return false;
+    }
+  }
+
+  /// 刪除特定模型的所有fail count記錄
+  Future<bool> deleteAllModelFailCounts({
+    required String model,
+  }) async {
+    try {
+      // 首先獲取所有該模型的fail count文檔
+      final url =
+          'https://firestore.googleapis.com/v1/projects/$projectId/databases/(default)/documents:runQuery?key=$apiKey';
+
+      final body = json.encode({
+        "structuredQuery": {
+          "from": [
+            {"collectionId": "failcounts"}
+          ],
+          "where": {
+            "compositeFilter": {
+              "op": "AND",
+              "filters": [
+                {
+                  "fieldFilter": {
+                    "field": {"fieldPath": "__name__"},
+                    "op": "GREATER_THAN_OR_EQUAL",
+                    "value": {
+                      "stringValue":
+                          "projects/$projectId/databases/(default)/documents/failcounts/$model"
+                    }
+                  }
+                },
+                {
+                  "fieldFilter": {
+                    "field": {"fieldPath": "__name__"},
+                    "op": "LESS_THAN",
+                    "value": {
+                      "stringValue":
+                          "projects/$projectId/databases/(default)/documents/failcounts/${model}z"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      });
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final documents = data as List<dynamic>? ?? [];
+
+        bool allSuccess = true;
+
+        // 刪除每個找到的文檔
+        for (final docWrapper in documents) {
+          final doc = docWrapper['document'];
+          if (doc != null) {
+            final String documentName = doc['name'] as String;
+            // 從完整路徑中提取用於DELETE請求的路徑
+            final pathParts = documentName.split('/documents/')[1];
+            final deleteUrl =
+                'https://firestore.googleapis.com/v1/projects/$projectId/databases/(default)/documents/$pathParts?key=$apiKey';
+
+            final deleteResponse = await http.delete(
+              Uri.parse(deleteUrl),
+              headers: {'Content-Type': 'application/json'},
+            );
+
+            if (deleteResponse.statusCode != 200 &&
+                deleteResponse.statusCode != 404) {
+              print(
+                  '⚠️ 刪除fail count文檔失敗: $documentName, status: ${deleteResponse.statusCode}');
+              allSuccess = false;
+            }
+          }
+        }
+
+        return allSuccess;
+      } else {
+        print('⚠️ 查詢fail count文檔失敗: ${response.statusCode}');
+        return false;
+      }
+    } catch (e) {
+      print('❌ 刪除模型 $model 所有fail count失敗: $e');
+      return false;
+    }
+  }
 }
 
 Future<void> fetchAndPsuSerialNumSpecs(String model) async {
