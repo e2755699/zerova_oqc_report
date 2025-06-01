@@ -318,7 +318,7 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
       builder: (context) => AlertDialog(
         title: const Text('確認刪除'),
         content: Text(
-            '確定要刪除 $_selectedModel 的所有規格嗎？此操作無法恢復。\n\n將刪除以下內容：\n• 輸入輸出特性規格\n• 基本功能測試規格\n• 耐壓測試規格\n• PSU序號規格\n• 包裝清單規格\n• 相關的失敗計數記錄'),
+            '確定要刪除 $_selectedModel 的所有規格嗎？此操作無法恢復。\n\n將刪除以下內容：\n• 輸入輸出特性規格\n• 基本功能測試規格\n• 耐壓測試規格\n• PSU序號規格\n• 配件包規格\n• 相關的失敗計數記錄'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -566,11 +566,11 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
         TabBar(
           controller: _tabController,
           tabs: const [
+            Tab(text: 'PSU序號'),
             Tab(text: '輸入輸出特性'),
             Tab(text: '基本功能測試'),
             Tab(text: '耐壓測試'),
-            Tab(text: 'PSU序號'),
-            Tab(text: '包裝清單'),
+            Tab(text: '配件包'),
           ],
         ),
         SizedBox(
@@ -578,6 +578,12 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
           child: TabBarView(
             controller: _tabController,
             children: [
+              PsuSerialNumTab(
+                spec: _psuSerialNumSpec,
+                onChanged: (newSpec) {
+                  _psuSerialNumSpec = newSpec;
+                },
+              ),
               InputOutputCharacteristicsTab(
                 spec: _inputOutputSpec,
                 onChanged: (newSpec) {
@@ -594,12 +600,6 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
                 spec: _hipotTestSpec,
                 onChanged: (newSpec) {
                   _hipotTestSpec = newSpec;
-                },
-              ),
-              PsuSerialNumTab(
-                spec: _psuSerialNumSpec,
-                onChanged: (newSpec) {
-                  _psuSerialNumSpec = newSpec;
                 },
               ),
               PackageListTab(

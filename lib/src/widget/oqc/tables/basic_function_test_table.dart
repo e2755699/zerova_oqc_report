@@ -34,7 +34,7 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
     'THD:',
     'Standby Power:'
   ];
-  final List<String> valueUnits = ['%', '%', '%', 'W'];
+  final List<String> valueUnits = ['%', '', '%', 'W'];
 
   double _defaultIfEmptyDouble(double? value, double defaultValue) {
     return (value == null || value.isNaN) ? defaultValue : value;

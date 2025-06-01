@@ -33,7 +33,7 @@ projects/oqcreport-87e5a/databases/(default)/documents/
 │   │   ├── PsuSerialNumSpec/                 # PSU序號規格
 │   │   │   └── spec/
 │   │   │       └── spec: {PsuSerialNumSpec}
-│   │   └── PackageListSpec/                  # 包裝清單規格
+│   │   └── PackageListSpec/                  # 配件包規格
 │   │       └── spec/
 │   │           └── spec: {PackageListSpec}
 ├── machines/                                 # 測試設備資料
@@ -68,7 +68,7 @@ projects/oqcreport-87e5a/databases/(default)/documents/
         ├── inputOutputCharacteristics/     # 輸入輸出特性
         ├── basicFunctionTest/              # 基本功能測試
         ├── protectionFunctionTest/         # 保護功能測試
-        ├── packageList/                    # 包裝清單
+        ├── packageList/                    # 配件包
         ├── attachments/                    # 附件
         └── signatures/                     # 簽名
 ```
@@ -230,7 +230,7 @@ class PsuSerialNumSpec {
 ---
 
 ### 5. PackageListSpec
-**用途**: 定義包裝清單內容物和數量標準  
+**用途**: 定義配件包內容物和數量標準
 **Firebase路徑**: `models/{modelId}/PackageListSpec/spec`
 
 ```dart
@@ -464,7 +464,7 @@ class TestItem {
 ---
 
 ### 6. PackageListResult
-**用途**: 包裝清單檢查結果  
+**用途**: 配件包檢查結果
 **檢查項目**: 包裝內容物數量核對
 
 ```dart
@@ -491,7 +491,7 @@ class PackageListResultMeasurement {
 }
 ```
 
-#### 包裝清單預設規格
+#### 配件包預設規格
 | 項目 | 規格數量 | 翻譯鍵值 | 英文名稱 |
 |------|----------|----------|----------|
 | RFID卡 | 2 | rfid_card | RFID Card |
@@ -546,7 +546,7 @@ enum Judgement {
 **使用場景**:
 - 所有測量結果的判定
 - 外觀檢查的判定
-- 包裝清單檢查的判定
+- 配件包檢查的判定
 - 失敗計數的統計依據
 
 ---

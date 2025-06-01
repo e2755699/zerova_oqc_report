@@ -18,7 +18,7 @@ Zerova OQC Report System 是一個現代化的品質控制報告管理平台，�
 5. **Input & Output Characteristics Table** - 輸入輸出特性表
 6. **Basic Function Test Table** - 基本功能測試表
 7. **Protection Function Test Table** - 保護功能測試表
-8. **Package List Table** - 包裝清單表
+8. **Package List Table** - 配件包表
 9. **Attachment Table** - 附件表
 10. **Signature Table** - 簽名表
 
