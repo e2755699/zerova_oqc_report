@@ -1088,8 +1088,6 @@ class PdfGenerator {
       3: const pw.FlexColumnWidth(0.8), // Check
     };
 
-    final spec = globalPackageListSpec;
-
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
@@ -1106,80 +1104,53 @@ class PdfGenerator {
           columnWidths: columnWidths,
           border: pw.TableBorder.all(),
           children: [
+            // 表頭
             pw.TableRow(
-              children: data.header
+              children: PackageListResult.defaultHeader
                   .map((header) => pw.Padding(
-                        padding: const pw.EdgeInsets.all(5),
-                        child: pw.Text(header,
-                            style: pw.TextStyle(font: font),
-                            textAlign: pw.TextAlign.center),
-                      ))
+                padding: const pw.EdgeInsets.all(5),
+                child: pw.Text(
+                  header,
+                  style: pw.TextStyle(font: font),
+                  textAlign: pw.TextAlign.center,
+                ),
+              ))
                   .toList(),
             ),
+            // 動態內容
             ...List.generate(
-              data.datas.length,
-              (index) => pw.TableRow(
-                children: [
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(5),
-                    child: pw.Text('${index + 1}',
-                        style: pw.TextStyle(font: font),
-                        textAlign: pw.TextAlign.center),
-                  ),
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(5),
-                    child: pw.Text(
-                          () {
-                        switch (index + 1) {
-                          case 1:
-                            return spec?.rfidcard ?? '';
-                          case 2:
-                            return spec?.productcertificatecard ?? '';
-                          case 3:
-                            return spec?.screwassym4 ?? '';
-                          case 4:
-                            return spec?.boltscover ?? '';
-                          case 5:
-                            return spec?.usermanual ?? '';
-                          default:
-                            return '';
-                        }
-                      }(),
-                      style: pw.TextStyle(font: font),
-                      textAlign: pw.TextAlign.center,
+              data.measurements.length,
+                  (index) {
+                final m = data.measurements[index];
+                return pw.TableRow(
+                  children: [
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(5),
+                      child: pw.Text('${index + 1}',
+                          style: pw.TextStyle(font: font),
+                          textAlign: pw.TextAlign.center),
                     ),
-                  ),
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(5),
-                    child: pw.Text(
-                          () {
-                        switch (index + 1) { // 注意原本你拿的 index 是從0開始，若跟之前getSpecText對應，需+1
-                          case 1:
-                            return spec?.rfidcardspec?.toString() ?? '';
-                          case 2:
-                            return spec?.productcertificatecardspec?.toString() ?? '';
-                          case 3:
-                            return spec?.screwassym4spec?.toString() ?? '';
-                          case 4:
-                            return spec?.boltscoverspec?.toString() ?? '';
-                          case 5:
-                            return spec?.usermanualspec?.toString() ?? '';
-                          default:
-                            return '';
-                        }
-                      }(),
-                      style: pw.TextStyle(font: font),
-                      textAlign: pw.TextAlign.center,
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(5),
+                      child: pw.Text(m.itemName,
+                          style: pw.TextStyle(font: font),
+                          textAlign: pw.TextAlign.center),
                     ),
-                  ),
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(5),
-                    child: pw.Text(data.datas[index].isCheck.value ? '✓' : '',
-                        style: pw.TextStyle(font: font),
-                        textAlign: pw.TextAlign.center),
-                  ),
-                ],
-              ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(5),
+                      child: pw.Text(m.quantity,
+                          style: pw.TextStyle(font: font),
+                          textAlign: pw.TextAlign.center),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(5),
+                      child: pw.Text(m.isCheck.value ? '✓' : '',
+                          style: pw.TextStyle(font: font),
+                          textAlign: pw.TextAlign.center),
+                    ),
+                  ],
+                );
+              },
             ),
           ],
         ),
@@ -1190,6 +1161,7 @@ class PdfGenerator {
       ],
     );
   }
+
 
   String getSpecText(int index, PackageListSpec spec) {
     switch (index) {

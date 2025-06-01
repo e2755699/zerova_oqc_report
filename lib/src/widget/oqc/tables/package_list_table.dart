@@ -9,90 +9,69 @@ import 'dart:io';
 import 'package:zerova_oqc_report/src/widget/common/table_wrapper.dart';
 import 'package:zerova_oqc_report/src/repo/sharepoint_uploader.dart';
 import 'package:zerova_oqc_report/src/widget/common/global_state.dart';
-import 'package:zerova_oqc_report/src/report/spec/package_list_spec.dart';
 import 'package:flutter/services.dart';
+
+import 'package:zerova_oqc_report/src/report/spec/package_list_spec.dart';
+import 'package:zerova_oqc_report/src/report/spec/new_package_list_spec.dart.dart';
+
+class ItemData {
+  String name;
+  String quantity;
+  ValueNotifier<bool> isChecked;
+
+  ItemData({this.name = '', this.quantity = '', bool isChecked = false})
+      : isChecked = ValueNotifier(isChecked);
+}
+
+final ValueNotifier<List<ItemData>> items = ValueNotifier<List<ItemData>>([]);
 
 class PackageListTable extends StatelessWidget {
   final String sn;
   final String model;
   final PackageListResult data;
 
-  const PackageListTable(this.data, {super.key, required this.sn, required this.model});
-
-  List<String> get headers => data.header;
-
-  void someFunction() {
-    final spec = globalPackageListSpec;
-    if (spec == null) {
-      print("globalPackageListSpec 尚未初始化");
-      return;
-    }
-    print('--- PackageListSpec ---');
-    print('RFID Card: ${spec.rfidcard} (${spec.rfidcardspec})');
-    print('Product Certificate Card: ${spec.productcertificatecard} (${spec.productcertificatecardspec})');
-    print('Screw Assy M4*12: ${spec.screwassym4} (${spec.screwassym4spec})');
-    print('Bolts Cover: ${spec.boltscover} (${spec.boltscoverspec})');
-    print('User Manual: ${spec.usermanual} (${spec.usermanualspec})');
-    print('-----------------------');
-  }
-
-  String _defaultIfEmptyString(String? value, String defaultValue) {
-    return (value == null || value.isEmpty) ? defaultValue : value;
-  }
-
-  int _defaultIfEmptyInt(int? value, int defaultValue) {
-    return (value == null) ? defaultValue : value;
-  }
-
-  Map<int, String> get _defaultSpecNames {
-    final spec = globalPackageListSpec;
-    return {
-      1: _defaultIfEmptyString(spec?.rfidcard, "RFID Card"),
-      2: _defaultIfEmptyString(spec?.productcertificatecard, "Product Certificate Card"),
-      3: _defaultIfEmptyString(spec?.screwassym4, "Screw Assy M4*12"),
-      4: _defaultIfEmptyString(spec?.boltscover, "Bolts Cover"),
-      5: _defaultIfEmptyString(spec?.usermanual, "User Manual"),
-    };
-  }
-
-  Map<int, int> get _defaultSpecValues {
-    final spec = globalPackageListSpec;
-    return {
-      6: _defaultIfEmptyInt(spec?.rfidcardspec, 2),
-      7: _defaultIfEmptyInt(spec?.productcertificatecardspec, 1),
-      8: _defaultIfEmptyInt(spec?.screwassym4spec, 22),
-      9: _defaultIfEmptyInt(spec?.boltscoverspec, 4),
-      10: _defaultIfEmptyInt(spec?.usermanualspec, 1),
-    };
-  }
+  const PackageListTable(
+      this.data, {
+        super.key,
+        required this.sn,
+        required this.model,
+      });
 
 
-  void initializeGlobalSpec() {
-    final specNames = _defaultSpecNames;
-    final specValues = _defaultSpecValues;
 
-    globalPackageListSpec = PackageListSpec(
-      rfidcard: specNames[1] ?? "RFID Card",
-      productcertificatecard: specNames[2] ?? "Product Certificate Card",
-      screwassym4: specNames[3] ?? "Screw Assy M4*12",
-      boltscover: specNames[4] ?? "Bolts Cover",
-      usermanual: specNames[5] ?? "User Manual",
-      rfidcardspec: specValues[6] ?? 2,
-      productcertificatecardspec: specValues[7] ?? 1,
-      screwassym4spec: specValues[8] ?? 22,
-      boltscoverspec: specValues[9] ?? 4,
-      usermanualspec: specValues[10] ?? 1,
-    );
-    //print("globalPackageListSpec initialized: ${globalPackageListSpec}");
-  }
 
   @override
   Widget build(BuildContext context) {
     if (!globalPackageListSpecInitialized) {
-      initializeGlobalSpec();
-      someFunction();
+      final measurements = PackageListSpecGlobal.get().measurements;
+
+      final initialItems = <ItemData>[];
+      print("'yyyyyyyyyy: ");
+      if (measurements.isNotEmpty) {
+        print("'xxxxxxxxxxxxx: ");
+        for (int i = 0; i < measurements.length; i++) {
+          final m = measurements[i];
+          print('itemName: ${m.itemName}, quantity: ${m.quantity}, isChecked: ${m.isCheck.value}');
+
+          data.updateOrAddMeasurement(
+            index: i,
+            name: m.itemName,
+            quantity: m.quantity,
+            isChecked: m.isCheck.value,
+          );
+
+          initialItems.add(ItemData(
+            name: m.itemName,
+            quantity: m.quantity,
+            isChecked: m.isCheck.value,
+          ));
+        }
+      }
+
+      items.value = initialItems;
       globalPackageListSpecInitialized = true;
-    } else {
+    }
+    else {
       print("globalPackageListSpec 已存在，不執行初始化");
     }
     return ValueListenableBuilder<int>(
@@ -102,21 +81,43 @@ class PackageListTable extends StatelessWidget {
           valueListenable: permissions,
           builder: (context, permission, _) {
             final isEditable = editMode == 1 && (permission == 1 || permission == 2);
-            final isHeaderEditable = editMode == 1 && permission == 1;
             return TableWrapper(
               title: context.tr('package_list'),
               titleAction: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
+                    icon: const Icon(Icons.add),
+                    tooltip: 'Add Item',
+                    onPressed: () {
+                      items.value = List.from(items.value)..add(ItemData());
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.remove),
+                    tooltip: 'Remove Item',
+                      onPressed: () {
+                        if (items.value.isNotEmpty) {
+                          final lastIndex = items.value.length - 1;
+                          items.value = List.from(items.value)..removeLast();
+                          data.removeMeasurementAt(lastIndex); // <-- 同步刪除測量資料
+
+                          //PackageListSpecStore.instance.packageListData = data;
+                        }
+                      }
+                  ),
+                  IconButton(
                     icon: const Icon(Icons.cloud_download),
                     tooltip: 'Download to SharePoint',
                     onPressed: () {
-                      SharePointUploader(uploadOrDownload: 2, sn: sn, model: '').startAuthorization(
+                      for (var m in PackageListSpecGlobal.get().measurements) {
+                        print('itemName: ${m.itemName}, quantity: ${m.quantity}, isChecked: ${m.isCheck.value}');
+                      }
+                      /*SharePointUploader(uploadOrDownload: 2, sn: sn, model: '').startAuthorization(
                         categoryTranslations: {
-                          "packageing_photo": "Packageing Photo ",
+                          "packageing_photo": "Packageing Photo",
                         },
-                      );
+                      );*/
                     },
                   ),
                   CameraButton(
@@ -128,133 +129,110 @@ class PackageListTable extends StatelessWidget {
               ),
               content: Column(
                 children: [
-                  Table(
-                    border: TableBorder.all(color: AppColors.lightBlueColor),
-                    children: [
-                      TableRow(
-                        children: headers
-                            .map((header) => Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Center(child: Text(header)),
-                        ))
-                            .toList(),
-                      ),
-                      ...data.datas.asMap().entries.map((entry) {
-                        return TableRow(
-                          children: [
-                            // No.
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Center(child: Text('${entry.key + 1}')),
-                            ),
-                            // Item
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Center(
-                                child: isHeaderEditable
-                                    ? TextFormField(
-                                  initialValue: _defaultSpecNames[entry.key + 1],
-                                  textAlign: TextAlign.center,
-                                  decoration: const InputDecoration(
-                                    isDense: true,
-                                    contentPadding: EdgeInsets.symmetric(vertical: 4, horizontal: 6),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.all(Radius.circular(6)),
-                                    ),
-                                  ),
-                                  keyboardType: TextInputType.text,
-                                  onChanged: (val) {
-                                    switch (entry.key + 1) {
-                                      case 1:
-                                        globalPackageListSpec = globalPackageListSpec?.copyWith(rfidcard: val);
-                                        break;
-                                      case 2:
-                                        globalPackageListSpec = globalPackageListSpec?.copyWith(productcertificatecard: val);
-                                        break;
-                                      case 3:
-                                        globalPackageListSpec = globalPackageListSpec?.copyWith(screwassym4: val);
-                                        break;
-                                      case 4:
-                                        globalPackageListSpec = globalPackageListSpec?.copyWith(boltscover: val);
-                                        break;
-                                      case 5:
-                                        globalPackageListSpec = globalPackageListSpec?.copyWith(usermanual: val);
-                                        break;
-                                    }
-                                  },
-                                )
-                                    : Text(_defaultSpecNames[entry.key + 1] ?? ''),
+                  ValueListenableBuilder<List<ItemData>>(
+                    valueListenable: items,
+                    builder: (context, itemList, _) {
+                      return Table(
+                        border: TableBorder.all(color: Colors.blue),
+                        children: [
+                          const TableRow(
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Center(child: Text('No.')),
                               ),
-                            ),
-
-                            // Q'ty
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Center(
-                                child: isHeaderEditable
-                                    ? SizedBox(
-                                  width: 120, // 你可以調整這個寬度
-                                  height: 36,
-                                  child: TextFormField(
-                                    initialValue: _defaultSpecValues[entry.key + 6]?.toString() ?? '',
-                                    textAlign: TextAlign.center,
-                                    decoration: const InputDecoration(
-                                      isDense: true,
-                                      contentPadding: EdgeInsets.symmetric(vertical: 4, horizontal: 6),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.all(Radius.circular(6)),
+                              Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Center(child: Text('Items')),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Center(child: Text('Q\'ty')),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Center(child: Text('Check')),
+                              ),
+                            ],
+                          ),
+                          ...itemList.asMap().entries.map((entry) {
+                            final index = entry.key;
+                            final item = entry.value;
+                            return TableRow(
+                              children: [
+                                // No.
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Center(child: Text('${index + 1}')),
+                                ),
+                                // Item (editable or plain text)
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Center(
+                                    child: isEditable
+                                        ? TextFormField(
+                                      initialValue: item.name,
+                                      decoration: const InputDecoration(
+                                        isDense: true,
+                                        border: OutlineInputBorder(),
                                       ),
-                                    ),
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                                    onChanged: (val) {
-                                      final parsed = int.tryParse(val);
-                                      if (parsed != null) {
-                                        switch (entry.key + 6) {
-                                          case 6:
-                                            globalPackageListSpec = globalPackageListSpec?.copyWith(rfidcardspec: parsed);
-                                            break;
-                                          case 7:
-                                            globalPackageListSpec = globalPackageListSpec?.copyWith(productcertificatecardspec: parsed);
-                                            break;
-                                          case 8:
-                                            globalPackageListSpec = globalPackageListSpec?.copyWith(screwassym4spec: parsed);
-                                            break;
-                                          case 9:
-                                            globalPackageListSpec = globalPackageListSpec?.copyWith(boltscoverspec: parsed);
-                                            break;
-                                          case 10:
-                                            globalPackageListSpec = globalPackageListSpec?.copyWith(usermanualspec: parsed);
-                                            break;
+                                        onChanged: (val) {
+                                          item.name = val;
+                                          data.updateOrAddMeasurement(index: index, name: val);
+
+                                          //PackageListSpecStore.instance.packageListData = data;
                                         }
-                                      }
-                                    },
-                                  ),
-                                )
-                                    : Text(_defaultSpecValues[entry.key + 6]?.toString() ?? ''),
-                              ),
-                            ),
-                            // Checkbox
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Center(
-                                child: ValueListenableBuilder(
-                                  key: GlobalKey(debugLabel: 'checkbox_${entry.value.key}'),
-                                  valueListenable: entry.value.isCheck,
-                                  builder: (context, value, _) => Checkbox(
-                                    value: value,
-                                    onChanged: (isCheck) {
-                                      entry.value.toggle();
-                                    },
-                                    activeColor: AppColors.primaryColor,
+                                    )
+                                        : Text(item.name),
                                   ),
                                 ),
-                              ),
-                            ),
-                          ],
-                        );
-                      }),
-                    ],
+                                // Quantity (editable or plain text)
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Center(
+                                    child: isEditable
+                                        ? TextFormField(
+                                      initialValue: item.quantity,
+                                      keyboardType: TextInputType.number,
+                                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                      decoration: const InputDecoration(
+                                        isDense: true,
+                                        border: OutlineInputBorder(),
+                                      ),
+                                        onChanged: (val) {
+                                          item.quantity = val;
+                                          data.updateOrAddMeasurement(index: index, quantity: val);
+                                          //PackageListSpecStore.instance.packageListData = data;
+                                        }
+                                    )
+                                        : Text(item.quantity),
+                                  ),
+                                ),
+                                // Checkbox (always clickable)
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Center(
+                                    child: ValueListenableBuilder<bool>(
+                                      valueListenable: item.isChecked,
+                                      builder: (context, isChecked, _) {
+                                        return Checkbox(
+                                          value: isChecked,
+                                            onChanged: (val) {
+                                              item.isChecked.value = val ?? false;
+                                              data.updateOrAddMeasurement(index: index, isChecked: val ?? false);
+                                              //PackageListSpecStore.instance.packageListData = data;
+                                            }
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          }),
+                        ],
+                      );
+                    },
                   ),
                   const SizedBox(height: 20),
                   ImageGrid(
@@ -269,18 +247,5 @@ class PackageListTable extends StatelessWidget {
         );
       },
     );
-  }
-
-  static Future<pw.ImageProvider?> imageFromPath(String path) async {
-    try {
-      final file = File(path);
-      if (await file.exists()) {
-        final bytes = await file.readAsBytes();
-        return pw.MemoryImage(bytes);
-      }
-    } catch (e) {
-      debugPrint('Error loading image: $e');
-    }
-    return null;
   }
 }
