@@ -12,26 +12,123 @@ class FirebaseService {
   final String apiKey =
       'AIzaSyBzlul4mftI7HHJnj48I2aUs2nV154x0iI'; // 替換為你的 API Key
 
-  /// 取得所有模型列表
+  /// 取得所有模型列表（改進版：更可靠的方法）
   Future<List<String>> getModelList() async {
-    final url =
-        'https://firestore.googleapis.com/v1/projects/$projectId/databases/(default)/documents/models?key=$apiKey';
+    try {
+      // 查詢多個規格類型，確保不遺漏任何模型
+      final specTypes = [
+        'InputOutputCharacteristics',
+        'BasicFunctionTest',
+        'HipotTestSpec',
+        'PsuSerialNumSpec',
+        'PackageListSpec'
+      ];
 
-    final response = await http.get(Uri.parse(url));
+      final modelSet = <String>{};
+
+      // 對每種規格類型進行collection group查詢
+      for (final specType in specTypes) {
+        try {
+          final url =
+              'https://firestore.googleapis.com/v1/projects/$projectId/databases/(default)/documents:runQuery?key=$apiKey';
+
+          final body = json.encode({
+            "structuredQuery": {
+              "from": [
+                {"collectionId": specType, "allDescendants": true}
+              ],
+              "limit": 100 // 增加限制以防遺漏
+            }
+          });
+
+          final response = await http.post(
+            Uri.parse(url),
+            headers: {'Content-Type': 'application/json'},
+            body: body,
+          );
+
+          if (response.statusCode == 200) {
+            final data = json.decode(response.body);
+            final documents = data as List<dynamic>? ?? [];
+
+            // 從文檔路徑中提取模型名稱
+            for (final docWrapper in documents) {
+              final doc = docWrapper['document'];
+              if (doc != null) {
+                final String name = doc['name'] as String;
+                // 路徑格式：projects/{project}/databases/(default)/documents/models/{modelId}/{specType}/{docId}
+                final segments = name.split('/');
+                if (segments.length >= 8 && segments[5] == 'models') {
+                  final modelId = segments[6];
+                  // 驗證模型ID不為空且合理
+                  if (modelId.isNotEmpty && modelId != 'undefined') {
+                    modelSet.add(modelId);
+                  }
+                }
+              }
+            }
+          }
+        } catch (e) {
+          // 如果某個規格類型查詢失敗，繼續查詢其他類型
+          print('⚠️ 查詢 $specType 失敗: $e');
+          continue;
+        }
+      }
+
+      // 如果所有查詢都失敗，拋出異常
+      if (modelSet.isEmpty) {
+        throw Exception('無法從任何規格類型中找到模型');
+      }
+
+      final modelList = modelSet.toList()..sort();
+      return modelList;
+    } catch (e) {
+      // 如果改進方法失敗，回退到原始方法
+      return await _getModelListFallback();
+    }
+  }
+
+  /// 備用方法：簡單的InputOutputCharacteristics查詢
+  Future<List<String>> _getModelListFallback() async {
+    final url =
+        'https://firestore.googleapis.com/v1/projects/$projectId/databases/(default)/documents:runQuery?key=$apiKey';
+
+    final body = json.encode({
+      "structuredQuery": {
+        "from": [
+          {"collectionId": "InputOutputCharacteristics", "allDescendants": true}
+        ],
+        "limit": 50
+      }
+    });
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: body,
+    );
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      final documents = data['documents'] as List<dynamic>? ?? [];
+      final documents = data as List<dynamic>? ?? [];
 
-      // 從文檔路徑中提取模型名稱
-      final modelList = documents.map<String>((doc) {
-        final String name = doc['name'] as String;
-        // 路徑格式為 "projects/{project}/databases/(default)/documents/models/{modelId}"
-        final segments = name.split('/');
-        return segments.last;
-      }).toList();
+      final modelSet = <String>{};
 
-      return modelList;
+      for (final docWrapper in documents) {
+        final doc = docWrapper['document'];
+        if (doc != null) {
+          final String name = doc['name'] as String;
+          final segments = name.split('/');
+          if (segments.length >= 8) {
+            final modelId = segments[6];
+            if (modelId.isNotEmpty) {
+              modelSet.add(modelId);
+            }
+          }
+        }
+      }
+
+      return modelSet.toList()..sort();
     } else {
       throw Exception(
           'Failed to load model list, statusCode=${response.statusCode}');
@@ -380,5 +477,45 @@ Future<void> fetchFailCountsForDevice(String model, String serialNumber) async {
   for (final entry in failCounts.entries) {
     FailCountStore.setCount(entry.key, entry.value);
     print('❌ ${entry.key}: ${entry.value} fails');
+  }
+}
+
+/// 測試新的getModelList()方法
+Future<void> testNewGetModelList() async {
+  print('\n🧪 === 測試新的getModelList()方法 ===');
+
+  try {
+    final firebaseService = FirebaseService();
+    final models = await firebaseService.getModelList();
+
+    print('\n📝 獲取到的模型列表:');
+    for (int i = 0; i < models.length; i++) {
+      print('  ${i + 1}. ${models[i]}');
+    }
+
+    print('\n🎯 期望的模型列表:');
+    final expectedModels = [
+      "DDYA362F0QEFOA",
+      "DDYA362F0QEFOA-RW",
+      "DDYA482F0VEFUU",
+      "DOYE362000D3PN",
+      "EV100",
+      "EV1000",
+      "EV500"
+    ];
+
+    for (int i = 0; i < expectedModels.length; i++) {
+      final expected = expectedModels[i];
+      final found = models.contains(expected);
+      print('  ${found ? '✅' : '❌'} $expected ${found ? '(找到)' : '(未找到)'}');
+    }
+
+    print('\n📊 統計:');
+    print('  實際獲取: ${models.length} 個模型');
+    print('  期望獲取: ${expectedModels.length} 個模型');
+    print(
+        '  匹配數量: ${expectedModels.where((e) => models.contains(e)).length} 個');
+  } catch (e) {
+    print('❌ 測試失敗: $e');
   }
 }
