@@ -25,6 +25,7 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
   bool _isLoading = false;
   bool _isNewModel = false;
   TabController? _tabController;
+  int _currentTabIndex = 0;
 
   // 各類型的規格
   InputOutputCharacteristicsSpec? _inputOutputSpec;
@@ -35,14 +36,24 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _tabController!.addListener(_onTabChanged);
     _loadModelList();
   }
 
   @override
   void dispose() {
     _modelController.dispose();
+    _tabController?.removeListener(_onTabChanged);
     _tabController?.dispose();
     super.dispose();
+  }
+
+  void _onTabChanged() {
+    if (_tabController!.indexIsChanging) {
+      setState(() {
+        _currentTabIndex = _tabController!.index;
+      });
+    }
   }
 
   // 載入模型列表
