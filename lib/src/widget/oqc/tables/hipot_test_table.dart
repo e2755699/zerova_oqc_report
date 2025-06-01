@@ -7,6 +7,8 @@ import 'package:zerova_oqc_report/src/widget/common/table_helper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:zerova_oqc_report/src/widget/common/global_state.dart';
 import 'package:zerova_oqc_report/src/report/spec/hipot_test_spec.dart';
+import 'package:zerova_oqc_report/src/widget/common/oqc_text_field.dart';
+import 'package:zerova_oqc_report/src/widget/common/judgement_dropdown.dart';
 
 class HiPotTestTable extends StatefulWidget {
   final ProtectionFunctionTestResult data;
@@ -152,76 +154,64 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                         ),
                         const SizedBox(height: 8),
                         isEditable
-                            ? TextField(
-                          decoration: const InputDecoration(
-                            labelText: 'Input/Output (MΩ)',
-                            border: OutlineInputBorder(),
-                            isDense: true,
-                            contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                          ),
-                          controller: TextEditingController(
-                            text: data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputOutput.value.toStringAsFixed(2),
-                          ),
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          onChanged: (value) {
-                            final parsed = double.tryParse(value);
-                            if (parsed != null) {
-                              data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputOutput.value = parsed;
-                            }
-                          },
-                        )
+                            ? OqcTextField(
+                                hintText: 'Input/Output (MΩ)',
+                                controller: TextEditingController(
+                                  text: data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputOutput.value.toStringAsFixed(2),
+                                ),
+                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                onChanged: (value) {
+                                  final parsed = double.tryParse(value);
+                                  if (parsed != null) {
+                                    data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputOutput.value = parsed;
+                                  }
+                                },
+                              )
                             : Text(
-                          'Input/Output: ${data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputOutput.value.toStringAsFixed(2)} MΩ',
-                          style: TableTextStyle.contentStyle(),
-                        ),
+                                'Input/Output: ${data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputOutput.value.toStringAsFixed(2)} MΩ',
+                                style: TableTextStyle.contentStyle(),
+                                textAlign: TextAlign.center,
+                              ),
                         const SizedBox(height: 8),
                         isEditable
-                            ? TextField(
-                          decoration: const InputDecoration(
-                            labelText: 'Input/Ground (MΩ)',
-                            border: OutlineInputBorder(),
-                            isDense: true,
-                            contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                          ),
-                          controller: TextEditingController(
-                            text: data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputGround.value.toStringAsFixed(2),
-                          ),
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          onChanged: (value) {
-                            final parsed = double.tryParse(value);
-                            if (parsed != null) {
-                              data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputGround.value = parsed;
-                            }
-                          },
-                        )
+                            ? OqcTextField(
+                                hintText: 'Input/Ground (MΩ)',
+                                controller: TextEditingController(
+                                  text: data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputGround.value.toStringAsFixed(2),
+                                ),
+                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                onChanged: (value) {
+                                  final parsed = double.tryParse(value);
+                                  if (parsed != null) {
+                                    data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputGround.value = parsed;
+                                  }
+                                },
+                              )
                             : Text(
-                          'Input/Ground: ${data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputGround.value.toStringAsFixed(2)} MΩ',
-                          style: TableTextStyle.contentStyle(),
-                        ),
+                                'Input/Ground: ${data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputGround.value.toStringAsFixed(2)} MΩ',
+                                style: TableTextStyle.contentStyle(),
+                                textAlign: TextAlign.center,
+                              ),
                         const SizedBox(height: 8),
                         isEditable
-                            ? TextField(
-                          decoration: const InputDecoration(
-                            labelText: 'Output/Ground (MΩ)',
-                            border: OutlineInputBorder(),
-                            isDense: true,
-                            contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                          ),
-                          controller: TextEditingController(
-                            text: data.hiPotTestResult.insulationImpedanceTest.leftInsulationOutputGround.value.toStringAsFixed(2),
-                          ),
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          onChanged: (value) {
-                            final parsed = double.tryParse(value);
-                            if (parsed != null) {
-                              data.hiPotTestResult.insulationImpedanceTest.leftInsulationOutputGround.value = parsed;
-                            }
-                          },
-                        )
+                            ? OqcTextField(
+                                hintText: 'Output/Ground (MΩ)',
+                                controller: TextEditingController(
+                                  text: data.hiPotTestResult.insulationImpedanceTest.leftInsulationOutputGround.value.toStringAsFixed(2),
+                                ),
+                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                onChanged: (value) {
+                                  final parsed = double.tryParse(value);
+                                  if (parsed != null) {
+                                    data.hiPotTestResult.insulationImpedanceTest.leftInsulationOutputGround.value = parsed;
+                                  }
+                                },
+                              )
                             : Text(
-                          'Output/Ground: ${data.hiPotTestResult.insulationImpedanceTest.leftInsulationOutputGround.value.toStringAsFixed(2)} MΩ',
-                          style: TableTextStyle.contentStyle(),
-                        ),
+                                'Output/Ground: ${data.hiPotTestResult.insulationImpedanceTest.leftInsulationOutputGround.value.toStringAsFixed(2)} MΩ',
+                                style: TableTextStyle.contentStyle(),
+                                textAlign: TextAlign.center,
+                              ),
                       ],
                     ),
                   ),
@@ -240,76 +230,64 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                         ),
                         const SizedBox(height: 8),
                         isEditable
-                            ? TextField(
-                          decoration: const InputDecoration(
-                            labelText: 'Input/Output (MΩ)',
-                            border: OutlineInputBorder(),
-                            isDense: true,
-                            contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                          ),
-                          controller: TextEditingController(
-                            text: data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputOutput.value.toStringAsFixed(2),
-                          ),
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          onChanged: (value) {
-                            final parsed = double.tryParse(value);
-                            if (parsed != null) {
-                              data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputOutput.value = parsed;
-                            }
-                          },
-                        )
+                            ? OqcTextField(
+                                hintText: 'Input/Output (MΩ)',
+                                controller: TextEditingController(
+                                  text: data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputOutput.value.toStringAsFixed(2),
+                                ),
+                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                onChanged: (value) {
+                                  final parsed = double.tryParse(value);
+                                  if (parsed != null) {
+                                    data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputOutput.value = parsed;
+                                  }
+                                },
+                              )
                             : Text(
-                          'Input/Output: ${data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputOutput.value.toStringAsFixed(2)} MΩ',
-                          style: TableTextStyle.contentStyle(),
-                        ),
+                                'Input/Output: ${data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputOutput.value.toStringAsFixed(2)} MΩ',
+                                style: TableTextStyle.contentStyle(),
+                                textAlign: TextAlign.center,
+                              ),
                         const SizedBox(height: 8),
                         isEditable
-                            ? TextField(
-                          decoration: const InputDecoration(
-                            labelText: 'Input/Ground (MΩ)',
-                            border: OutlineInputBorder(),
-                            isDense: true,
-                            contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                          ),
-                          controller: TextEditingController(
-                            text: data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputGround.value.toStringAsFixed(2),
-                          ),
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          onChanged: (value) {
-                            final parsed = double.tryParse(value);
-                            if (parsed != null) {
-                              data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputGround.value = parsed;
-                            }
-                          },
-                        )
+                            ? OqcTextField(
+                                hintText: 'Input/Ground (MΩ)',
+                                controller: TextEditingController(
+                                  text: data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputGround.value.toStringAsFixed(2),
+                                ),
+                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                onChanged: (value) {
+                                  final parsed = double.tryParse(value);
+                                  if (parsed != null) {
+                                    data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputGround.value = parsed;
+                                  }
+                                },
+                              )
                             : Text(
-                          'Input/Ground: ${data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputGround.value.toStringAsFixed(2)} MΩ',
-                          style: TableTextStyle.contentStyle(),
-                        ),
+                                'Input/Ground: ${data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputGround.value.toStringAsFixed(2)} MΩ',
+                                style: TableTextStyle.contentStyle(),
+                                textAlign: TextAlign.center,
+                              ),
                         const SizedBox(height: 8),
                         isEditable
-                            ? TextField(
-                          decoration: const InputDecoration(
-                            labelText: 'Output/Ground (MΩ)',
-                            border: OutlineInputBorder(),
-                            isDense: true,
-                            contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                          ),
-                          controller: TextEditingController(
-                            text: data.hiPotTestResult.insulationImpedanceTest.rightInsulationOutputGround.value.toStringAsFixed(2),
-                          ),
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          onChanged: (value) {
-                            final parsed = double.tryParse(value);
-                            if (parsed != null) {
-                              data.hiPotTestResult.insulationImpedanceTest.rightInsulationOutputGround.value = parsed;
-                            }
-                          },
-                        )
+                            ? OqcTextField(
+                                hintText: 'Output/Ground (MΩ)',
+                                controller: TextEditingController(
+                                  text: data.hiPotTestResult.insulationImpedanceTest.rightInsulationOutputGround.value.toStringAsFixed(2),
+                                ),
+                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                onChanged: (value) {
+                                  final parsed = double.tryParse(value);
+                                  if (parsed != null) {
+                                    data.hiPotTestResult.insulationImpedanceTest.rightInsulationOutputGround.value = parsed;
+                                  }
+                                },
+                              )
                             : Text(
-                          'Output/Ground: ${data.hiPotTestResult.insulationImpedanceTest.rightInsulationOutputGround.value.toStringAsFixed(2)} MΩ',
-                          style: TableTextStyle.contentStyle(),
-                        ),
+                                'Output/Ground: ${data.hiPotTestResult.insulationImpedanceTest.rightInsulationOutputGround.value.toStringAsFixed(2)} MΩ',
+                                style: TableTextStyle.contentStyle(),
+                                textAlign: TextAlign.center,
+                              ),
                       ],
                     ),
                   ),
@@ -405,76 +383,64 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                       ),
                       const SizedBox(height: 8),
                       isEditable
-                          ? TextField(
-                        decoration: const InputDecoration(
-                          labelText: 'Input/Output (mA)',
-                          border: OutlineInputBorder(),
-                          isDense: true,
-                          contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                        ),
-                        controller: TextEditingController(
-                          text: data.hiPotTestResult.insulationVoltageTest.leftInsulationInputOutput.value.toStringAsFixed(2),
-                        ),
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        onChanged: (value) {
-                          final parsed = double.tryParse(value);
-                          if (parsed != null) {
-                            data.hiPotTestResult.insulationVoltageTest.leftInsulationInputOutput.value = parsed;
-                          }
-                        },
-                      )
+                          ? OqcTextField(
+                              hintText: 'Input/Output (mA)',
+                              controller: TextEditingController(
+                                text: data.hiPotTestResult.insulationVoltageTest.leftInsulationInputOutput.value.toStringAsFixed(2),
+                              ),
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              onChanged: (value) {
+                                final parsed = double.tryParse(value);
+                                if (parsed != null) {
+                                  data.hiPotTestResult.insulationVoltageTest.leftInsulationInputOutput.value = parsed;
+                                }
+                              },
+                            )
                           : Text(
-                        'Input/Output: ${data.hiPotTestResult.insulationVoltageTest.leftInsulationInputOutput.value.toStringAsFixed(2)} mA',
-                        style: TableTextStyle.contentStyle(),
-                      ),
+                              'Input/Output: ${data.hiPotTestResult.insulationVoltageTest.leftInsulationInputOutput.value.toStringAsFixed(2)} mA',
+                              style: TableTextStyle.contentStyle(),
+                              textAlign: TextAlign.center,
+                            ),
                       const SizedBox(height: 8),
                       isEditable
-                          ? TextField(
-                        decoration: const InputDecoration(
-                          labelText: 'Input/Ground (mA)',
-                          border: OutlineInputBorder(),
-                          isDense: true,
-                          contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                        ),
-                        controller: TextEditingController(
-                          text: data.hiPotTestResult.insulationVoltageTest.leftInsulationInputGround.value.toStringAsFixed(2),
-                        ),
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        onChanged: (value) {
-                          final parsed = double.tryParse(value);
-                          if (parsed != null) {
-                            data.hiPotTestResult.insulationVoltageTest.leftInsulationInputGround.value = parsed;
-                          }
-                        },
-                      )
+                          ? OqcTextField(
+                              hintText: 'Input/Ground (mA)',
+                              controller: TextEditingController(
+                                text: data.hiPotTestResult.insulationVoltageTest.leftInsulationInputGround.value.toStringAsFixed(2),
+                              ),
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              onChanged: (value) {
+                                final parsed = double.tryParse(value);
+                                if (parsed != null) {
+                                  data.hiPotTestResult.insulationVoltageTest.leftInsulationInputGround.value = parsed;
+                                }
+                              },
+                            )
                           : Text(
-                        'Input/Ground: ${data.hiPotTestResult.insulationVoltageTest.leftInsulationInputGround.value.toStringAsFixed(2)} mA',
-                        style: TableTextStyle.contentStyle(),
-                      ),
+                              'Input/Ground: ${data.hiPotTestResult.insulationVoltageTest.leftInsulationInputGround.value.toStringAsFixed(2)} mA',
+                              style: TableTextStyle.contentStyle(),
+                              textAlign: TextAlign.center,
+                            ),
                       const SizedBox(height: 8),
                       isEditable
-                          ? TextField(
-                        decoration: const InputDecoration(
-                          labelText: 'Output/Ground (mA)',
-                          border: OutlineInputBorder(),
-                          isDense: true,
-                          contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                        ),
-                        controller: TextEditingController(
-                          text: data.hiPotTestResult.insulationVoltageTest.leftInsulationOutputGround.value.toStringAsFixed(2),
-                        ),
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        onChanged: (value) {
-                          final parsed = double.tryParse(value);
-                          if (parsed != null) {
-                            data.hiPotTestResult.insulationVoltageTest.leftInsulationOutputGround.value = parsed;
-                          }
-                        },
-                      )
+                          ? OqcTextField(
+                              hintText: 'Output/Ground (mA)',
+                              controller: TextEditingController(
+                                text: data.hiPotTestResult.insulationVoltageTest.leftInsulationOutputGround.value.toStringAsFixed(2),
+                              ),
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              onChanged: (value) {
+                                final parsed = double.tryParse(value);
+                                if (parsed != null) {
+                                  data.hiPotTestResult.insulationVoltageTest.leftInsulationOutputGround.value = parsed;
+                                }
+                              },
+                            )
                           : Text(
-                        'Output/Ground: ${data.hiPotTestResult.insulationVoltageTest.leftInsulationOutputGround.value.toStringAsFixed(2)} mA',
-                        style: TableTextStyle.contentStyle(),
-                      ),
+                              'Output/Ground: ${data.hiPotTestResult.insulationVoltageTest.leftInsulationOutputGround.value.toStringAsFixed(2)} mA',
+                              style: TableTextStyle.contentStyle(),
+                              textAlign: TextAlign.center,
+                            ),
                     ],
                   ),
                 ),
@@ -493,76 +459,64 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                       ),
                       const SizedBox(height: 8),
                       isEditable
-                          ? TextField(
-                        decoration: const InputDecoration(
-                          labelText: 'Input/Output (mA)',
-                          border: OutlineInputBorder(),
-                          isDense: true,
-                          contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                        ),
-                        controller: TextEditingController(
-                          text: data.hiPotTestResult.insulationVoltageTest.rightInsulationInputOutput.value.toStringAsFixed(2),
-                        ),
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        onChanged: (value) {
-                          final parsed = double.tryParse(value);
-                          if (parsed != null) {
-                            data.hiPotTestResult.insulationVoltageTest.rightInsulationInputOutput.value = parsed;
-                          }
-                        },
-                      )
+                          ? OqcTextField(
+                              hintText: 'Input/Output (mA)',
+                              controller: TextEditingController(
+                                text: data.hiPotTestResult.insulationVoltageTest.rightInsulationInputOutput.value.toStringAsFixed(2),
+                              ),
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              onChanged: (value) {
+                                final parsed = double.tryParse(value);
+                                if (parsed != null) {
+                                  data.hiPotTestResult.insulationVoltageTest.rightInsulationInputOutput.value = parsed;
+                                }
+                              },
+                            )
                           : Text(
-                        'Input/Output: ${data.hiPotTestResult.insulationVoltageTest.rightInsulationInputOutput.value.toStringAsFixed(2)} mA',
-                        style: TableTextStyle.contentStyle(),
-                      ),
+                              'Input/Output: ${data.hiPotTestResult.insulationVoltageTest.rightInsulationInputOutput.value.toStringAsFixed(2)} mA',
+                              style: TableTextStyle.contentStyle(),
+                              textAlign: TextAlign.center,
+                            ),
                       const SizedBox(height: 8),
                       isEditable
-                          ? TextField(
-                        decoration: const InputDecoration(
-                          labelText: 'Input/Ground (mA)',
-                          border: OutlineInputBorder(),
-                          isDense: true,
-                          contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                        ),
-                        controller: TextEditingController(
-                          text: data.hiPotTestResult.insulationVoltageTest.rightInsulationInputGround.value.toStringAsFixed(2),
-                        ),
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        onChanged: (value) {
-                          final parsed = double.tryParse(value);
-                          if (parsed != null) {
-                            data.hiPotTestResult.insulationVoltageTest.rightInsulationInputGround.value = parsed;
-                          }
-                        },
-                      )
+                          ? OqcTextField(
+                              hintText: 'Input/Ground (mA)',
+                              controller: TextEditingController(
+                                text: data.hiPotTestResult.insulationVoltageTest.rightInsulationInputGround.value.toStringAsFixed(2),
+                              ),
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              onChanged: (value) {
+                                final parsed = double.tryParse(value);
+                                if (parsed != null) {
+                                  data.hiPotTestResult.insulationVoltageTest.rightInsulationInputGround.value = parsed;
+                                }
+                              },
+                            )
                           : Text(
-                        'Input/Ground: ${data.hiPotTestResult.insulationVoltageTest.rightInsulationInputGround.value.toStringAsFixed(2)} mA',
-                        style: TableTextStyle.contentStyle(),
-                      ),
+                              'Input/Ground: ${data.hiPotTestResult.insulationVoltageTest.rightInsulationInputGround.value.toStringAsFixed(2)} mA',
+                              style: TableTextStyle.contentStyle(),
+                              textAlign: TextAlign.center,
+                            ),
                       const SizedBox(height: 8),
                       isEditable
-                          ? TextField(
-                        decoration: const InputDecoration(
-                          labelText: 'Output/Ground (mA)',
-                          border: OutlineInputBorder(),
-                          isDense: true,
-                          contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                        ),
-                        controller: TextEditingController(
-                          text: data.hiPotTestResult.insulationVoltageTest.rightInsulationOutputGround.value.toStringAsFixed(2),
-                        ),
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        onChanged: (value) {
-                          final parsed = double.tryParse(value);
-                          if (parsed != null) {
-                            data.hiPotTestResult.insulationVoltageTest.rightInsulationOutputGround.value = parsed;
-                          }
-                        },
-                      )
+                          ? OqcTextField(
+                              hintText: 'Output/Ground (mA)',
+                              controller: TextEditingController(
+                                text: data.hiPotTestResult.insulationVoltageTest.rightInsulationOutputGround.value.toStringAsFixed(2),
+                              ),
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              onChanged: (value) {
+                                final parsed = double.tryParse(value);
+                                if (parsed != null) {
+                                  data.hiPotTestResult.insulationVoltageTest.rightInsulationOutputGround.value = parsed;
+                                }
+                              },
+                            )
                           : Text(
-                        'Output/Ground: ${data.hiPotTestResult.insulationVoltageTest.rightInsulationOutputGround.value.toStringAsFixed(2)} mA',
-                        style: TableTextStyle.contentStyle(),
-                      ),
+                              'Output/Ground: ${data.hiPotTestResult.insulationVoltageTest.rightInsulationOutputGround.value.toStringAsFixed(2)} mA',
+                              style: TableTextStyle.contentStyle(),
+                              textAlign: TextAlign.center,
+                            ),
                     ],
                   ),
                 ),
@@ -612,22 +566,8 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                     DataCell(_buildInsulationTestingRecord()),
                     DataCell(
                       isEditable
-                          ? DropdownButton<Judgement>(
+                          ? JudgementDropdown(
                         value: data.hiPotTestResult.insulationImpedanceTest.storedJudgement,
-                        items: Judgement.values.map((j) => DropdownMenuItem(
-                          value: j,
-                          child: Text(
-                            j.name.toUpperCase(),
-                            style: TextStyle(
-                              color: j == Judgement.pass
-                                  ? Colors.green
-                                  : j == Judgement.fail
-                                  ? Colors.red
-                                  : Colors.grey,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        )).toList(),
                         onChanged: (Judgement? newValue) {
                           if (newValue != null) {
                             setState(() {
@@ -636,15 +576,11 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                           }
                         },
                       )
-                          : Text(
-                        data.hiPotTestResult.insulationImpedanceTest.storedJudgement.name.toUpperCase(),
-                        style: TextStyle(
-                          color: data.hiPotTestResult.insulationImpedanceTest.storedJudgement == Judgement.pass
-                              ? Colors.green
-                              : data.hiPotTestResult.insulationImpedanceTest.storedJudgement == Judgement.fail
-                              ? Colors.red
-                              : Colors.grey,
-                          fontWeight: FontWeight.bold,
+                          : Center(
+                        child: Text(
+                          data.hiPotTestResult.insulationImpedanceTest.storedJudgement.name.toUpperCase(),
+                          style: JudgementStyles.getTextStyle(data.hiPotTestResult.insulationImpedanceTest.storedJudgement),
+                          textAlign: TextAlign.center,
                         ),
                       ),
                     ),
@@ -658,22 +594,8 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                     DataCell(
 
                       isEditable
-                          ? DropdownButton<Judgement>(
+                          ? JudgementDropdown(
                         value: data.hiPotTestResult.insulationVoltageTest.storedJudgement,
-                        items: Judgement.values.map((j) => DropdownMenuItem(
-                          value: j,
-                          child: Text(
-                            j.name.toUpperCase(),
-                            style: TextStyle(
-                              color: j == Judgement.pass
-                                  ? Colors.green
-                                  : j == Judgement.fail
-                                  ? Colors.red
-                                  : Colors.grey,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        )).toList(),
                         onChanged: (Judgement? newValue) {
                           if (newValue != null) {
                             setState(() {
@@ -682,15 +604,11 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                           }
                         },
                       )
-                          : Text(
-                        data.hiPotTestResult.insulationVoltageTest.storedJudgement.name.toUpperCase(),
-                        style: TextStyle(
-                          color: data.hiPotTestResult.insulationVoltageTest.storedJudgement == Judgement.pass
-                              ? Colors.green
-                              : data.hiPotTestResult.insulationVoltageTest.storedJudgement == Judgement.fail
-                              ? Colors.red
-                              : Colors.grey,
-                          fontWeight: FontWeight.bold,
+                          : Center(
+                        child: Text(
+                          data.hiPotTestResult.insulationVoltageTest.storedJudgement.name.toUpperCase(),
+                          style: JudgementStyles.getTextStyle(data.hiPotTestResult.insulationVoltageTest.storedJudgement),
+                          textAlign: TextAlign.center,
                         ),
                       ),
                     ),

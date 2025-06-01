@@ -7,7 +7,9 @@ import 'package:zerova_oqc_report/src/report/enum/judgement.dart';
 import 'package:zerova_oqc_report/src/widget/common/table_helper.dart';
 import 'package:zerova_oqc_report/src/widget/common/global_state.dart';
 import 'package:zerova_oqc_report/src/report/spec/basic_function_test_spec.dart';
+import 'package:zerova_oqc_report/src/widget/common/oqc_text_field.dart';
 import 'package:flutter/services.dart';
+import 'package:zerova_oqc_report/src/widget/common/judgement_dropdown.dart';
 
 class BasicFunctionTestTable extends StatefulWidget {
   final BasicFunctionTestResult data;
@@ -168,25 +170,23 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
                             // 第一欄 Spec
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
                                   getSpecLabel(index),
                                   style: TableTextStyle.contentStyle(),
+                                  textAlign: TextAlign.center,
                                 ),
                                 const SizedBox(width: 8),
                                 isHeaderEditable
                                     ? Expanded(
-                                  child: TextFormField(
+                                  child: OqcTextField(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8),
                                     initialValue: _reportValues[index][0],
                                     keyboardType: TextInputType.numberWithOptions(decimal: true),
                                     inputFormatters: [
                                       FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
                                     ],
-                                    decoration: const InputDecoration(
-                                      isDense: true,
-                                      contentPadding: EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-                                      border: OutlineInputBorder(),
-                                    ),
                                     onChanged: (value) {
                                       final doubleValue = double.tryParse(value);
                                       if (doubleValue != null) {
@@ -223,12 +223,14 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
                                       }
                                       // 如果轉換失敗可以忽略或做錯誤處理
                                     },
-
                                   ),
                                 )
-                                    : Text(
-                                  _reportValues[index][0],
-                                  style: TableTextStyle.contentStyle(),
+                                    : Center(
+                                  child: Text(
+                                    _reportValues[index][0],
+                                    style: TableTextStyle.contentStyle(),
+                                    textAlign: TextAlign.center,
+                                  ),
                                 ),
                                 const SizedBox(width: 8),
                                 // 單位獨立顯示
@@ -249,17 +251,13 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
                                       ? valueLabels[index]
                                       : '',
                                   style: TableTextStyle.contentStyle(),
+                                  textAlign: TextAlign.center,
                                 ),
                                 const SizedBox(width: 8),
                                 Expanded(
-                                  child: TextFormField(
+                                  child: OqcTextField(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8),
                                     initialValue: _reportValues[index][1],
-                                    decoration: const InputDecoration(
-                                      isDense: true,
-                                      contentPadding: EdgeInsets.symmetric(
-                                          vertical: 6, horizontal: 8),
-                                      border: OutlineInputBorder(),
-                                    ),
                                     onChanged: (value) {
                                       setState(() {
                                         _reportValues[index][1] = value;
@@ -291,31 +289,35 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
                                         'Spec: $specPrefix$specText$unit\n$label $valueText$unit';
                                       });
                                     },
-
                                   ),
                                 ),
                                 Text(
                                   valueUnits.length > index ? valueUnits[index] : '',
                                   style: TableTextStyle.contentStyle(),
+                                  textAlign: TextAlign.center,
                                 ),
                               ],
                             )
                                 : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
                                   valueLabels.length > index ? valueLabels[index] : '',
                                   style: TableTextStyle.contentStyle(),
+                                  textAlign: TextAlign.center,
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
                                   _reportValues[index][1],
                                   style: TableTextStyle.contentStyle(),
+                                  textAlign: TextAlign.center,
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
                                   valueUnits.length > index ? valueUnits[index] : '',
                                   style: TableTextStyle.contentStyle(),
+                                  textAlign: TextAlign.center,
                                 ),
                               ],
                             ),
@@ -326,24 +328,8 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
 
                     isEditable
                         ? DataCell(
-                      DropdownButton<Judgement>(
+                      JudgementDropdown(
                         value: data.testItems[index].judgement,
-                        items: Judgement.values.map((j) {
-                          return DropdownMenuItem(
-                            value: j,
-                            child: Text(
-                              j.name.toUpperCase(),
-                              style: TextStyle(
-                                color: j == Judgement.pass
-                                    ? Colors.green
-                                    : j == Judgement.fail
-                                    ? Colors.red
-                                    : Colors.grey,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          );
-                        }).toList(),
                         onChanged: (value) {
                           if (value != null) {
                             setState(() {
@@ -353,15 +339,7 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
                         },
                       ),
                     )
-                        : OqcTableStyle.getDataCell(
-                      data.testItems[index].judgement.name.toUpperCase(),
-                      color: data.testItems[index].judgement == Judgement.pass
-                          ? Colors.green
-                          : data.testItems[index].judgement == Judgement.fail
-                          ? Colors.red
-                          : Colors.grey,
-                      fontWeight: FontWeight.bold,
-                    ),
+                        : OqcTableStyle.getJudgementCell(data.testItems[index].judgement),
                   ],
                 ),
               ),

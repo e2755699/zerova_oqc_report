@@ -96,9 +96,7 @@ class StyledDataTable extends StatelessWidget {
         width: 1024,
         child: DataTable(
           dataRowMinHeight: dataRowMinHeight,
-          // 设置数据行的最小高度
           dataRowMaxHeight: dataRowMaxHeight,
-          // 设置数据行的最大高度
           border: TableBorder.all(
             color: AppColors.lightBlueColor,
             width: 1,
@@ -107,6 +105,12 @@ class StyledDataTable extends StatelessWidget {
               WidgetStateProperty.all(AppColors.primaryColor.withOpacity(0.1)),
           columns: columns,
           rows: rows,
+          headingTextStyle: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: AppColors.darkBlueColor,
+          ),
+          horizontalMargin: 0,
+          columnSpacing: 0,
         ),
       ),
     );

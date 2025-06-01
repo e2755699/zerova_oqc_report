@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:zerova_oqc_report/src/report/model/psu_serial_number.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 import 'package:zerova_oqc_report/src/widget/common/table_wrapper.dart';
+import 'package:zerova_oqc_report/src/widget/common/text_form_field_style.dart';
+import 'package:zerova_oqc_report/src/widget/common/oqc_text_field.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:zerova_oqc_report/src/report/spec/psu_serial_numbers_spec.dart';
 import 'package:zerova_oqc_report/src/widget/common/global_state.dart';
@@ -170,42 +172,32 @@ class _PsuSerialNumbersTableState extends State<PsuSerialNumbersTable> {
                       OqcTableStyle.getDataCell((index + 1).toString()),
                       DataCell(
                         isEditable
-                            ? TextFormField(
-                          controller: controller,
-                          decoration: const InputDecoration(
-                            isDense: true,
-                            contentPadding:
-                            EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-                            border: OutlineInputBorder(),
-                          ),
-                            onChanged: (val) {
-                              if (val.trim().isNotEmpty) {
-                                if (index < widget.data.psuSN.length) {
-                                  widget.data.psuSN[index].value = val;
-                                } else {
-                                  // 先補滿到 index
-                                  while (widget.data.psuSN.length <= index) {
-                                    widget.data.psuSN.add(
-                                      SerialNumber(
-                                        spec: 12,
-                                        value: '', // 空值先填，等會下面會被填入 val
-                                        key: "PSU SN",
-                                        name: "PSU",
-                                      ),
-                                    );
+                            ? OqcTextField(
+                                controller: _controllers[index],
+                                onChanged: (val) {
+                                  if (val.trim().isNotEmpty) {
+                                    if (index < widget.data.psuSN.length) {
+                                      widget.data.psuSN[index].value = val;
+                                    } else {
+                                      // 先補滿到 index
+                                      while (widget.data.psuSN.length <= index) {
+                                        widget.data.psuSN.add(
+                                          SerialNumber(
+                                            spec: 12,
+                                            value: '', // 空值先填，等會下面會被填入 val
+                                            key: "PSU SN",
+                                            name: "PSU",
+                                          ),
+                                        );
+                                      }
+                                      widget.data.psuSN[index].value = val;
+                                    }
                                   }
-                                  widget.data.psuSN[index].value = val;
-                                }
-                              }
-                            }
-
-
-                        )
-                            : OqcTableStyle.getDataCell(
-                          index < widget.data.psuSN.length
-                              ? widget.data.psuSN[index].value
-                              : controller.text,
-                        ).child,
+                                },
+                              )
+                            : OqcTableStyle
+                                .getDataCell(widget.data.psuSN[index].value)
+                                .child,
                       ),
                     ],
                   );

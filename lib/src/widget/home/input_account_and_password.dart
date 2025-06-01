@@ -12,8 +12,7 @@ class InputAccountAndPassword extends StatefulWidget {
       _InputAccountAndPasswordState();
 }
 
-class _InputAccountAndPasswordState extends State<InputAccountAndPassword>
-    with LoadFileHelper {
+class _InputAccountAndPasswordState extends State<InputAccountAndPassword> {
   final _formKey = GlobalKey<FormState>();
   final _snController = TextEditingController();
   final _modelController = TextEditingController();

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:zerova_oqc_report/src/utils/window_size_manager.dart';
+import 'package:zerova_oqc_report/src/report/enum/judgement.dart';
+import 'package:zerova_oqc_report/src/widget/common/judgement_dropdown.dart';
 
 class TableWrapper extends StatelessWidget {
   final String title;
@@ -52,10 +54,14 @@ class TableTextStyle {
 class OqcTableStyle {
   static DataColumn getDataColumn(String text) {
     return DataColumn(
-      headingRowAlignment: MainAxisAlignment.center,
-      label: Text(
-        text,
-        style: TableTextStyle.headerStyle(),
+      label: Expanded(
+        child: Center(
+          child: Text(
+            text,
+            style: TableTextStyle.headerStyle(),
+            textAlign: TextAlign.center,
+          ),
+        ),
       ),
     );
   }
@@ -63,16 +69,19 @@ class OqcTableStyle {
   static DataCell getDataCell(String text,
       {MaterialColor? color, FontWeight? fontWeight}) {
     return DataCell(
-      Center(
-        child: Text(
-          text,
-          style: TableTextStyle.contentStyle().copyWith(
-            color: color,
-            fontWeight: fontWeight,
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+        child: Center(
+          child: Text(
+            text,
+            style: TableTextStyle.contentStyle().copyWith(
+              color: color,
+              fontWeight: fontWeight,
+            ),
+            textAlign: TextAlign.center,
+            softWrap: true,
+            overflow: TextOverflow.visible,
           ),
-          textAlign: TextAlign.start,
-          softWrap: true,
-          overflow: TextOverflow.visible,
         ),
       ),
     );
@@ -93,6 +102,18 @@ class OqcTableStyle {
       dataRowMaxHeight: double.infinity,
       columns: columns,
       rows: rows,
+    );
+  }
+
+  static DataCell getJudgementCell(Judgement judgement) {
+    return DataCell(
+      Center(
+        child: Text(
+          judgement.name.toUpperCase(),
+          style: JudgementStyles.getTextStyle(judgement),
+          textAlign: TextAlign.center,
+        ),
+      ),
     );
   }
 }
