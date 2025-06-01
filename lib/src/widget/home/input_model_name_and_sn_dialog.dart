@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:zerova_oqc_report/src/repo/firebase_service.dart';
 import 'dart:io';
 import 'package:path/path.dart' as path;
+import 'package:zerova_oqc_report/src/report/spec/new_package_list_spec.dart.dart';
 
 class InputModelNameAndSnDialog extends StatefulWidget {
   const InputModelNameAndSnDialog({super.key});
@@ -268,6 +269,7 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
           onPressed: isLoading
               ? null
               : () async {
+            globalPackageListSpecInitialized = false;
                   if (_formKey.currentState!.validate()) {
                     await _submitForm();
                   }

@@ -91,7 +91,7 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Center(
-            child: isHeaderEditable
+              child: isHeaderEditable
                 ? Row(
               mainAxisSize: MainAxisSize.min,
               children: [

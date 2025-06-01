@@ -6,6 +6,8 @@ import 'package:zerova_oqc_report/src/report/spec/basic_function_test_spec.dart'
 import 'package:zerova_oqc_report/src/report/spec/hipot_test_spec.dart';
 import 'package:zerova_oqc_report/src/report/spec/package_list_spec.dart';
 import 'package:zerova_oqc_report/src/report/spec/FailCountStore.dart';
+import 'package:zerova_oqc_report/src/report/model/package_list_result.dart';
+import 'package:zerova_oqc_report/src/report/spec/new_package_list_spec.dart.dart';
 
 class FirebaseService {
   final String projectId = 'oqcreport-87e5a';
@@ -583,6 +585,7 @@ Future<void> fetchAndPrintHipotTestSpecs(String model) async {
   }
 }
 
+
 Future<void> fetchAndPrintPackageListSpecs(String model) async {
   final firebaseService = FirebaseService();
   final tableNames = ['PackageListSpec'];
@@ -604,6 +607,119 @@ Future<void> fetchAndPrintPackageListSpecs(String model) async {
     print(jsonEncode(entry.value));
   }
 }
+
+/// 撈取 /models/{model}/PackageListSpec/spec 文件，並回傳 spec 內容 Map
+Future<PackageListResult?> fetchPackageListSpec(String model) async {
+  final String projectId = 'oqcreport-87e5a';
+  final String apiKey = 'AIzaSyBzlul4mftI7HHJnj48I2aUs2nV154x0iI'; // 替換為你的 API Key
+  final url =
+      'https://firestore.googleapis.com/v1/projects/$projectId/databases/(default)/documents/models/$model/PackageListSpec/spec?key=$apiKey';
+
+  final response = await http.get(Uri.parse(url));
+
+  if (response.statusCode == 200) {
+    final data = json.decode(response.body);
+    final specField = data['fields']?['spec'];
+    if (specField != null && specField is Map) {
+      final fieldsMap = specField['mapValue']?['fields'];
+      if (fieldsMap != null && fieldsMap is Map<String, dynamic>) {
+        final specData = _fromFirestoreFields(Map<String, dynamic>.from(fieldsMap));
+
+        // 轉換 measurements 內的 map<string, object> 到 List<Map>
+        if (specData.containsKey('measurements')) {
+          final measurementsRaw = specData['measurements'];
+          if (measurementsRaw is Map<String, dynamic>) {
+            final measurementsList = measurementsRaw.entries
+                .toList()
+              ..sort((a, b) => int.parse(a.key).compareTo(int.parse(b.key)));
+            final parsedList = measurementsList.map((e) => e.value).toList();
+            specData['measurements'] = parsedList;
+          }
+        }
+
+        // 呼叫轉換函式，把 specData 轉成 PackageListResult
+        return packageListResultFromSpecData(specData);
+      }
+    }
+    return null;
+  } else if (response.statusCode == 404) {
+    return null;
+  } else {
+    throw Exception('Failed to fetch PackageListSpec spec, statusCode=${response.statusCode}');
+  }
+}
+
+
+Map<String, dynamic> _fromFirestoreFields(Map<String, dynamic> fields) {
+  final result = <String, dynamic>{};
+
+  fields.forEach((key, value) {
+    if (value is Map<String, dynamic>) {
+      if (value.containsKey('stringValue')) {
+        result[key] = value['stringValue'];
+      } else if (value.containsKey('integerValue')) {
+        result[key] = int.tryParse(value['integerValue'].toString()) ?? 0;
+      } else if (value.containsKey('doubleValue')) {
+        result[key] = double.tryParse(value['doubleValue'].toString()) ?? 0.0;
+      } else if (value.containsKey('booleanValue')) {
+        result[key] = value['booleanValue'];
+      } else if (value.containsKey('mapValue')) {
+        final nestedFields = value['mapValue']['fields'] as Map<String, dynamic>? ?? {};
+        result[key] = _fromFirestoreFields(nestedFields);
+      } else if (value.containsKey('arrayValue')) {
+        final arrayValues = value['arrayValue']['values'] as List<dynamic>? ?? [];
+        result[key] = arrayValues.map((e) {
+          if (e is Map<String, dynamic>) {
+            return _fromFirestoreFields(e);
+          } else {
+            return e;
+          }
+        }).toList();
+      } else {
+        result[key] = value; // fallback，可能是 null 或其他型態
+      }
+    } else {
+      result[key] = value; // fallback
+    }
+  });
+
+  return result;
+}
+
+
+
+Future<bool> uploadPackageListSpec({
+  required String model,
+  required String tableName,
+  required PackageListResult packageListResult,
+}) async {
+  final firebaseService = FirebaseService();
+
+  // 轉成 List 格式也可以，這邊示範 Map 格式保持你原本寫法
+  Map<String, dynamic> specData = {
+    "measurements": packageListResult.measurements.asMap().map((index, m) => MapEntry(
+      index.toString(),
+      {
+        "itemName": m.itemName,
+        "quantity": m.quantity,
+        "isChecked": m.isCheck.value,
+      },
+    ))
+  };
+
+  print('準備上傳資料: $specData');
+
+  bool success = await firebaseService.addOrUpdateSpec(
+    model: model,
+    tableName: tableName,
+    spec: specData,
+  );
+
+  print('上傳結果: $success');
+  return success;
+}
+
+
 
 Future<void> fetchFailCountsForDevice(String model, String serialNumber) async {
   final firebaseService = FirebaseService();

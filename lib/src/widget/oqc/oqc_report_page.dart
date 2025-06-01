@@ -33,6 +33,7 @@ import 'package:zerova_oqc_report/src/report/spec/hipot_test_spec.dart';
 import 'package:zerova_oqc_report/src/report/spec/package_list_spec.dart';
 import 'package:zerova_oqc_report/src/report/spec/FailCountStore.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/oqc_model.dart';
+import 'package:zerova_oqc_report/src/report/spec/new_package_list_spec.dart.dart';
 
 class OqcReportPage extends StatefulWidget {
   const OqcReportPage({
@@ -156,9 +157,9 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
           startUpload(context);
           if (globalPsuSerialNumSpec != null) {
             final success = await FirebaseService().addOrUpdateSpec(
-              model: widget.oqcModel.model, // 你需要確保這裡有正確的 model 名稱
-              tableName: 'PsuSerialNumSpec',
-              spec: globalPsuSerialNumSpec!.toJson(),
+                model: widget.oqcModel.model, // 你需要確保這裡有正確的 model 名稱
+                tableName: 'PsuSerialNumSpec',
+                spec: globalPsuSerialNumSpec!.toJson(),
             );
 
             if (success) {
@@ -214,7 +215,7 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
           } else {
             print('⚠️ 尚未設定 globalHipotTestSpec');
           }
-          if (globalPackageListSpec != null) {
+          /*if (globalPackageListSpec != null) {
             final success = await FirebaseService().addOrUpdateSpec(
               model: widget.oqcModel.model, // 你需要確保這裡有正確的 model 名稱
               tableName: 'PackageListSpec',
@@ -229,6 +230,78 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
           } else {
             print('⚠️ 尚未設定 globalPackageListSpec');
           }
+*/
+          var PackageListdata = PackageListSpecGlobal.get();
+
+          if (PackageListdata != null) {
+            final success = await uploadPackageListSpec(
+              model: widget.oqcModel.model,
+              tableName: 'PackageListSpec',
+              packageListResult: PackageListdata,
+            );
+
+            if (success) {
+              print('✅ 規格已成功上傳 Firebase');
+            } else {
+              print('❌ 上傳失敗，請檢查網路或 API Key');
+            }
+          } else {
+            print('⚠️ 尚未設定 globalPackageListSpec');
+          }
+         /*
+          void someFunction() async {
+            var tableName = 'PackageListSpec';
+
+           // var data = PackageListSpecGlobal.get(); // 你的全域變數 PackageListResult
+
+            if (PackageListdata != null) {
+              bool result = await uploadPackageListSpec(
+                model: widget.oqcModel.model,
+                tableName: tableName,
+                packageListResult: PackageListdata,
+              );
+              if (result) {
+                print('PackageListSpec 上傳成功');
+              } else {
+                print('PackageListSpec 上傳失敗');
+              }
+            }
+          }
+
+          someFunction();
+
+          void printAllMeasurements(PackageListResult data) {
+            for (int i = 0; i < data.measurements.length; i++) {
+              final m = data.measurements[i];
+              print('Index: $i');
+              print('  itemName: ${m.itemName}');
+              print('  quantity: ${m.quantity}');
+              print('  isChecked: ${m.isCheck.value}');
+              print('------------------');
+            }
+          }
+
+          var globalData = PackageListSpecGlobal.get();
+          printAllMeasurements(globalData);
+*/
+          // 也可以操作
+          //globalData.updateOrAddMeasurement(index: 0, name: "New Item", quantity: "10");
+         // FirebaseService firebaseService = FirebaseService();
+          /*void uploadExample() async {
+            final success = await uploadPackageListResult(
+              model: 'ZV123',
+              sn: 'SN0001',
+              data: '',
+            );
+
+            if (success) {
+              print('✅ 上傳成功');
+            } else {
+              print('❌ 上傳失敗');
+            }
+          }
+
+*/
 
           final tableNames = [
             'AppearanceStructureInspectionFunction',
