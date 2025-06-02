@@ -191,7 +191,7 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
                     style: const TextStyle(color: Colors.black, fontSize: 16),
                     children: [
                       TextSpan(
-                        text: '${context.tr('check_failed_message')}:\n\n',
+                        text: '${context.tr('check_failed_message')}\n\n',
                       ),
                       TextSpan(
                         text: failItems.join('\n'),

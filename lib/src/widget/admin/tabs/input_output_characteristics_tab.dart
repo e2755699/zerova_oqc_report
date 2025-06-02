@@ -244,7 +244,7 @@ class _InputOutputCharacteristicsTabState
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                               const SizedBox(height: 8),
-                              _buildRangeInputs(
+                              /*_buildRangeInputs(
                                   'Vin',
                                   'V',
                                   _controllers['leftVinLowerbound']!,
@@ -253,7 +253,7 @@ class _InputOutputCharacteristicsTabState
                                   'Iin',
                                   'A',
                                   _controllers['leftIinLowerbound']!,
-                                  _controllers['leftIinUpperbound']!),
+                                  _controllers['leftIinUpperbound']!),*/
                               _buildRangeInputs(
                                   'Pin',
                                   'W',
@@ -296,7 +296,7 @@ class _InputOutputCharacteristicsTabState
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                               const SizedBox(height: 8),
-                              _buildRangeInputs(
+                              /*_buildRangeInputs(
                                   'Vin',
                                   'V',
                                   _controllers['rightVinLowerbound']!,
@@ -305,7 +305,7 @@ class _InputOutputCharacteristicsTabState
                                   'Iin',
                                   'A',
                                   _controllers['rightIinLowerbound']!,
-                                  _controllers['rightIinUpperbound']!),
+                                  _controllers['rightIinUpperbound']!),*/
                               _buildRangeInputs(
                                   'Pin',
                                   'W',
