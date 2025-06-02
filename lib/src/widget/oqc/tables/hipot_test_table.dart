@@ -6,6 +6,7 @@ import 'package:zerova_oqc_report/src/widget/common/table_wrapper.dart';
 import 'package:zerova_oqc_report/src/widget/common/table_helper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:zerova_oqc_report/src/widget/common/global_state.dart';
+import 'package:zerova_oqc_report/src/widget/common/table_failorpass.dart';
 import 'package:zerova_oqc_report/src/report/spec/hipot_test_spec.dart';
 import 'package:zerova_oqc_report/src/widget/common/oqc_text_field.dart';
 import 'package:zerova_oqc_report/src/widget/common/judgement_dropdown.dart';
@@ -45,6 +46,35 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
     };
   }
 
+  void _updateHipotTestPassOrFail() {
+    final impedance = data.hiPotTestResult.insulationImpedanceTest;
+    final voltage = data.hiPotTestResult.insulationVoltageTest;
+
+    final judgementsPassed =
+        impedance.storedJudgement == Judgement.pass &&
+            voltage.storedJudgement == Judgement.pass;
+
+    final allFieldsFilled = [
+      impedance.leftInsulationInputOutput.value,
+      impedance.leftInsulationInputGround.value,
+      impedance.leftInsulationOutputGround.value,
+      impedance.rightInsulationInputOutput.value,
+      impedance.rightInsulationInputGround.value,
+      impedance.rightInsulationOutputGround.value,
+      voltage.leftInsulationInputOutput.value,
+      voltage.leftInsulationInputGround.value,
+      voltage.leftInsulationOutputGround.value,
+      voltage.rightInsulationInputOutput.value,
+      voltage.rightInsulationInputGround.value,
+      voltage.rightInsulationOutputGround.value,
+    ].every((v) => v != null && !v.isNaN);
+
+    hipotTestPassOrFail = judgementsPassed && allFieldsFilled;
+
+    debugPrint('hipotTestPassOrFail = $hipotTestPassOrFail');
+  }
+
+
   void initializeGlobalSpec() {
     globalHipotTestSpec = HipotTestSpec(
       insulationimpedancespec: _defaultSpec[1] ?? 10,
@@ -67,6 +97,7 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
     data = widget.data;
     data.hiPotTestResult.insulationImpedanceTest.updateStoredJudgement();
     data.hiPotTestResult.insulationVoltageTest.updateStoredJudgement();
+    _updateHipotTestPassOrFail();
   }
 
   @override
@@ -164,18 +195,26 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                             contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
                           ),
                                 controller: TextEditingController(
-                                  text: data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputOutput.value.toStringAsFixed(2),
+                                  text: data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputOutput.value.isNaN
+                                      ? ' '
+                                      : data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputOutput.value.toStringAsFixed(2),
                                 ),
                                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                 onChanged: (value) {
-                                  final parsed = double.tryParse(value);
-                                  if (parsed != null) {
-                                    data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputOutput.value = parsed;
+                                  if (value.trim().isEmpty) {
+                                    data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputOutput.value = double.nan;
                                   }
+                                  else {
+                                    final parsed = double.tryParse(value);
+                                    if (parsed != null) {
+                                      data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputOutput.value = parsed;
+                                    }
+                                  }
+                                  _updateHipotTestPassOrFail();
                                 },
                               )
                             : Text(
-                                'Input/Output: ${data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputOutput.value.toStringAsFixed(2)} MΩ',
+                                'Input/Output: ${data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputOutput.value.isNaN ? '' : data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputOutput.value.toStringAsFixed(2)} MΩ',
                                 style: TableTextStyle.contentStyle(),
                                 textAlign: TextAlign.center,
                               ),
@@ -189,22 +228,30 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                             isDense: true,
                              contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
                           ),
-                                controller: TextEditingController(
-                                  text: data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputGround.value.toStringAsFixed(2),
-                                ),
+                          controller: TextEditingController(
+                            text: data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputGround.value.isNaN
+                                ? ' '
+                                : data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputGround.value.toStringAsFixed(2),
+                          ),
                                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                onChanged: (value) {
-                                  final parsed = double.tryParse(value);
-                                  if (parsed != null) {
-                                    data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputGround.value = parsed;
-                                  }
-                                },
+                          onChanged: (value) {
+                            if (value.trim().isEmpty) {
+                              data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputGround.value = double.nan;
+                            }
+                            else {
+                              final parsed = double.tryParse(value);
+                              if (parsed != null) {
+                                data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputGround.value = parsed;
+                              }
+                            }
+                            _updateHipotTestPassOrFail();
+                          },
                               )
                             : Text(
-                                'Input/Ground: ${data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputGround.value.toStringAsFixed(2)} MΩ',
-                                style: TableTextStyle.contentStyle(),
-                                textAlign: TextAlign.center,
-                              ),
+                          'Input/Ground: ${data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputGround.value.isNaN ? '' : data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputGround.value.toStringAsFixed(2)} MΩ',
+                          style: TableTextStyle.contentStyle(),
+                          textAlign: TextAlign.center,
+                        ),
                         const SizedBox(height: 8),
                         isEditable
                             ? TextField(
@@ -215,22 +262,30 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                             isDense: true,
                              contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
                           ),
-                                controller: TextEditingController(
-                                  text: data.hiPotTestResult.insulationImpedanceTest.leftInsulationOutputGround.value.toStringAsFixed(2),
-                                ),
+            controller: TextEditingController(
+            text: data.hiPotTestResult.insulationImpedanceTest.leftInsulationOutputGround.value.isNaN
+            ? ' '
+                : data.hiPotTestResult.insulationImpedanceTest.leftInsulationOutputGround.value.toStringAsFixed(2),
+            ),
                                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                onChanged: (value) {
-                                  final parsed = double.tryParse(value);
-                                  if (parsed != null) {
-                                    data.hiPotTestResult.insulationImpedanceTest.leftInsulationOutputGround.value = parsed;
-                                  }
-                                },
+            onChanged: (value) {
+            if (value.trim().isEmpty) {
+            data.hiPotTestResult.insulationImpedanceTest.leftInsulationOutputGround.value = double.nan;
+            }
+            else {
+            final parsed = double.tryParse(value);
+            if (parsed != null) {
+            data.hiPotTestResult.insulationImpedanceTest.leftInsulationOutputGround.value = parsed;
+            }
+            }
+            _updateHipotTestPassOrFail();
+            },
                               )
                             : Text(
-                                'Output/Ground: ${data.hiPotTestResult.insulationImpedanceTest.leftInsulationOutputGround.value.toStringAsFixed(2)} MΩ',
-                                style: TableTextStyle.contentStyle(),
-                                textAlign: TextAlign.center,
-                              ),
+                          'Output/Ground: ${data.hiPotTestResult.insulationImpedanceTest.leftInsulationOutputGround.value.isNaN ? '' : data.hiPotTestResult.insulationImpedanceTest.leftInsulationOutputGround.value.toStringAsFixed(2)} MΩ',
+                          style: TableTextStyle.contentStyle(),
+                          textAlign: TextAlign.center,
+                        ),
                       ],
                     ),
                   ),
@@ -257,22 +312,30 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                             isDense: true,
                              contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
                           ),
-                                controller: TextEditingController(
-                                  text: data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputOutput.value.toStringAsFixed(2),
-                                ),
+                          controller: TextEditingController(
+                            text: data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputOutput.value.isNaN
+                                ? ' '
+                                : data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputOutput.value.toStringAsFixed(2),
+                          ),
                                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                onChanged: (value) {
-                                  final parsed = double.tryParse(value);
-                                  if (parsed != null) {
-                                    data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputOutput.value = parsed;
-                                  }
-                                },
+                          onChanged: (value) {
+                            if (value.trim().isEmpty) {
+                              data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputOutput.value = double.nan;
+                            }
+                            else {
+                              final parsed = double.tryParse(value);
+                              if (parsed != null) {
+                                data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputOutput.value = parsed;
+                              }
+                            }
+                            _updateHipotTestPassOrFail();
+                          },
                               )
                             : Text(
-                                'Input/Output: ${data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputOutput.value.toStringAsFixed(2)} MΩ',
-                                style: TableTextStyle.contentStyle(),
-                                textAlign: TextAlign.center,
-                              ),
+                          'Input/Output: ${data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputOutput.value.isNaN ? '' : data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputOutput.value.toStringAsFixed(2)} MΩ',
+                          style: TableTextStyle.contentStyle(),
+                          textAlign: TextAlign.center,
+                        ),
                         const SizedBox(height: 8),
                         isEditable
                             ? TextField(
@@ -283,22 +346,30 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                             isDense: true,
                              contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
                           ),
-                                controller: TextEditingController(
-                                  text: data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputGround.value.toStringAsFixed(2),
-                                ),
+                          controller: TextEditingController(
+                            text: data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputGround.value.isNaN
+                                ? ' '
+                                : data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputGround.value.toStringAsFixed(2),
+                          ),
                                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                onChanged: (value) {
-                                  final parsed = double.tryParse(value);
-                                  if (parsed != null) {
-                                    data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputGround.value = parsed;
-                                  }
-                                },
+                          onChanged: (value) {
+                            if (value.trim().isEmpty) {
+                              data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputGround.value = double.nan;
+                            }
+                            else {
+                              final parsed = double.tryParse(value);
+                              if (parsed != null) {
+                                data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputGround.value = parsed;
+                              }
+                            }
+                            _updateHipotTestPassOrFail();
+                          },
                               )
                             : Text(
-                                'Input/Ground: ${data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputGround.value.toStringAsFixed(2)} MΩ',
-                                style: TableTextStyle.contentStyle(),
-                                textAlign: TextAlign.center,
-                              ),
+                          'Input/Ground: ${data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputGround.value.isNaN ? '' : data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputGround.value.toStringAsFixed(2)} MΩ',
+                          style: TableTextStyle.contentStyle(),
+                          textAlign: TextAlign.center,
+                        ),
                         const SizedBox(height: 8),
                         isEditable
                             ? TextField(
@@ -309,22 +380,30 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                             isDense: true,
                             // contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
                           ),
-                                controller: TextEditingController(
-                                  text: data.hiPotTestResult.insulationImpedanceTest.rightInsulationOutputGround.value.toStringAsFixed(2),
-                                ),
+                          controller: TextEditingController(
+                            text: data.hiPotTestResult.insulationImpedanceTest.rightInsulationOutputGround.value.isNaN
+                                ? ' '
+                                : data.hiPotTestResult.insulationImpedanceTest.rightInsulationOutputGround.value.toStringAsFixed(2),
+                          ),
                                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                onChanged: (value) {
-                                  final parsed = double.tryParse(value);
-                                  if (parsed != null) {
-                                    data.hiPotTestResult.insulationImpedanceTest.rightInsulationOutputGround.value = parsed;
-                                  }
-                                },
+                          onChanged: (value) {
+                            if (value.trim().isEmpty) {
+                              data.hiPotTestResult.insulationImpedanceTest.rightInsulationOutputGround.value = double.nan;
+                            }
+                            else {
+                              final parsed = double.tryParse(value);
+                              if (parsed != null) {
+                                data.hiPotTestResult.insulationImpedanceTest.rightInsulationOutputGround.value = parsed;
+                              }
+                            }
+                            _updateHipotTestPassOrFail();
+                          },
                               )
                             : Text(
-                                'Output/Ground: ${data.hiPotTestResult.insulationImpedanceTest.rightInsulationOutputGround.value.toStringAsFixed(2)} MΩ',
-                                style: TableTextStyle.contentStyle(),
-                                textAlign: TextAlign.center,
-                              ),
+                          'Output/Ground: ${data.hiPotTestResult.insulationImpedanceTest.rightInsulationOutputGround.value.isNaN ? '' : data.hiPotTestResult.insulationImpedanceTest.rightInsulationOutputGround.value.toStringAsFixed(2)} MΩ',
+                          style: TableTextStyle.contentStyle(),
+                          textAlign: TextAlign.center,
+                        ),
                       ],
                     ),
                   ),
@@ -429,22 +508,30 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                           isDense: true,
                           contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
                         ),
-                              controller: TextEditingController(
-                                text: data.hiPotTestResult.insulationVoltageTest.leftInsulationInputOutput.value.toStringAsFixed(2),
-                              ),
+                        controller: TextEditingController(
+                          text: data.hiPotTestResult.insulationVoltageTest.leftInsulationInputOutput.value.isNaN
+                              ? ' '
+                              : data.hiPotTestResult.insulationVoltageTest.leftInsulationInputOutput.value.toStringAsFixed(2),
+                        ),
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                              onChanged: (value) {
-                                final parsed = double.tryParse(value);
-                                if (parsed != null) {
-                                  data.hiPotTestResult.insulationVoltageTest.leftInsulationInputOutput.value = parsed;
-                                }
-                              },
+                        onChanged: (value) {
+                          if (value.trim().isEmpty) {
+                            data.hiPotTestResult.insulationVoltageTest.leftInsulationInputOutput.value = double.nan;
+                          }
+                          else {
+                            final parsed = double.tryParse(value);
+                            if (parsed != null) {
+                              data.hiPotTestResult.insulationVoltageTest.leftInsulationInputOutput.value = parsed;
+                            }
+                          }
+                          _updateHipotTestPassOrFail();
+                        },
                             )
                           : Text(
-                              'Input/Output: ${data.hiPotTestResult.insulationVoltageTest.leftInsulationInputOutput.value.toStringAsFixed(2)} mA',
-                              style: TableTextStyle.contentStyle(),
-                              textAlign: TextAlign.center,
-                            ),
+                        'Input/Output: ${data.hiPotTestResult.insulationVoltageTest.leftInsulationInputOutput.value.isNaN ? '' : data.hiPotTestResult.insulationVoltageTest.leftInsulationInputOutput.value.toStringAsFixed(2)} mA',
+                        style: TableTextStyle.contentStyle(),
+                        textAlign: TextAlign.center,
+                      ),
                       const SizedBox(height: 8),
                       isEditable
                           ? TextField(
@@ -455,22 +542,30 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                           isDense: true,
                           contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
                         ),
-                              controller: TextEditingController(
-                                text: data.hiPotTestResult.insulationVoltageTest.leftInsulationInputGround.value.toStringAsFixed(2),
-                              ),
+                        controller: TextEditingController(
+                          text: data.hiPotTestResult.insulationVoltageTest.leftInsulationInputGround.value.isNaN
+                              ? ' '
+                              : data.hiPotTestResult.insulationVoltageTest.leftInsulationInputGround.value.toStringAsFixed(2),
+                        ),
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                              onChanged: (value) {
-                                final parsed = double.tryParse(value);
-                                if (parsed != null) {
-                                  data.hiPotTestResult.insulationVoltageTest.leftInsulationInputGround.value = parsed;
-                                }
-                              },
+                        onChanged: (value) {
+                          if (value.trim().isEmpty) {
+                            data.hiPotTestResult.insulationVoltageTest.leftInsulationInputGround.value = double.nan;
+                          }
+                          else {
+                            final parsed = double.tryParse(value);
+                            if (parsed != null) {
+                              data.hiPotTestResult.insulationVoltageTest.leftInsulationInputGround.value = parsed;
+                            }
+                          }
+                          _updateHipotTestPassOrFail();
+                        },
                             )
                           : Text(
-                              'Input/Ground: ${data.hiPotTestResult.insulationVoltageTest.leftInsulationInputGround.value.toStringAsFixed(2)} mA',
-                              style: TableTextStyle.contentStyle(),
-                              textAlign: TextAlign.center,
-                            ),
+                        'Input/Ground: ${data.hiPotTestResult.insulationVoltageTest.leftInsulationInputGround.value.isNaN ? '' : data.hiPotTestResult.insulationVoltageTest.leftInsulationInputGround.value.toStringAsFixed(2)} mA',
+                        style: TableTextStyle.contentStyle(),
+                        textAlign: TextAlign.center,
+                      ),
                       const SizedBox(height: 8),
                       isEditable
                           ? TextField(
@@ -481,22 +576,30 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                           isDense: true,
                           contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
                         ),
-                              controller: TextEditingController(
-                                text: data.hiPotTestResult.insulationVoltageTest.leftInsulationOutputGround.value.toStringAsFixed(2),
-                              ),
+                        controller: TextEditingController(
+                          text: data.hiPotTestResult.insulationVoltageTest.leftInsulationOutputGround.value.isNaN
+                              ? ' '
+                              : data.hiPotTestResult.insulationVoltageTest.leftInsulationOutputGround.value.toStringAsFixed(2),
+                        ),
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                              onChanged: (value) {
-                                final parsed = double.tryParse(value);
-                                if (parsed != null) {
-                                  data.hiPotTestResult.insulationVoltageTest.leftInsulationOutputGround.value = parsed;
-                                }
-                              },
+                        onChanged: (value) {
+                          if (value.trim().isEmpty) {
+                            data.hiPotTestResult.insulationVoltageTest.leftInsulationOutputGround.value = double.nan;
+                          }
+                          else {
+                            final parsed = double.tryParse(value);
+                            if (parsed != null) {
+                              data.hiPotTestResult.insulationVoltageTest.leftInsulationOutputGround.value = parsed;
+                            }
+                          }
+                          _updateHipotTestPassOrFail();
+                        },
                             )
                           : Text(
-                              'Output/Ground: ${data.hiPotTestResult.insulationVoltageTest.leftInsulationOutputGround.value.toStringAsFixed(2)} mA',
-                              style: TableTextStyle.contentStyle(),
-                              textAlign: TextAlign.center,
-                            ),
+                        'Output/Ground: ${data.hiPotTestResult.insulationVoltageTest.leftInsulationOutputGround.value.isNaN ? '' : data.hiPotTestResult.insulationVoltageTest.leftInsulationOutputGround.value.toStringAsFixed(2)} mA',
+                        style: TableTextStyle.contentStyle(),
+                        textAlign: TextAlign.center,
+                      ),
                     ],
                   ),
                 ),
@@ -523,22 +626,30 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                           isDense: true,
                           contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
                         ),
-                              controller: TextEditingController(
-                                text: data.hiPotTestResult.insulationVoltageTest.rightInsulationInputOutput.value.toStringAsFixed(2),
-                              ),
+                        controller: TextEditingController(
+                          text: data.hiPotTestResult.insulationVoltageTest.rightInsulationInputOutput.value.isNaN
+                              ? ' '
+                              : data.hiPotTestResult.insulationVoltageTest.rightInsulationInputOutput.value.toStringAsFixed(2),
+                        ),
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                              onChanged: (value) {
-                                final parsed = double.tryParse(value);
-                                if (parsed != null) {
-                                  data.hiPotTestResult.insulationVoltageTest.rightInsulationInputOutput.value = parsed;
-                                }
-                              },
+                        onChanged: (value) {
+                          if (value.trim().isEmpty) {
+                            data.hiPotTestResult.insulationVoltageTest.rightInsulationInputOutput.value = double.nan;
+                          }
+                          else {
+                            final parsed = double.tryParse(value);
+                            if (parsed != null) {
+                              data.hiPotTestResult.insulationVoltageTest.rightInsulationInputOutput.value = parsed;
+                            }
+                          }
+                          _updateHipotTestPassOrFail();
+                        },
                             )
                           : Text(
-                              'Input/Output: ${data.hiPotTestResult.insulationVoltageTest.rightInsulationInputOutput.value.toStringAsFixed(2)} mA',
-                              style: TableTextStyle.contentStyle(),
-                              textAlign: TextAlign.center,
-                            ),
+                        'Input/Output: ${data.hiPotTestResult.insulationVoltageTest.rightInsulationInputOutput.value.isNaN ? '' : data.hiPotTestResult.insulationVoltageTest.rightInsulationInputOutput.value.toStringAsFixed(2)} mA',
+                        style: TableTextStyle.contentStyle(),
+                        textAlign: TextAlign.center,
+                      ),
                       const SizedBox(height: 8),
                       isEditable
                           ? TextField(
@@ -549,22 +660,30 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                           isDense: true,
                           contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
                         ),
-                              controller: TextEditingController(
-                                text: data.hiPotTestResult.insulationVoltageTest.rightInsulationInputGround.value.toStringAsFixed(2),
-                              ),
+                        controller: TextEditingController(
+                          text: data.hiPotTestResult.insulationVoltageTest.rightInsulationInputGround.value.isNaN
+                              ? ' '
+                              : data.hiPotTestResult.insulationVoltageTest.rightInsulationInputGround.value.toStringAsFixed(2),
+                        ),
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                              onChanged: (value) {
-                                final parsed = double.tryParse(value);
-                                if (parsed != null) {
-                                  data.hiPotTestResult.insulationVoltageTest.rightInsulationInputGround.value = parsed;
-                                }
-                              },
+                        onChanged: (value) {
+                          if (value.trim().isEmpty) {
+                            data.hiPotTestResult.insulationVoltageTest.rightInsulationInputGround.value = double.nan;
+                          }
+                          else {
+                            final parsed = double.tryParse(value);
+                            if (parsed != null) {
+                              data.hiPotTestResult.insulationVoltageTest.rightInsulationInputGround.value = parsed;
+                            }
+                          }
+                          _updateHipotTestPassOrFail();
+                        },
                             )
                           : Text(
-                              'Input/Ground: ${data.hiPotTestResult.insulationVoltageTest.rightInsulationInputGround.value.toStringAsFixed(2)} mA',
-                              style: TableTextStyle.contentStyle(),
-                              textAlign: TextAlign.center,
-                            ),
+                        'Input/Ground: ${data.hiPotTestResult.insulationVoltageTest.rightInsulationInputGround.value.isNaN ? '' : data.hiPotTestResult.insulationVoltageTest.rightInsulationInputGround.value.toStringAsFixed(2)} mA',
+                        style: TableTextStyle.contentStyle(),
+                        textAlign: TextAlign.center,
+                      ),
                       const SizedBox(height: 8),
                       isEditable
                           ? TextField(
@@ -575,22 +694,30 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                           isDense: true,
                           contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
                         ),
-                              controller: TextEditingController(
-                                text: data.hiPotTestResult.insulationVoltageTest.rightInsulationOutputGround.value.toStringAsFixed(2),
-                              ),
+                        controller: TextEditingController(
+                          text: data.hiPotTestResult.insulationVoltageTest.rightInsulationOutputGround.value.isNaN
+                              ? ' '
+                              : data.hiPotTestResult.insulationVoltageTest.rightInsulationOutputGround.value.toStringAsFixed(2),
+                        ),
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                              onChanged: (value) {
-                                final parsed = double.tryParse(value);
-                                if (parsed != null) {
-                                  data.hiPotTestResult.insulationVoltageTest.rightInsulationOutputGround.value = parsed;
-                                }
-                              },
+                        onChanged: (value) {
+                          if (value.trim().isEmpty) {
+                            data.hiPotTestResult.insulationVoltageTest.rightInsulationOutputGround.value = double.nan;
+                          }
+                          else {
+                            final parsed = double.tryParse(value);
+                            if (parsed != null) {
+                              data.hiPotTestResult.insulationVoltageTest.rightInsulationOutputGround.value = parsed;
+                            }
+                          }
+                          _updateHipotTestPassOrFail();
+                        },
                             )
                           : Text(
-                              'Output/Ground: ${data.hiPotTestResult.insulationVoltageTest.rightInsulationOutputGround.value.toStringAsFixed(2)} mA',
-                              style: TableTextStyle.contentStyle(),
-                              textAlign: TextAlign.center,
-                            ),
+                        'Output/Ground: ${data.hiPotTestResult.insulationVoltageTest.rightInsulationOutputGround.value.isNaN ? '' : data.hiPotTestResult.insulationVoltageTest.rightInsulationOutputGround.value.toStringAsFixed(2)} mA',
+                        style: TableTextStyle.contentStyle(),
+                        textAlign: TextAlign.center,
+                      ),
                     ],
                   ),
                 ),
@@ -648,6 +775,7 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                               data.hiPotTestResult.insulationImpedanceTest.storedJudgement = newValue;
                             });
                           }
+                          _updateHipotTestPassOrFail();
                         },
                       )
                           : Center(
@@ -676,6 +804,7 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
                               data.hiPotTestResult.insulationVoltageTest.storedJudgement = newValue;
                             });
                           }
+                          _updateHipotTestPassOrFail();
                         },
                       )
                           : Center(

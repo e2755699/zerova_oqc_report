@@ -20,6 +20,8 @@
   "please_input_sn": "Vui lòng nhập số sê-ri",
   "cancel": "Hủy",
   "submit": "Gửi",
+  "check_failed": "Kiểm tra không thành công",
+  "check_failed_message": "Các mục sau đây không vượt qua được kiểm tra, có thể có giá trị trống hoặc KHÔNG ĐẠT. \nvui lòng sửa lại và gửi lại",
   "exit": "Thoát",
   "close": "Đóng",
   "exit_confirm_title": "Xác nhận thoát",

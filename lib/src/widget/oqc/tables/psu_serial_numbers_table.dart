@@ -7,6 +7,7 @@ import 'package:zerova_oqc_report/src/widget/common/oqc_text_field.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:zerova_oqc_report/src/report/spec/psu_serial_numbers_spec.dart';
 import 'package:zerova_oqc_report/src/widget/common/global_state.dart';
+import 'package:zerova_oqc_report/src/widget/common/table_failorpass.dart';
 
 class PsuSerialNumbersTable extends StatefulWidget {
   final Psuserialnumber data;
@@ -77,6 +78,34 @@ class _PsuSerialNumbersTableState extends State<PsuSerialNumbersTable> {
     }
   }
 
+  void validate() {
+    bool hasError = false;
+
+    final expectedQty = globalPsuSerialNumSpec?.qty ?? 0;
+
+    // 防止 psuSN 長度不足
+    if (widget.data.psuSN.length < expectedQty) {
+      print('⚠️ widget.data.psuSN 數量不足，無法進行完整驗證');
+      hasError = true;
+    }
+
+    for (int i = 0; i < expectedQty; i++) {
+      if (i >= widget.data.psuSN.length) {
+        hasError = true;  // 沒資料也算錯
+        break;
+      }
+
+      final sn = widget.data.psuSN[i];
+      if (sn.value.trim().isEmpty) {
+        hasError = true;  // 有空值就是錯誤
+        break;
+      }
+    }
+
+    psuSNPassOrFail = !hasError;
+  }
+
+
   @override
   void initState() {
     super.initState();
@@ -92,6 +121,8 @@ class _PsuSerialNumbersTableState extends State<PsuSerialNumbersTable> {
     );
 
     _headerController = TextEditingController(text: qty.toString());
+
+    validate();
   }
 
   @override
@@ -177,9 +208,8 @@ class _PsuSerialNumbersTableState extends State<PsuSerialNumbersTable> {
                             ? OqcTextField(
                                 controller: _controllers[index],
                                 onChanged: (val) {
-                                  if (val.trim().isNotEmpty) {
                                     if (index < widget.data.psuSN.length) {
-                                      widget.data.psuSN[index].value = val;
+                                      widget.data.psuSN[index].value = val.trim();
                                     } else {
                                       // 先補滿到 index
                                       while (
@@ -193,9 +223,9 @@ class _PsuSerialNumbersTableState extends State<PsuSerialNumbersTable> {
                                           ),
                                         );
                                       }
-                                      widget.data.psuSN[index].value = val;
+                                      widget.data.psuSN[index].value = val.trim();
                                     }
-                                  }
+                                    validate();
                                 })
                             : OqcTableStyle.getDataCell(
                                 index < widget.data.psuSN.length

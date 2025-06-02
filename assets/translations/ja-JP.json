@@ -20,6 +20,8 @@
   "please_input_sn": "シリアル番号を入力してください",
   "cancel": "キャンセル",
   "submit": "送信",
+  "check_failed": "検査失敗",
+  "check_failed_message": "以下の項目はチェックに合格しませんでした。空の値またはFAILがある可能性があります。 \n修正して再度送信してください。",
   "exit": "終了",
   "close": "閉じる",
   "exit_confirm_title": "終了確認",

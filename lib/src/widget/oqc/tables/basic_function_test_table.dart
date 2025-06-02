@@ -6,6 +6,7 @@ import 'package:zerova_oqc_report/src/widget/common/table_wrapper.dart';
 import 'package:zerova_oqc_report/src/report/enum/judgement.dart';
 import 'package:zerova_oqc_report/src/widget/common/table_helper.dart';
 import 'package:zerova_oqc_report/src/widget/common/global_state.dart';
+import 'package:zerova_oqc_report/src/widget/common/table_failorpass.dart';
 import 'package:zerova_oqc_report/src/report/spec/basic_function_test_spec.dart';
 import 'package:zerova_oqc_report/src/widget/common/oqc_text_field.dart';
 import 'package:flutter/services.dart';
@@ -96,7 +97,31 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
     }
   }
 
-  @override
+  void _updateBasicFunctionTestPassOrFail() {
+    bool allPassed = true;
+    bool allFieldsFilled = true;
+
+    for (var i = 0; i < data.testItems.length; i++) {
+      // 判斷 judgement
+      if (data.testItems[i].judgement != Judgement.pass) {
+        allPassed = false;
+        break;
+      }
+    }
+
+    for (var i = 0; i < _reportValues.length; i++) {
+      final valueText = _reportValues[i][1]; // index 1 是使用者填的 value 欄位
+      if (valueText.trim().isEmpty) {
+        allFieldsFilled = false;
+        break;
+      }
+    }
+
+    // 判斷結果
+    basicFunctionTestPassOrFail = allPassed && allFieldsFilled;
+    debugPrint('basicFunctionTestPassOrFail = $basicFunctionTestPassOrFail');
+  }
+
   @override
   void initState() {
     super.initState();
@@ -331,6 +356,7 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
                                             data.testItems[index].description =
                                                 'Spec: $specPrefix$specText$unit\n$label $valueText$unit';
                                           });
+                                          _updateBasicFunctionTestPassOrFail();
                                         },
                                       ))
                                     : Text(
@@ -363,6 +389,7 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
                                     data.testItems[index].judgement = value;
                                   });
                                 }
+                                _updateBasicFunctionTestPassOrFail();
                               },
                             ),
                           )

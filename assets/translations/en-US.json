@@ -10,6 +10,8 @@
   "hipot_test": "Hi-pot Test",
   "package_list": "Kit parts",
   "attachment": "Attachment",
+  "check_failed": "Inspection failed",
+  "check_failed_message": "The following items have not passed the check, there may be empty values or FAIL. \nplease correct them and submit again",
   "exit": "Exit",
   "close": "Close",
   "exit_confirm_title": "Confirm Exit",
