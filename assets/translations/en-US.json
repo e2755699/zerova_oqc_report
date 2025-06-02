@@ -42,6 +42,8 @@
   "take_photo": "Take Photo",
   "next_photo": "Next Photo",
   "browse_photos": "Browse Photos",
+  "select_all": "Select all images",
+  "deselect_all": "Deselect all images",
   "images_saved": "Selected images have been saved!",
   "select_multiple_images": "Select Multiple Images",
   "no_images_found": "No images found in the specified directory.",
