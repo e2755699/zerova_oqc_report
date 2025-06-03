@@ -97,7 +97,12 @@ class _HomePageState extends State<HomePage> with LoadFileHelper<HomePage> {
                           onPressed: () {
                             context.go('/model-spec-template');
                           },
-                          child: Text(context.tr('model_spec_template')),
+                          child: Text(
+                            context.tr('model_spec_template'),
+                            textAlign: TextAlign.center, // 強制文字置中對齊
+                            maxLines: 2,                 // 最多兩行，避免溢出
+                            overflow: TextOverflow.ellipsis, // 若超過則以 "..." 顯示
+                          ),
                         ),
                       ),
                       const SizedBox(height: 20),

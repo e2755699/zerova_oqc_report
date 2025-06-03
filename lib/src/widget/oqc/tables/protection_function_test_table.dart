@@ -6,6 +6,7 @@ import 'package:zerova_oqc_report/src/widget/common/table_wrapper.dart';
 import 'package:zerova_oqc_report/src/widget/common/table_helper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:zerova_oqc_report/src/widget/common/global_state.dart';
+import 'package:zerova_oqc_report/src/widget/common/table_failorpass.dart';
 
 class ProtectionFunctionTestTable extends StatefulWidget {
   final ProtectionFunctionTestResult data;
@@ -21,6 +22,18 @@ class _ProtectionFunctionTestTableState
     extends State<ProtectionFunctionTestTable> with TableHelper {
   List<ProtectionFunctionMeasurement> get testItems =>
       widget.data.specialFunctionTestResult.testItems;
+
+  void _updateProtectionFunctionTestPassOrFail() {
+    bool allPassed = testItems.every((item) => item.judgement == Judgement.pass);
+    protectionFunctionTestPassOrFail = allPassed;
+    debugPrint('protectionFunctionTestPassOrFail = $protectionFunctionTestPassOrFail');
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _updateProtectionFunctionTestPassOrFail(); // 初始時立即檢查判斷
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -105,6 +118,7 @@ class _ProtectionFunctionTestTableState
                         testItems[index].judgement = value;
                       });
                     }
+                    _updateProtectionFunctionTestPassOrFail();
                   },
                 ),
               )

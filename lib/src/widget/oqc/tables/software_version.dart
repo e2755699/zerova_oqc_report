@@ -7,6 +7,7 @@ import 'package:zerova_oqc_report/src/widget/common/table_wrapper.dart';
 import 'package:zerova_oqc_report/src/widget/common/oqc_text_field.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:zerova_oqc_report/src/widget/common/global_state.dart';
+import 'package:zerova_oqc_report/src/widget/common/table_failorpass.dart';
 
 class SoftwareVersionTable extends StatefulWidget {
   final SoftwareVersion data;
@@ -20,12 +21,20 @@ class SoftwareVersionTable extends StatefulWidget {
 class _SoftwareVersionTableState extends State<SoftwareVersionTable> {
   late List<TextEditingController> _controllers;
 
+  void validate() {
+    bool hasEmpty = widget.data.versions.any((v) => v.value.trim().isEmpty);
+    setState(() {
+      swVerPassOrFail = !hasEmpty;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     _controllers = widget.data.versions
         .map((v) => TextEditingController(text: v.value))
         .toList();
+    validate();
   }
 
   @override
@@ -67,6 +76,7 @@ class _SoftwareVersionTableState extends State<SoftwareVersionTable> {
                               setState(() {
                                 widget.data.versions[index].value = val;
                               });
+                              validate();
                             },
                           )
                         : OqcTableStyle

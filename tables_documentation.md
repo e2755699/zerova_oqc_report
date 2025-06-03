@@ -16,7 +16,7 @@
 | hipot_test_table.dart | 709 | 耐壓測試表格 |
 | input_output_characteristics_table.dart | 829 | 輸入輸出特性表格 |
 | model_name_and_serial_number_table.dart | 39 | 型號和序號表格 |
-| package_list_table.dart | 177 | 包裝清單表格 |
+| package_list_table.dart | 177 | 配件包表格 |
 | protection_function_test_table.dart | 120 | 保護功能測試表格 |
 | psu_serial_numbers_table.dart | 107 | PSU序號表格 |
 | signature_table.dart | 113 | 簽名表格 |

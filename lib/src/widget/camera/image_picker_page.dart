@@ -184,15 +184,47 @@ class _ImagePickerPageState extends State<ImagePickerPage>
                 ),
               ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          await _saveSelectedImages(); // 儲存所選影像
-          Navigator.of(context).pop(); // 關閉對話框
-        },
-        icon: const Icon(Icons.save),
-        label: Text(context.tr('save_selected_images')),
-        backgroundColor: AppColors.fabColor,
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          FloatingActionButton.extended(
+            heroTag: 'select_all',
+            onPressed: () {
+              setState(() {
+                _selectedImages = List<bool>.filled(_selectedImages.length, true);
+              });
+            },
+            icon: const Icon(Icons.select_all),
+            label: Text(context.tr('select_all')),
+            backgroundColor: AppColors.fabColor,
+          ),
+          const SizedBox(height: 8),
+          FloatingActionButton.extended(
+            heroTag: 'deselect_all',
+            onPressed: () {
+              setState(() {
+                _selectedImages = List<bool>.filled(_selectedImages.length, false);
+              });
+            },
+            icon: const Icon(Icons.deselect),
+            label: Text(context.tr('deselect_all')),
+            backgroundColor: AppColors.fabColor,
+          ),
+          const SizedBox(height: 8),
+          FloatingActionButton.extended(
+            heroTag: 'save_selected',
+            onPressed: () async {
+              await _saveSelectedImages(); // 儲存所選影像
+              Navigator.of(context).pop(); // 返回前一頁
+            },
+            icon: const Icon(Icons.save),
+            label: Text(context.tr('save_selected_images')),
+            backgroundColor: AppColors.fabColor,
+          ),
+        ],
       ),
+
     );
   }
 }

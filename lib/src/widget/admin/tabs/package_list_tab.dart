@@ -39,9 +39,9 @@ class _PackageListTabState extends State<PackageListTab> {
     _spec = widget.spec ?? PackageListResult();
 
     // 如果沒有任何測量項目，添加一些預設項目
-    if (_spec.measurements.isEmpty) {
+    /*if (_spec.measurements.isEmpty) {
       _addDefaultItems();
-    }
+    }*/
 
     // 初始化控制器
     _initializeControllers();
@@ -173,7 +173,7 @@ class _PackageListTabState extends State<PackageListTab> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '包裝清單規格',
+                  '配件包規格',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 ElevatedButton.icon(
@@ -328,10 +328,10 @@ class _PackageListTabState extends State<PackageListTab> {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    '• 包裝清單: 設定此模型的包裝清單項目和數量\n'
+                    '• 配件包: 設定此模型的配件包項目和數量\n'
                     '• 可以新增、編輯或刪除包裝項目\n'
                     '• 每個項目包含名稱和數量\n'
-                    '• 此設定將用於 OQC 報告的包裝清單表格',
+                    '• 此設定將用於 OQC 報告的配件包表格',
                     style: TextStyle(fontSize: 14),
                   ),
                 ],

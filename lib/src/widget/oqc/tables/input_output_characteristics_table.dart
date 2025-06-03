@@ -5,6 +5,7 @@ import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 import 'package:zerova_oqc_report/src/widget/common/table_wrapper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:zerova_oqc_report/src/widget/common/global_state.dart';
+import 'package:zerova_oqc_report/src/widget/common/table_failorpass.dart';
 import 'package:zerova_oqc_report/src/report/spec/input_output_characteristics_spec.dart';
 import 'package:zerova_oqc_report/src/widget/common/table_helper.dart';
 import 'package:flutter/services.dart';
@@ -266,6 +267,7 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
         });
       });
     }
+    _updateIoCharacteristicsPassOrFail();
   }
 
 
@@ -330,6 +332,45 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
     4: [23, 24], // Pout
   };
 
+  void _updateIoCharacteristicsPassOrFail() {
+    bool allPassed = true;
+
+    // 判斷 judgement 是否全部為 pass
+    for (final side in widget.inputOutputCharacteristics.inputOutputCharacteristicsSide) {
+      debugPrint('judgement = ${side.judgement}');
+      if (side.judgement != Judgement.pass) {
+        allPassed = false;
+        break;
+      }
+    }
+
+    // 判斷是否有任何欄位為空
+    bool allFieldsFilled = true;
+    final requiredKeys = ['L_3', 'L_4', 'L_5', 'L_6', 'R_3', 'R_4', 'R_5', 'R_6'];
+
+    for (final key in requiredKeys) {
+      final input = _cellInputs[key];
+      final controller = _cellControllers[key];
+
+      // 判斷來源：1. 使用者輸入的值（_cellInputs），2. 若無則讀取 TextEditingController 的文字
+      final valueStr = (input != null && input.trim().isNotEmpty)
+          ? input
+          : controller?.text ?? '';
+
+      // 去除空白後是否還是空字串（空值）
+      if (valueStr.trim().isEmpty) {
+        allFieldsFilled = false;
+        break;
+      }
+    }
+
+    // 更新全域變數
+    ioCharacteristicsPassOrFail = allPassed && allFieldsFilled;
+    debugPrint('ioCharacteristicsPassOrFail = $ioCharacteristicsPassOrFail');
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<int>(
@@ -339,8 +380,8 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
           valueListenable: permissions,
           builder: (context, permission, _) {
             final isEditable = editMode == 1 && (permission == 1 || permission == 2);
-            final isHeaderEditable = editMode == 1 && permission == 1;
-
+            //final isHeaderEditable = editMode == 1 && permission == 1;
+            final isHeaderEditable = false;
 
             // 你的 headerColumns (完全照你給的程式碼)
             final leftHeaderColumns = leftHeaders.asMap().entries.map((entry) {
@@ -392,6 +433,7 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
                                   setState(() {
                                     _userInput[upperIndex] = value;
                                   });
+                                  _updateIoCharacteristicsPassOrFail();
                                 },
                               ),
                             ),
@@ -423,6 +465,7 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
                                   setState(() {
                                     _userInput[lowerIndex] = value;
                                   });
+                                  _updateIoCharacteristicsPassOrFail();
                                 },
                               ),
                             ),
@@ -513,6 +556,7 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
                                   setState(() {
                                     _userInput[upperIndex] = value;
                                   });
+                                  _updateIoCharacteristicsPassOrFail();
                                 },
                               ),
                             ),
@@ -544,6 +588,7 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
                                   setState(() {
                                     _userInput[lowerIndex] = value;
                                   });
+                                  _updateIoCharacteristicsPassOrFail();
                                 },
                               ),
                             ),
@@ -619,6 +664,7 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
                               item.judgement = newValue;
                             });
                           }
+                          _updateIoCharacteristicsPassOrFail();
                         },
                         items: Judgement.values.map((value) {
                           return DropdownMenuItem<Judgement>(
@@ -681,6 +727,7 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
                               item.judgement = newValue;
                             });
                           }
+                          _updateIoCharacteristicsPassOrFail();
                         },
                         items: Judgement.values.map((value) {
                           return DropdownMenuItem<Judgement>(
@@ -736,10 +783,6 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
       },
     );
   }
-
-
-
-
 
   DataCell editableCell(String rowKey, String defaultValue, bool isEditable, {String suffix = ""}) {
     final value = _cellInputs[rowKey] ?? defaultValue;
@@ -799,6 +842,7 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
                     }
                   }
                 });
+                _updateIoCharacteristicsPassOrFail();
               },
               decoration: InputDecoration(
                 isDense: true,

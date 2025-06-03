@@ -34,6 +34,7 @@ import 'package:zerova_oqc_report/src/report/spec/package_list_spec.dart';
 import 'package:zerova_oqc_report/src/report/spec/FailCountStore.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/oqc_model.dart';
 import 'package:zerova_oqc_report/src/report/spec/new_package_list_spec.dart.dart';
+import 'package:zerova_oqc_report/src/widget/common/table_failorpass.dart';
 
 class OqcReportPage extends StatefulWidget {
   const OqcReportPage({
@@ -152,6 +153,66 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
       title: context.tr('oqc_report'),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
+          // ❗先做 fail 檢查
+          List<String> failItems = [];
+
+          //bill4
+          if (psuSNPassOrFail == false) {
+            failItems.add(context.tr('psu_sn'));
+          }
+          if (swVerPassOrFail == false) {
+            failItems.add(context.tr('software_version'));
+          }
+          if (appearanceStructureInspectionPassOrFail == false) {
+            failItems.add(context.tr('appearance_structure_inspection'));
+          }
+          if (ioCharacteristicsPassOrFail == false) {
+            failItems.add(context.tr('input_output_characteristics'));
+          }
+          if (basicFunctionTestPassOrFail == false) {
+            failItems.add(context.tr('basic_function_test'));
+          }
+          if (protectionFunctionTestPassOrFail == false) {
+            failItems.add(context.tr('protection_function_test'));
+          }
+          if (hipotTestPassOrFail == false) {
+            failItems.add(context.tr('hipot_test'));
+          }
+
+          if (failItems.isNotEmpty) {
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                //title: context.tr('oqc_report'),
+                title: Text('⚠️ ${context.tr('check_failed')}'),
+                //title: const Text('⚠️ 檢查未通過'),
+                content: RichText(
+                  text: TextSpan(
+                    style: const TextStyle(color: Colors.black, fontSize: 16),
+                    children: [
+                      TextSpan(
+                        text: '${context.tr('check_failed_message')}\n\n',
+                      ),
+                      TextSpan(
+                        text: failItems.join('\n'),
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    child: const Text('OK'),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+            );
+
+            return; // ❌ 不繼續執行
+          }
+
+
           await _generateAndUploadPdf();
           //bill3
           startUpload(context);

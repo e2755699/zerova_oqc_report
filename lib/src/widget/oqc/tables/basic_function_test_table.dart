@@ -6,6 +6,7 @@ import 'package:zerova_oqc_report/src/widget/common/table_wrapper.dart';
 import 'package:zerova_oqc_report/src/report/enum/judgement.dart';
 import 'package:zerova_oqc_report/src/widget/common/table_helper.dart';
 import 'package:zerova_oqc_report/src/widget/common/global_state.dart';
+import 'package:zerova_oqc_report/src/widget/common/table_failorpass.dart';
 import 'package:zerova_oqc_report/src/report/spec/basic_function_test_spec.dart';
 import 'package:zerova_oqc_report/src/widget/common/oqc_text_field.dart';
 import 'package:flutter/services.dart';
@@ -34,7 +35,7 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
     'THD:',
     'Standby Power:'
   ];
-  final List<String> valueUnits = ['%', '%', '%', 'W'];
+  final List<String> valueUnits = ['%', '', '%', 'W'];
 
   double _defaultIfEmptyDouble(double? value, double defaultValue) {
     return (value == null || value.isNaN) ? defaultValue : value;
@@ -96,7 +97,31 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
     }
   }
 
-  @override
+  void _updateBasicFunctionTestPassOrFail() {
+    bool allPassed = true;
+    bool allFieldsFilled = true;
+
+    for (var i = 0; i < data.testItems.length; i++) {
+      // 判斷 judgement
+      if (data.testItems[i].judgement != Judgement.pass) {
+        allPassed = false;
+        break;
+      }
+    }
+
+    for (var i = 0; i < _reportValues.length; i++) {
+      final valueText = _reportValues[i][1]; // index 1 是使用者填的 value 欄位
+      if (valueText.trim().isEmpty) {
+        allFieldsFilled = false;
+        break;
+      }
+    }
+
+    // 判斷結果
+    basicFunctionTestPassOrFail = allPassed && allFieldsFilled;
+    debugPrint('basicFunctionTestPassOrFail = $basicFunctionTestPassOrFail');
+  }
+
   @override
   void initState() {
     super.initState();
@@ -151,8 +176,8 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
           builder: (context, permission, _) {
             final isEditable =
                 editMode == 1 && (permission == 1 || permission == 2);
-            final isHeaderEditable = editMode == 1 && permission == 1;
-
+            //final isHeaderEditable = editMode == 1 && permission == 1;
+            final isHeaderEditable = false;
             final dataTable = StyledDataTable(
               dataRowMinHeight: 50,
               dataRowMaxHeight: 80,
@@ -179,9 +204,11 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             // 第一欄 Spec
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
+                        Padding(
+                        padding: const EdgeInsets.only(left: 12.0), // 根據需要調整左邊距
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 Text(
                                   getSpecLabel(index),
@@ -189,7 +216,7 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
                                   textAlign: TextAlign.center,
                                 ),
                                 const SizedBox(width: 8),
-                                isEditable
+                                isHeaderEditable
                                     ? Expanded(
                                         child: OqcTextField(
                                           padding: const EdgeInsets.symmetric(
@@ -268,12 +295,14 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
                                 ),
                               ],
                             ),
-
+                        ),
                             const SizedBox(height: 8),
                             // 第二欄 Value + Label + Unit
-                            Row(
-                              crossAxisAlignment:  CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
+                      Padding(
+                        padding: const EdgeInsets.only(left: 12.0), // 根據需要調整左邊距
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 Text(
                                   valueLabels.length > index
@@ -327,6 +356,7 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
                                             data.testItems[index].description =
                                                 'Spec: $specPrefix$specText$unit\n$label $valueText$unit';
                                           });
+                                          _updateBasicFunctionTestPassOrFail();
                                         },
                                       ))
                                     : Text(
@@ -342,6 +372,7 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
                                   textAlign: TextAlign.center,
                                 ),
                               ],
+                        ),
                             ),
                           ],
                         ),
@@ -358,6 +389,7 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
                                     data.testItems[index].judgement = value;
                                   });
                                 }
+                                _updateBasicFunctionTestPassOrFail();
                               },
                             ),
                           )
