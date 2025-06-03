@@ -5,6 +5,10 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:path/path.dart' as path;
 import '../config/config_manager.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'dart:async';
+import 'dart:typed_data';
+import 'package:crypto/crypto.dart';
 
 class SharePointUploader {
   final String clientId = ConfigManager.clientId;
@@ -19,21 +23,28 @@ class SharePointUploader {
   final String sn;
   final String model;
 
+  // Token管理相關
+  String? _accessToken;
+  String? _refreshToken;
+  DateTime? _tokenExpiry;
+  static const String _tokenKey = 'sharepoint_access_token';
+  static const String _refreshTokenKey = 'sharepoint_refresh_token';
+  static const String _expiryKey = 'sharepoint_token_expiry';
+
+  // 安全存儲實例
+  static const _secureStorage = FlutterSecureStorage(
+    aOptions: AndroidOptions(
+      encryptedSharedPreferences: true,
+    ),
+    iOptions: IOSOptions(
+      accessibility: IOSAccessibility.first_unlock_this_device,
+    ),
+  );
+
   static final Set<String> _downloadedModels = {};
 
-  SharePointUploader({required this.uploadOrDownload, required this.sn, required this.model});
-  /*Future<String> _getUserPicturesPath(String subDirectory) async {
-    // 獲取當前使用者的根目錄
-    final String userProfile = Platform.environment['USERPROFILE'] ?? '';
-
-    // 根據根目錄構建圖片目錄路徑
-    if (userProfile.isNotEmpty) {
-      final String picturesPath = path.join(userProfile, 'Pictures', subDirectory);
-      return picturesPath;
-    } else {
-      throw Exception("Unable to find the user profile directory.");
-    }
-  }*/
+  SharePointUploader(
+      {required this.uploadOrDownload, required this.sn, required this.model});
 
   bool hasDownloaded(String model) {
     if (_downloadedModels.contains(model)) {
@@ -63,105 +74,159 @@ class SharePointUploader {
   Future<void> startAuthorization({
     Function(String, int, int)? onProgressUpdate,
     required Map<String, String> categoryTranslations,
+    Duration timeout = const Duration(minutes: 5),
   }) async {
-    // final token = await getAccessToken(refreshToken : "1.AXIAEnOpZTgOx0q5I043N_tALqpoaaYGC7VGvgcUU6orVCfDAFxyAA.AgABAwEAAABVrSpeuWamRam2jAF1XRQEAwDs_wUA9P8tL7d3tSQwcqZlHcX4D-r5OI1gb2KFFQsjfzH2CNsDN6XsmDHkNBb8OC4J_HVjC8SbftdAp6YNHrO6tjMnbKqiTYISkrRQTOVxQBQfxCbMBlvwJcrcbRXKVoIZuWf8EkQimNIAxWVatTT72TfEc1dKs-rpjnEUj4XR6Vjp4Gb4mC2xbXRbp47Y3nTA4VMIQh_12U9ahZsTaA61qZ8BRpxelQ3QTlKSAxOjrG1dF-kavOnV2DmtABXFUb_RPYe-PUKxaBjvqK5_48FtBjoP15f9foS1I-UHo1OSlnampXWzgACrwAkYRziqlbxKKhTja9nJcUXKZlaYZzjVGgwehji6AcQlPcwx-bfWpcNvZSPYOFt4PeYmkNoYQPlwrJElLesXOM3BvDpcn_-nZdJxa7D8wwpqNGWvPTJgg9Q_oPULOD8yvNGQZ76ufYJMWv6MIADhqLEWHlePlCa7ode9oAcTGhZtJd1gstQ7psueCX6-0k1Dv_v-UhZ51um7RrXdfc_H0ueH-0VKZmgaT_aUQ-G-fphWiN_uCw676LSadHBUP-wOwqQXbSdkOLsfKridjHtoouo6QucQZK5X4hWES8ZnKr9th4TjPduAgQ6qcyfpRZoHtCWOzYLA9oyZDiASTMRzvGBUGdlDrqn_08uz3qi7uByX4I9IsvVfyNGTrNfOhZYiK98lvJa_gmv3d5o5hqgYIt_gjHpBlIrvDcug8oHSG-N22QLV7OoGnxnmm215cg2y-UtArNvXuQg0WDmuqC56ANLNPrNnLMH8VcFeeckNkRy099ifcq3rwWsib__iWjiYrtaYUJgi33DtGMMX6_YmprSq0ySmAop-gkIV8w4GpFV1EiGykb7uqsSCQdKmYQoxExdZaCMbA5t0JQTJ0fI0a-_-seK0S1j6lB2Lav10-qqxLZUiVKOpf5kw8fQL6smLK8wXi5n-rCKB7BNfjBuhOYZf_avp63OuG8FHvvBQCP05i42s8W7txrHQqR-CFz8bsr8c7f3M26yRmUlo15sO20qq3wsll0FoVuYdX4k7fovl6dsmUGZAQF3Klb-fXPCG2J6gOXhDCzxoMBz0GEAyYxho1I2QGOb1BxUhfhHvfFEfg2sUNbi0YXMkYQE6cnpEjmz-ByIGyGXqaJfj4HU38hf5qXF2t-1ZCB8h3e7DE9AGj-yrr_Jmi0mdctlcDYppt8NYHdcYdF1mcPvgtpsch3w3nVpyOCJyusk5OjgxAaY8yiqHMB6wEvjsVsg74AoDg6rZlQXNQJ9f1kpjH9Xn26A2rpILsow4R-X5eCHrUzAFpZjF8kMigFyEKPrb4XJKc739DKO51Q36BmoMZ1LhBUrhMcRipBLVQtMSJMX3J_tNH0ua2gKXbp4tX620vam2D4s2mNJx2tG6kqd4krJAFmOd0_OLtCxwtLp9YmjfJWS-v0B_qE7V3eGsWblkqBg2O6FKjQEX18xrMdKHaLT1qKi_vd7C-xLeKIFErpT-SKAqRi15EH_sCIsUo1GwtF6kslI");
-    // if (token != null) {
-    //   print("Access Token 獲取成功，正在上傳/下載檔案...");
-    //   if (uploadOrDownload == 0) { //Upload
-    //     await uploadAllPackagingPhotos(token, (current, total) => onProgressUpdate?.call("配件包照片", current, total)!); //上傳所有配件包照片
-    //     await uploadAllAttachmentPhotos(token, (current, total) => onProgressUpdate?.call("外觀檢查照片", current, total)); //上傳所有外觀檢查照片
-    //     await uploadOQCReport(token, (current, total) => onProgressUpdate?.call("OQC 報告", current, total)); //上傳OQC report
-    //     //await uploadSelectedPackagingPhotos(token); // 上傳選擇的配件包照片
-    //     //await uploadSelectedAttachmentPhotos(token); // 上傳選擇的外觀檢查照片
-    //   } else if (uploadOrDownload == 1) {  //Donwload
-    //     await downloadComparePictures(token); // 下載參考照片
-    //   } else {
-    //     throw Exception("Didn't contain Upload Or Download");
-    //   }
-    // } else {
-    //   print("無法獲取 Access Token");
-    // }
     if (uploadOrDownload == 1 && hasDownloaded(model)) {
       return;
     }
 
-
-    final authUrl = Uri.https(
-      "login.microsoftonline.com",
-      "$tenantId/oauth2/v2.0/authorize",
-      {
-        "client_id": clientId,
-        "response_type": "code",
-        "redirect_uri": redirectUri,
-        "scope": "https://graph.microsoft.com/.default"
-      },
-    );
-
-    if (await canLaunch(authUrl.toString())) {
-      await launch(authUrl.toString());
-    } else {
-      print("無法打開瀏覽器");
+    String? token = await getValidAccessToken();
+    if (token != null) {
+      print("使用現有Token進行操作...");
+      await _executeOperations(token, onProgressUpdate, categoryTranslations);
       return;
     }
 
-    _server = await HttpServer.bind(InternetAddress.loopbackIPv4, 8000);
-    await for (HttpRequest request in _server) {
-      if (request.uri.path == "/callback") {
-        final authCode = request.uri.queryParameters['code'];
-        if (authCode != null) {
-          print("授權碼獲取成功: $authCode");
-          final token = await getAccessToken(authCode: authCode);
-          if (token != null) {
-            print("Access Token 獲取成功，正在上傳/下載檔案...");
-            if (uploadOrDownload == 0) {
-              //Upload
-              await uploadAllPackagingPhotos(
-                  token,
-                      (current, total) => onProgressUpdate?.call(
-                      categoryTranslations['packageing_photo'] ?? 'Packageing Photo ',
-                      current,
-                      total));
-              await uploadAllAttachmentPhotos(
-                  token,
-                      (current, total) => onProgressUpdate?.call(
-                      categoryTranslations['appearance_photo'] ?? 'Appearance Photo ',
-                      current,
-                      total));
-              await uploadOQCReport(
-                  token,
-                      (current, total) => onProgressUpdate?.call(
-                      categoryTranslations['oqc_report'] ?? 'OQC Report ',
-                      current,
-                      total));
-              //await uploadSelectedPackagingPhotos(token); // 上傳選擇的配件包照片
-              //await uploadSelectedAttachmentPhotos(token); // 上傳選擇的外觀檢查照片
-            } else if (uploadOrDownload == 1) {
-              //Donwload
-              await downloadComparePictures(token); // 下載參考照片
-            } else if (uploadOrDownload == 2) {
-              //Donwload
-              //await downloadPhoneAttachmentPictures(token); // 下載參考照片
-              await downloadPhonePackagingPictures(token); // 下載參考照片
-            }
-            else if (uploadOrDownload == 3) {
-              //Donwload
-              await downloadPhoneAttachmentPictures(token); // 下載參考照片
-              //await downloadPhonePackagingPictures(token); // 下載參考照片
-            }
-            else {
-              throw Exception("Didn't contain Upload Or Download");
-            }
-          } else {
-            print("無法獲取 Access Token");
+    await _performOAuthFlow(onProgressUpdate, categoryTranslations, timeout);
+  }
+
+  Future<void> _performOAuthFlow(
+    Function(String, int, int)? onProgressUpdate,
+    Map<String, String> categoryTranslations,
+    Duration timeout,
+  ) async {
+    try {
+      final authUrl = Uri.https(
+        "login.microsoftonline.com",
+        "$tenantId/oauth2/v2.0/authorize",
+        {
+          "client_id": clientId,
+          "response_type": "code",
+          "redirect_uri": redirectUri,
+          "scope": "https://graph.microsoft.com/.default offline_access",
+          "state": DateTime.now().millisecondsSinceEpoch.toString(),
+        },
+      );
+
+      if (await canLaunch(authUrl.toString())) {
+        await launch(authUrl.toString());
+      } else {
+        throw Exception("無法打開瀏覽器進行授權");
+      }
+
+      HttpServer? server;
+      for (int port = 8000; port <= 8010; port++) {
+        try {
+          server = await HttpServer.bind(InternetAddress.loopbackIPv4, port);
+          _server = server;
+          print("本地服務器啟動在端口: $port");
+          break;
+        } catch (e) {
+          if (port == 8010) {
+            throw Exception("無法綁定任何可用端口 (8000-8010)");
           }
         }
-        request.response
-          ..statusCode = HttpStatus.ok
-          ..write("<script>window.close();</script>授權完成，請回到終端機查看結果。")
-          ..close();
-        _server.close();
-        break;
       }
+
+      final completer = Completer<void>();
+      late Timer timeoutTimer;
+
+      timeoutTimer = Timer(timeout, () {
+        if (!completer.isCompleted) {
+          completer.completeError(TimeoutException("OAuth授權超時", timeout));
+          _server.close();
+        }
+      });
+
+      _server.listen((HttpRequest request) async {
+        if (request.uri.path == "/callback") {
+          timeoutTimer.cancel();
+
+          final authCode = request.uri.queryParameters['code'];
+          final error = request.uri.queryParameters['error'];
+          final state = request.uri.queryParameters['state'];
+
+          if (error != null) {
+            completer.completeError(Exception("OAuth授權錯誤: $error"));
+          } else if (authCode != null) {
+            try {
+              final token = await getAccessToken(authCode: authCode);
+              if (token != null) {
+                await _saveTokens();
+                await _executeOperations(
+                    token, onProgressUpdate, categoryTranslations);
+                completer.complete();
+              } else {
+                completer.completeError(Exception("無法獲取 Access Token"));
+              }
+            } catch (e) {
+              completer.completeError(e);
+            }
+          } else {
+            completer.completeError(Exception("無效的授權回調"));
+          }
+
+          request.response
+            ..statusCode = HttpStatus.ok
+            ..headers.contentType = ContentType.html
+            ..write("""
+              <!DOCTYPE html>
+              <html>
+              <head><title>授權完成</title></head>
+              <body>
+                <h2>授權完成</h2>
+                <p>您可以關閉此頁面並回到應用程式。</p>
+                <script>
+                  setTimeout(() => window.close(), 2000);
+                </script>
+              </body>
+              </html>
+            """)
+            ..close();
+
+          await _server.close();
+        }
+      });
+
+      await completer.future;
+    } catch (e) {
+      print("OAuth授權失敗: $e");
+      rethrow;
+    }
+  }
+
+  Future<void> _executeOperations(
+    String token,
+    Function(String, int, int)? onProgressUpdate,
+    Map<String, String> categoryTranslations,
+  ) async {
+    if (uploadOrDownload == 0) {
+      await uploadAllPackagingPhotos(
+          token,
+          (current, total) => onProgressUpdate?.call(
+              categoryTranslations['packageing_photo'] ?? 'Packageing Photo',
+              current,
+              total));
+      await uploadAllAttachmentPhotos(
+          token,
+          (current, total) => onProgressUpdate?.call(
+              categoryTranslations['appearance_photo'] ?? 'Appearance Photo',
+              current,
+              total));
+      await uploadOQCReport(
+          token,
+          (current, total) => onProgressUpdate?.call(
+              categoryTranslations['oqc_report'] ?? 'OQC Report',
+              current,
+              total));
+    } else if (uploadOrDownload == 1) {
+      await downloadComparePictures(token);
+    } else if (uploadOrDownload == 2) {
+      await downloadPhonePackagingPictures(token);
+    } else if (uploadOrDownload == 3) {
+      await downloadPhoneAttachmentPictures(token);
+    } else {
+      throw Exception("Didn't contain Upload Or Download");
     }
   }
 
@@ -185,11 +250,84 @@ class SharePointUploader {
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      return data['access_token'];
+      _accessToken = data['access_token'];
+      // 只有在使用authorization_code時才會返回refresh_token
+      if (data['refresh_token'] != null) {
+        _refreshToken = data['refresh_token'];
+      }
+      final expiresIn = data['expires_in'] ?? 3600; // 預設1小時
+      _tokenExpiry = DateTime.now().add(Duration(seconds: expiresIn));
+      return _accessToken;
     } else {
       print("無法獲取 Access Token: ${response.statusCode} ${response.body}");
       return null;
     }
+  }
+
+  /// 儲存Token到安全存儲
+  Future<void> _saveTokens() async {
+    if (_accessToken != null) {
+      await _secureStorage.write(key: _tokenKey, value: _accessToken!);
+    }
+    if (_refreshToken != null) {
+      // 直接存儲refresh token，flutter_secure_storage會自動加密
+      await _secureStorage.write(key: _refreshTokenKey, value: _refreshToken!);
+    }
+    if (_tokenExpiry != null) {
+      await _secureStorage.write(
+          key: _expiryKey, value: _tokenExpiry!.toIso8601String());
+    }
+  }
+
+  /// 從安全存儲載入Token
+  Future<void> _loadTokens() async {
+    _accessToken = await _secureStorage.read(key: _tokenKey);
+    _refreshToken = await _secureStorage.read(key: _refreshTokenKey);
+
+    final expiryString = await _secureStorage.read(key: _expiryKey);
+    if (expiryString != null) {
+      _tokenExpiry = DateTime.parse(expiryString);
+    }
+  }
+
+  /// 清除所有存儲的Token
+  Future<void> clearStoredTokens() async {
+    await _secureStorage.delete(key: _tokenKey);
+    await _secureStorage.delete(key: _refreshTokenKey);
+    await _secureStorage.delete(key: _expiryKey);
+    _accessToken = null;
+    _refreshToken = null;
+    _tokenExpiry = null;
+  }
+
+  /// 檢查Token是否有效
+  bool _isTokenValid() {
+    return _accessToken != null &&
+        _tokenExpiry != null &&
+        _tokenExpiry!
+            .isAfter(DateTime.now().add(Duration(minutes: 5))); // 提前5分鐘刷新
+  }
+
+  /// 獲取有效的Access Token（自動刷新）
+  Future<String?> getValidAccessToken() async {
+    await _loadTokens();
+
+    // 如果token有效，直接返回
+    if (_isTokenValid()) {
+      return _accessToken;
+    }
+
+    // 嘗試使用refresh token獲取新token
+    if (_refreshToken != null) {
+      final newToken = await getAccessToken(refreshToken: _refreshToken);
+      if (newToken != null) {
+        await _saveTokens();
+        return newToken;
+      }
+    }
+
+    // 需要重新授權
+    return null;
   }
 
   Future<void> uploadAllPackagingPhotos(
@@ -409,7 +547,7 @@ class SharePointUploader {
 
       modelNameUsed = "default";
       listFilesUrl =
-      "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/Jackalope/外觀參考照片/default:/children";
+          "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/Jackalope/外觀參考照片/default:/children";
 
       response = await http.get(
         Uri.parse(listFilesUrl),
@@ -432,7 +570,8 @@ class SharePointUploader {
     }
 
     // 根據實際使用的 model 建立儲存路徑
-    final String directoryPath = path.join(zerovaPath, 'Compare Pictures', modelNameUsed);
+    final String directoryPath =
+        path.join(zerovaPath, 'Compare Pictures', modelNameUsed);
     final directory = Directory(directoryPath);
     if (!directory.existsSync()) {
       directory.createSync(recursive: true);
@@ -461,7 +600,8 @@ class SharePointUploader {
 
   Future<void> downloadPhoneAttachmentPictures(String accessToken) async {
     final String zerovaPath = await _getOrCreateUserZerovaPath();
-    final String directoryPath = path.join(zerovaPath, 'All Photos/$sn/Attachment');
+    final String directoryPath =
+        path.join(zerovaPath, 'All Photos/$sn/Attachment');
     final listFilesUrl =
         "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/Jackalope/Photos/$sn/Attachment:/children";
 
@@ -505,9 +645,11 @@ class SharePointUploader {
       print("無法取得檔案清單: ${response.statusCode} ${response.body}");
     }
   }
+
   Future<void> downloadPhonePackagingPictures(String accessToken) async {
     final String zerovaPath = await _getOrCreateUserZerovaPath();
-    final String directoryPath = path.join(zerovaPath, 'All Photos/$sn/Packaging');
+    final String directoryPath =
+        path.join(zerovaPath, 'All Photos/$sn/Packaging');
     final listFilesUrl =
         "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/Jackalope/Photos/$sn/Packaging:/children";
 
@@ -551,107 +693,4 @@ class SharePointUploader {
       print("無法取得檔案清單: ${response.statusCode} ${response.body}");
     }
   }
-
-/*
-  Future<void> uploadSelectedPackagingPhotos(String accessToken) async {
-    final String zerovaPath = await _getOrCreateUserZerovaPath();
-    final String snFolderPath = path.join(zerovaPath, 'Selected Photos', SN);
-    final String packagingFolderPath = path.join(snFolderPath, 'Packaging');
-    final Directory snDirectory = Directory(snFolderPath);
-    final Directory packagingDirectory = Directory(packagingFolderPath);
-
-    if (!snDirectory.existsSync()) {
-      print("資料夾不存在: $snFolderPath");
-      return;
-    }
-
-    // 取得 SN 及其底下 Packaging 內的所有檔案
-    final List<File> files = [
-      ...snDirectory.listSync().whereType<File>(), // 只包含 SN 目錄內的檔案
-      if (packagingDirectory.existsSync()) ...packagingDirectory.listSync(recursive: true).whereType<File>(), // Packaging 內的檔案
-    ];
-
-    if (files.isEmpty) {
-      print("資料夾中沒有檔案: $snFolderPath");
-      return;
-    }
-
-    for (var file in files) {
-      final String relativePath = path.relative(file.path, from: zerovaPath);
-      final String sharePointPath = "Jackalope/$relativePath";
-
-      final String uploadUrl =
-          "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/items/root:/$sharePointPath:/content";
-
-      try {
-        final response = await http.put(
-          Uri.parse(uploadUrl),
-          headers: {
-            "Authorization": "Bearer $accessToken",
-            "Content-Type": "application/octet-stream"
-          },
-          body: file.readAsBytesSync(),
-        );
-
-        if (response.statusCode == 201) {
-          print("檔案上傳成功: $relativePath");
-        } else {
-          print("檔案上傳失敗: $relativePath - ${response.statusCode} ${response.body}");
-        }
-      } catch (e) {
-        print("檔案上傳失敗: $relativePath - $e");
-      }
-    }
-  }
-  Future<void> uploadSelectedAttachmentPhotos(String accessToken) async {
-    final String zerovaPath = await _getOrCreateUserZerovaPath();
-    final String snFolderPath = path.join(zerovaPath, 'Selected Photos', SN);
-    final String attachmentFolderPath = path.join(snFolderPath, 'Attachment');
-    final Directory snDirectory = Directory(snFolderPath);
-    final Directory attachmentDirectory = Directory(attachmentFolderPath);
-
-    if (!snDirectory.existsSync()) {
-      print("資料夾不存在: $snFolderPath");
-      return;
-    }
-
-    // 取得 SN 及其底下 Attachment 內的所有檔案
-    final List<File> files = [
-      ...snDirectory.listSync().whereType<File>(), // 只包含 SN 目錄內的檔案
-      if (attachmentDirectory.existsSync()) ...attachmentDirectory.listSync(recursive: true).whereType<File>(), // Attachment 內的檔案
-    ];
-
-    if (files.isEmpty) {
-      print("資料夾中沒有檔案: $snFolderPath");
-      return;
-    }
-
-    for (var file in files) {
-      final String relativePath = path.relative(file.path, from: zerovaPath);
-      final String sharePointPath = "Jackalope/$relativePath";
-
-      final String uploadUrl =
-          "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/items/root:/$sharePointPath:/content";
-
-      try {
-        final response = await http.put(
-          Uri.parse(uploadUrl),
-          headers: {
-            "Authorization": "Bearer $accessToken",
-            "Content-Type": "application/octet-stream"
-          },
-          body: file.readAsBytesSync(),
-        );
-
-        if (response.statusCode == 201) {
-          print("檔案上傳成功: $relativePath");
-        } else {
-          print("檔案上傳失敗: $relativePath - ${response.statusCode} ${response.body}");
-        }
-      } catch (e) {
-        print("檔案上傳失敗: $relativePath - $e");
-      }
-    }
-  }
-*/
 }
