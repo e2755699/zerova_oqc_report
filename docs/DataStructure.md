@@ -108,22 +108,6 @@ class InputOutputCharacteristicsSpec {
   double leftPoutLowerbound;   // 左側輸出功率下限 (W)
   double leftPoutUpperbound;   // 左側輸出功率上限 (W)
   
-  // 右側輸入規格 (Right Side Input Specifications)
-  double rightVinLowerbound;   // 右側輸入電壓下限 (V)
-  double rightVinUpperbound;   // 右側輸入電壓上限 (V)
-  double rightIinLowerbound;   // 右側輸入電流下限 (A)
-  double rightIinUpperbound;   // 右側輸入電流上限 (A)
-  double rightPinLowerbound;   // 右側輸入功率下限 (W)
-  double rightPinUpperbound;   // 右側輸入功率上限 (W)
-  
-  // 右側輸出規格 (Right Side Output Specifications)
-  double rightVoutLowerbound;  // 右側輸出電壓下限 (V)
-  double rightVoutUpperbound;  // 右側輸出電壓上限 (V)
-  double rightIoutLowerbound;  // 右側輸出電流下限 (A)
-  double rightIoutUpperbound;  // 右側輸出電流上限 (A)
-  double rightPoutLowerbound;  // 右側輸出功率下限 (W)
-  double rightPoutUpperbound;  // 右側輸出功率上限 (W)
-  
   // 全局變數
   InputOutputCharacteristicsSpec? globalInputOutputSpec;
 }
@@ -229,44 +213,110 @@ class PsuSerialNumSpec {
 
 ---
 
-### 5. PackageListSpec
-**用途**: 定義包裝清單內容物和數量標準  
-**Firebase路徑**: `models/{modelId}/PackageListSpec/spec`
+### 5. PackageListResult 🆕
+**用途**: 定義動態包裝清單項目和數量管理  
+**Firebase路徑**: `models/{modelId}/PackageListSpec/spec/measurements`  
+**模板頁面**: 支援在 ModelSpecTemplatePage 中編輯
 
 ```dart
-class PackageListSpec {
-  // 包裝內容物名稱 (Package Item Names)
-  String rfidcard;                    // RFID卡名稱
-  String productcertificatecard;      // 產品認證卡名稱
-  String screwassym4;                 // M4螺絲名稱
-  String boltscover;                  // 螺栓蓋名稱
-  String usermanual;                  // 用戶手冊名稱
+class PackageListResult {
+  final List<PackageListResultMeasurement> measurements;  // 包裝項目列表
   
-  // 包裝內容物數量規格 (Package Item Quantity Specifications)
-  int? rfidcardspec;                  // RFID卡數量規格
-  int? productcertificatecardspec;    // 產品認證卡數量規格
-  int? screwassym4spec;               // M4螺絲數量規格
-  int? boltscoverspec;                // 螺栓蓋數量規格
-  int? usermanualspec;                // 用戶手冊數量規格
+  // 動態管理方法
+  void updateOrAddMeasurement({
+    required int index,
+    String? name,
+    String? quantity,
+    bool? isChecked,
+  });
   
-  // 全局變數
-  PackageListSpec? globalPackageListSpec;
+  void removeMeasurementAt(int index);
+  
+  // 預設標頭欄位
+  static final List<String> defaultHeader = [
+    "No.",      // 編號
+    "Items",    // 項目名稱
+    "Q'ty",     // 數量
+    "Check",    // 檢查狀態
+  ];
+}
+
+class PackageListResultMeasurement {
+  int spec;                             // 規格參考值
+  final int key;                        // 項目識別鍵
+  String translationKey;                // 翻譯鍵值
+  String itemName;                      // 項目名稱
+  String quantity;                      // 數量
+  final ValueNotifier<bool> isCheck;    // 檢查狀態 (動態更新)
+  
+  // 狀態切換
+  void toggle() => isCheck.value = !isCheck.value;
 }
 ```
 
-#### JSON 欄位映射與預設值
-| Dart 屬性 | JSON 鍵值 | 說明 | 類型 | 預設值 |
-|-----------|-----------|------|------|--------|
-| `rfidcard` | `RFIDCNAME` | RFID卡名稱 | String | "RFID Card" |
-| `productcertificatecard` | `PCCAME` | 產品認證卡名稱 | String | "Product Certificate Card" |
-| `screwassym4` | `SAM4AME` | M4螺絲名稱 | String | "Screw Assy M4*12" |
-| `boltscover` | `BCNAME` | 螺栓蓋名稱 | String | "Bolts Cover" |
-| `usermanual` | `UMNAME` | 用戶手冊名稱 | String | "User Manual" |
-| `rfidcardspec` | `RFIDCSPEC` | RFID卡數量規格 | int? | 2 |
-| `productcertificatecardspec` | `PCCSPEC` | 產品認證卡數量規格 | int? | 1 |
-| `screwassym4spec` | `SAM4SPEC` | M4螺絲數量規格 | int? | 4 |
-| `boltscoverspec` | `BCSPEC` | 螺栓蓋數量規格 | int? | 22 |
-| `usermanualspec` | `UMSPEC` | 用戶手冊數量規格 | int? | 1 |
+#### Firebase 資料結構
+```json
+{
+  "models": {
+    "{modelId}": {
+      "PackageListSpec": {
+        "spec": {
+          "measurements": {
+            "0": {
+              "itemName": "PSU主體",
+              "quantity": "1",
+              "isChecked": false
+            },
+            "1": {
+              "itemName": "電源線",
+              "quantity": "1", 
+              "isChecked": false
+            },
+            "2": {
+              "itemName": "使用手冊",
+              "quantity": "1",
+              "isChecked": false
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+#### 預設項目配置表
+| 項目名稱 | 預設數量 | 用途說明 |
+|----------|----------|----------|
+| PSU主體 | 1 | 主要充電設備 |
+| 電源線 | 1 | 電源連接線材 |
+| 使用手冊 | 1 | 操作指南文件 |
+| 保固書 | 1 | 保固憑證文件 |
+| 包裝盒 | 1 | 外包裝容器 |
+
+#### API 專用方法
+| 方法名稱 | 用途 | 參數 | 回傳值 |
+|----------|------|------|--------|
+| `fetchPackageListSpec()` | 載入包裝清單規格 | `String model` | `PackageListResult?` |
+| `uploadPackageListSpec()` | 上傳包裝清單規格 | `model, tableName, packageListResult` | `bool` |
+
+**使用場景**:
+- **模板管理**: 在管理員界面設定標準包裝清單
+- **動態編輯**: 支援新增、修改、刪除包裝項目
+- **OQC檢查**: 在品質檢驗時核對包裝內容
+- **報告生成**: 自動生成包裝清單表格到PDF報告
+
+**特色功能** 🆕:
+- **響應式UI**: 使用 `ValueNotifier<bool>` 實現即時狀態更新
+- **動態管理**: 支援運行時增減包裝項目
+- **模板支援**: 在 `PackageListTab` 中提供友善的編輯界面
+- **數據驗證**: 自動驗證項目名稱和數量格式
+
+**與舊版差異**:
+- 捨棄固定欄位的 `PackageListSpec` 設計
+- 改用動態清單的 `PackageListResult` 模型
+- 支援無限制新增自定義包裝項目
+- 提供專用 API 方法處理複雜的資料轉換
 
 ---
 

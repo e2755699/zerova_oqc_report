@@ -2,7 +2,7 @@
 
 **檔案路徑**: `lib/src/widget/admin/model_spec_template_page.dart`  
 **用途**: 管理產品模型規格模板的管理員界面  
-**版本**: 1.4.0  
+**版本**: 1.5.0  
 **作者**: Zerova OQC Team  
 
 ---
@@ -46,7 +46,8 @@
   - 輸入輸出特性 (InputOutputCharacteristics)
   - 基本功能測試 (BasicFunctionTest)
   - 耐壓測試 (HipotTest)
-  - PSU序號規格 (PsuSerialNum) 🆕
+  - PSU序號規格 (PsuSerialNum)
+  - 包裝清單規格 (PackageList) 🆕
 - **即時編輯**: 支援即時修改規格參數
 - **預設值處理**: 為新模型提供合理的預設規格值
 
@@ -79,9 +80,10 @@ graph TB
     C --> F[BasicFunctionTestTab]
     C --> G[HipotTestTab]
     C --> H[PsuSerialNumTab]
+    C --> I[PackageListTab]
     
-    D --> I[SaveButton]
-    D --> J[DeleteButton]
+    D --> J[SaveButton]
+    D --> K[DeleteButton]
 ```
 
 ### 狀態管理
@@ -92,7 +94,7 @@ graph TB
 | `_selectedModel` | `String?` | 當前選擇的模型 |
 | `_isLoading` | `bool` | 載入狀態指示器 |
 | `_isNewModel` | `bool` | 新增模型模式開關 |
-| `_tabController` | `TabController?` | 標籤頁控制器 (4個標籤) |
+| `_tabController` | `TabController?` | 標籤頁控制器 (5個標籤) 🆕 |
 
 ---
 
@@ -116,7 +118,7 @@ class InputOutputCharacteristicsSpec {
 }
 ```
 
-**預設值** (v1.4.0):
+**預設值**:
 - 左/右側輸入電壓：187-253V
 - 左/右側輸入電流：0-230A
 - 左/右側輸入功率：0-130W
@@ -134,7 +136,7 @@ class BasicFunctionTestSpec {
 }
 ```
 
-**預設值** (v1.4.0):
+**預設值**:
 - 效率：94%
 - 功率因子：0.99
 - 總諧波失真：5%
@@ -148,19 +150,52 @@ class HipotTestSpec {
 }
 ```
 
-**預設值** (v1.4.0):
+**預設值**:
 - 絕緣阻抗規格：10 MΩ
 - 漏電流規格：10 mA
 
-#### 4. PsuSerialNumSpec 🆕
+#### 4. PsuSerialNumSpec
 ```dart
 class PsuSerialNumSpec {
   int? qty;  // PSU數量規格
 }
 ```
 
-**預設值** (v1.4.0):
+**預設值**:
 - PSU數量：12個
+
+#### 5. PackageListResult 🆕
+```dart
+class PackageListResult {
+  final List<PackageListResultMeasurement> measurements;
+  
+  // 動態管理包裝項目
+  void updateOrAddMeasurement({
+    required int index,
+    String? name,
+    String? quantity,
+    bool? isChecked,
+  });
+  
+  void removeMeasurementAt(int index);
+}
+
+class PackageListResultMeasurement {
+  int spec;
+  final int key;
+  String translationKey;
+  String itemName;         // 項目名稱
+  String quantity;         // 數量
+  final ValueNotifier<bool> isCheck;  // 檢查狀態
+}
+```
+
+**預設值**:
+- PSU主體 (數量：1)
+- 電源線 (數量：1)
+- 使用手冊 (數量：1)
+- 保固書 (數量：1)
+- 包裝盒 (數量：1)
 
 ### Firebase 數據結構
 
@@ -173,8 +208,17 @@ models/
 │   │   └── spec/
 │   ├── HipotTestSpec/
 │   │   └── spec/
-│   └── PsuSerialNumSpec/
+│   ├── PsuSerialNumSpec/
+│   │   └── spec/
+│   └── PackageListSpec/          🆕
 │       └── spec/
+│           └── measurements/
+│               ├── 0/
+│               │   ├── itemName: "PSU主體"
+│               │   ├── quantity: "1"
+│               │   └── isChecked: false
+│               ├── 1/
+│               └── ...
 ```
 
 ---
@@ -204,56 +248,69 @@ MainLayout(
 - 下拉選單自動載入可用模型
 - 即時切換和清空邏輯
 
-**程式碼範例**:
-```dart
-Widget _buildModelSelector() {
-  return Card(
-    child: Column(
-      children: [
-        // 模式切換按鈕
-        ElevatedButton.icon(
-          onPressed: _toggleNewModelMode,
-          icon: Icon(_isNewModel ? Icons.list : Icons.add),
-          label: Text(_isNewModel ? '選擇現有模型' : '新增模型'),
-        ),
-        
-        // 選擇/輸入介面
-        if (!_isNewModel) 
-          DropdownButtonFormField<String>(...) // 下拉選單
-        else 
-          TextField(...) // 文字輸入框
-      ],
-    ),
-  );
-}
-```
-
-#### 2. 標籤頁內容 (`_buildTabContent`)
+#### 2. 標籤頁內容 (`_buildTabContent`) 🆕 更新
 
 **功能**: 提供分類的規格編輯界面
 
-**結構** (v1.4.0 更新):
+**結構** (v1.5.0 更新):
 ```dart
 TabBarView(
   children: [
-    InputOutputCharacteristicsTab(
-      spec: _inputOutputSpec,
-      onChanged: (newSpec) => setState(() => _inputOutputSpec = newSpec),
-    ),
+    InputOutputCharacteristicsTab(...),
     BasicFunctionTestTab(...),
     HipotTestTab(...),
-    PsuSerialNumTab(...), // 🆕 新增的PSU序號標籤頁
+    PsuSerialNumTab(...),
+    PackageListTab(              // 🆕 新增的包裝清單標籤頁
+      spec: _packageListSpec,
+      onChanged: (newSpec) => _packageListSpec = newSpec,
+    ),
   ],
 )
 ```
 
-**標籤頁列表**:
+**標籤頁列表** (v1.5.0):
 1. **輸入輸出特性**: 電壓、電流、功率範圍設定
 2. **基本功能測試**: 效率、功率因子等參數
 3. **耐壓測試**: 絕緣阻抗和漏電流規格
-4. **PSU序號** 🆕: PSU數量設定
+4. **PSU序號**: PSU數量設定
+5. **包裝清單** 🆕: 產品包裝項目和數量管理
 
-#### 3. 浮動操作按鈕 (`_buildFABs`)
+#### 3. 包裝清單標籤頁 (`PackageListTab`) 🆕
+
+**檔案路徑**: `lib/src/widget/admin/tabs/package_list_tab.dart`
+
+**功能特色**:
+- **動態項目管理**: 可新增、編輯、刪除包裝項目
+- **表格介面**: 清晰的項目列表顯示
+- **即時編輯**: 支援直接編輯項目名稱和數量
+- **預設項目**: 自動添加常見包裝項目
+
+**UI 結構**:
+```
+┌─ 包裝清單規格 ──────────────── [新增項目] ─┐
+├─────────────────────────────────────────┤
+│ No. │     項目名稱      │ 數量  │   操作   │
+├─────┼─────────────────┼─────┼─────────┤
+│  1  │ [PSU主體      ] │ [1] │ [刪除🗑️] │
+│  2  │ [電源線       ] │ [1] │ [刪除🗑️] │
+│  3  │ [使用手冊     ] │ [1] │ [刪除🗑️] │
+│ ... │       ...        │ ... │   ...    │
+└─────────────────────────────────────────┘
+```
+
+**程式碼範例**:
+```dart
+PackageListTab(
+  spec: _packageListSpec,
+  onChanged: (newSpec) {
+    setState(() {
+      _packageListSpec = newSpec;
+    });
+  },
+)
+```
+
+#### 4. 浮動操作按鈕 (`_buildFABs`)
 
 **功能**: 提供保存和刪除操作
 
@@ -263,114 +320,11 @@ TabBarView(
 
 ---
 
-## 🚧 共用組件
-
-為了減少代碼重複和提高維護性，我們建立了一套共用的規格輸入組件。
-
-### SpecInputField
-
-**檔案路徑**: `lib/src/widget/common/spec_input_field.dart`
-
-基礎的規格輸入欄位組件，提供統一的 TextField 樣式和行為。
-
-```dart
-SpecInputField(
-  label: '數值',
-  controller: controller,
-  unit: 'V',
-  isRequired: true,
-  onChanged: (value) => print('值改變: $value'),
-)
-```
-
-**特色功能**:
-- 統一的 OutlineInputBorder 樣式
-- 自動數值鍵盤類型
-- 單位顯示 (suffixText)
-- 必填欄位標記 (*)
-- 禁用狀態視覺效果
-
-### LabeledSpecInputField
-
-帶有左側標籤的輸入欄位，適用於需要標籤-輸入框組合的場景。
-
-```dart
-LabeledSpecInputField(
-  label: '絕緣阻抗規格',
-  unit: 'MΩ',
-  controller: controller,
-  labelWidth: 150,
-  isRequired: true,
-)
-```
-
-**使用場景**:
-- `HipotTestTab`: 耐壓測試規格輸入
-- `BasicFunctionTestTab`: 基本功能測試參數
-- `PsuSerialNumTab` 🆕: PSU序號數量設定
-
-### RangeSpecInputField
-
-範圍輸入組件，用於需要下限-上限配對輸入的場景。
-
-```dart
-RangeSpecInputField(
-  label: 'Vin (V)',
-  unit: 'V',
-  lowerController: lowerController,
-  upperController: upperController,
-  isRequired: true,
-)
-```
-
-**使用場景**:
-- `InputOutputCharacteristicsTab`: 所有輸入輸出特性範圍
-
-### SpecInputUtils
-
-提供規格輸入相關的工具方法。
-
-```dart
-// 數值驗證
-String? error = SpecInputUtils.numberValidator(value, required: true);
-
-// 範圍驗證
-String? rangeError = SpecInputUtils.rangeValidator(lowerValue, upperValue);
-
-// 格式化顯示
-String formatted = SpecInputUtils.formatNumber(123.456, decimalPlaces: 2);
-
-// 控制器操作
-double? value = SpecInputUtils.getNumberFromController(controller);
-SpecInputUtils.setControllerNumber(controller, 123.45);
-```
-
-### 組件比較表
-
-| 組件 | 使用場景 | 主要特色 | 適用頁面 |
-|------|----------|----------|----------|
-| `SpecInputField` | 基礎數值輸入 | 簡單統一的樣式 | 所有規格頁面 |
-| `LabeledSpecInputField` | 標籤+輸入框 | 左側標籤顯示 | Hipot, BasicFunction, PsuSerialNum |
-| `RangeSpecInputField` | 範圍輸入 | 下限-上限配對 | InputOutput |
-
----
-
 ## 🔌 API 接口
 
-### Firebase Service 整合
+### Firebase Service 整合 🆕 更新
 
-#### 1. 載入模型列表
-```dart
-Future<void> _loadModelList() async {
-  final firebaseService = FirebaseService();
-  final models = await firebaseService.getModelList();
-  setState(() {
-    _modelList.addAll(models);
-  });
-}
-```
-
-#### 2. 載入模型規格 (v1.4.0 更新)
+#### 1. 載入模型規格 (v1.5.0 更新)
 ```dart
 Future<void> _loadModelSpecs(String model) async {
   final specs = await firebaseService.getAllSpecs(
@@ -379,102 +333,160 @@ Future<void> _loadModelSpecs(String model) async {
       'InputOutputCharacteristics', 
       'BasicFunctionTest', 
       'HipotTestSpec',
-      'PsuSerialNumSpec'  // 🆕 新增PSU序號規格
+      'PsuSerialNumSpec'
     ],
   );
   
-  // 轉換並設置規格對象
-  _inputOutputSpec = InputOutputCharacteristicsSpec.fromJson(specs['InputOutputCharacteristics']);
-  _basicFunctionSpec = BasicFunctionTestSpec.fromJson(specs['BasicFunctionTest']);
-  _hipotTestSpec = HipotTestSpec.fromJson(specs['HipotTestSpec']);
-  _psuSerialNumSpec = PsuSerialNumSpec.fromJson(specs['PsuSerialNumSpec']); // 🆕
-  // ...
+  // 🆕 載入 PackageListSpec (使用專用方法)
+  final packageListResult = await fetchPackageListSpec(model);
+  
+  // 設置規格對象...
+  _packageListSpec = packageListResult ?? PackageListResult(); // 🆕
 }
 ```
 
-#### 3. 保存模型規格 (v1.4.0 更新)
+#### 2. 保存模型規格 (v1.5.0 更新)
 ```dart
 Future<void> _saveModelSpecs() async {
-  final firebaseService = FirebaseService();
+  // 保存其他規格...
   
-  // 保存各類型規格
-  await firebaseService.addOrUpdateSpec(
-    model: model,
-    tableName: 'InputOutputCharacteristics',
-    spec: _inputOutputSpec!.toJson(),
-  );
-  
-  // 🆕 保存PSU序號規格
-  if (_psuSerialNumSpec != null) {
-    await firebaseService.addOrUpdateSpec(
+  // 🆕 保存 PackageListSpec 規格
+  if (_packageListSpec != null) {
+    await uploadPackageListSpec(
       model: model,
-      tableName: 'PsuSerialNumSpec',
-      spec: _psuSerialNumSpec!.toJson(),
+      tableName: 'PackageListSpec',
+      packageListResult: _packageListSpec!,
     );
   }
-  // ...
 }
 ```
 
-### API 方法對應表
+#### 3. 包裝清單專用 API 🆕
+
+**fetchPackageListSpec**: 從 Firestore 載入包裝清單規格
+```dart
+Future<PackageListResult?> fetchPackageListSpec(String model) async {
+  // 從 /models/{model}/PackageListSpec/spec 載入資料
+  // 轉換 Firestore 格式為 PackageListResult 對象
+}
+```
+
+**uploadPackageListSpec**: 上傳包裝清單規格到 Firestore
+```dart
+Future<bool> uploadPackageListSpec({
+  required String model,
+  required String tableName,
+  required PackageListResult packageListResult,
+}) async {
+  // 將 PackageListResult 轉換為 Firestore 格式
+  // 保存到指定路徑
+}
+```
+
+### API 方法對應表 🆕 更新
 
 | 操作 | Firebase Service 方法 | 說明 |
 |------|---------------------|------|
 | 取得模型列表 | `getModelList()` | 獲取所有可用模型 |
 | 讀取規格 | `getAllSpecs()` | 批量讀取多種規格 |
 | 保存規格 | `addOrUpdateSpec()` | 新增或更新單一規格 |
+| 讀取包裝清單 🆕 | `fetchPackageListSpec()` | 專用包裝清單讀取 |
+| 保存包裝清單 🆕 | `uploadPackageListSpec()` | 專用包裝清單保存 |
 
 ---
 
 ## 💻 使用範例
 
-### 基本使用流程
+### 包裝清單管理範例 🆕
 
 ```dart
-// 1. 導航到模型規格頁面
-Navigator.push(
-  context,
-  MaterialPageRoute(builder: (context) => const ModelSpecTemplatePage()),
-);
-
-// 2. 頁面自動載入模型列表
-// 3. 用戶選擇模型或新增模型
-// 4. 編輯規格參數
-// 5. 點擊保存按鈕
+class PackageListExample {
+  // 創建包裝清單規格
+  PackageListResult createPackageListSpec() {
+    final spec = PackageListResult();
+    
+    // 添加標準包裝項目
+    spec.updateOrAddMeasurement(
+      index: 0,
+      name: 'PSU主體',
+      quantity: '1',
+      isChecked: false,
+    );
+    
+    spec.updateOrAddMeasurement(
+      index: 1,
+      name: '電源線',
+      quantity: '1',
+      isChecked: false,
+    );
+    
+    return spec;
+  }
+  
+  // 保存包裝清單
+  Future<void> savePackageList(String model, PackageListResult spec) async {
+    final success = await uploadPackageListSpec(
+      model: model,
+      tableName: 'PackageListSpec',
+      packageListResult: spec,
+    );
+    
+    print('保存結果: ${success ? '成功' : '失敗'}');
+  }
+}
 ```
 
-### 程式化操作範例 (v1.4.0 更新)
+### 完整模型創建流程 🆕
 
 ```dart
-class ExampleUsage {
-  // 創建新模型規格
-  Future<void> createNewModelSpec() async {
-    final page = ModelSpecTemplatePage();
-    
-    // 模擬新增模型 (使用新的預設值)
-    final newSpec = InputOutputCharacteristicsSpec(
-      leftVinLowerbound: 187,  // 🆕 更新的預設值
-      leftVinUpperbound: 253,  // 🆕 更新的預設值
-      // ... 其他參數
-    );
-    
-    // 🆕 創建PSU序號規格
-    final psuSpec = PsuSerialNumSpec(qty: 12);
-    
-    // 保存到 Firebase
-    await FirebaseService().addOrUpdateSpec(
-      model: 'NEW_MODEL_001',
-      tableName: 'InputOutputCharacteristics',
-      spec: newSpec.toJson(),
-    );
-    
-    // 🆕 保存PSU序號規格
-    await FirebaseService().addOrUpdateSpec(
-      model: 'NEW_MODEL_001',
-      tableName: 'PsuSerialNumSpec',
-      spec: psuSpec.toJson(),
-    );
-  }
+Future<void> createCompleteModel() async {
+  final model = 'NEW_MODEL_V2';
+  
+  // 1. 創建輸入輸出特性規格
+  final ioSpec = InputOutputCharacteristicsSpec(
+    leftVinLowerbound: 187,
+    leftVinUpperbound: 253,
+    // ...
+  );
+  
+  // 2. 創建基本功能測試規格
+  final bfSpec = BasicFunctionTestSpec(
+    eff: 94,
+    pf: 0.99,
+    thd: 5,
+    sp: 100,
+  );
+  
+  // 3. 創建耐壓測試規格
+  final htSpec = HipotTestSpec(
+    insulationimpedancespec: 10,
+    leakagecurrentspec: 10,
+  );
+  
+  // 4. 創建PSU序號規格
+  final psuSpec = PsuSerialNumSpec(qty: 12);
+  
+  // 5. 🆕 創建包裝清單規格
+  final packageSpec = PackageListResult();
+  // 會自動添加預設項目
+  
+  // 6. 保存所有規格
+  final firebaseService = FirebaseService();
+  
+  await firebaseService.addOrUpdateSpec(
+    model: model,
+    tableName: 'InputOutputCharacteristics',
+    spec: ioSpec.toJson(),
+  );
+  
+  // ... 保存其他規格
+  
+  // 🆕 保存包裝清單規格
+  await uploadPackageListSpec(
+    model: model,
+    tableName: 'PackageListSpec',
+    packageListResult: packageSpec,
+  );
 }
 ```
 
@@ -482,200 +494,110 @@ class ExampleUsage {
 
 ## ⚠️ 錯誤處理
 
-### 異常處理策略
+### 刪除確認 (v1.5.0 更新)
 
-#### 1. 網路錯誤處理
-```dart
-try {
-  final models = await firebaseService.getModelList();
-  // 成功處理
-} catch (e) {
-  if (context.mounted) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('載入模型列表失敗: $e')),
-    );
-  }
-}
-```
-
-#### 2. 數據驗證
-```dart
-Future<void> _saveModelSpecs() async {
-  // 驗證模型選擇
-  if (_selectedModel == null && !_isNewModel) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('請先選擇或新增一個模型')),
-    );
-    return;
-  }
-  
-  // 驗證模型名稱
-  final model = _isNewModel ? _modelController.text : _selectedModel!;
-  if (model.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('模型名稱不能為空')),
-    );
-    return;
-  }
-}
-```
-
-#### 3. 刪除確認 (v1.4.0 更新)
 ```dart
 final confirm = await showDialog<bool>(
   context: context,
   builder: (context) => AlertDialog(
     title: const Text('確認刪除'),
-    content: Text('確定要刪除 $_selectedModel 的所有規格嗎？此操作無法恢復。\n\n將刪除以下內容：\n• 輸入輸出特性規格\n• 基本功能測試規格\n• 耐壓測試規格\n• PSU序號規格\n• 相關的失敗計數記錄'), // 🆕 包含PSU序號規格
-    actions: [
-      TextButton(onPressed: () => Navigator.pop(context, false), child: Text('取消')),
-      TextButton(onPressed: () => Navigator.pop(context, true), child: Text('刪除')),
-    ],
+    content: Text('確定要刪除 $_selectedModel 的所有規格嗎？此操作無法恢復。\n\n將刪除以下內容：\n• 輸入輸出特性規格\n• 基本功能測試規格\n• 耐壓測試規格\n• PSU序號規格\n• 包裝清單規格\n• 相關的失敗計數記錄'), // 🆕 包含包裝清單規格
+    // ...
   ),
 );
 ```
 
-### 常見錯誤及解決方案
+### 包裝清單特定錯誤處理 🆕
 
-| 錯誤類型 | 可能原因 | 解決方案 |
-|----------|----------|----------|
-| 載入模型失敗 | 網路連接問題、Firebase 權限 | 檢查網路連接和 API 權限 |
-| 保存失敗 | 數據格式錯誤、網路中斷 | 驗證數據格式，重試保存 |
-| 規格載入失敗 | 模型不存在、數據損壞 | 提供預設值，友善錯誤訊息 |
+```dart
+// 項目驗證
+void validatePackageListItem(String itemName, String quantity) {
+  if (itemName.trim().isEmpty) {
+    throw Exception('項目名稱不能為空');
+  }
+  
+  final qty = int.tryParse(quantity);
+  if (qty == null || qty <= 0) {
+    throw Exception('數量必須是正整數');
+  }
+}
+
+// 保存錯誤處理
+try {
+  await uploadPackageListSpec(
+    model: model,
+    tableName: 'PackageListSpec',
+    packageListResult: _packageListSpec!,
+  );
+} catch (e) {
+  if (context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('保存包裝清單失敗: $e')),
+    );
+  }
+}
+```
 
 ---
 
 ## 🚀 最佳實踐
 
-### 1. 效能優化
+### 包裝清單管理最佳實踐 🆕
 
 ```dart
-// 使用適當的生命週期管理
-@override
-void dispose() {
-  _modelController.dispose();
-  _tabController?.dispose();
-  super.dispose();
-}
-
-// 避免不必要的重建
-const SizedBox(height: 20), // 使用 const
-```
-
-### 2. 狀態管理
-
-```dart
-// 確保在適當的時機更新 UI
-setState(() {
-  _isLoading = true;
-});
-
-// 檢查 widget 是否還在樹中
-if (context.mounted) {
-  ScaffoldMessenger.of(context).showSnackBar(snackBar);
-}
-```
-
-### 3. 共用組件使用
-
-```dart
-// 好的做法：使用共用組件
-LabeledSpecInputField(
-  label: '規格名稱',
-  unit: '單位',
-  controller: controller,
-  isRequired: true,
-)
-
-// 不好的做法：重複創建 TextField
-TextField(
-  controller: controller,
-  decoration: InputDecoration(
-    border: const OutlineInputBorder(),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-    suffixText: '單位',
-  ),
-  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-)
-```
-
-### 4. 數據一致性 (v1.4.0 更新)
-
-```dart
-// 提供合理的預設值
-_inputOutputSpec = InputOutputCharacteristicsSpec(
-  leftVinLowerbound: 187,  // 🆕 實際的預設值
-  leftVinUpperbound: 253,  // 🆕 實際的預設值
-  // ...
-);
-
-// 🆕 PSU序號規格預設值
-_psuSerialNumSpec = PsuSerialNumSpec(qty: 12);
-
-// 數據驗證
-if (specMap != null && specMap.isNotEmpty) {
-  _inputOutputSpec = InputOutputCharacteristicsSpec.fromJson(specMap);
-} else {
-  // 使用預設值
+class PackageListBestPractices {
+  // 1. 統一的項目創建
+  PackageListResult createStandardPackageList() {
+    final standardItems = [
+      {'name': 'PSU主體', 'qty': '1'},
+      {'name': '電源線', 'qty': '1'},
+      {'name': '使用手冊', 'qty': '1'},
+      {'name': '保固書', 'qty': '1'},
+      {'name': '包裝盒', 'qty': '1'},
+    ];
+    
+    final spec = PackageListResult();
+    for (int i = 0; i < standardItems.length; i++) {
+      spec.updateOrAddMeasurement(
+        index: i,
+        name: standardItems[i]['name']!,
+        quantity: standardItems[i]['qty']!,
+        isChecked: false,
+      );
+    }
+    
+    return spec;
+  }
+  
+  // 2. 數據一致性檢查
+  bool validatePackageList(PackageListResult spec) {
+    for (final measurement in spec.measurements) {
+      if (measurement.itemName.trim().isEmpty) return false;
+      if (int.tryParse(measurement.quantity) == null) return false;
+    }
+    return true;
+  }
+  
+  // 3. 控制器管理
+  void disposeControllers(List<TextEditingController> controllers) {
+    for (final controller in controllers) {
+      controller.dispose();
+    }
+    controllers.clear();
+  }
 }
 ```
-
-### 5. 使用者體驗
-
-```dart
-// 載入狀態指示
-if (_isLoading)
-  Container(
-    color: Colors.black54,
-    child: const Center(child: CircularProgressIndicator()),
-  ),
-
-// 友善的錯誤訊息
-ScaffoldMessenger.of(context).showSnackBar(
-  SnackBar(content: Text('模型規格 $model 已成功保存')),
-);
-```
-
-### 6. 代碼重構原則
-
-**重構前的問題**:
-```dart
-// 重複的 TextField 代碼分散在多個文件中
-Widget _buildInputField(String label, String unit, TextEditingController controller) {
-  return Row(
-    children: [
-      SizedBox(width: 150, child: Text(label)),
-      Expanded(
-        child: TextField(
-          controller: controller,
-          decoration: InputDecoration(
-            border: const OutlineInputBorder(),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            suffixText: unit,
-          ),
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        ),
-      ),
-    ],
-  );
-}
-```
-
-**重構後的優勢**:
-- **一致性**: 所有輸入欄位使用相同的樣式和行為
-- **維護性**: 修改樣式只需要更新一個地方
-- **擴展性**: 新增功能（如驗證、必填標記）自動應用到所有使用處
-- **可讀性**: 代碼更簡潔，意圖更明確
 
 ---
 
 ## 📖 相關文檔
 
+- [包裝清單標籤頁文檔](./PackageListTab.md) 🆕
+- [包裝清單結果模型文檔](./PackageListResult.md) 🆕
 - [共用組件文檔](./SpecInputField.md)
 - [Firebase Service 文檔](./FirebaseService.md)
 - [資料結構文檔](./DataStructure.md)
-- [UI 組件庫文檔](./UIComponents.md)
-- [PSU序號規格文檔](./PsuSerialNumSpec.md) 🆕
+- [PSU序號規格文檔](./PsuSerialNumSpec.md)
 - [OQC 系統總覽](../README.md)
 
 ---
@@ -688,7 +610,8 @@ Widget _buildInputField(String label, String unit, TextEditingController control
 | 1.1.0 | 2024-01-15 | 新增模型自動發現功能 |
 | 1.2.0 | 2024-02-01 | 改進錯誤處理和使用者體驗 |
 | 1.3.0 | 2024-02-15 | 重構使用共用組件，提高代碼複用性 |
-| 1.4.0 | 2024-12-19 | 🆕 新增PSU序號規格支援，更新預設值，4個標籤頁界面 |
+| 1.4.0 | 2024-12-19 | 新增PSU序號規格支援，更新預設值，4個標籤頁界面 |
+| 1.5.0 | 2024-12-19 | 🆕 新增包裝清單規格支援，5個標籤頁界面，專用 API 方法 |
 
 ---
 
