@@ -29,6 +29,8 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
   /// 存每一行兩個欄位的字串，index 0: spec, index 1: value
   late List<List<String>> _reportValues;
 
+  final defaultNames = ['Efficiency', 'Power Factor (PF)', 'Harmonic', 'Standby Power'];
+
   final List<String> valueLabels = [
     'Efficiency:',
     'PF:',
@@ -132,6 +134,13 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
     _reportValues = List.generate(
       data.testItems.length,
       (index) {
+
+        if (data.testItems[index].name == null || data.testItems[index].name.trim().isEmpty) {
+          if (index < defaultNames.length) {
+            data.testItems[index].name = defaultNames[index];
+          }
+        }
+
         String specValue = _defaultSpec[index + 1]?.toString() ?? '';
 
         // 設定符號依照 index

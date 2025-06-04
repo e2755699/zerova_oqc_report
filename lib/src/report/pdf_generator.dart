@@ -986,10 +986,7 @@ class PdfGenerator {
                       pw.Center(
                         child: pw.Text(
                           'Leakage current < ${globalHipotTestSpec?.leakagecurrentspec?.toStringAsFixed(2) ?? '10'} mA',
-                          style: pw.TextStyle(
-                            font: font,
-                            color: PdfColors.red,
-                          ),
+                          style: pw.TextStyle(font: font),
                           textAlign: pw.TextAlign.center,
                         ),
                       ),

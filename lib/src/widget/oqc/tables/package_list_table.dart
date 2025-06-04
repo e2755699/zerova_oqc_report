@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'dart:convert';
 import 'package:zerova_oqc_report/src/report/model/package_list_result.dart';
 import 'package:zerova_oqc_report/src/widget/common/camera_button.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
@@ -10,9 +11,10 @@ import 'package:zerova_oqc_report/src/widget/common/table_wrapper.dart';
 import 'package:zerova_oqc_report/src/repo/sharepoint_uploader.dart';
 import 'package:zerova_oqc_report/src/widget/common/global_state.dart';
 import 'package:flutter/services.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zerova_oqc_report/src/report/spec/package_list_spec.dart';
 import 'package:zerova_oqc_report/src/report/spec/new_package_list_spec.dart.dart';
+
 
 class ItemData {
   String name;
@@ -21,6 +23,30 @@ class ItemData {
 
   ItemData({this.name = '', this.quantity = '', bool isChecked = false})
       : isChecked = ValueNotifier(isChecked);
+}
+
+class CheckboxStateStorage {
+  static Future<void> save(String sn, List<ItemData> items) async {
+    final prefs = await SharedPreferences.getInstance();
+    final data = items.map((item) => {
+      'name': item.name,
+      'isChecked': item.isChecked.value,
+    }).toList();
+    await prefs.setString('checkbox_state_$sn', jsonEncode(data));
+  }
+
+  static Future<Map<String, bool>> load(String sn) async {
+    final prefs = await SharedPreferences.getInstance();
+    final str = prefs.getString('checkbox_state_$sn');
+    if (str != null) {
+      final List decoded = jsonDecode(str);
+      return {
+        for (var item in decoded)
+          item['name'] as String: item['isChecked'] as bool,
+      };
+    }
+    return {};
+  }
 }
 
 final ValueNotifier<List<ItemData>> items = ValueNotifier<List<ItemData>>([]);
@@ -47,31 +73,35 @@ class PackageListTable extends StatelessWidget {
 
       final initialItems = <ItemData>[];
       if (measurements.isNotEmpty) {
-        for (int i = 0; i < measurements.length; i++) {
-          final m = measurements[i];
-          print('itemName: ${m.itemName}, quantity: ${m.quantity}, isChecked: ${m.isCheck.value}');
+        CheckboxStateStorage.load(sn).then((savedCheckboxMap) {
+          for (int i = 0; i < measurements.length; i++) {
+            final m = measurements[i];
+            final isChecked = savedCheckboxMap[m.itemName] ?? m.isCheck.value;
 
-          data.updateOrAddMeasurement(
-            index: i,
-            name: m.itemName,
-            quantity: m.quantity,
-            isChecked: m.isCheck.value,
-          );
+            print('itemName: ${m.itemName}, quantity: ${m.quantity}, isChecked: $isChecked');
 
-          initialItems.add(ItemData(
-            name: m.itemName,
-            quantity: m.quantity,
-            isChecked: m.isCheck.value,
-          ));
-        }
+            data.updateOrAddMeasurement(
+              index: i,
+              name: m.itemName,
+              quantity: m.quantity,
+              isChecked: isChecked,
+            );
+
+            initialItems.add(ItemData(
+              name: m.itemName,
+              quantity: m.quantity,
+              isChecked: isChecked,
+            ));
+          }
+
+          items.value = initialItems;
+          globalPackageListSpecInitialized = true;
+        });
+      } else {
+        globalPackageListSpecInitialized = true;
       }
+    }
 
-      items.value = initialItems;
-      globalPackageListSpecInitialized = true;
-    }
-    else {
-      print("globalPackageListSpec 已存在，不執行初始化");
-    }
     return ValueListenableBuilder<int>(
       valueListenable: globalEditModeNotifier,
       builder: (context, editMode, _) {
@@ -216,6 +246,7 @@ class PackageListTable extends StatelessWidget {
                                             onChanged: (val) {
                                               item.isChecked.value = val ?? false;
                                               data.updateOrAddMeasurement(index: index, isChecked: val ?? false);
+                                              CheckboxStateStorage.save(sn, items.value); // 加這行儲存 checkbox 狀態
                                               //PackageListSpecStore.instance.packageListData = data;
                                             }
                                         );

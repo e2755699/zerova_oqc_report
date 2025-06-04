@@ -29,9 +29,68 @@ class _ProtectionFunctionTestTableState
     debugPrint('protectionFunctionTestPassOrFail = $protectionFunctionTestPassOrFail');
   }
 
+  final List<ProtectionFunctionMeasurement> defaultProtectionFunctionMeasurements = [
+    ProtectionFunctionMeasurement(
+      spec: 3,
+      value: 3,
+      key: "Emergency_Stop",
+      name: "Emergency Stop Function",
+      description:
+      'After the charger is powered on and charging normally, set the rated load to initiate charging. Once the charger reaches normal output current, press the emergency stop button. This action will disconnect the charger from the AC output and trigger an alarm.',
+      judgement: Judgement.fail,
+    ),
+    ProtectionFunctionMeasurement(
+      spec: 3,
+      value: 3,
+      key: "Door_Open",
+      name: "Door Open Function",
+      description:
+      'While opening the door, the charger should stop charging immediately and shows alarm when the door open.',
+      judgement: Judgement.fail,
+    ),
+    ProtectionFunctionMeasurement(
+      spec: 3,
+      value: 3,
+      key: "Ground_Fault",
+      name: "Ground Fault Function",
+      description:
+      "If the charger detects a ground fault or a drop in insulation below the protection threshold of rated resistance during simulation, it should stop charging and trigger an alarm to protect charger immediately.",
+      judgement: Judgement.fail,
+    ),
+  ];
+
+
   @override
   void initState() {
     super.initState();
+
+    for (int i = 0; i < widget.data.specialFunctionTestResult.testItems.length; i++) {
+      final item = widget.data.specialFunctionTestResult.testItems[i];
+
+      final isNameEmpty = item.name.trim().isEmpty;
+      final isDescriptionEmpty = item.description.trim().isEmpty;
+
+      if (isNameEmpty || isDescriptionEmpty) {
+        if (i < defaultProtectionFunctionMeasurements.length) {
+          final defaultItem = defaultProtectionFunctionMeasurements[i];
+          debugPrint('🔁 Updating item at index $i with default values.');
+
+          // 就地修改欄位
+          item.spec = defaultItem.spec;
+          item.value = defaultItem.value;
+          item.key = defaultItem.key;
+          item.name = defaultItem.name;
+          item.description = defaultItem.description;
+          item.judgement = defaultItem.judgement;
+
+        } else {
+          debugPrint('⚠️ No default value at index $i to apply.');
+        }
+      }
+    }
+    for (int i = 0; i < widget.data.specialFunctionTestResult.testItems.length; i++) {
+      debugPrint('testItems[$i] => key: ${testItems[i].key}, name: ${testItems[i].name}, description: ${testItems[i].description}, judgement: ${testItems[i].judgement}');
+    }
     _updateProtectionFunctionTestPassOrFail(); // 初始時立即檢查判斷
   }
 

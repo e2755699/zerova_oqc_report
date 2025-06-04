@@ -472,7 +472,7 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
           )
               : Text(
             'Leakage current < ${globalHipotTestSpec?.leakagecurrentspec?.toStringAsFixed(2) ?? '10'} mA',
-            style: TableTextStyle.contentStyle().copyWith(color: Colors.red),
+            style: TableTextStyle.contentStyle(),
             textAlign: TextAlign.center,
           ),
         ),

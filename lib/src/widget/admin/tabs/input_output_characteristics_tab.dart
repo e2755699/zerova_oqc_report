@@ -256,7 +256,7 @@ class _InputOutputCharacteristicsTabState
                                   _controllers['leftIinUpperbound']!),*/
                               _buildRangeInputs(
                                   'Pin',
-                                  'W',
+                                  'kW',
                                   _controllers['leftPinLowerbound']!,
                                   _controllers['leftPinUpperbound']!),
                               const SizedBox(height: 16),
@@ -277,7 +277,7 @@ class _InputOutputCharacteristicsTabState
                                   _controllers['leftIoutUpperbound']!),
                               _buildRangeInputs(
                                   'Pout',
-                                  'W',
+                                  'kW',
                                   _controllers['leftPoutLowerbound']!,
                                   _controllers['leftPoutUpperbound']!),
                             ],
@@ -308,7 +308,7 @@ class _InputOutputCharacteristicsTabState
                                   _controllers['rightIinUpperbound']!),*/
                               _buildRangeInputs(
                                   'Pin',
-                                  'W',
+                                  'kW',
                                   _controllers['rightPinLowerbound']!,
                                   _controllers['rightPinUpperbound']!),
                               const SizedBox(height: 16),
@@ -329,7 +329,7 @@ class _InputOutputCharacteristicsTabState
                                   _controllers['rightIoutUpperbound']!),
                               _buildRangeInputs(
                                   'Pout',
-                                  'W',
+                                  'kW',
                                   _controllers['rightPoutLowerbound']!,
                                   _controllers['rightPoutUpperbound']!),
                             ],

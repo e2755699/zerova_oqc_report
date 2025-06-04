@@ -427,11 +427,11 @@ class InsulationTestResult {
 }
 
 class ProtectionFunctionMeasurement {
-  final double spec;
+   double spec;
    double value;
-  final String key;
-  final String name;
-  final String description;
+   String key;
+   String name;
+   String description;
   Judgement judgement;
 
   ProtectionFunctionMeasurement({
