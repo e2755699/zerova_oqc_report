@@ -92,10 +92,10 @@ class _UploadProgressDialogState extends State<UploadProgressDialog> {
       }
     });
 
-    await Future.delayed(const Duration(seconds: 2)); // 顯示 2 秒後自動關閉
+    /*await Future.delayed(const Duration(seconds: 2)); // 顯示 2 秒後自動關閉
     if (mounted) {
       Navigator.pop(context); // 關閉對話框
-    }
+    }*/
   }
 
   @override

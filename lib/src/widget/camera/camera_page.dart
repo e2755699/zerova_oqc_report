@@ -248,6 +248,17 @@ class _CameraPageState extends State<CameraPage> with ImagePageHelper {
         _showInSnackBar('Picture saved to: $newPath');
       } else {
         await CameraPlatform.instance.resumePreview(_cameraId);
+        if (_selectedImagePath != null && _imagePaths.isNotEmpty) {
+          final currentIndex = _imagePaths.indexOf(_selectedImagePath!);
+
+          if (currentIndex + 1 < _imagePaths.length) {
+            final nextIndex = currentIndex + 1;
+
+            setState(() {
+              _selectedImagePath = _imagePaths[nextIndex];
+            });
+          }
+        }
       }
       if (mounted) {
         setState(() {
@@ -341,6 +352,20 @@ class _CameraPageState extends State<CameraPage> with ImagePageHelper {
                   ),
                 ),
                 const SizedBox(width: 5),
+              // 新增的 this photo 按鈕
+                if (_previewPaused && widget.packagingOrAttachment != 0)
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      await CameraPlatform.instance.resumePreview(_cameraId);
+                      if (mounted) {
+                        setState(() {
+                          _previewPaused = false;
+                        });
+                      }
+                    },
+                    icon: const Icon(Icons.camera_alt_rounded),
+                    label: Text(context.tr('this_photo')),
+                  ),
                 Builder(
                   builder: (BuildContext context) {
                     return ElevatedButton.icon(
