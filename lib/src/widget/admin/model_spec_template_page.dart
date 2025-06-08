@@ -6,12 +6,14 @@ import 'package:zerova_oqc_report/src/report/spec/hipot_test_spec.dart';
 import 'package:zerova_oqc_report/src/report/spec/psu_serial_numbers_spec.dart';
 import 'package:zerova_oqc_report/src/report/model/package_list_result.dart';
 import 'package:zerova_oqc_report/src/repo/firebase_service.dart';
+import 'package:zerova_oqc_report/src/repo/sharepoint_uploader.dart';
 import 'package:zerova_oqc_report/src/widget/common/main_layout.dart';
 import 'package:zerova_oqc_report/src/widget/admin/tabs/input_output_characteristics_tab.dart';
 import 'package:zerova_oqc_report/src/widget/admin/tabs/basic_function_test_tab.dart';
 import 'package:zerova_oqc_report/src/widget/admin/tabs/hipot_test_tab.dart';
 import 'package:zerova_oqc_report/src/widget/admin/tabs/psu_serial_num_tab.dart';
 import 'package:zerova_oqc_report/src/widget/admin/tabs/package_list_tab.dart';
+import 'package:zerova_oqc_report/src/widget/admin/tabs/photo_manager_tab.dart';
 
 class ModelSpecTemplatePage extends StatefulWidget {
   const ModelSpecTemplatePage({super.key});
@@ -28,6 +30,7 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
   bool _isLoading = false;
   bool _isNewModel = false;
   TabController? _tabController;
+  //List<String> deletedFilesFromChild = [];
   int _currentTabIndex = 0;
 
   // 各類型的規格
@@ -40,7 +43,7 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this);
+    _tabController = TabController(length: 6, vsync: this);
     _tabController!.addListener(_onTabChanged);
     _loadModelList();
   }
@@ -273,6 +276,16 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
         );
       }
 
+      //bill4
+      // 上傳比對照片
+      if (model != null) {
+        SharePointUploader(uploadOrDownload: 5, sn: '', model: model).startAuthorization(
+          categoryTranslations: {
+            "compare_photo": "Compare Photo ",
+          },
+        );
+      }
+
       // 如果是新模型，添加到列表中
       if (_isNewModel && !_modelList.contains(model)) {
         setState(() {
@@ -318,7 +331,7 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
       builder: (context) => AlertDialog(
         title: const Text('確認刪除'),
         content: Text(
-            '確定要刪除 $_selectedModel 的所有規格嗎？此操作無法恢復。\n\n將刪除以下內容：\n• 輸入輸出特性規格\n• 基本功能測試規格\n• 耐壓測試規格\n• PSU序號規格\n• 配件包規格\n• 相關的失敗計數記錄'),
+            '確定要刪除 $_selectedModel 的所有規格嗎？此操作無法恢復。\n\n將刪除以下內容：\n• PSU序號規格\n• 輸入輸出特性規格\n• 基本功能測試規格\n• 耐壓測試規格\n• 配件包規格\n• 比對照片\n• 相關的失敗計數記錄'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -345,6 +358,14 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
       // 刪除模型的所有規格文件
       final deleteSpecsSuccess = await firebaseService.deleteAllModelSpecs(
         model: _selectedModel!,
+      );
+
+      //bill5
+      // 刪除比對照片
+      SharePointUploader(uploadOrDownload: 6, sn: '', model: _selectedModel!).startAuthorization(
+        categoryTranslations: {
+          "compare_photo": "Compare Photo ",
+        },
       );
 
       // 檢查刪除結果
@@ -399,6 +420,14 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
       }
     }
   }
+
+  // 刪除上傳照片清單
+  /*void onDeletedFilesUpdated(List<String> deletedFiles) {
+    setState(() {
+      deletedFilesFromChild = deletedFiles;
+    });
+    print("父元件收到刪除檔案列表： $deletedFilesFromChild");
+  }*/
 
   // 切換到新增模型模式
   void _toggleNewModelMode() {
@@ -571,6 +600,7 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
             Tab(text: '基本功能測試'),
             Tab(text: '耐壓測試'),
             Tab(text: '配件包'),
+            Tab(text: '上傳比對照片'),
           ],
         ),
         SizedBox(
@@ -608,6 +638,10 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
                   _packageListSpec = newSpec;
                 },
               ),
+              PhotoManagerTab(
+                selectedModel: _selectedModel ?? '',
+                //onDeletedFilesChanged: onDeletedFilesUpdated,
+              )
             ],
           ),
         ),

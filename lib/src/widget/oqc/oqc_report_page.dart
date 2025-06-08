@@ -156,7 +156,7 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
           // ❗先做 fail 檢查
           List<String> failItems = [];
 
-          //bill4
+          //bill6
           if (psuSNPassOrFail == false) {
             failItems.add(context.tr('psu_sn'));
           }

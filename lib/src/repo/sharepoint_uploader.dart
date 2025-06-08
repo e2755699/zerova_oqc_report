@@ -114,7 +114,6 @@ class SharePointUploader {
           if (token != null) {
             print("Access Token 獲取成功，正在上傳/下載檔案...");
             if (uploadOrDownload == 0) {
-              //Upload
               await uploadAllPackagingPhotos(
                   token,
                       (current, total) => onProgressUpdate?.call(
@@ -136,17 +135,29 @@ class SharePointUploader {
               //await uploadSelectedPackagingPhotos(token); // 上傳選擇的配件包照片
               //await uploadSelectedAttachmentPhotos(token); // 上傳選擇的外觀檢查照片
             } else if (uploadOrDownload == 1) {
-              //Donwload
               await downloadComparePictures(token); // 下載參考照片
-            } else if (uploadOrDownload == 2) {
-              //Donwload
-              //await downloadPhoneAttachmentPictures(token); // 下載參考照片
+            }
+            else if (uploadOrDownload == 2) {
               await downloadPhonePackagingPictures(token); // 下載參考照片
             }
             else if (uploadOrDownload == 3) {
-              //Donwload
               await downloadPhoneAttachmentPictures(token); // 下載參考照片
-              //await downloadPhonePackagingPictures(token); // 下載參考照片
+            }
+            else if (uploadOrDownload == 4) {
+              await downloadComparePicturesForSpec(token); // 下載參考照片
+            }
+            else if (uploadOrDownload == 5) {
+              // 上傳參考照片
+              await uploadComparePhotos(
+                  token,
+                      (current, total) => onProgressUpdate?.call(
+                      categoryTranslations['compare_photo'] ?? 'Compare Photo ',
+                      current,
+                      total));
+            }
+            else if (uploadOrDownload == 6) {
+              // 刪除比對資料夾
+              await deleteModelFolderFromSharePoint(token); // 下載參考照片
             }
             else {
               throw Exception("Didn't contain Upload Or Download");
@@ -189,6 +200,73 @@ class SharePointUploader {
     } else {
       print("無法獲取 Access Token: ${response.statusCode} ${response.body}");
       return null;
+    }
+  }
+  Future<void> uploadComparePhotos(
+      String accessToken, Function(int, int) onProgressUpdate) async {
+    final String zerovaPath = await _getOrCreateUserZerovaPath();
+    final String modelFolderPath = path.join(zerovaPath, 'Compare Pictures', model);
+    final Directory modelDirectory = Directory(modelFolderPath);
+
+    if (!modelDirectory.existsSync()) {
+      print("資料夾不存在: $modelFolderPath");
+      return;
+    }
+
+    final List<File> files = modelDirectory
+        .listSync()
+        .whereType<File>()
+        .where((file) =>
+          file.path.toLowerCase().endsWith('.jpg') ||
+              file.path.toLowerCase().endsWith('.jpeg') ||
+              file.path.toLowerCase().endsWith('.png'))
+        .toList();
+
+    if (files.isEmpty) {
+      print("資料夾中沒有檔案: $modelFolderPath");
+      return;
+    }
+
+    // 統計檔案數量
+    int totalFiles = files.length;
+    int uploadedFiles = 0;
+    print("總共需要上傳 $totalFiles 張比對照片");
+
+    for (var file in files) {
+      String relativePath = path.relative(file.path, from: zerovaPath);
+      // 將相對路徑中的 "Compare Pictures" 替換成 "外觀參考照片"
+      relativePath = relativePath.replaceFirst('Compare Pictures', '外觀參考照片');
+      final String sharePointPath = "Jackalope/$relativePath";
+
+      final String uploadUrl =
+          "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/items/root:/$sharePointPath:/content";
+
+      try {
+        final response = await http.put(
+          Uri.parse(uploadUrl),
+          headers: {
+            "Authorization": "Bearer $accessToken",
+            "Content-Type": "application/octet-stream"
+          },
+          body: file.readAsBytesSync(),
+        );
+
+        // 顯示進度
+        double progress = (uploadedFiles + 1) / totalFiles * 100;
+        print(
+            "比對照片上傳進度: ${uploadedFiles + 1}/$totalFiles (${progress.toStringAsFixed(2)}%)");
+        uploadedFiles++;
+        onProgressUpdate(uploadedFiles, totalFiles);
+
+        if (response.statusCode == 201) {
+          print("檔案上傳成功: $relativePath");
+        } else {
+          print(
+              "檔案上傳失敗: $relativePath - ${response.statusCode} ${response.body}");
+        }
+      } catch (e) {
+        print("檔案上傳失敗: $relativePath - $e");
+      }
     }
   }
 
@@ -458,6 +536,59 @@ class SharePointUploader {
     //記錄這個 model 已經下載過
     _downloadedModels.add(model);
   }
+  Future<void> downloadComparePicturesForSpec(String accessToken) async {
+    final String zerovaPath = await _getOrCreateUserZerovaPath();
+    String modelNameUsed = model; // 預設使用傳入的 model 名稱
+
+    // 建立初始要查詢的 SharePoint 路徑
+    String listFilesUrl =
+        "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/Jackalope/外觀參考照片/$model:/children";
+
+    // 發送查詢請求
+    var response = await http.get(
+      Uri.parse(listFilesUrl),
+      headers: {"Authorization": "Bearer $accessToken"},
+    );
+
+    if (response.statusCode != 200) {
+      print("找不到目錄 $model");
+      return;
+    }
+
+    // 成功取得檔案清單
+    final data = json.decode(response.body);
+    final List files = data['value'];
+
+    if (files.isEmpty) {
+      print("參考照片資料夾（$modelNameUsed）中沒有檔案");
+      return;
+    }
+
+    // 根據實際使用的 model 建立儲存路徑
+    final String directoryPath = path.join(zerovaPath, 'Compare Pictures', modelNameUsed);
+    final directory = Directory(directoryPath);
+    if (!directory.existsSync()) {
+      directory.createSync(recursive: true);
+    }
+
+    for (var file in files) {
+      final fileName = file['name'];
+      final downloadUrl = file['@microsoft.graph.downloadUrl'];
+
+      if (downloadUrl != null) {
+        try {
+          final fileResponse = await http.get(Uri.parse(downloadUrl));
+          final filePath = "${directory.path}/$fileName";
+          final localFile = File(filePath);
+          localFile.writeAsBytesSync(fileResponse.bodyBytes);
+
+          print("檔案下載成功: $fileName");
+        } catch (e) {
+          print("檔案下載失敗: $fileName - $e");
+        }
+      }
+    }
+  }
 
   Future<void> downloadPhoneAttachmentPictures(String accessToken) async {
     final String zerovaPath = await _getOrCreateUserZerovaPath();
@@ -552,6 +683,64 @@ class SharePointUploader {
     }
   }
 
+  Future<void> deleteFilesFromSharePoint(String accessToken, List<String> deletedFiles) async {
+    final String zerovaPath = await _getOrCreateUserZerovaPath();
+
+    for (var localFilePath in deletedFiles) {
+      // 把本機完整路徑轉成 SharePoint 路徑
+      String relativePath = path.relative(localFilePath, from: zerovaPath);
+
+      // 將路徑中的 "Compare Pictures" 替換成 "外觀參考照片"
+      relativePath = relativePath.replaceFirst('Compare Pictures', '外觀參考照片');
+
+      final String sharePointPath = "Jackalope/$relativePath";
+
+      final String deleteUrl = "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/items/root:/$sharePointPath";
+
+      try {
+        final response = await http.delete(
+          Uri.parse(deleteUrl),
+          headers: {
+            "Authorization": "Bearer $accessToken",
+          },
+        );
+
+        if (response.statusCode == 204) {
+          print("檔案刪除成功: $sharePointPath");
+        } else if (response.statusCode == 404) {
+          print("檔案不存在（無法刪除）: $sharePointPath");
+        } else {
+          print("檔案刪除失敗: $sharePointPath - ${response.statusCode} ${response.body}");
+        }
+      } catch (e) {
+        print("刪除檔案發生錯誤: $sharePointPath - $e");
+      }
+    }
+  }
+  Future<void> deleteModelFolderFromSharePoint(String accessToken) async {
+    final String folderPath = "Jackalope/外觀參考照片/$model";
+
+    final String deleteUrl = "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/items/root:/$folderPath";
+
+    try {
+      final response = await http.delete(
+        Uri.parse(deleteUrl),
+        headers: {
+          "Authorization": "Bearer $accessToken",
+        },
+      );
+
+      if (response.statusCode == 204) {
+        print("資料夾刪除成功: $folderPath");
+      } else if (response.statusCode == 404) {
+        print("資料夾不存在（無法刪除）: $folderPath");
+      } else {
+        print("資料夾刪除失敗: $folderPath - ${response.statusCode} ${response.body}");
+      }
+    } catch (e) {
+      print("刪除資料夾發生錯誤: $folderPath - $e");
+    }
+  }
 /*
   Future<void> uploadSelectedPackagingPhotos(String accessToken) async {
     final String zerovaPath = await _getOrCreateUserZerovaPath();
