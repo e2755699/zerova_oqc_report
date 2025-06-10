@@ -71,14 +71,15 @@ class _PhotoManagerTabState extends State<PhotoManagerTab> {
     await loadImages();
   }
 
-  void downloadImages() {
-    SharePointUploader(uploadOrDownload: 4, sn: '', model: widget.selectedModel).startAuthorization(
+  Future<void> downloadImages() async {
+    await SharePointUploader(uploadOrDownload: 4, sn: '', model: widget.selectedModel).startAuthorization(
       categoryTranslations: {
         "packageing_photo": "Packageing Photo ",
         "appearance_photo": "Appearance Photo ",
         "oqc_report": "OQC Report ",
       },
     );
+    await loadImages();
   }
 
   Future<void> loadImages() async {

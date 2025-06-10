@@ -431,9 +431,9 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
 
   // 切換到新增模型模式
   void _toggleNewModelMode() {
+    setState(() {
     _isNewModel = !_isNewModel;
     if (_isNewModel) {
-      setState(() {
         _selectedModel = null;
         _modelController.clear();
         _inputOutputSpec = InputOutputCharacteristicsSpec(
@@ -483,8 +483,8 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
         _packageListSpec = PackageListResult(); // 建立新的 PackageListResult
 
         _isLoading = false;
-      });
     }
+    });
   }
 
   @override
@@ -568,6 +568,11 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
                         border: OutlineInputBorder(),
                         labelText: '輸入新模型名稱',
                       ),
+                      onChanged: (value) {
+                        setState(() {
+                          // 這裡可以更新你想的變數或做其他處理
+                        });
+                      },
                     ),
                   ),
                 ],
@@ -639,7 +644,7 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
                 },
               ),
               PhotoManagerTab(
-                selectedModel: _selectedModel ?? '',
+                selectedModel: _isNewModel ? _modelController.text : (_selectedModel ?? ''),
                 //onDeletedFilesChanged: onDeletedFilesUpdated,
               )
             ],
