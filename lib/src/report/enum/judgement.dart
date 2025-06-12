@@ -2,5 +2,5 @@
 enum Judgement {
   pass,
   fail,
-  unknown
+  na,
 } 

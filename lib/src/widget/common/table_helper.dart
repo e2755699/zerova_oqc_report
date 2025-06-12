@@ -10,7 +10,7 @@ mixin TableHelper {
       case 'fail':
         return Judgement.fail;
       default:
-        return Judgement.unknown;
+        return Judgement.na;
     }
   }
 

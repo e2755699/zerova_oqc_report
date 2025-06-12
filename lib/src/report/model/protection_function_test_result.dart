@@ -419,7 +419,7 @@ class InsulationTestResult {
       this.leftInsulationOutputGround,
       this.rightInsulationInputOutput,
       this.rightInsulationInputGround,
-      this.rightInsulationOutputGround) : storedJudgement = Judgement.unknown;
+      this.rightInsulationOutputGround) : storedJudgement = Judgement.na;
 
   void updateStoredJudgement() {
     storedJudgement = judgement;

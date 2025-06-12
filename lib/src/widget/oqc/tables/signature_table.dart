@@ -69,13 +69,9 @@ class _SignatureTableState extends State<SignatureTable> {
                 ),
               ),
               Expanded(
-                child: TextField(
-                  controller: widget._picController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    contentPadding:
-                        EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  ),
+                child: Text(
+                  widget._picController.text,
+                  style: const TextStyle(fontSize: 16),
                 ),
               ),
             ],
@@ -95,16 +91,9 @@ class _SignatureTableState extends State<SignatureTable> {
                 ),
               ),
               Expanded(
-                child: TextField(
-                  controller: widget._dateController,
-                  readOnly: true,
-                  onTap: () => _selectDate(context),
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    contentPadding:
-                        EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    suffixIcon: Icon(Icons.calendar_today),
-                  ),
+                child: Text(
+                  widget._dateController.text,
+                  style: const TextStyle(fontSize: 16),
                 ),
               ),
             ],
