@@ -7,7 +7,10 @@ import 'package:flutter/services.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:zerova_oqc_report/src/utils/image_path_helper.dart';
 import 'package:zerova_oqc_report/src/widget/camera/image_picker_page.dart';
+import 'package:zerova_oqc_report/src/widget/camera/image_picker_page_new.dart';
 import 'package:zerova_oqc_report/src/widget/common/main_layout.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class CameraPage extends StatefulWidget {
   final int packagingOrAttachment; // 0:Packaging  1:Attachment
@@ -27,6 +30,7 @@ class CameraPage extends StatefulWidget {
 
 class _CameraPageState extends State<CameraPage> with ImagePageHelper {
   String _cameraInfo = 'Unknown';
+  String? _pickedPhotoPath; // 右邊顯示的照片
   List<CameraDescription> _cameras = <CameraDescription>[];
   int _cameraIndex = 0;
   int _cameraId = -1;
@@ -45,6 +49,7 @@ class _CameraPageState extends State<CameraPage> with ImagePageHelper {
 
   String? _selectedImagePath;
   List<String> _imagePaths = [];
+  Map<String, String> _pickedPhotoMap = {};
 
   @override
   void initState() {
@@ -52,6 +57,7 @@ class _CameraPageState extends State<CameraPage> with ImagePageHelper {
     WidgetsFlutterBinding.ensureInitialized();
     _fetchCameras().then((_) => _initializeCamera());
     _loadImages();
+    _loadPickedPhotoMap();  // ← 加這個
   }
 
   @override
@@ -110,6 +116,21 @@ class _CameraPageState extends State<CameraPage> with ImagePageHelper {
     if (mounted) {
       setState(() {
         _imagePaths = imageFiles;
+        // 如果還沒選過，預設選第一張比對圖
+        if (_selectedImagePath == null && imageFiles.isNotEmpty) {
+          _selectedImagePath = imageFiles.first;
+        }
+      });
+    }
+  }
+
+  Future<void> _loadPickedPhotoMap() async {
+    final prefs = await SharedPreferences.getInstance();
+    final encoded = prefs.getString('pickedPhotoMap');
+    if (encoded != null) {
+      setState(() {
+        final decoded = jsonDecode(encoded);
+        _pickedPhotoMap = Map<String, String>.from(decoded);
       });
     }
   }
@@ -218,6 +239,12 @@ class _CameraPageState extends State<CameraPage> with ImagePageHelper {
     );
   }
 
+  Future<void> _savePickedPhotoMap() async {
+    final prefs = await SharedPreferences.getInstance();
+    final encoded = jsonEncode(_pickedPhotoMap);
+    await prefs.setString('pickedPhotoMap', encoded);
+  }
+
   Future<void> _takePicture() async {
     if (_initialized && _cameraId >= 0) {
       if (!_previewPaused) {
@@ -322,111 +349,131 @@ class _CameraPageState extends State<CameraPage> with ImagePageHelper {
               child: Text(context.tr('recheck_cameras')),
             ),
           if (_cameras.isNotEmpty)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                if (widget.packagingOrAttachment != 0)
-                  DropdownButton<String>(
-                    hint: Text(context.tr('select_image')),
-                    value: _selectedImagePath,
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedImagePath = newValue;
-                      });
-                    },
-                    items: _imagePaths
-                        .map<DropdownMenuItem<String>>((String path) {
-                      return DropdownMenuItem<String>(
-                        value: path,
-                        child: Text(path.split('\\').last),
-                      );
-                    }).toList(),
-                  ),
-                ElevatedButton.icon(
-                  onPressed: _initialized ? _takePicture : null,
-                  icon: const Icon(Icons.camera_alt_rounded),
-                  label: Text(
-                    _previewPaused
-                        ? context.tr('next_photo')
-                        : context.tr('take_photo'),
-                  ),
-                ),
-                const SizedBox(width: 5),
-              // 新增的 this photo 按鈕
-                if (_previewPaused && widget.packagingOrAttachment != 0)
-                  ElevatedButton.icon(
-                    onPressed: () async {
-                      await CameraPlatform.instance.resumePreview(_cameraId);
-                      if (mounted) {
-                        setState(() {
-                          _previewPaused = false;
-                        });
-                      }
-                    },
-                    icon: const Icon(Icons.camera_alt_rounded),
-                    label: Text(context.tr('this_photo')),
-                  ),
-                Builder(
-                  builder: (BuildContext context) {
-                    return ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ImagePickerPage(
-                              packagingOrAttachment:
-                                  widget.packagingOrAttachment,
-                              sn: widget.sn,
-                            ),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.image),
-                      label: Text(context.tr('browse_photos')),
-                    );
-                  },
-                ),
-              ],
-            ),
-          const SizedBox(height: 5),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: Row(
-              children: <Widget>[
-                if (_selectedImagePath != null && _previewSize != null)
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Container(
-                        constraints: const BoxConstraints(
-                            maxHeight: 500), // 與相機畫面相同的最大高度
-                        child: AspectRatio(
-                          aspectRatio: _previewSize!.width /
-                              _previewSize!.height, // 保持相機畫面比例
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Row(
+                children: <Widget>[
+                  // 左邊：比對用圖片
+                  if (_selectedImagePath != null)
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Container(
+                          constraints: const BoxConstraints(maxHeight: 500),
                           child: Image.file(
                             File(_selectedImagePath!),
-                            fit: BoxFit.contain, // 確保圖片完整顯示，不被裁切
+                            fit: BoxFit.contain,
                           ),
                         ),
                       ),
                     ),
-                  ),
-                if (_initialized && _previewSize != null)
+
+                  // 右邊：選的圖片
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10.0),
                       child: Container(
                         constraints: const BoxConstraints(maxHeight: 500),
-                        child: AspectRatio(
-                          aspectRatio:
-                              _previewSize!.width / _previewSize!.height,
-                          child: _buildPreview(),
-                        ),
+                        child: _pickedPhotoMap[_selectedImagePath] != null
+                            ? Image.file(
+                          File(_pickedPhotoMap[_selectedImagePath]!),
+                          fit: BoxFit.contain,
+                        )
+                            : const Center(child: Text('尚未選擇照片')),
                       ),
                     ),
                   ),
-              ],
+                ],
+              ),
             ),
+
+          // 按鈕區塊
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              if (widget.packagingOrAttachment != 0)
+                DropdownButton<String>(
+                  hint: Text(context.tr('select_image')),
+                  value: _selectedImagePath,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _selectedImagePath = newValue;
+                    });
+                  },
+                  items: _imagePaths.map<DropdownMenuItem<String>>((String path) {
+                    return DropdownMenuItem<String>(
+                      value: path,
+                      child: Text(path.split('\\').last),
+                    );
+                  }).toList(),
+                ),
+              /*ElevatedButton.icon(
+                onPressed: _initialized ? _takePicture : null,
+                icon: const Icon(Icons.camera_alt_rounded),
+                label: Text(
+                  _previewPaused
+                      ? context.tr('next_photo')
+                      : context.tr('take_photo'),
+                ),
+              ),
+              const SizedBox(width: 5),*/
+              ElevatedButton.icon(
+                onPressed: () async {
+                  final result = await Navigator.push<String>(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ImagePickerPageNew(
+                        packagingOrAttachment: widget.packagingOrAttachment,
+                        sn: widget.sn,
+                      ),
+                    ),
+                  );
+
+                  if (result != null && mounted && _selectedImagePath != null) {
+                    //print('收到選取圖片路徑: $result');
+                    setState(() {
+                      _pickedPhotoMap[_selectedImagePath!] = result;
+                      _savePickedPhotoMap();
+                    });
+                  }
+
+                },
+                icon: const Icon(Icons.photo_library),
+                label: Text(context.tr('select_image')),
+              ),
+              /*if (_previewPaused && widget.packagingOrAttachment != 0)
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    await CameraPlatform.instance.resumePreview(_cameraId);
+                    if (mounted) {
+                      setState(() {
+                        _previewPaused = false;
+                      });
+                    }
+                  },
+                  icon: const Icon(Icons.camera_alt_rounded),
+                  label: Text(context.tr('this_photo')),
+                ),
+              Builder(
+                builder: (BuildContext context) {
+                  return ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ImagePickerPage(
+                            packagingOrAttachment: widget.packagingOrAttachment,
+                            sn: widget.sn,
+                          ),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.image),
+                    label: Text(context.tr('browse_photos')),
+                  );
+                },
+              ),*/
+            ],
           ),
         ],
       ),

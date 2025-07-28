@@ -278,13 +278,13 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
 
       //bill4
       // 上傳比對照片
-      if (model != null) {
+      /*if (model != null) {
         SharePointUploader(uploadOrDownload: 5, sn: '', model: model).startAuthorization(
           categoryTranslations: {
             "compare_photo": "Compare Photo ",
           },
         );
-      }
+      }*/
 
       // 如果是新模型，添加到列表中
       if (_isNewModel && !_modelList.contains(model)) {
@@ -362,11 +362,11 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
 
       //bill5
       // 刪除比對照片
-      SharePointUploader(uploadOrDownload: 6, sn: '', model: _selectedModel!).startAuthorization(
+      /*SharePointUploader(uploadOrDownload: 6, sn: '', model: _selectedModel!).startAuthorization(
         categoryTranslations: {
           "compare_photo": "Compare Photo ",
         },
-      );
+      );*/
 
       // 檢查刪除結果
       if (deleteSpecsSuccess) {

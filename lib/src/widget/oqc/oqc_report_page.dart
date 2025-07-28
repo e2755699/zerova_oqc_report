@@ -157,6 +157,7 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
           List<String> failItems = [];
 
           //bill6
+          /*
           if (psuSNPassOrFail == false) {
             failItems.add(context.tr('psu_sn'));
           }
@@ -211,11 +212,11 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
 
             return; // ❌ 不繼續執行
           }
-
+*/
 
           await _generateAndUploadPdf();
           //bill3
-          startUpload(context);
+          //startUpload(context);
           if (globalPsuSerialNumSpec != null) {
             final success = await FirebaseService().addOrUpdateSpec(
                 model: widget.oqcModel.model, // 你需要確保這裡有正確的 model 名稱

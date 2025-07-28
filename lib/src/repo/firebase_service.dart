@@ -649,6 +649,39 @@ Future<PackageListResult?> fetchPackageListSpec(String model) async {
   }
 }
 
+Future<Map<String, List<String>>> fetchModelToSnMapFromFirestore() async {
+  const projectId = 'oqcreport-87e5a';
+  const apiKey = 'AIzaSyBzlul4mftI7HHJnj48I2aUs2nV154x0iI';
+  const url =
+      'https://firestore.googleapis.com/v1/projects/$projectId/databases/(default)/documents/todo?key=$apiKey';
+
+  final response = await http.get(Uri.parse(url));
+
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    final Map<String, List<String>> result = {};
+
+    if (data['documents'] != null) {
+      for (final doc in data['documents']) {
+        final name = doc['name']; // e.g., .../todo/EV500
+        final model = name.split('/').last;
+
+        final fields = doc['fields'] ?? {};
+        final snList = <String>[];
+
+        fields.forEach((snKey, _) {
+          snList.add(snKey);
+        });
+
+        result[model] = snList;
+      }
+    }
+
+    return result;
+  } else {
+    throw Exception('Failed to fetch data: ${response.body}');
+  }
+}
 
 Map<String, dynamic> _fromFirestoreFields(Map<String, dynamic> fields) {
   final result = <String, dynamic>{};

@@ -140,9 +140,14 @@ class PackageListTable extends StatelessWidget {
                     icon: const Icon(Icons.cloud_download),
                     tooltip: 'Download to SharePoint',
                     onPressed: () {
-                      for (var m in PackageListSpecGlobal.get().measurements) {
-                        print('itemName: ${m.itemName}, quantity: ${m.quantity}, isChecked: ${m.isCheck.value}');
-                      }
+                      //someFunction();
+                      SharePointUploader(uploadOrDownload: 2, sn: sn, model: '').startAuthorization(
+                        categoryTranslations: {
+                          "packageing_photo": "Packageing Photo ",
+                          //"appearance_photo": "Appearance Photo ",
+                          //"oqc_report": "OQC Report ",
+                        },
+                      );
                     },
                   ),
                   CameraButton(

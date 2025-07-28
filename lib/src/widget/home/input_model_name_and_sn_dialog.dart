@@ -25,10 +25,23 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
   final _snFocusNode = FocusNode();
   bool isLoading = false;
 
-  @override
+  final Map<String, List<String>> modelToSnMap = {
+    //'EV500': ['T2449A003A1', 'T2449A003A2'],
+    //'EV600': ['T2449A003A3'],
+  };
+
+  String? selectedModel;
+  String? selectedSn;
+
   void initState() {
     super.initState();
-    _modelFocusNode.requestFocus();
+
+    fetchModelToSnMapFromFirestore().then((map) {
+      setState(() {
+        modelToSnMap.clear();
+        modelToSnMap.addAll(map);
+      });
+    });
   }
 
   @override
@@ -236,6 +249,59 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // 🔽 Model Dropdown
+            DropdownButtonFormField<String>(
+              value: selectedModel,
+              isExpanded: true,
+              decoration: InputDecoration(
+                labelText: '選擇 Model (可選或手動輸入)',
+                prefixIcon: const Icon(Icons.list),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
+                filled: true,
+                fillColor: Colors.grey[100],
+              ),
+              items: modelToSnMap.keys.map((model) {
+                return DropdownMenuItem(
+                  value: model,
+                  child: Text(model),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  selectedModel = value;
+                  selectedSn = null;
+                  _modelController.text = value ?? '';
+                });
+              },
+            ),
+            const SizedBox(height: 12),
+
+            // 🔽 SN Dropdown
+            DropdownButtonFormField<String>(
+              value: selectedSn,
+              isExpanded: true,
+              decoration: InputDecoration(
+                labelText: '選擇 SN (可選或手動輸入)',
+                prefixIcon: const Icon(Icons.numbers),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
+                filled: true,
+                fillColor: Colors.grey[100],
+              ),
+              items: selectedModel == null
+                  ? []
+                  : modelToSnMap[selectedModel!]!.map((sn) {
+                return DropdownMenuItem(value: sn, child: Text(sn));
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  selectedSn = value;
+                  _snController.text = value ?? '';
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+
+            // 📝 原本的手動輸入區塊 - Model
             TextFormField(
               enabled: !isLoading,
               focusNode: _modelFocusNode,
@@ -244,9 +310,7 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
                 labelText: context.tr('model_name'),
                 hintText: context.tr('please_input_model_name'),
                 prefixIcon: const Icon(Icons.text_fields),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
                 filled: true,
                 fillColor: Colors.grey[200],
               ),
@@ -257,11 +321,12 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
                 return null;
               },
               onFieldSubmitted: (value) {
-                // 按下 Enter 後跳到 SN 輸入框
                 _snFocusNode.requestFocus();
               },
             ),
             const SizedBox(height: 16),
+
+            // 📝 原本的手動輸入區塊 - SN
             TextFormField(
               enabled: !isLoading,
               focusNode: _snFocusNode,
@@ -270,9 +335,7 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
                 labelText: context.tr('sn'),
                 hintText: context.tr('please_input_sn'),
                 prefixIcon: const Icon(Icons.numbers),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
                 filled: true,
                 fillColor: Colors.grey[200],
               ),
@@ -283,12 +346,12 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
                 return null;
               },
               onFieldSubmitted: (value) async {
-                // 按下 Enter 後提交表單
                 if (!isLoading && _formKey.currentState!.validate()) {
                   await _submitForm();
                 }
               },
             ),
+
             if (isLoading)
               Container(
                 margin: const EdgeInsets.only(top: 16),
@@ -302,6 +365,7 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
               ),
           ],
         ),
+
       ),
       actions: [
         TextButton(

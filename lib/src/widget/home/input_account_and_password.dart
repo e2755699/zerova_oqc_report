@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:zerova_oqc_report/src/widget/home/home_page.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:zerova_oqc_report/src/widget/common/global_state.dart';
 import 'package:zerova_oqc_report/src/report/spec/account_data.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class InputAccountAndPassword extends StatefulWidget {
   const InputAccountAndPassword({super.key});
@@ -77,6 +76,7 @@ class _InputAccountAndPasswordState extends State<InputAccountAndPassword> {
                 filled: true,
                 fillColor: Colors.grey[200],
               ),
+              obscureText: true, // 密碼欄位
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return context.tr('please_input_pwd');
@@ -90,22 +90,25 @@ class _InputAccountAndPasswordState extends State<InputAccountAndPassword> {
       actions: [
         TextButton(
           onPressed: () {
-            Navigator.of(context).pop();
+            Navigator.of(context).pop({'success': false});
           },
           child: Text(context.tr('cancel')),
         ),
         TextButton(
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
-              final account = _modelController.text;
-              final pwd = _snController.text;
+              final account = _modelController.text.trim();
+              final pwd = _snController.text.trim();
+
+              bool loginSuccess = false;
 
               if (accountList.containsKey(account) &&
                   accountList[account]!['pwd'] == pwd) {
                 permissions.value = accountList[account]!['permission'];
-                currentAccount = account; // ⬅️ 設定目前帳號
+                currentAccount = account;
                 final userName = accountList[account]!['name'];
                 print("登入成功：$userName，權限：${permissions.value}");
+                loginSuccess = true;
               } else {
                 permissions.value = 0;
                 print("登入失敗");
@@ -115,15 +118,22 @@ class _InputAccountAndPasswordState extends State<InputAccountAndPassword> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      permissions.value == 1
+                      loginSuccess
+                          ? (permissions.value == 1
                           ? context.tr('login_success_admin')
                           : permissions.value == 2
                           ? context.tr('login_success_operator')
-                          : context.tr('login_success_guest'),
+                          : context.tr('login_success_guest'))
+                          : context.tr('login_failed'),
                     ),
                   ),
                 );
-                Navigator.of(context).pop();
+
+                Navigator.of(context).pop({
+                  'success': loginSuccess,
+                  if (loginSuccess) 'account': account,
+                  if (loginSuccess) 'password': pwd,
+                });
               }
             }
           },
