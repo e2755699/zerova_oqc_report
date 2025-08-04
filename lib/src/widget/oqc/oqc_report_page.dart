@@ -87,6 +87,7 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
         inputOutputCharacteristics: widget.oqcModel.inputOutputCharacteristics,
         protectionTestResults: widget.oqcModel.protectionTestResults,
         packageListResult: widget.oqcModel.packageListResult,
+        inputOutputSpec: globalInputOutputSpec, // 傳遞 spec 參數
       );
 
       // 獲取用戶的 Pictures/OQC report 目錄
@@ -106,8 +107,8 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
       if (userProfile.isEmpty) {
         throw Exception('無法獲取用戶目錄');
       }
-      var filePath =
-          path.join(userProfile, 'Pictures', 'Zerova', 'OQC Report', widget.oqcModel.sn);
+      var filePath = path.join(
+          userProfile, 'Pictures', 'Zerova', 'OQC Report', widget.oqcModel.sn);
       final Directory dir = Directory(filePath);
       if (!await dir.exists()) {
         await dir.create(recursive: true);
@@ -219,9 +220,9 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
           //startUpload(context);
           if (globalPsuSerialNumSpec != null) {
             final success = await FirebaseService().addOrUpdateSpec(
-                model: widget.oqcModel.model, // 你需要確保這裡有正確的 model 名稱
-                tableName: 'PsuSerialNumSpec',
-                spec: globalPsuSerialNumSpec!.toJson(),
+              model: widget.oqcModel.model, // 你需要確保這裡有正確的 model 名稱
+              tableName: 'PsuSerialNumSpec',
+              spec: globalPsuSerialNumSpec!.toJson(),
             );
 
             if (success) {
@@ -310,7 +311,7 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
           } else {
             print('⚠️ 尚未設定 globalPackageListSpec');
           }
-         /*
+          /*
           void someFunction() async {
             var tableName = 'PackageListSpec';
 
@@ -348,7 +349,7 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
 */
           // 也可以操作
           //globalData.updateOrAddMeasurement(index: 0, name: "New Item", quantity: "10");
-         // FirebaseService firebaseService = FirebaseService();
+          // FirebaseService firebaseService = FirebaseService();
           /*void uploadExample() async {
             final success = await uploadPackageListResult(
               model: 'ZV123',
@@ -376,7 +377,8 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
             final failCount = FailCountStore.getCount(tableName);
 
             // 如果有值就上傳
-            if (failCount != null) { // failCount 是 int，不會是 null，這裡可改成 failCount > 0 或 failCount >= 0 視需求
+            if (failCount != null) {
+              // failCount 是 int，不會是 null，這裡可改成 failCount > 0 或 failCount >= 0 視需求
               final success = await FirebaseService().addOrUpdateFailCount(
                 model: widget.oqcModel.model,
                 serialNumber: widget.oqcModel.sn,
@@ -393,13 +395,11 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
               print('⚠️ 尚未設定 $tableName');
             }
           }
-
         },
         icon: const Icon(Icons.upload_file),
         label: Text(context.tr('submit')),
         backgroundColor: AppColors.fabColor,
       ),
-
       body: Stack(
         children: [
           SingleChildScrollView(
@@ -414,11 +414,12 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
                   ),
                   PsuSerialNumbersTable(widget.oqcModel.psuSerialNumbers!),
                   SoftwareVersionTable(widget.oqcModel.softwareVersion!),
-                  AppearanceStructureInspectionTable(widget.oqcModel.testFunction!),
+                  AppearanceStructureInspectionTable(
+                      widget.oqcModel.testFunction!),
                   InputOutputCharacteristicsTable(
                       widget.oqcModel.inputOutputCharacteristics!),
-                  BasicFunctionTestTable(widget
-                      .oqcModel.inputOutputCharacteristics!.basicFunctionTestResult),
+                  BasicFunctionTestTable(widget.oqcModel
+                      .inputOutputCharacteristics!.basicFunctionTestResult),
                   ProtectionFunctionTestTable(
                     widget.oqcModel.protectionTestResults!,
                   ),
