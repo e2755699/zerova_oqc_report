@@ -135,7 +135,8 @@ class InputOutputCharacteristics {
                   : Judgement.fail,
             ));
           }
-        } else if (spcDesc == "Total_Input_Power") {
+        }
+        else if (spcDesc == "Total_Input_Power" && spcValue != 0) {
           if (spcItem.contains("Left  Plug") && leftTotalInputPowerCount < 1) {
             double spec = 130;
             double lowerBound = globalInputOutputSpec!.leftPinLowerbound;
@@ -182,7 +183,8 @@ class InputOutputCharacteristics {
                       : Judgement.fail,
             );
           }
-        } else if (spcDesc.contains("Output_Voltage")) {
+        }
+        else if (spcDesc.contains("Output_Voltage") && spcValue != 0) {
           if (spcItem.contains("Left  Plug") && leftOutputVoltageCount < 1) {
             double spec = 950;
             double lowerBound = globalInputOutputSpec!.leftVoutLowerbound;
@@ -217,7 +219,8 @@ class InputOutputCharacteristics {
                   : Judgement.fail,
             );
           }
-        } else if (spcDesc.contains("Output_Current")) {
+        }
+        else if (spcDesc.contains("Output_Current") && spcValue != 0) {
           if (spcItem.contains("Left  Plug") && leftOutputCurrentCount < 1) {
             double spec = 126;
             double lowerBound = globalInputOutputSpec!.leftIoutLowerbound;
@@ -252,7 +255,8 @@ class InputOutputCharacteristics {
                   : Judgement.fail,
             );
           }
-        } else if (spcDesc.contains("Output_Power")) {
+        }
+        else if (spcDesc.contains("Output_Power") && spcValue != 0) {
           if (spcItem.contains("Left  Plug") && leftTotalOutputPowerCount < 1) {
             double spec = 120;
             double lowerBound = globalInputOutputSpec!.leftPoutLowerbound;
