@@ -100,8 +100,7 @@ class InputOutputCharacteristics {
                   : Judgement.fail,
             ));
           }
-        }
-        else if (spcDesc.contains("Input_Current")) {
+        } else if (spcDesc.contains("Input_Current")) {
           if (spcItem.contains("Left  Plug") && leftInputCurrentCount < 3) {
             double spec = 230;
             double lowerBound = globalInputOutputSpec!.leftIinLowerbound;
@@ -136,23 +135,28 @@ class InputOutputCharacteristics {
                   : Judgement.fail,
             ));
           }
-        }
-        else if (spcDesc == "Total_Input_Power") {
+        } else if (spcDesc == "Total_Input_Power") {
           if (spcItem.contains("Left  Plug") && leftTotalInputPowerCount < 1) {
             double spec = 130;
             double lowerBound = globalInputOutputSpec!.leftPinLowerbound;
             double upperBound = globalInputOutputSpec!.leftPinUpperbound;
             leftTotalInputPowerCount++;
+
+            // 數值轉換：如果大於10萬則除以1000 (W -> kW)
+            double convertedValue =
+                spcValue > 100000 ? spcValue / 1000 : spcValue;
+
             leftTotalInputPower = InputOutputMeasurement(
               spec: spec,
-              value: spcValue,
+              value: convertedValue,
               count: leftTotalInputPowerCount,
               key: spcDesc,
               name: "Pin",
               description: '',
-              judgement: (spcValue >= lowerBound && spcValue <= upperBound)
-                  ? Judgement.pass
-                  : Judgement.fail,
+              judgement:
+                  (convertedValue >= lowerBound && convertedValue <= upperBound)
+                      ? Judgement.pass
+                      : Judgement.fail,
             );
           } else if (spcItem.contains("Right Plug") &&
               rightTotalInputPowerCount < 1) {
@@ -160,20 +164,25 @@ class InputOutputCharacteristics {
             double lowerBound = globalInputOutputSpec!.rightPinLowerbound;
             double upperBound = globalInputOutputSpec!.rightPinUpperbound;
             rightTotalInputPowerCount++;
+
+            // 數值轉換：如果大於10萬則除以1000 (W -> kW)
+            double convertedValue =
+                spcValue > 100000 ? spcValue / 1000 : spcValue;
+
             rightTotalInputPower = InputOutputMeasurement(
               spec: spec,
-              value: spcValue,
+              value: convertedValue,
               count: leftTotalInputPowerCount,
               key: spcDesc,
               name: "Pin",
               description: '',
-              judgement: (spcValue >= lowerBound && spcValue <= upperBound)
-                  ? Judgement.pass
-                  : Judgement.fail,
+              judgement:
+                  (convertedValue >= lowerBound && convertedValue <= upperBound)
+                      ? Judgement.pass
+                      : Judgement.fail,
             );
           }
-        }
-        else if (spcDesc.contains("Output_Voltage")) {
+        } else if (spcDesc.contains("Output_Voltage")) {
           if (spcItem.contains("Left  Plug") && leftOutputVoltageCount < 1) {
             double spec = 950;
             double lowerBound = globalInputOutputSpec!.leftVoutLowerbound;
@@ -208,8 +217,7 @@ class InputOutputCharacteristics {
                   : Judgement.fail,
             );
           }
-        }
-        else if (spcDesc.contains("Output_Current")) {
+        } else if (spcDesc.contains("Output_Current")) {
           if (spcItem.contains("Left  Plug") && leftOutputCurrentCount < 1) {
             double spec = 126;
             double lowerBound = globalInputOutputSpec!.leftIoutLowerbound;
@@ -244,23 +252,28 @@ class InputOutputCharacteristics {
                   : Judgement.fail,
             );
           }
-        }
-        else if (spcDesc.contains("Output_Power")) {
+        } else if (spcDesc.contains("Output_Power")) {
           if (spcItem.contains("Left  Plug") && leftTotalOutputPowerCount < 1) {
             double spec = 120;
             double lowerBound = globalInputOutputSpec!.leftPoutLowerbound;
             double upperBound = globalInputOutputSpec!.leftPoutUpperbound;
             leftTotalOutputPowerCount++;
+
+            // 數值轉換：如果大於10萬則除以1000 (W -> kW)
+            double convertedValue =
+                spcValue > 100000 ? spcValue / 1000 : spcValue;
+
             leftTotalOutputPower = InputOutputMeasurement(
               spec: spec,
-              value: spcValue,
+              value: convertedValue,
               count: leftTotalOutputPowerCount,
               key: spcDesc,
               name: "Pout",
               description: '',
-              judgement: (spcValue >= lowerBound && spcValue <= upperBound)
-                  ? Judgement.pass
-                  : Judgement.fail,
+              judgement:
+                  (convertedValue >= lowerBound && convertedValue <= upperBound)
+                      ? Judgement.pass
+                      : Judgement.fail,
             );
           } else if (spcItem.contains("Right Plug") &&
               rightTotalOutputPowerCount < 1) {
@@ -268,20 +281,25 @@ class InputOutputCharacteristics {
             double lowerBound = globalInputOutputSpec!.rightPoutLowerbound;
             double upperBound = globalInputOutputSpec!.rightPoutUpperbound;
             rightTotalOutputPowerCount++;
+
+            // 數值轉換：如果大於10萬則除以1000 (W -> kW)
+            double convertedValue =
+                spcValue > 100000 ? spcValue / 1000 : spcValue;
+
             rightTotalOutputPower = InputOutputMeasurement(
               spec: spec,
-              value: spcValue,
+              value: convertedValue,
               count: rightTotalOutputPowerCount,
               key: spcDesc,
               name: "Pout",
               description: '',
-              judgement: (spcValue >= lowerBound && spcValue <= upperBound)
-                  ? Judgement.pass
-                  : Judgement.fail,
+              judgement:
+                  (convertedValue >= lowerBound && convertedValue <= upperBound)
+                      ? Judgement.pass
+                      : Judgement.fail,
             );
           }
-        }
-        else if (spcDesc.contains("EFF")) {
+        } else if (spcDesc.contains("EFF")) {
           double spec = globalBasicFunctionTestSpec!.eff;
           if (effCount < 1) {
             effCount++;
@@ -296,8 +314,7 @@ class InputOutputCharacteristics {
               //defaultSpecText: _defaultSpec[1] ?? '>94%',
             );
           }
-        }
-        else if (spcDesc.contains("PowerFactor")) {
+        } else if (spcDesc.contains("PowerFactor")) {
           double spec = globalBasicFunctionTestSpec!.pf;
           if (powerFactorCount < 1) {
             powerFactorCount++;
@@ -309,11 +326,10 @@ class InputOutputCharacteristics {
               name: "Power Factor (PF)",
               description: 'Spec: ≧ 0.99 \n PF: {VALUE} %',
               judgement: spcValue >= spec ? Judgement.pass : Judgement.fail,
-             // defaultSpecText: _defaultSpec[2] ?? '≧ 0.99',
+              // defaultSpecText: _defaultSpec[2] ?? '≧ 0.99',
             );
           }
-        }
-        else if (spcDesc.contains("THD")) {
+        } else if (spcDesc.contains("THD")) {
           double spec = globalBasicFunctionTestSpec!.thd;
           if (thdCount < 1) {
             thdCount++;
@@ -325,11 +341,10 @@ class InputOutputCharacteristics {
               name: "Harmonic",
               description: 'Spec: <5% \n THD: {VALUE} %',
               judgement: spcValue < spec ? Judgement.pass : Judgement.fail,
-             // defaultSpecText: _defaultSpec[3] ?? '<5%',
+              // defaultSpecText: _defaultSpec[3] ?? '<5%',
             );
           }
-        }
-        else if (spcDesc.contains("Standby_Total_Input_Power")) {
+        } else if (spcDesc.contains("Standby_Total_Input_Power")) {
           double spec = globalBasicFunctionTestSpec!.sp;
           if (standbyTotalInputPowerCount < 1) {
             standbyTotalInputPowerCount++;
@@ -341,7 +356,7 @@ class InputOutputCharacteristics {
               name: "Standby Power",
               description: 'Spec: <100W \n Standby Power: {VALUE} W',
               judgement: spcValue < spec ? Judgement.pass : Judgement.fail,
-             // defaultSpecText: _defaultSpec[4] ?? '<100W',
+              // defaultSpecText: _defaultSpec[4] ?? '<100W',
             );
           }
         }
@@ -440,7 +455,6 @@ class InputOutputCharacteristicsSide {
       this.outputCurrent,
       this.totalOutputPower);
 }
-
 
 class InputOutputMeasurement {
   double spec;

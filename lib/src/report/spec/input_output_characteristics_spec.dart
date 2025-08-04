@@ -1,3 +1,23 @@
+// 定義功率單位枚舉
+enum PowerUnit {
+  kW('kW'),
+  kVA('kVA');
+
+  const PowerUnit(this.displayName);
+  final String displayName;
+
+  static PowerUnit fromString(String value) {
+    switch (value) {
+      case 'kW':
+        return PowerUnit.kW;
+      case 'kVA':
+        return PowerUnit.kVA;
+      default:
+        return PowerUnit.kW; // 預設值
+    }
+  }
+}
+
 // 這邊先放你的 InputOutputCharacteristicsSpec 類別
 // 假設它長這樣（你可以換成你自己完整的實作）
 
@@ -28,6 +48,9 @@ class InputOutputCharacteristicsSpec {
   double rightPoutLowerbound;
   double rightPoutUpperbound;
 
+  // 新增單位字段
+  PowerUnit pinUnit;
+  PowerUnit poutUnit;
 
   InputOutputCharacteristicsSpec({
     required this.leftVinLowerbound,
@@ -54,6 +77,9 @@ class InputOutputCharacteristicsSpec {
     required this.rightIoutUpperbound,
     required this.rightPoutLowerbound,
     required this.rightPoutUpperbound,
+    // 預設單位：Pin=kVA, Pout=kW
+    this.pinUnit = PowerUnit.kVA,
+    this.poutUnit = PowerUnit.kW,
   });
 
   factory InputOutputCharacteristicsSpec.fromJson(Map<String, dynamic> json) {
@@ -62,6 +88,7 @@ class InputOutputCharacteristicsSpec {
           ? value.toDouble()
           : double.tryParse(value.toString()) ?? double.nan;
     }
+
     return InputOutputCharacteristicsSpec(
       leftVinLowerbound: parseDouble(json['LVinLB']),
       leftVinUpperbound: parseDouble(json['LVinUB']),
@@ -87,6 +114,13 @@ class InputOutputCharacteristicsSpec {
       rightIoutUpperbound: parseDouble(json['RIoutUB']),
       rightPoutLowerbound: parseDouble(json['RPoutLB']),
       rightPoutUpperbound: parseDouble(json['RPoutUB']),
+      // 從 JSON 讀取單位，如果沒有則使用預設值
+      pinUnit: json['pinUnit'] != null
+          ? PowerUnit.fromString(json['pinUnit'])
+          : PowerUnit.kVA,
+      poutUnit: json['poutUnit'] != null
+          ? PowerUnit.fromString(json['poutUnit'])
+          : PowerUnit.kW,
     );
   }
 
@@ -115,6 +149,8 @@ class InputOutputCharacteristicsSpec {
     double? rightIoutUpperbound,
     double? rightPoutLowerbound,
     double? rightPoutUpperbound,
+    PowerUnit? pinUnit,
+    PowerUnit? poutUnit,
   }) {
     return InputOutputCharacteristicsSpec(
       leftVinLowerbound: leftVinLowerbound ?? this.leftVinLowerbound,
@@ -141,38 +177,44 @@ class InputOutputCharacteristicsSpec {
       rightIoutUpperbound: rightIoutUpperbound ?? this.rightIoutUpperbound,
       rightPoutLowerbound: rightPoutLowerbound ?? this.rightPoutLowerbound,
       rightPoutUpperbound: rightPoutUpperbound ?? this.rightPoutUpperbound,
+      pinUnit: pinUnit ?? this.pinUnit,
+      poutUnit: poutUnit ?? this.poutUnit,
     );
   }
 
   Map<String, dynamic> toJson() => {
-    // 左側欄位
-    'LVinLB': leftVinLowerbound,
-    'LVinUB': leftVinUpperbound,
-    'LIinLB': leftIinLowerbound,
-    'LIinUB': leftIinUpperbound,
-    'LPinLB': leftPinLowerbound,
-    'LPinUB': leftPinUpperbound,
-    'LVoutLB': leftVoutLowerbound,
-    'LVoutUB': leftVoutUpperbound,
-    'LIoutLB': leftIoutLowerbound,
-    'LIoutUB': leftIoutUpperbound,
-    'LPoutLB': leftPoutLowerbound,
-    'LPoutUB': leftPoutUpperbound,
+        // 左側欄位
+        'LVinLB': leftVinLowerbound,
+        'LVinUB': leftVinUpperbound,
+        'LIinLB': leftIinLowerbound,
+        'LIinUB': leftIinUpperbound,
+        'LPinLB': leftPinLowerbound,
+        'LPinUB': leftPinUpperbound,
+        'LVoutLB': leftVoutLowerbound,
+        'LVoutUB': leftVoutUpperbound,
+        'LIoutLB': leftIoutLowerbound,
+        'LIoutUB': leftIoutUpperbound,
+        'LPoutLB': leftPoutLowerbound,
+        'LPoutUB': leftPoutUpperbound,
 
-    // 右側欄位
-    'RVinLB': rightVinLowerbound,
-    'RVinUB': rightVinUpperbound,
-    'RIinLB': rightIinLowerbound,
-    'RIinUB': rightIinUpperbound,
-    'RPinLB': rightPinLowerbound,
-    'RPinUB': rightPinUpperbound,
-    'RVoutLB': rightVoutLowerbound,
-    'RVoutUB': rightVoutUpperbound,
-    'RIoutLB': rightIoutLowerbound,
-    'RIoutUB': rightIoutUpperbound,
-    'RPoutLB': rightPoutLowerbound,
-    'RPoutUB': rightPoutUpperbound,
-  };
+        // 右側欄位
+        'RVinLB': rightVinLowerbound,
+        'RVinUB': rightVinUpperbound,
+        'RIinLB': rightIinLowerbound,
+        'RIinUB': rightIinUpperbound,
+        'RPinLB': rightPinLowerbound,
+        'RPinUB': rightPinUpperbound,
+        'RVoutLB': rightVoutLowerbound,
+        'RVoutUB': rightVoutUpperbound,
+        'RIoutLB': rightIoutLowerbound,
+        'RIoutUB': rightIoutUpperbound,
+        'RPoutLB': rightPoutLowerbound,
+        'RPoutUB': rightPoutUpperbound,
+
+        // 單位欄位
+        'pinUnit': pinUnit.displayName,
+        'poutUnit': poutUnit.displayName,
+      };
 
   @override
   String toString() {
@@ -189,9 +231,9 @@ class InputOutputCharacteristicsSpec {
       RVoutLB: $rightVoutLowerbound, RVoutUB: $rightVoutUpperbound,
       RIoutLB: $rightIoutLowerbound, RIoutUB: $rightIoutUpperbound,
       RPoutLB: $rightPoutLowerbound, RPoutUB: $rightPoutUpperbound,
+      pinUnit: ${pinUnit.displayName}, poutUnit: ${poutUnit.displayName},
       ''';
   }
-
 }
 
 // 在檔案最上層宣告一個全域變數

@@ -227,6 +227,93 @@ class _InputOutputCharacteristicsTabState
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
+
+            // 單位選擇區域
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Theme.of(context).dividerColor),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '單位設定',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Pin 單位:'),
+                            const SizedBox(height: 4),
+                            DropdownButtonFormField<PowerUnit>(
+                              value: _spec.pinUnit,
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                isDense: true,
+                              ),
+                              items: PowerUnit.values.map((unit) {
+                                return DropdownMenuItem<PowerUnit>(
+                                  value: unit,
+                                  child: Text(unit.displayName),
+                                );
+                              }).toList(),
+                              onChanged: (PowerUnit? newValue) {
+                                if (newValue != null) {
+                                  setState(() {
+                                    _spec = _spec.copyWith(pinUnit: newValue);
+                                  });
+                                  widget.onChanged(_spec);
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Pout 單位:'),
+                            const SizedBox(height: 4),
+                            DropdownButtonFormField<PowerUnit>(
+                              value: _spec.poutUnit,
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                isDense: true,
+                              ),
+                              items: PowerUnit.values.map((unit) {
+                                return DropdownMenuItem<PowerUnit>(
+                                  value: unit,
+                                  child: Text(unit.displayName),
+                                );
+                              }).toList(),
+                              onChanged: (PowerUnit? newValue) {
+                                if (newValue != null) {
+                                  setState(() {
+                                    _spec = _spec.copyWith(poutUnit: newValue);
+                                  });
+                                  widget.onChanged(_spec);
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
