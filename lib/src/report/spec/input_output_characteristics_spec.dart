@@ -28,6 +28,11 @@ class InputOutputCharacteristicsSpec {
   double rightPoutLowerbound;
   double rightPoutUpperbound;
 
+  // 新增：Pin 和 Pout 的單位選擇
+  String leftPinUnit;
+  String leftPoutUnit;
+  String rightPinUnit;
+  String rightPoutUnit;
 
   InputOutputCharacteristicsSpec({
     required this.leftVinLowerbound,
@@ -54,6 +59,11 @@ class InputOutputCharacteristicsSpec {
     required this.rightIoutUpperbound,
     required this.rightPoutLowerbound,
     required this.rightPoutUpperbound,
+    // Pin 預設 kVA，Pout 預設 kW
+    this.leftPinUnit = 'kVA',
+    this.leftPoutUnit = 'kW',
+    this.rightPinUnit = 'kVA',
+    this.rightPoutUnit = 'kW',
   });
 
   factory InputOutputCharacteristicsSpec.fromJson(Map<String, dynamic> json) {
@@ -62,6 +72,7 @@ class InputOutputCharacteristicsSpec {
           ? value.toDouble()
           : double.tryParse(value.toString()) ?? double.nan;
     }
+
     return InputOutputCharacteristicsSpec(
       leftVinLowerbound: parseDouble(json['LVinLB']),
       leftVinUpperbound: parseDouble(json['LVinUB']),
@@ -87,6 +98,11 @@ class InputOutputCharacteristicsSpec {
       rightIoutUpperbound: parseDouble(json['RIoutUB']),
       rightPoutLowerbound: parseDouble(json['RPoutLB']),
       rightPoutUpperbound: parseDouble(json['RPoutUB']),
+      // 讀取單位，若無則使用預設值
+      leftPinUnit: json['LPinUnit']?.toString() ?? 'kVA',
+      leftPoutUnit: json['LPoutUnit']?.toString() ?? 'kW',
+      rightPinUnit: json['RPinUnit']?.toString() ?? 'kVA',
+      rightPoutUnit: json['RPoutUnit']?.toString() ?? 'kW',
     );
   }
 
@@ -115,6 +131,10 @@ class InputOutputCharacteristicsSpec {
     double? rightIoutUpperbound,
     double? rightPoutLowerbound,
     double? rightPoutUpperbound,
+    String? leftPinUnit,
+    String? leftPoutUnit,
+    String? rightPinUnit,
+    String? rightPoutUnit,
   }) {
     return InputOutputCharacteristicsSpec(
       leftVinLowerbound: leftVinLowerbound ?? this.leftVinLowerbound,
@@ -141,57 +161,66 @@ class InputOutputCharacteristicsSpec {
       rightIoutUpperbound: rightIoutUpperbound ?? this.rightIoutUpperbound,
       rightPoutLowerbound: rightPoutLowerbound ?? this.rightPoutLowerbound,
       rightPoutUpperbound: rightPoutUpperbound ?? this.rightPoutUpperbound,
+      leftPinUnit: leftPinUnit ?? this.leftPinUnit,
+      leftPoutUnit: leftPoutUnit ?? this.leftPoutUnit,
+      rightPinUnit: rightPinUnit ?? this.rightPinUnit,
+      rightPoutUnit: rightPoutUnit ?? this.rightPoutUnit,
     );
   }
 
   Map<String, dynamic> toJson() => {
-    // 左側欄位
-    'LVinLB': leftVinLowerbound,
-    'LVinUB': leftVinUpperbound,
-    'LIinLB': leftIinLowerbound,
-    'LIinUB': leftIinUpperbound,
-    'LPinLB': leftPinLowerbound,
-    'LPinUB': leftPinUpperbound,
-    'LVoutLB': leftVoutLowerbound,
-    'LVoutUB': leftVoutUpperbound,
-    'LIoutLB': leftIoutLowerbound,
-    'LIoutUB': leftIoutUpperbound,
-    'LPoutLB': leftPoutLowerbound,
-    'LPoutUB': leftPoutUpperbound,
+        // 左側欄位
+        'LVinLB': leftVinLowerbound,
+        'LVinUB': leftVinUpperbound,
+        'LIinLB': leftIinLowerbound,
+        'LIinUB': leftIinUpperbound,
+        'LPinLB': leftPinLowerbound,
+        'LPinUB': leftPinUpperbound,
+        'LVoutLB': leftVoutLowerbound,
+        'LVoutUB': leftVoutUpperbound,
+        'LIoutLB': leftIoutLowerbound,
+        'LIoutUB': leftIoutUpperbound,
+        'LPoutLB': leftPoutLowerbound,
+        'LPoutUB': leftPoutUpperbound,
 
-    // 右側欄位
-    'RVinLB': rightVinLowerbound,
-    'RVinUB': rightVinUpperbound,
-    'RIinLB': rightIinLowerbound,
-    'RIinUB': rightIinUpperbound,
-    'RPinLB': rightPinLowerbound,
-    'RPinUB': rightPinUpperbound,
-    'RVoutLB': rightVoutLowerbound,
-    'RVoutUB': rightVoutUpperbound,
-    'RIoutLB': rightIoutLowerbound,
-    'RIoutUB': rightIoutUpperbound,
-    'RPoutLB': rightPoutLowerbound,
-    'RPoutUB': rightPoutUpperbound,
-  };
+        // 右側欄位
+        'RVinLB': rightVinLowerbound,
+        'RVinUB': rightVinUpperbound,
+        'RIinLB': rightIinLowerbound,
+        'RIinUB': rightIinUpperbound,
+        'RPinLB': rightPinLowerbound,
+        'RPinUB': rightPinUpperbound,
+        'RVoutLB': rightVoutLowerbound,
+        'RVoutUB': rightVoutUpperbound,
+        'RIoutLB': rightIoutLowerbound,
+        'RIoutUB': rightIoutUpperbound,
+        'RPoutLB': rightPoutLowerbound,
+        'RPoutUB': rightPoutUpperbound,
+
+        // 單位欄位
+        'LPinUnit': leftPinUnit,
+        'LPoutUnit': leftPoutUnit,
+        'RPinUnit': rightPinUnit,
+        'RPoutUnit': rightPoutUnit,
+      };
 
   @override
   String toString() {
     return '''
       LVinLB: $leftVinLowerbound, LVinUB: $leftVinUpperbound,
       LIinLB: $leftIinLowerbound, LIinUB: $leftIinUpperbound,
-      LPinLB: $leftPinLowerbound, LPinUB: $leftPinUpperbound,
+      LPinLB: $leftPinLowerbound, LPinUB: $leftPinUpperbound ($leftPinUnit),
       LVoutLB: $leftVoutLowerbound, LVoutUB: $leftVoutUpperbound,
       LIoutLB: $leftIoutLowerbound, LIoutUB: $leftIoutUpperbound,
-      LPoutLB: $leftPoutLowerbound, LPoutUB: $leftPoutUpperbound,
+      LPoutLB: $leftPoutLowerbound, LPoutUB: $leftPoutUpperbound ($leftPoutUnit),
       RVinLB: $rightVinLowerbound, RVinUB: $rightVinUpperbound,
       RIinLB: $rightIinLowerbound, RIinUB: $rightIinUpperbound,
-      RPinLB: $rightPinLowerbound, RPinUB: $rightPinUpperbound,
+      RPinLB: $rightPinLowerbound, RPinUB: $rightPinUpperbound ($rightPinUnit),
       RVoutLB: $rightVoutLowerbound, RVoutUB: $rightVoutUpperbound,
       RIoutLB: $rightIoutLowerbound, RIoutUB: $rightIoutUpperbound,
-      RPoutLB: $rightPoutLowerbound, RPoutUB: $rightPoutUpperbound,
+      RPoutLB: $rightPoutLowerbound, RPoutUB: $rightPoutUpperbound ($rightPoutUnit),
       ''';
   }
-
 }
 
 // 在檔案最上層宣告一個全域變數

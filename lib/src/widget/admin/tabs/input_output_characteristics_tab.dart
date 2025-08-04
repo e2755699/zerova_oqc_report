@@ -64,6 +64,11 @@ class _InputOutputCharacteristicsTabState
           rightIoutUpperbound: 0,
           rightPoutLowerbound: 0,
           rightPoutUpperbound: 0,
+          // 使用預設單位
+          leftPinUnit: 'kVA',
+          leftPoutUnit: 'kW',
+          rightPinUnit: 'kVA',
+          rightPoutUnit: 'kW',
         );
 
     // 初始化控制器
@@ -203,6 +208,33 @@ class _InputOutputCharacteristicsTabState
     widget.onChanged(newSpec);
   }
 
+  // 更新單位的方法
+  void _updateUnit(String unitField, String unit) {
+    InputOutputCharacteristicsSpec newSpec;
+
+    switch (unitField) {
+      case 'leftPinUnit':
+        newSpec = _spec.copyWith(leftPinUnit: unit);
+        break;
+      case 'leftPoutUnit':
+        newSpec = _spec.copyWith(leftPoutUnit: unit);
+        break;
+      case 'rightPinUnit':
+        newSpec = _spec.copyWith(rightPinUnit: unit);
+        break;
+      case 'rightPoutUnit':
+        newSpec = _spec.copyWith(rightPoutUnit: unit);
+        break;
+      default:
+        return;
+    }
+
+    setState(() {
+      _spec = newSpec;
+    });
+    widget.onChanged(newSpec);
+  }
+
   @override
   void dispose() {
     for (var controller in _controllers.values) {
@@ -254,11 +286,13 @@ class _InputOutputCharacteristicsTabState
                                   'A',
                                   _controllers['leftIinLowerbound']!,
                                   _controllers['leftIinUpperbound']!),*/
-                              _buildRangeInputs(
+                              _buildRangeInputsWithUnitSelector(
                                   'Pin',
-                                  'kW',
+                                  _spec.leftPinUnit,
                                   _controllers['leftPinLowerbound']!,
-                                  _controllers['leftPinUpperbound']!),
+                                  _controllers['leftPinUpperbound']!,
+                                  ['kVA', 'kW'],
+                                  'leftPinUnit'),
                               const SizedBox(height: 16),
                               Text(
                                 '左側輸出特性',
@@ -275,11 +309,13 @@ class _InputOutputCharacteristicsTabState
                                   'A',
                                   _controllers['leftIoutLowerbound']!,
                                   _controllers['leftIoutUpperbound']!),
-                              _buildRangeInputs(
+                              _buildRangeInputsWithUnitSelector(
                                   'Pout',
-                                  'kW',
+                                  _spec.leftPoutUnit,
                                   _controllers['leftPoutLowerbound']!,
-                                  _controllers['leftPoutUpperbound']!),
+                                  _controllers['leftPoutUpperbound']!,
+                                  ['kW', 'kVA'],
+                                  'leftPoutUnit'),
                             ],
                           ),
                         ),
@@ -306,11 +342,13 @@ class _InputOutputCharacteristicsTabState
                                   'A',
                                   _controllers['rightIinLowerbound']!,
                                   _controllers['rightIinUpperbound']!),*/
-                              _buildRangeInputs(
+                              _buildRangeInputsWithUnitSelector(
                                   'Pin',
-                                  'kW',
+                                  _spec.rightPinUnit,
                                   _controllers['rightPinLowerbound']!,
-                                  _controllers['rightPinUpperbound']!),
+                                  _controllers['rightPinUpperbound']!,
+                                  ['kVA', 'kW'],
+                                  'rightPinUnit'),
                               const SizedBox(height: 16),
                               Text(
                                 '右側輸出特性',
@@ -327,11 +365,13 @@ class _InputOutputCharacteristicsTabState
                                   'A',
                                   _controllers['rightIoutLowerbound']!,
                                   _controllers['rightIoutUpperbound']!),
-                              _buildRangeInputs(
+                              _buildRangeInputsWithUnitSelector(
                                   'Pout',
-                                  'kW',
+                                  _spec.rightPoutUnit,
                                   _controllers['rightPoutLowerbound']!,
-                                  _controllers['rightPoutUpperbound']!),
+                                  _controllers['rightPoutUpperbound']!,
+                                  ['kW', 'kVA'],
+                                  'rightPoutUnit'),
                             ],
                           ),
                         ),
@@ -360,6 +400,69 @@ class _InputOutputCharacteristicsTabState
         lowerController: lowerController,
         upperController: upperController,
         isRequired: true,
+      ),
+    );
+  }
+
+  // 新方法：帶有單位選擇器的範圍輸入欄位
+  Widget _buildRangeInputsWithUnitSelector(
+      String label,
+      String currentUnit,
+      TextEditingController lowerController,
+      TextEditingController upperController,
+      List<String> unitOptions,
+      String unitField) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: DropdownButtonFormField<String>(
+                  value: currentUnit,
+                  decoration: const InputDecoration(
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                  items: unitOptions.map((unit) {
+                    return DropdownMenuItem<String>(
+                      value: unit,
+                      child: Text(unit),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      _updateUnit(unitField, value);
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          RangeSpecInputField(
+            label: '',
+            unit: currentUnit,
+            lowerController: lowerController,
+            upperController: upperController,
+            isRequired: true,
+          ),
+        ],
       ),
     );
   }

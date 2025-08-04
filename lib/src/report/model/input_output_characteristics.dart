@@ -1,9 +1,7 @@
 import 'package:zerova_oqc_report/src/report/enum/judgement.dart';
 import 'package:zerova_oqc_report/src/report/model/basic_function_test_result.dart';
 import 'package:zerova_oqc_report/src/report/spec/basic_function_test_spec.dart';
-import 'package:zerova_oqc_report/src/widget/oqc/tables/basic_function_test_table.dart';
 import 'package:zerova_oqc_report/src/report/spec/input_output_characteristics_spec.dart';
-import 'package:zerova_oqc_report/src/report/spec/basic_function_test_spec.dart';
 
 class InputOutputCharacteristics {
   final InputOutputCharacteristicsSide leftSideInputOutputCharacteristics;
@@ -58,6 +56,42 @@ class InputOutputCharacteristics {
     double thdCount = 0;
     double standbyTotalInputPowerCount = 0;
 
+    // 輔助函數：處理 Pin 和 Pout 的數值自動除 1000
+    double processPowerValue(double value) {
+      return value > 100000 ? value / 1000 : value;
+    }
+
+    // 輔助函數：創建帶詳細日誌的測量結果
+    InputOutputMeasurement createMeasurementWithLogging({
+      required String name,
+      required double spec,
+      required double value,
+      required double lowerBound,
+      required double upperBound,
+      required double count,
+      required String key,
+      required String description,
+      String? unit,
+    }) {
+      final bool passed = (value >= lowerBound && value <= upperBound);
+      final judgement = passed ? Judgement.pass : Judgement.fail;
+
+      print('🔢 創建測量項目: $name${unit != null ? " ($unit)" : ""}');
+      print('   數值: $value');
+      print('   範圍: $lowerBound ~ $upperBound');
+      print('   判斷: ${passed ? "✅ PASS" : "❌ FAIL"}');
+
+      return InputOutputMeasurement(
+        spec: spec,
+        value: value,
+        count: count,
+        key: key,
+        name: unit != null ? "$name ($unit)" : name,
+        description: description,
+        judgement: judgement,
+      );
+    }
+
     for (var item in data) {
       String? spcDesc = item['SPC_DESC'];
       String? spcValueStr = item['SPC_VALUE'];
@@ -71,16 +105,16 @@ class InputOutputCharacteristics {
             double lowerBound = globalInputOutputSpec!.leftVinLowerbound;
             double upperBound = globalInputOutputSpec!.leftVinUpperbound;
             leftInputVoltageCount++;
-            leftInputVoltage.add(InputOutputMeasurement(
+            leftInputVoltage.add(createMeasurementWithLogging(
+              name: "Vin",
               spec: spec,
               value: spcValue,
+              lowerBound: lowerBound,
+              upperBound: upperBound,
               count: leftInputVoltageCount,
               key: spcDesc,
-              name: "Vin",
               description: '',
-              judgement: (spcValue >= lowerBound && spcValue <= upperBound)
-                  ? Judgement.pass
-                  : Judgement.fail,
+              unit: 'V', // 固定單位
             ));
           } else if (spcItem.contains("Right Plug") &&
               rightInputVoltageCount < 3) {
@@ -88,35 +122,34 @@ class InputOutputCharacteristics {
             double lowerBound = globalInputOutputSpec!.rightVinLowerbound;
             double upperBound = globalInputOutputSpec!.rightVinUpperbound;
             rightInputVoltageCount++;
-            rightInputVoltage.add(InputOutputMeasurement(
+            rightInputVoltage.add(createMeasurementWithLogging(
+              name: "Vin",
               spec: spec,
               value: spcValue,
+              lowerBound: lowerBound,
+              upperBound: upperBound,
               count: rightInputVoltageCount,
               key: spcDesc,
-              name: "Vin",
               description: '',
-              judgement: (spcValue >= lowerBound && spcValue <= upperBound)
-                  ? Judgement.pass
-                  : Judgement.fail,
+              unit: 'V', // 固定單位
             ));
           }
-        }
-        else if (spcDesc.contains("Input_Current")) {
+        } else if (spcDesc.contains("Input_Current")) {
           if (spcItem.contains("Left  Plug") && leftInputCurrentCount < 3) {
             double spec = 230;
             double lowerBound = globalInputOutputSpec!.leftIinLowerbound;
             double upperBound = globalInputOutputSpec!.leftIinUpperbound;
             leftInputCurrentCount++;
-            leftInputCurrent.add(InputOutputMeasurement(
+            leftInputCurrent.add(createMeasurementWithLogging(
+              name: "Iin",
               spec: spec,
               value: spcValue,
+              lowerBound: lowerBound,
+              upperBound: upperBound,
               count: leftInputCurrentCount,
               key: spcDesc,
-              name: "Iin",
               description: '',
-              judgement: (spcValue >= lowerBound && spcValue <= upperBound)
-                  ? Judgement.pass
-                  : Judgement.fail,
+              unit: 'A', // 固定單位
             ));
           } else if (spcItem.contains("Right Plug") &&
               rightInputCurrentCount < 3) {
@@ -124,71 +157,71 @@ class InputOutputCharacteristics {
             double lowerBound = globalInputOutputSpec!.rightIinLowerbound;
             double upperBound = globalInputOutputSpec!.rightIinUpperbound;
             rightInputCurrentCount++;
-            rightInputCurrent.add(InputOutputMeasurement(
+            rightInputCurrent.add(createMeasurementWithLogging(
+              name: "Iin",
               spec: spec,
               value: spcValue,
+              lowerBound: lowerBound,
+              upperBound: upperBound,
               count: rightInputCurrentCount,
               key: spcDesc,
-              name: "Iin",
               description: '',
-              judgement: (spcValue >= lowerBound && spcValue <= upperBound)
-                  ? Judgement.pass
-                  : Judgement.fail,
+              unit: 'A', // 固定單位
             ));
           }
-        }
-        else if (spcDesc == "Total_Input_Power") {
+        } else if (spcDesc == "Total_Input_Power") {
           if (spcItem.contains("Left  Plug") && leftTotalInputPowerCount < 1) {
             double spec = 130;
             double lowerBound = globalInputOutputSpec!.leftPinLowerbound;
             double upperBound = globalInputOutputSpec!.leftPinUpperbound;
+            double processedValue = processPowerValue(spcValue); // 自動除 1000 處理
             leftTotalInputPowerCount++;
-            leftTotalInputPower = InputOutputMeasurement(
+            leftTotalInputPower = createMeasurementWithLogging(
+              name: "Pin",
               spec: spec,
-              value: spcValue,
+              value: processedValue,
+              lowerBound: lowerBound,
+              upperBound: upperBound,
               count: leftTotalInputPowerCount,
               key: spcDesc,
-              name: "Pin",
               description: '',
-              judgement: (spcValue >= lowerBound && spcValue <= upperBound)
-                  ? Judgement.pass
-                  : Judgement.fail,
+              unit: globalInputOutputSpec!.leftPinUnit,
             );
           } else if (spcItem.contains("Right Plug") &&
               rightTotalInputPowerCount < 1) {
             double spec = 130;
             double lowerBound = globalInputOutputSpec!.rightPinLowerbound;
             double upperBound = globalInputOutputSpec!.rightPinUpperbound;
+            double processedValue = processPowerValue(spcValue); // 自動除 1000 處理
             rightTotalInputPowerCount++;
-            rightTotalInputPower = InputOutputMeasurement(
+            rightTotalInputPower = createMeasurementWithLogging(
+              name: "Pin",
               spec: spec,
-              value: spcValue,
+              value: processedValue,
+              lowerBound: lowerBound,
+              upperBound: upperBound,
               count: leftTotalInputPowerCount,
               key: spcDesc,
-              name: "Pin",
               description: '',
-              judgement: (spcValue >= lowerBound && spcValue <= upperBound)
-                  ? Judgement.pass
-                  : Judgement.fail,
+              unit: globalInputOutputSpec!.rightPinUnit,
             );
           }
-        }
-        else if (spcDesc.contains("Output_Voltage")) {
+        } else if (spcDesc.contains("Output_Voltage")) {
           if (spcItem.contains("Left  Plug") && leftOutputVoltageCount < 1) {
             double spec = 950;
             double lowerBound = globalInputOutputSpec!.leftVoutLowerbound;
             double upperBound = globalInputOutputSpec!.leftVoutUpperbound;
             leftOutputVoltageCount++;
-            leftOutputVoltage = InputOutputMeasurement(
+            leftOutputVoltage = createMeasurementWithLogging(
+              name: "Vout",
               spec: spec,
               value: spcValue,
+              lowerBound: lowerBound,
+              upperBound: upperBound,
               count: leftOutputVoltageCount,
               key: spcDesc,
-              name: "Vout",
               description: '',
-              judgement: (spcValue >= lowerBound && spcValue <= upperBound)
-                  ? Judgement.pass
-                  : Judgement.fail,
+              unit: 'V', // 固定單位
             );
           } else if (spcItem.contains("Right Plug") &&
               rightOutputVoltageCount < 1) {
@@ -196,35 +229,34 @@ class InputOutputCharacteristics {
             double lowerBound = globalInputOutputSpec!.rightVoutLowerbound;
             double upperBound = globalInputOutputSpec!.rightVoutUpperbound;
             rightOutputVoltageCount++;
-            rightOutputVoltage = InputOutputMeasurement(
+            rightOutputVoltage = createMeasurementWithLogging(
+              name: "Vout",
               spec: spec,
               value: spcValue,
+              lowerBound: lowerBound,
+              upperBound: upperBound,
               count: rightOutputVoltageCount,
               key: spcDesc,
-              name: "Vout",
               description: '',
-              judgement: (spcValue >= lowerBound && spcValue <= upperBound)
-                  ? Judgement.pass
-                  : Judgement.fail,
+              unit: 'V', // 固定單位
             );
           }
-        }
-        else if (spcDesc.contains("Output_Current")) {
+        } else if (spcDesc.contains("Output_Current")) {
           if (spcItem.contains("Left  Plug") && leftOutputCurrentCount < 1) {
             double spec = 126;
             double lowerBound = globalInputOutputSpec!.leftIoutLowerbound;
             double upperBound = globalInputOutputSpec!.leftIoutUpperbound;
             leftOutputCurrentCount++;
-            leftOutputCurrent = InputOutputMeasurement(
+            leftOutputCurrent = createMeasurementWithLogging(
+              name: "Iout",
               spec: spec,
               value: spcValue,
+              lowerBound: lowerBound,
+              upperBound: upperBound,
               count: leftOutputCurrentCount,
               key: spcDesc,
-              name: "Iout",
               description: '',
-              judgement: (spcValue >= lowerBound && spcValue <= upperBound)
-                  ? Judgement.pass
-                  : Judgement.fail,
+              unit: 'A', // 固定單位
             );
           } else if (spcItem.contains("Right Plug") &&
               rightOutputCurrentCount < 1) {
@@ -232,56 +264,56 @@ class InputOutputCharacteristics {
             double lowerBound = globalInputOutputSpec!.rightIoutLowerbound;
             double upperBound = globalInputOutputSpec!.rightIoutUpperbound;
             rightOutputCurrentCount++;
-            rightOutputCurrent = InputOutputMeasurement(
+            rightOutputCurrent = createMeasurementWithLogging(
+              name: "Iout",
               spec: spec,
               value: spcValue,
+              lowerBound: lowerBound,
+              upperBound: upperBound,
               count: rightOutputCurrentCount,
               key: spcDesc,
-              name: "Iout",
               description: '',
-              judgement: (spcValue >= lowerBound && spcValue <= upperBound)
-                  ? Judgement.pass
-                  : Judgement.fail,
+              unit: 'A', // 固定單位
             );
           }
-        }
-        else if (spcDesc.contains("Output_Power")) {
+        } else if (spcDesc.contains("Output_Power")) {
           if (spcItem.contains("Left  Plug") && leftTotalOutputPowerCount < 1) {
             double spec = 120;
             double lowerBound = globalInputOutputSpec!.leftPoutLowerbound;
             double upperBound = globalInputOutputSpec!.leftPoutUpperbound;
+            double processedValue = processPowerValue(spcValue); // 自動除 1000 處理
             leftTotalOutputPowerCount++;
-            leftTotalOutputPower = InputOutputMeasurement(
+            leftTotalOutputPower = createMeasurementWithLogging(
+              name: "Pout",
               spec: spec,
-              value: spcValue,
+              value: processedValue,
+              lowerBound: lowerBound,
+              upperBound: upperBound,
               count: leftTotalOutputPowerCount,
               key: spcDesc,
-              name: "Pout",
               description: '',
-              judgement: (spcValue >= lowerBound && spcValue <= upperBound)
-                  ? Judgement.pass
-                  : Judgement.fail,
+              unit: globalInputOutputSpec!.leftPoutUnit,
             );
           } else if (spcItem.contains("Right Plug") &&
               rightTotalOutputPowerCount < 1) {
             double spec = 120;
             double lowerBound = globalInputOutputSpec!.rightPoutLowerbound;
             double upperBound = globalInputOutputSpec!.rightPoutUpperbound;
+            double processedValue = processPowerValue(spcValue); // 自動除 1000 處理
             rightTotalOutputPowerCount++;
-            rightTotalOutputPower = InputOutputMeasurement(
+            rightTotalOutputPower = createMeasurementWithLogging(
+              name: "Pout",
               spec: spec,
-              value: spcValue,
+              value: processedValue,
+              lowerBound: lowerBound,
+              upperBound: upperBound,
               count: rightTotalOutputPowerCount,
               key: spcDesc,
-              name: "Pout",
               description: '',
-              judgement: (spcValue >= lowerBound && spcValue <= upperBound)
-                  ? Judgement.pass
-                  : Judgement.fail,
+              unit: globalInputOutputSpec!.rightPoutUnit,
             );
           }
-        }
-        else if (spcDesc.contains("EFF")) {
+        } else if (spcDesc.contains("EFF")) {
           double spec = globalBasicFunctionTestSpec!.eff;
           if (effCount < 1) {
             effCount++;
@@ -296,8 +328,7 @@ class InputOutputCharacteristics {
               //defaultSpecText: _defaultSpec[1] ?? '>94%',
             );
           }
-        }
-        else if (spcDesc.contains("PowerFactor")) {
+        } else if (spcDesc.contains("PowerFactor")) {
           double spec = globalBasicFunctionTestSpec!.pf;
           if (powerFactorCount < 1) {
             powerFactorCount++;
@@ -309,11 +340,10 @@ class InputOutputCharacteristics {
               name: "Power Factor (PF)",
               description: 'Spec: ≧ 0.99 \n PF: {VALUE} %',
               judgement: spcValue >= spec ? Judgement.pass : Judgement.fail,
-             // defaultSpecText: _defaultSpec[2] ?? '≧ 0.99',
+              // defaultSpecText: _defaultSpec[2] ?? '≧ 0.99',
             );
           }
-        }
-        else if (spcDesc.contains("THD")) {
+        } else if (spcDesc.contains("THD")) {
           double spec = globalBasicFunctionTestSpec!.thd;
           if (thdCount < 1) {
             thdCount++;
@@ -325,11 +355,10 @@ class InputOutputCharacteristics {
               name: "Harmonic",
               description: 'Spec: <5% \n THD: {VALUE} %',
               judgement: spcValue < spec ? Judgement.pass : Judgement.fail,
-             // defaultSpecText: _defaultSpec[3] ?? '<5%',
+              // defaultSpecText: _defaultSpec[3] ?? '<5%',
             );
           }
-        }
-        else if (spcDesc.contains("Standby_Total_Input_Power")) {
+        } else if (spcDesc.contains("Standby_Total_Input_Power")) {
           double spec = globalBasicFunctionTestSpec!.sp;
           if (standbyTotalInputPowerCount < 1) {
             standbyTotalInputPowerCount++;
@@ -341,7 +370,7 @@ class InputOutputCharacteristics {
               name: "Standby Power",
               description: 'Spec: <100W \n Standby Power: {VALUE} W',
               judgement: spcValue < spec ? Judgement.pass : Judgement.fail,
-             // defaultSpecText: _defaultSpec[4] ?? '<100W',
+              // defaultSpecText: _defaultSpec[4] ?? '<100W',
             );
           }
         }
@@ -397,32 +426,109 @@ class InputOutputCharacteristicsSide {
   // getter: 如果有人工結果，回傳人工結果；沒的話回傳自動判斷
   Judgement get judgement {
     if (_manualJudgement != null) {
+      print('🔧 手動設定判斷結果 ($side): $_manualJudgement');
       return _manualJudgement!;
     }
 
     // 自動判斷邏輯（你原本的判斷）
     //Vin跟Iin暫時拿掉
+    print('🔍 開始自動判斷 ($side側):');
+
     int passCount = 0;
     /*bool inputVoltagePass =
     inputVoltage.every((m) => m.judgement == Judgement.pass);
     bool inputCurrentPass =
     inputCurrent.every((m) => m.judgement == Judgement.pass);*/
+
     bool totalInputPowerPass = totalInputPower.judgement == Judgement.pass;
     bool outputVoltagePass = outputVoltage.judgement == Judgement.pass;
     bool outputCurrentPass = outputCurrent.judgement == Judgement.pass;
     bool totalOutputPowerPass = totalOutputPower.judgement == Judgement.pass;
-    [
+
+    // 詳細日誌輸出 - 顯示完整範圍
+    String getJudgmentInfo(InputOutputMeasurement measurement,
+        double lowerBound, double upperBound) {
+      final passed = measurement.judgement == Judgement.pass;
+      return '  📊 ${measurement.name}: ${measurement.value} (範圍: $lowerBound ~ $upperBound) -> ${passed ? "✅ PASS" : "❌ FAIL"}';
+    }
+
+    // 獲取規格範圍
+    final leftPinLower = globalInputOutputSpec?.leftPinLowerbound ?? 0;
+    final leftPinUpper = globalInputOutputSpec?.leftPinUpperbound ?? 130;
+    final leftVoutLower = globalInputOutputSpec?.leftVoutLowerbound ?? 931;
+    final leftVoutUpper = globalInputOutputSpec?.leftVoutUpperbound ?? 969;
+    final leftIoutLower = globalInputOutputSpec?.leftIoutLowerbound ?? 123;
+    final leftIoutUpper = globalInputOutputSpec?.leftIoutUpperbound ?? 129;
+    final leftPoutLower = globalInputOutputSpec?.leftPoutLowerbound ?? 118;
+    final leftPoutUpper = globalInputOutputSpec?.leftPoutUpperbound ?? 122;
+
+    final rightPinLower = globalInputOutputSpec?.rightPinLowerbound ?? 0;
+    final rightPinUpper = globalInputOutputSpec?.rightPinUpperbound ?? 130;
+    final rightVoutLower = globalInputOutputSpec?.rightVoutLowerbound ?? 931;
+    final rightVoutUpper = globalInputOutputSpec?.rightVoutUpperbound ?? 969;
+    final rightIoutLower = globalInputOutputSpec?.rightIoutLowerbound ?? 123;
+    final rightIoutUpper = globalInputOutputSpec?.rightIoutUpperbound ?? 129;
+    final rightPoutLower = globalInputOutputSpec?.rightPoutLowerbound ?? 118;
+    final rightPoutUpper = globalInputOutputSpec?.rightPoutUpperbound ?? 122;
+
+    // 根據側別顯示對應的範圍
+    if (side == 'L') {
+      print(getJudgmentInfo(totalInputPower, leftPinLower, leftPinUpper));
+      print(getJudgmentInfo(outputVoltage, leftVoutLower, leftVoutUpper));
+      print(getJudgmentInfo(outputCurrent, leftIoutLower, leftIoutUpper));
+      print(getJudgmentInfo(totalOutputPower, leftPoutLower, leftPoutUpper));
+    } else {
+      print(getJudgmentInfo(totalInputPower, rightPinLower, rightPinUpper));
+      print(getJudgmentInfo(outputVoltage, rightVoutLower, rightVoutUpper));
+      print(getJudgmentInfo(outputCurrent, rightIoutLower, rightIoutUpper));
+      print(getJudgmentInfo(totalOutputPower, rightPoutLower, rightPoutUpper));
+    }
+
+    // 計算通過的項目數
+    final testResults = [
       /*inputVoltagePass,
       inputCurrentPass,*/
       totalInputPowerPass,
       outputVoltagePass,
       outputCurrentPass,
       totalOutputPowerPass
-    ].forEach((passed) {
-      if (passed) passCount++;
-    });
+    ];
 
-    return passCount > 2 ? Judgement.pass : Judgement.fail;
+    // 重新計算passCount，確保邏輯正確
+    passCount = 0;
+    for (bool result in testResults) {
+      if (result) passCount++;
+    }
+
+    // 🔒 強制修復邏輯：ALL項目都必須PASS，整體才能PASS
+    final int totalItems = 4; // Pin, Vout, Iout, Pout
+    final bool allItemsPass = (passCount == totalItems);
+
+    // 🔒 額外安全檢查：確保沒有任何項目是FAIL
+    final bool noFailItems = testResults.every((result) => result == true);
+
+    // 🔒 雙重檢查：兩個條件都必須滿足
+    final bool finalCheck = allItemsPass && noFailItems;
+
+    final Judgement finalResult = finalCheck ? Judgement.pass : Judgement.fail;
+
+    print(
+        '  📈 通過項目數: $passCount/$totalItems，最終判斷: ${finalResult == Judgement.pass ? "✅ PASS" : "❌ FAIL"}');
+
+    // 🔒 強制檢查：如果是PASS但passCount < totalItems，強制設為FAIL
+    if (finalResult == Judgement.pass && passCount < totalItems) {
+      print(
+          '🚨 發現邏輯錯誤！強制修正為FAIL (passCount: $passCount, totalItems: $totalItems)');
+      return Judgement.fail;
+    }
+
+    // 🔒 強制檢查：如果有任何個別項目是FAIL，整體必須是FAIL
+    if (finalResult == Judgement.pass && !noFailItems) {
+      print('🚨 發現邏輯錯誤！有項目FAIL但整體為PASS，強制修正為FAIL');
+      return Judgement.fail;
+    }
+
+    return finalResult;
   }
 
   // setter: 用於人工修改結果
@@ -440,7 +546,6 @@ class InputOutputCharacteristicsSide {
       this.outputCurrent,
       this.totalOutputPower);
 }
-
 
 class InputOutputMeasurement {
   double spec;

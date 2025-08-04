@@ -16,16 +16,18 @@ class InputOutputCharacteristicsTable extends StatefulWidget {
   final InputOutputCharacteristicsSpec? spec;
 
   const InputOutputCharacteristicsTable(
-      this.inputOutputCharacteristics, {
-        super.key,
-        this.spec,
-      });
+    this.inputOutputCharacteristics, {
+    super.key,
+    this.spec,
+  });
 
   @override
-  State<InputOutputCharacteristicsTable> createState() => _InputOutputCharacteristicsTableState();
+  State<InputOutputCharacteristicsTable> createState() =>
+      _InputOutputCharacteristicsTableState();
 }
 
-class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteristicsTable> with TableHelper {
+class _InputOutputCharacteristicsTableState
+    extends State<InputOutputCharacteristicsTable> with TableHelper {
   final Map<int, FocusNode> _focusNodes = {};
   final Set<int> _focusedIndices = {};
   final Map<int, String?> _userInput = {};
@@ -35,7 +37,8 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
 
   TextEditingController _getCellController(String key, String defaultValue) {
     if (!_cellControllers.containsKey(key)) {
-      final controller = TextEditingController(text: _cellInputs[key] ?? defaultValue);
+      final controller =
+          TextEditingController(text: _cellInputs[key] ?? defaultValue);
       controller.addListener(() {
         _cellInputs[key] = controller.text;
       });
@@ -43,23 +46,36 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
     }
     return _cellControllers[key]!;
   }
+
   void someFunction() {
     if (globalInputOutputSpec != null) {
       print('Left Side:');
-      print('  Vin: ${globalInputOutputSpec!.leftVinLowerbound} ~ ${globalInputOutputSpec!.leftVinUpperbound}');
-      print('  Iin: ${globalInputOutputSpec!.leftIinLowerbound} ~ ${globalInputOutputSpec!.leftIinUpperbound}');
-      print('  Pin: ${globalInputOutputSpec!.leftPinLowerbound} ~ ${globalInputOutputSpec!.leftPinUpperbound}');
-      print('  Vout: ${globalInputOutputSpec!.leftVoutLowerbound} ~ ${globalInputOutputSpec!.leftVoutUpperbound}');
-      print('  Iout: ${globalInputOutputSpec!.leftIoutLowerbound} ~ ${globalInputOutputSpec!.leftIoutUpperbound}');
-      print('  Pout: ${globalInputOutputSpec!.leftPoutLowerbound} ~ ${globalInputOutputSpec!.leftPoutUpperbound}');
+      print(
+          '  Vin: ${globalInputOutputSpec!.leftVinLowerbound} ~ ${globalInputOutputSpec!.leftVinUpperbound}');
+      print(
+          '  Iin: ${globalInputOutputSpec!.leftIinLowerbound} ~ ${globalInputOutputSpec!.leftIinUpperbound}');
+      print(
+          '  Pin: ${globalInputOutputSpec!.leftPinLowerbound} ~ ${globalInputOutputSpec!.leftPinUpperbound}');
+      print(
+          '  Vout: ${globalInputOutputSpec!.leftVoutLowerbound} ~ ${globalInputOutputSpec!.leftVoutUpperbound}');
+      print(
+          '  Iout: ${globalInputOutputSpec!.leftIoutLowerbound} ~ ${globalInputOutputSpec!.leftIoutUpperbound}');
+      print(
+          '  Pout: ${globalInputOutputSpec!.leftPoutLowerbound} ~ ${globalInputOutputSpec!.leftPoutUpperbound}');
 
       print('Right Side:');
-      print('  Vin: ${globalInputOutputSpec!.rightVinLowerbound} ~ ${globalInputOutputSpec!.rightVinUpperbound}');
-      print('  Iin: ${globalInputOutputSpec!.rightIinLowerbound} ~ ${globalInputOutputSpec!.rightIinUpperbound}');
-      print('  Pin: ${globalInputOutputSpec!.rightPinLowerbound} ~ ${globalInputOutputSpec!.rightPinUpperbound}');
-      print('  Vout: ${globalInputOutputSpec!.rightVoutLowerbound} ~ ${globalInputOutputSpec!.rightVoutUpperbound}');
-      print('  Iout: ${globalInputOutputSpec!.rightIoutLowerbound} ~ ${globalInputOutputSpec!.rightIoutUpperbound}');
-      print('  Pout: ${globalInputOutputSpec!.rightPoutLowerbound} ~ ${globalInputOutputSpec!.rightPoutUpperbound}');
+      print(
+          '  Vin: ${globalInputOutputSpec!.rightVinLowerbound} ~ ${globalInputOutputSpec!.rightVinUpperbound}');
+      print(
+          '  Iin: ${globalInputOutputSpec!.rightIinLowerbound} ~ ${globalInputOutputSpec!.rightIinUpperbound}');
+      print(
+          '  Pin: ${globalInputOutputSpec!.rightPinLowerbound} ~ ${globalInputOutputSpec!.rightPinUpperbound}');
+      print(
+          '  Vout: ${globalInputOutputSpec!.rightVoutLowerbound} ~ ${globalInputOutputSpec!.rightVoutUpperbound}');
+      print(
+          '  Iout: ${globalInputOutputSpec!.rightIoutLowerbound} ~ ${globalInputOutputSpec!.rightIoutUpperbound}');
+      print(
+          '  Pout: ${globalInputOutputSpec!.rightPoutLowerbound} ~ ${globalInputOutputSpec!.rightPoutUpperbound}');
     } else {
       print('資料還沒載入');
     }
@@ -67,7 +83,8 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
 
   void someFunction2() {
     // 讀取
-    int currentFailCount = FailCountStore.getCount('InputOutputCharacteristics');
+    int currentFailCount =
+        FailCountStore.getCount('InputOutputCharacteristics');
     print('現在 InputOutputCharacteristics 失敗數量: $currentFailCount');
 
     // 增加
@@ -163,76 +180,100 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
       setState(() {
         switch (index) {
           case 1:
-            globalInputOutputSpec = globalInputOutputSpec!.copyWith(leftVinLowerbound: value);
+            globalInputOutputSpec =
+                globalInputOutputSpec!.copyWith(leftVinLowerbound: value);
             break;
           case 2:
-            globalInputOutputSpec = globalInputOutputSpec!.copyWith(leftVinUpperbound: value);
+            globalInputOutputSpec =
+                globalInputOutputSpec!.copyWith(leftVinUpperbound: value);
             break;
           case 3:
-            globalInputOutputSpec = globalInputOutputSpec!.copyWith(leftIinLowerbound: value);
+            globalInputOutputSpec =
+                globalInputOutputSpec!.copyWith(leftIinLowerbound: value);
             break;
           case 4:
-            globalInputOutputSpec = globalInputOutputSpec!.copyWith(leftIinUpperbound: value);
+            globalInputOutputSpec =
+                globalInputOutputSpec!.copyWith(leftIinUpperbound: value);
             break;
           case 5:
-            globalInputOutputSpec = globalInputOutputSpec!.copyWith(leftPinLowerbound: value);
+            globalInputOutputSpec =
+                globalInputOutputSpec!.copyWith(leftPinLowerbound: value);
             break;
           case 6:
-            globalInputOutputSpec = globalInputOutputSpec!.copyWith(leftPinUpperbound: value);
+            globalInputOutputSpec =
+                globalInputOutputSpec!.copyWith(leftPinUpperbound: value);
             break;
           case 7:
-            globalInputOutputSpec = globalInputOutputSpec!.copyWith(leftVoutLowerbound: value);
+            globalInputOutputSpec =
+                globalInputOutputSpec!.copyWith(leftVoutLowerbound: value);
             break;
           case 8:
-            globalInputOutputSpec = globalInputOutputSpec!.copyWith(leftVoutUpperbound: value);
+            globalInputOutputSpec =
+                globalInputOutputSpec!.copyWith(leftVoutUpperbound: value);
             break;
           case 9:
-            globalInputOutputSpec = globalInputOutputSpec!.copyWith(leftIoutLowerbound: value);
+            globalInputOutputSpec =
+                globalInputOutputSpec!.copyWith(leftIoutLowerbound: value);
             break;
           case 10:
-            globalInputOutputSpec = globalInputOutputSpec!.copyWith(leftIoutUpperbound: value);
+            globalInputOutputSpec =
+                globalInputOutputSpec!.copyWith(leftIoutUpperbound: value);
             break;
           case 11:
-            globalInputOutputSpec = globalInputOutputSpec!.copyWith(leftPoutLowerbound: value);
+            globalInputOutputSpec =
+                globalInputOutputSpec!.copyWith(leftPoutLowerbound: value);
             break;
           case 12:
-            globalInputOutputSpec = globalInputOutputSpec!.copyWith(leftPoutUpperbound: value);
+            globalInputOutputSpec =
+                globalInputOutputSpec!.copyWith(leftPoutUpperbound: value);
             break;
           case 13:
-            globalInputOutputSpec = globalInputOutputSpec!.copyWith(rightVinLowerbound: value);
+            globalInputOutputSpec =
+                globalInputOutputSpec!.copyWith(rightVinLowerbound: value);
             break;
           case 14:
-            globalInputOutputSpec = globalInputOutputSpec!.copyWith(rightVinUpperbound: value);
+            globalInputOutputSpec =
+                globalInputOutputSpec!.copyWith(rightVinUpperbound: value);
             break;
           case 15:
-            globalInputOutputSpec = globalInputOutputSpec!.copyWith(rightIinLowerbound: value);
+            globalInputOutputSpec =
+                globalInputOutputSpec!.copyWith(rightIinLowerbound: value);
             break;
           case 16:
-            globalInputOutputSpec = globalInputOutputSpec!.copyWith(rightIinUpperbound: value);
+            globalInputOutputSpec =
+                globalInputOutputSpec!.copyWith(rightIinUpperbound: value);
             break;
           case 17:
-            globalInputOutputSpec = globalInputOutputSpec!.copyWith(rightPinLowerbound: value);
+            globalInputOutputSpec =
+                globalInputOutputSpec!.copyWith(rightPinLowerbound: value);
             break;
           case 18:
-            globalInputOutputSpec = globalInputOutputSpec!.copyWith(rightPinUpperbound: value);
+            globalInputOutputSpec =
+                globalInputOutputSpec!.copyWith(rightPinUpperbound: value);
             break;
           case 19:
-            globalInputOutputSpec = globalInputOutputSpec!.copyWith(rightVoutLowerbound: value);
+            globalInputOutputSpec =
+                globalInputOutputSpec!.copyWith(rightVoutLowerbound: value);
             break;
           case 20:
-            globalInputOutputSpec = globalInputOutputSpec!.copyWith(rightVoutUpperbound: value);
+            globalInputOutputSpec =
+                globalInputOutputSpec!.copyWith(rightVoutUpperbound: value);
             break;
           case 21:
-            globalInputOutputSpec = globalInputOutputSpec!.copyWith(rightIoutLowerbound: value);
+            globalInputOutputSpec =
+                globalInputOutputSpec!.copyWith(rightIoutLowerbound: value);
             break;
           case 22:
-            globalInputOutputSpec = globalInputOutputSpec!.copyWith(rightIoutUpperbound: value);
+            globalInputOutputSpec =
+                globalInputOutputSpec!.copyWith(rightIoutUpperbound: value);
             break;
           case 23:
-            globalInputOutputSpec = globalInputOutputSpec!.copyWith(rightPoutLowerbound: value);
+            globalInputOutputSpec =
+                globalInputOutputSpec!.copyWith(rightPoutLowerbound: value);
             break;
           case 24:
-            globalInputOutputSpec = globalInputOutputSpec!.copyWith(rightPoutUpperbound: value);
+            globalInputOutputSpec =
+                globalInputOutputSpec!.copyWith(rightPoutUpperbound: value);
             break;
         }
       });
@@ -270,7 +311,6 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
     _updateIoCharacteristicsPassOrFail();
   }
 
-
   @override
   void dispose() {
     for (var node in _focusNodes.values) {
@@ -284,6 +324,7 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
     }
     super.dispose();
   }
+
   List<List<String>> get leftHeaders {
     String format(int index) {
       return _controllers[index]?.text.isNotEmpty == true
@@ -291,12 +332,16 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
           : _defaultSpec[index]!.toStringAsFixed(0);
     }
 
+    // 使用 globalInputOutputSpec 中的單位設定
+    String leftPinUnit = globalInputOutputSpec?.leftPinUnit ?? 'kVA';
+    String leftPoutUnit = globalInputOutputSpec?.leftPoutUnit ?? 'kW';
+
     return [
       ['Item', 'Spec'],
-      ['Pin', format(5), 'kW', format(6), 'kW'],
+      ['Pin', format(5), leftPinUnit, format(6), leftPinUnit],
       ['Vout', format(7), 'V', format(8), 'V'],
       ['Iout', format(9), 'A', format(10), 'A'],
-      ['Pout', format(11), 'kW', format(12), 'kW'],
+      ['Pout', format(11), leftPoutUnit, format(12), leftPoutUnit],
       ['Judgement'],
     ];
   }
@@ -308,20 +353,24 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
           : _defaultSpec[index]!.toStringAsFixed(0);
     }
 
+    // 使用 globalInputOutputSpec 中的單位設定
+    String rightPinUnit = globalInputOutputSpec?.rightPinUnit ?? 'kVA';
+    String rightPoutUnit = globalInputOutputSpec?.rightPoutUnit ?? 'kW';
+
     return [
       ['Item', 'Spec'],
-      ['Pin', format(17), 'kW', format(18), 'kW'],
+      ['Pin', format(17), rightPinUnit, format(18), rightPinUnit],
       ['Vout', format(19), 'V', format(20), 'V'],
       ['Iout', format(21), 'A', format(22), 'A'],
-      ['Pout', format(23), 'kW', format(24), 'kW'],
+      ['Pout', format(23), rightPoutUnit, format(24), rightPoutUnit],
       ['Judgement'],
     ];
   }
 
   final Map<int, List<int>> leftHeaderEditableIndexMap = {
-    1: [5, 6],   // Pin
-    2: [7, 8],   // Vout
-    3: [9, 10],  // Iout
+    1: [5, 6], // Pin
+    2: [7, 8], // Vout
+    3: [9, 10], // Iout
     4: [11, 12], // Pout
   };
 
@@ -335,8 +384,12 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
   void _updateIoCharacteristicsPassOrFail() {
     bool allPassed = true;
 
+    // 先重新計算個別測量項目的判斷結果
+    _recalculateIndividualJudgements();
+
     // 判斷 judgement 是否全部為 pass
-    for (final side in widget.inputOutputCharacteristics.inputOutputCharacteristicsSide) {
+    for (final side
+        in widget.inputOutputCharacteristics.inputOutputCharacteristicsSide) {
       debugPrint('judgement = ${side.judgement}');
       if (side.judgement != Judgement.pass) {
         allPassed = false;
@@ -346,7 +399,16 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
 
     // 判斷是否有任何欄位為空
     bool allFieldsFilled = true;
-    final requiredKeys = ['L_3', 'L_4', 'L_5', 'L_6', 'R_3', 'R_4', 'R_5', 'R_6'];
+    final requiredKeys = [
+      'L_3',
+      'L_4',
+      'L_5',
+      'L_6',
+      'R_3',
+      'R_4',
+      'R_5',
+      'R_6'
+    ];
 
     for (final key in requiredKeys) {
       final input = _cellInputs[key];
@@ -364,12 +426,112 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
       }
     }
 
-    // 更新全域變數
-    ioCharacteristicsPassOrFail = allPassed && allFieldsFilled;
+    // 更新全域變數和全局監聽器
+    bool finalResult = allPassed && allFieldsFilled;
+    ioCharacteristicsPassOrFail = finalResult;
+    GlobalJudgementMonitor.updateTestResult('ioCharacteristics', finalResult);
     debugPrint('ioCharacteristicsPassOrFail = $ioCharacteristicsPassOrFail');
   }
 
+  // 新增：重新計算個別測量項目的判斷結果
+  void _recalculateIndividualJudgements() {
+    if (globalInputOutputSpec == null) return;
 
+    for (int index = 0;
+        index <
+            widget.inputOutputCharacteristics.inputOutputCharacteristicsSide
+                .length;
+        index++) {
+      final side = widget
+          .inputOutputCharacteristics.inputOutputCharacteristicsSide[index];
+
+      if (index == 0) {
+        // Left side
+        // 重新計算 Pin 判斷
+        final pinValue = side.totalInputPower.value;
+        final pinLower = globalInputOutputSpec!.leftPinLowerbound;
+        final pinUpper = globalInputOutputSpec!.leftPinUpperbound;
+        side.totalInputPower.judgement =
+            (pinValue >= pinLower && pinValue <= pinUpper)
+                ? Judgement.pass
+                : Judgement.fail;
+
+        // 重新計算 Vout 判斷
+        final voutValue = side.outputVoltage.value;
+        final voutLower = globalInputOutputSpec!.leftVoutLowerbound;
+        final voutUpper = globalInputOutputSpec!.leftVoutUpperbound;
+        side.outputVoltage.judgement =
+            (voutValue >= voutLower && voutValue <= voutUpper)
+                ? Judgement.pass
+                : Judgement.fail;
+
+        // 重新計算 Iout 判斷
+        final ioutValue = side.outputCurrent.value;
+        final ioutLower = globalInputOutputSpec!.leftIoutLowerbound;
+        final ioutUpper = globalInputOutputSpec!.leftIoutUpperbound;
+        side.outputCurrent.judgement =
+            (ioutValue >= ioutLower && ioutValue <= ioutUpper)
+                ? Judgement.pass
+                : Judgement.fail;
+
+        // 重新計算 Pout 判斷
+        final poutValue = side.totalOutputPower.value;
+        final poutLower = globalInputOutputSpec!.leftPoutLowerbound;
+        final poutUpper = globalInputOutputSpec!.leftPoutUpperbound;
+        side.totalOutputPower.judgement =
+            (poutValue >= poutLower && poutValue <= poutUpper)
+                ? Judgement.pass
+                : Judgement.fail;
+      } else if (index == 1) {
+        // Right side
+        // 重新計算 Pin 判斷
+        final pinValue = side.totalInputPower.value;
+        final pinLower = globalInputOutputSpec!.rightPinLowerbound;
+        final pinUpper = globalInputOutputSpec!.rightPinUpperbound;
+        side.totalInputPower.judgement =
+            (pinValue >= pinLower && pinValue <= pinUpper)
+                ? Judgement.pass
+                : Judgement.fail;
+
+        // 重新計算 Vout 判斷
+        final voutValue = side.outputVoltage.value;
+        final voutLower = globalInputOutputSpec!.rightVoutLowerbound;
+        final voutUpper = globalInputOutputSpec!.rightVoutUpperbound;
+        side.outputVoltage.judgement =
+            (voutValue >= voutLower && voutValue <= voutUpper)
+                ? Judgement.pass
+                : Judgement.fail;
+
+        // 重新計算 Iout 判斷
+        final ioutValue = side.outputCurrent.value;
+        final ioutLower = globalInputOutputSpec!.rightIoutLowerbound;
+        final ioutUpper = globalInputOutputSpec!.rightIoutUpperbound;
+        side.outputCurrent.judgement =
+            (ioutValue >= ioutLower && ioutValue <= ioutUpper)
+                ? Judgement.pass
+                : Judgement.fail;
+
+        // 重新計算 Pout 判斷
+        final poutValue = side.totalOutputPower.value;
+        final poutLower = globalInputOutputSpec!.rightPoutLowerbound;
+        final poutUpper = globalInputOutputSpec!.rightPoutUpperbound;
+        side.totalOutputPower.judgement =
+            (poutValue >= poutLower && poutValue <= poutUpper)
+                ? Judgement.pass
+                : Judgement.fail;
+      }
+
+      print('🔄 重新計算 ${side.side} 側判斷結果:');
+      print(
+          '  Pin: ${side.totalInputPower.value} -> ${side.totalInputPower.judgement}');
+      print(
+          '  Vout: ${side.outputVoltage.value} -> ${side.outputVoltage.judgement}');
+      print(
+          '  Iout: ${side.outputCurrent.value} -> ${side.outputCurrent.judgement}');
+      print(
+          '  Pout: ${side.totalOutputPower.value} -> ${side.totalOutputPower.judgement}');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -379,7 +541,8 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
         return ValueListenableBuilder<int>(
           valueListenable: permissions,
           builder: (context, permission, _) {
-            final isEditable = editMode == 1 && (permission == 1 || permission == 2);
+            final isEditable =
+                editMode == 1 && (permission == 1 || permission == 2);
             //final isHeaderEditable = editMode == 1 && permission == 1;
             final isHeaderEditable = false;
 
@@ -389,7 +552,8 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
               final header = entry.value;
 
               if (leftHeaderEditableIndexMap.containsKey(index)) {
-                final controllerIndices = leftHeaderEditableIndexMap[index]!; // e.g., [5, 6]
+                final controllerIndices =
+                    leftHeaderEditableIndexMap[index]!; // e.g., [5, 6]
                 final lowerIndex = controllerIndices[0];
                 final upperIndex = controllerIndices[1];
 
@@ -404,7 +568,6 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
                     children: [
                       Text(header[0], style: TableTextStyle.headerStyle()),
                       const SizedBox(height: 4),
-
                       Visibility(
                         visible: isHeaderEditable,
                         child: Row(
@@ -419,14 +582,17 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
                                 style: TableTextStyle.headerStyle(),
                                 textAlign: TextAlign.center,
                                 keyboardType: TextInputType.number,
-                                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly
+                                ],
                                 decoration: InputDecoration(
                                   labelText: 'Up',
                                   hintText: _focusedIndices.contains(upperIndex)
                                       ? ''
                                       : '${_defaultSpec[upperIndex]?.toInt().toString() ?? ''}',
                                   isDense: true,
-                                  contentPadding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 6, horizontal: 8),
                                   border: const OutlineInputBorder(),
                                 ),
                                 onChanged: (value) {
@@ -438,10 +604,9 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
                               ),
                             ),
                             const SizedBox(width: 4),
-                            Text(header[2], style: TableTextStyle.headerStyle()),
-
+                            Text(header[2],
+                                style: TableTextStyle.headerStyle()),
                             const SizedBox(width: 16),
-
                             SizedBox(
                               width: 60,
                               child: TextField(
@@ -451,14 +616,17 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
                                 style: TableTextStyle.headerStyle(),
                                 textAlign: TextAlign.center,
                                 keyboardType: TextInputType.number,
-                                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly
+                                ],
                                 decoration: InputDecoration(
                                   labelText: 'Low',
                                   hintText: _focusedIndices.contains(lowerIndex)
                                       ? ''
                                       : '${_defaultSpec[lowerIndex]?.toInt().toString() ?? ''}',
                                   isDense: true,
-                                  contentPadding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 6, horizontal: 8),
                                   border: const OutlineInputBorder(),
                                 ),
                                 onChanged: (value) {
@@ -470,11 +638,11 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
                               ),
                             ),
                             const SizedBox(width: 4),
-                            Text(header[4], style: TableTextStyle.headerStyle()),
+                            Text(header[4],
+                                style: TableTextStyle.headerStyle()),
                           ],
                         ),
                       ),
-
                       if (!isHeaderEditable)
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -484,7 +652,9 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
                               style: TableTextStyle.headerStyle(),
                             ),
                             const SizedBox(width: 4),
-                            const Text(',', style: TextStyle(fontWeight: FontWeight.normal)),
+                            const Text(',',
+                                style:
+                                    TextStyle(fontWeight: FontWeight.normal)),
                             const SizedBox(width: 4),
                             Text(
                               '${_controllers[lowerIndex]?.text.isNotEmpty == true ? _controllers[lowerIndex]!.text.split('.').first : _defaultSpec[lowerIndex]?.toInt().toString() ?? ''}${lowerUnit}',
@@ -502,18 +672,21 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
                 label: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  children: header.map((h) => Text(h, style: TableTextStyle.headerStyle())).toList(),
+                  children: header
+                      .map((h) => Text(h, style: TableTextStyle.headerStyle()))
+                      .toList(),
                 ),
               );
             }).toList();
 
-
-            final rightHeaderColumns = rightHeaders.asMap().entries.map((entry) {
+            final rightHeaderColumns =
+                rightHeaders.asMap().entries.map((entry) {
               final index = entry.key;
               final header = entry.value;
 
               if (rightHeaderEditableIndexMap.containsKey(index)) {
-                final controllerIndices = rightHeaderEditableIndexMap[index]!; // [lower, upper]
+                final controllerIndices =
+                    rightHeaderEditableIndexMap[index]!; // [lower, upper]
                 final lowerIndex = controllerIndices[0];
                 final upperIndex = controllerIndices[1];
 
@@ -527,14 +700,13 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
                     children: [
                       Text(header[0], style: TableTextStyle.headerStyle()),
                       const SizedBox(height: 4),
-
                       Visibility(
                         visible: isHeaderEditable,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             SizedBox(
-                              width: 60,  // 寬度調整
+                              width: 60, // 寬度調整
                               child: TextField(
                                 focusNode: _focusNodes[upperIndex],
                                 controller: _controllers[upperIndex],
@@ -542,14 +714,17 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
                                 style: TableTextStyle.headerStyle(),
                                 textAlign: TextAlign.center,
                                 keyboardType: TextInputType.number,
-                                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly
+                                ],
                                 decoration: InputDecoration(
                                   labelText: 'Up',
                                   hintText: _focusedIndices.contains(upperIndex)
                                       ? ''
                                       : '${_defaultSpec[upperIndex]?.toInt().toString() ?? ''}',
                                   isDense: true,
-                                  contentPadding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 6, horizontal: 8),
                                   border: const OutlineInputBorder(),
                                 ),
                                 onChanged: (value) {
@@ -561,12 +736,11 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
                               ),
                             ),
                             const SizedBox(width: 4),
-                            Text(header[2], style: TableTextStyle.headerStyle()),
-
+                            Text(header[2],
+                                style: TableTextStyle.headerStyle()),
                             const SizedBox(width: 16),
-
                             SizedBox(
-                              width: 60,  // 寬度調整
+                              width: 60, // 寬度調整
                               child: TextField(
                                 focusNode: _focusNodes[lowerIndex],
                                 controller: _controllers[lowerIndex],
@@ -574,14 +748,17 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
                                 style: TableTextStyle.headerStyle(),
                                 textAlign: TextAlign.center,
                                 keyboardType: TextInputType.number,
-                                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly
+                                ],
                                 decoration: InputDecoration(
                                   labelText: 'Low',
                                   hintText: _focusedIndices.contains(lowerIndex)
                                       ? ''
                                       : '${_defaultSpec[lowerIndex]?.toInt().toString() ?? ''}',
                                   isDense: true,
-                                  contentPadding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 6, horizontal: 8),
                                   border: const OutlineInputBorder(),
                                 ),
                                 onChanged: (value) {
@@ -593,11 +770,11 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
                               ),
                             ),
                             const SizedBox(width: 4),
-                            Text(header[4], style: TableTextStyle.headerStyle()),
+                            Text(header[4],
+                                style: TableTextStyle.headerStyle()),
                           ],
                         ),
                       ),
-
                       if (!isHeaderEditable)
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -607,7 +784,9 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
                               style: TableTextStyle.headerStyle(),
                             ),
                             const SizedBox(width: 4),
-                            const Text(',', style: TextStyle(fontWeight: FontWeight.normal)),
+                            const Text(',',
+                                style:
+                                    TextStyle(fontWeight: FontWeight.normal)),
                             const SizedBox(width: 4),
                             Text(
                               '${_controllers[lowerIndex]?.text.isNotEmpty == true ? _controllers[lowerIndex]!.text.split('.').first : _defaultSpec[lowerIndex]?.toInt().toString() ?? ''}${lowerUnit}',
@@ -625,7 +804,9 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
                 label: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  children: header.map((h) => Text(h, style: TableTextStyle.headerStyle())).toList(),
+                  children: header
+                      .map((h) => Text(h, style: TableTextStyle.headerStyle()))
+                      .toList(),
                 ),
               );
             }).toList();
@@ -635,66 +816,81 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
                 Theme.of(context).colorScheme.primary.withOpacity(0.12),
               ),
               cells: rightHeaderColumns
-                  .map((dataColumn) => DataCell(Center(child: dataColumn.label)))
-                  .toList(), );
+                  .map(
+                      (dataColumn) => DataCell(Center(child: dataColumn.label)))
+                  .toList(),
+            );
 
             // L 列
             DataRow? lRow;
-            if (widget.inputOutputCharacteristics.inputOutputCharacteristicsSide.isNotEmpty) {
-              final item = widget.inputOutputCharacteristics.inputOutputCharacteristicsSide[0];
+            if (widget.inputOutputCharacteristics.inputOutputCharacteristicsSide
+                .isNotEmpty) {
+              final item = widget
+                  .inputOutputCharacteristics.inputOutputCharacteristicsSide[0];
+
+              // 獲取正確的單位
+              String leftPinUnit = globalInputOutputSpec?.leftPinUnit ?? 'kVA';
+              String leftPoutUnit = globalInputOutputSpec?.leftPoutUnit ?? 'kW';
+
               lRow = DataRow(
                 cells: [
                   editableCell("L_0", item.side, false),
-                  editableCell("L_3", item.totalInputPower.value.toStringAsFixed(2), isEditable,
-                      suffix: ' kW'),
-                  editableCell("L_4", item.outputVoltage.value.toStringAsFixed(2), isEditable,
+                  editableCell("L_3",
+                      item.totalInputPower.value.toStringAsFixed(2), isEditable,
+                      suffix: ' $leftPinUnit'),
+                  editableCell("L_4",
+                      item.outputVoltage.value.toStringAsFixed(2), isEditable,
                       suffix: ' V'),
-                  editableCell("L_5", item.outputCurrent.value.toStringAsFixed(2), isEditable,
+                  editableCell("L_5",
+                      item.outputCurrent.value.toStringAsFixed(2), isEditable,
                       suffix: ' A'),
-                  editableCell("L_6", item.totalOutputPower.value.toStringAsFixed(2), isEditable,
-                      suffix: ' kW'),
+                  editableCell(
+                      "L_6",
+                      item.totalOutputPower.value.toStringAsFixed(2),
+                      isEditable,
+                      suffix: ' $leftPoutUnit'),
                   DataCell(
                     Center(
                       child: isEditable
                           ? DropdownButton<Judgement>(
-                        value: item.judgement,
-                        onChanged: (Judgement? newValue) {
-                          if (newValue != null) {
-                            setState(() {
-                              item.judgement = newValue;
-                            });
-                          }
-                          _updateIoCharacteristicsPassOrFail();
-                        },
-                        items: Judgement.values.map((value) {
-                          return DropdownMenuItem<Judgement>(
-                            value: value,
-                            child: Text(
-                              value.name.toUpperCase(),
+                              value: item.judgement,
+                              onChanged: (Judgement? newValue) {
+                                if (newValue != null) {
+                                  setState(() {
+                                    item.judgement = newValue;
+                                  });
+                                }
+                                _updateIoCharacteristicsPassOrFail();
+                              },
+                              items: Judgement.values.map((value) {
+                                return DropdownMenuItem<Judgement>(
+                                  value: value,
+                                  child: Text(
+                                    value.name.toUpperCase(),
+                                    style: TextStyle(
+                                      color: value == Judgement.pass
+                                          ? Colors.green
+                                          : value == Judgement.fail
+                                              ? Colors.red
+                                              : Colors.grey,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                              underline: SizedBox(),
+                            )
+                          : Text(
+                              item.judgement.name.toUpperCase(),
                               style: TextStyle(
-                                color: value == Judgement.pass
+                                color: item.judgement == Judgement.pass
                                     ? Colors.green
-                                    : value == Judgement.fail
-                                    ? Colors.red
-                                    : Colors.grey,
+                                    : item.judgement == Judgement.fail
+                                        ? Colors.red
+                                        : Colors.grey,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                          );
-                        }).toList(),
-                        underline: SizedBox(),
-                      )
-                          : Text(
-                        item.judgement.name.toUpperCase(),
-                        style: TextStyle(
-                          color: item.judgement == Judgement.pass
-                              ? Colors.green
-                              : item.judgement == Judgement.fail
-                              ? Colors.red
-                              : Colors.grey,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
                     ),
                   ),
                 ],
@@ -703,61 +899,77 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
 
             // R 列
             DataRow? rRow;
-            if (widget.inputOutputCharacteristics.inputOutputCharacteristicsSide.length > 1) {
-              final item = widget.inputOutputCharacteristics.inputOutputCharacteristicsSide[1];
+            if (widget.inputOutputCharacteristics.inputOutputCharacteristicsSide
+                    .length >
+                1) {
+              final item = widget
+                  .inputOutputCharacteristics.inputOutputCharacteristicsSide[1];
+
+              // 獲取正確的單位
+              String rightPinUnit =
+                  globalInputOutputSpec?.rightPinUnit ?? 'kVA';
+              String rightPoutUnit =
+                  globalInputOutputSpec?.rightPoutUnit ?? 'kW';
+
               rRow = DataRow(
                 cells: [
                   editableCell("R_0", item.side, false),
-                  editableCell("R_3", item.totalInputPower.value.toStringAsFixed(2), isEditable,
-                      suffix: ' kW'),
-                  editableCell("R_4", item.outputVoltage.value.toStringAsFixed(2), isEditable,
+                  editableCell("R_3",
+                      item.totalInputPower.value.toStringAsFixed(2), isEditable,
+                      suffix: ' $rightPinUnit'),
+                  editableCell("R_4",
+                      item.outputVoltage.value.toStringAsFixed(2), isEditable,
                       suffix: ' V'),
-                  editableCell("R_5", item.outputCurrent.value.toStringAsFixed(2), isEditable,
+                  editableCell("R_5",
+                      item.outputCurrent.value.toStringAsFixed(2), isEditable,
                       suffix: ' A'),
-                  editableCell("R_6", item.totalOutputPower.value.toStringAsFixed(2), isEditable,
-                      suffix: ' kW'),
+                  editableCell(
+                      "R_6",
+                      item.totalOutputPower.value.toStringAsFixed(2),
+                      isEditable,
+                      suffix: ' $rightPoutUnit'),
                   DataCell(
                     Center(
                       child: isEditable
                           ? DropdownButton<Judgement>(
-                        value: item.judgement,
-                        onChanged: (Judgement? newValue) {
-                          if (newValue != null) {
-                            setState(() {
-                              item.judgement = newValue;
-                            });
-                          }
-                          _updateIoCharacteristicsPassOrFail();
-                        },
-                        items: Judgement.values.map((value) {
-                          return DropdownMenuItem<Judgement>(
-                            value: value,
-                            child: Text(
-                              value.name.toUpperCase(),
+                              value: item.judgement,
+                              onChanged: (Judgement? newValue) {
+                                if (newValue != null) {
+                                  setState(() {
+                                    item.judgement = newValue;
+                                  });
+                                }
+                                _updateIoCharacteristicsPassOrFail();
+                              },
+                              items: Judgement.values.map((value) {
+                                return DropdownMenuItem<Judgement>(
+                                  value: value,
+                                  child: Text(
+                                    value.name.toUpperCase(),
+                                    style: TextStyle(
+                                      color: value == Judgement.pass
+                                          ? Colors.green
+                                          : value == Judgement.fail
+                                              ? Colors.red
+                                              : Colors.grey,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                              underline: SizedBox(),
+                            )
+                          : Text(
+                              item.judgement.name.toUpperCase(),
                               style: TextStyle(
-                                color: value == Judgement.pass
+                                color: item.judgement == Judgement.pass
                                     ? Colors.green
-                                    : value == Judgement.fail
-                                    ? Colors.red
-                                    : Colors.grey,
+                                    : item.judgement == Judgement.fail
+                                        ? Colors.red
+                                        : Colors.grey,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                          );
-                        }).toList(),
-                        underline: SizedBox(),
-                      )
-                          : Text(
-                        item.judgement.name.toUpperCase(),
-                        style: TextStyle(
-                          color: item.judgement == Judgement.pass
-                              ? Colors.green
-                              : item.judgement == Judgement.fail
-                              ? Colors.red
-                              : Colors.grey,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
                     ),
                   ),
                 ],
@@ -777,14 +989,14 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
                 ],
               ),
             );
-
           },
         );
       },
     );
   }
 
-  DataCell editableCell(String rowKey, String defaultValue, bool isEditable, {String suffix = ""}) {
+  DataCell editableCell(String rowKey, String defaultValue, bool isEditable,
+      {String suffix = ""}) {
     final value = _cellInputs[rowKey] ?? defaultValue;
 
     if (!isEditable) {
@@ -822,8 +1034,11 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
                   }
                   if (index != null &&
                       index >= 0 &&
-                      index < widget.inputOutputCharacteristics.inputOutputCharacteristicsSide.length){
-                    final side = widget.inputOutputCharacteristics.inputOutputCharacteristicsSide[index];
+                      index <
+                          widget.inputOutputCharacteristics
+                              .inputOutputCharacteristicsSide.length) {
+                    final side = widget.inputOutputCharacteristics
+                        .inputOutputCharacteristicsSide[index];
                     if (rowKey.endsWith('_3')) {
                       final parsed = double.tryParse(newValue);
                       if (parsed != null) side.totalInputPower.value = parsed;
@@ -846,7 +1061,8 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
               },
               decoration: InputDecoration(
                 isDense: true,
-                contentPadding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
                 border: const OutlineInputBorder(),
                 suffixText: null, // 不用 suffixText
               ),
@@ -855,7 +1071,6 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
               keyboardType: TextInputType.numberWithOptions(decimal: true),
             ),
           ),
-
           if (suffix.trim().isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(left: 6),
@@ -868,5 +1083,4 @@ class _InputOutputCharacteristicsTableState extends State<InputOutputCharacteris
       ),
     );
   }
-
 }

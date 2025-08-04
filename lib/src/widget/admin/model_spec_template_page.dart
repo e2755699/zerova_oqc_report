@@ -152,6 +152,12 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
             rightIoutUpperbound: 129,
             rightPoutLowerbound: 118,
             rightPoutUpperbound: 122,
+
+            // 單位設定
+            leftPinUnit: 'kVA',
+            leftPoutUnit: 'kW',
+            rightPinUnit: 'kVA',
+            rightPoutUnit: 'kW',
           );
         }
 
@@ -432,8 +438,8 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
   // 切換到新增模型模式
   void _toggleNewModelMode() {
     setState(() {
-    _isNewModel = !_isNewModel;
-    if (_isNewModel) {
+      _isNewModel = !_isNewModel;
+      if (_isNewModel) {
         _selectedModel = null;
         _modelController.clear();
         _inputOutputSpec = InputOutputCharacteristicsSpec(
@@ -464,6 +470,12 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
           rightIoutUpperbound: 129,
           rightPoutLowerbound: 118,
           rightPoutUpperbound: 122,
+
+          // 單位設定
+          leftPinUnit: 'kVA',
+          leftPoutUnit: 'kW',
+          rightPinUnit: 'kVA',
+          rightPoutUnit: 'kW',
         );
 
         _basicFunctionSpec = BasicFunctionTestSpec(
@@ -483,7 +495,7 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
         _packageListSpec = PackageListResult(); // 建立新的 PackageListResult
 
         _isLoading = false;
-    }
+      }
     });
   }
 
@@ -644,7 +656,9 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
                 },
               ),
               PhotoManagerTab(
-                selectedModel: _isNewModel ? _modelController.text : (_selectedModel ?? ''),
+                selectedModel: _isNewModel
+                    ? _modelController.text
+                    : (_selectedModel ?? ''),
                 //onDeletedFilesChanged: onDeletedFilesUpdated,
               )
             ],

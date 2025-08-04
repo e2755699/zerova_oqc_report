@@ -89,22 +89,64 @@ class _PsuSerialNumbersTableState extends State<PsuSerialNumbersTable> {
       hasError = true;
     }
 
+    print('🔍 開始PSU序號表自動判斷:');
+
+    // 檢查每個序號項目
+    int validCount = 0;
+    int totalCount = expectedQty;
+
     for (int i = 0; i < expectedQty; i++) {
       if (i >= widget.data.psuSN.length) {
-        hasError = true;  // 沒資料也算錯
+        print('  📊 PSU ${i + 1}: (缺少資料) -> ❌ FAIL');
+        hasError = true;
         break;
       }
 
       final sn = widget.data.psuSN[i];
-      if (sn.value.trim().isEmpty) {
-        hasError = true;  // 有空值就是錯誤
+      final isEmpty = sn.value.trim().isEmpty;
+      final isValid = !isEmpty;
+
+      if (isValid) validCount++;
+
+      print(
+          '  📊 PSU ${i + 1}: "${sn.value}" -> ${isValid ? "✅ PASS" : "❌ FAIL"}${isEmpty ? " (空值)" : ""}');
+
+      if (isEmpty) {
+        hasError = true;
         break;
       }
     }
 
-    psuSNPassOrFail = !hasError;
-  }
+    // 🔒 強制邏輯：所有序號都必須有效，整體才能PASS
+    final bool allItemsPass = (validCount == totalCount);
+    final bool noFailItems = !hasError;
+    final bool finalCheck = allItemsPass && noFailItems;
 
+    print(
+        '  📈 通過項目數: $validCount/$totalCount，最終判斷: ${finalCheck ? "✅ PASS" : "❌ FAIL"}');
+
+    // 🔒 強制檢查：如果是PASS但validCount < totalCount，強制設為FAIL
+    if (finalCheck && validCount < totalCount) {
+      print(
+          '🚨 發現邏輯錯誤！強制修正為FAIL (validCount: $validCount, totalCount: $totalCount)');
+      psuSNPassOrFail = false;
+      GlobalJudgementMonitor.updateTestResult('psuSN', false);
+      return;
+    }
+
+    // 🔒 強制檢查：如果有錯誤但整體為PASS，強制設為FAIL
+    if (finalCheck && hasError) {
+      print('🚨 發現邏輯錯誤！有項目FAIL但整體為PASS，強制修正為FAIL');
+      psuSNPassOrFail = false;
+      GlobalJudgementMonitor.updateTestResult('psuSN', false);
+      return;
+    }
+
+    bool finalResult = finalCheck;
+    psuSNPassOrFail = finalResult;
+    GlobalJudgementMonitor.updateTestResult('psuSN', finalResult);
+    print('psuSNPassOrFail = $psuSNPassOrFail');
+  }
 
   @override
   void initState() {
@@ -208,24 +250,23 @@ class _PsuSerialNumbersTableState extends State<PsuSerialNumbersTable> {
                             ? OqcTextField(
                                 controller: _controllers[index],
                                 onChanged: (val) {
-                                    if (index < widget.data.psuSN.length) {
-                                      widget.data.psuSN[index].value = val.trim();
-                                    } else {
-                                      // 先補滿到 index
-                                      while (
-                                          widget.data.psuSN.length <= index) {
-                                        widget.data.psuSN.add(
-                                          SerialNumber(
-                                            spec: 12,
-                                            value: '', // 空值先填，等會下面會被填入 val
-                                            key: "PSU SN",
-                                            name: "PSU",
-                                          ),
-                                        );
-                                      }
-                                      widget.data.psuSN[index].value = val.trim();
+                                  if (index < widget.data.psuSN.length) {
+                                    widget.data.psuSN[index].value = val.trim();
+                                  } else {
+                                    // 先補滿到 index
+                                    while (widget.data.psuSN.length <= index) {
+                                      widget.data.psuSN.add(
+                                        SerialNumber(
+                                          spec: 12,
+                                          value: '', // 空值先填，等會下面會被填入 val
+                                          key: "PSU SN",
+                                          name: "PSU",
+                                        ),
+                                      );
                                     }
-                                    validate();
+                                    widget.data.psuSN[index].value = val.trim();
+                                  }
+                                  validate();
                                 })
                             : OqcTableStyle.getDataCell(
                                 index < widget.data.psuSN.length

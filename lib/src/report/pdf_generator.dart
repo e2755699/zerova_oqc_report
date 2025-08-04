@@ -226,7 +226,9 @@ class PdfGenerator {
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
                     child: pw.Text(
-                        index < data.psuSN.length ? data.psuSN[index].value : '',
+                        index < data.psuSN.length
+                            ? data.psuSN[index].value
+                            : '',
                         style: pw.TextStyle(font: font),
                         textAlign: pw.TextAlign.center),
                   ),
@@ -235,7 +237,6 @@ class PdfGenerator {
             ],
           );
         }),
-
       ],
     );
   }
@@ -439,20 +440,20 @@ class PdfGenerator {
     // Header for Left Spec
     List<String> leftHeaders = [
       'Item \n Spec',
-      'Pin \n ${formatSpec(spec?.leftPinUpperbound, spec?.leftPinLowerbound, 'kW')}',
+      'Pin \n ${formatSpec(spec?.leftPinUpperbound, spec?.leftPinLowerbound, spec?.leftPinUnit ?? 'kVA')}',
       'Vout \n ${formatSpec(spec?.leftVoutUpperbound, spec?.leftVoutLowerbound, 'V')}',
       'Iout \n ${formatSpec(spec?.leftIoutUpperbound, spec?.leftIoutLowerbound, 'A')}',
-      'Pout \n ${formatSpec(spec?.leftPoutUpperbound, spec?.leftPoutLowerbound, 'kW')}',
+      'Pout \n ${formatSpec(spec?.leftPoutUpperbound, spec?.leftPoutLowerbound, spec?.leftPoutUnit ?? 'kW')}',
       'Judgement',
     ];
 
     // Header for Right Spec
     List<String> rightHeaders = [
       'Item \n Spec',
-      'Pin \n ${formatSpec(spec?.rightPinUpperbound, spec?.rightPinLowerbound, 'kW')}',
+      'Pin \n ${formatSpec(spec?.rightPinUpperbound, spec?.rightPinLowerbound, spec?.rightPinUnit ?? 'kVA')}',
       'Vout \n ${formatSpec(spec?.rightVoutUpperbound, spec?.rightVoutLowerbound, 'V')}',
       'Iout \n ${formatSpec(spec?.rightIoutUpperbound, spec?.rightIoutLowerbound, 'A')}',
-      'Pout \n ${formatSpec(spec?.rightPoutUpperbound, spec?.rightPoutLowerbound, 'kW')}',
+      'Pout \n ${formatSpec(spec?.rightPoutUpperbound, spec?.rightPoutLowerbound, spec?.rightPoutUnit ?? 'kW')}',
       'Judgement',
     ];
 
@@ -473,20 +474,20 @@ class PdfGenerator {
       pw.TableRow(
         children: leftHeaders
             .map((header) => pw.Padding(
-          padding: const pw.EdgeInsets.all(5),
-          child: pw.Text(
-            header,
-            style: pw.TextStyle(font: font, fontSize: 10),
-            textAlign: pw.TextAlign.center,
-          ),
-        ))
+                  padding: const pw.EdgeInsets.all(5),
+                  child: pw.Text(
+                    header,
+                    style: pw.TextStyle(font: font, fontSize: 10),
+                    textAlign: pw.TextAlign.center,
+                  ),
+                ))
             .toList(),
       ),
     );
 
     // ➤ 加入 Left 資料列
     final left = data.inputOutputCharacteristicsSide.firstWhere(
-          (item) => item.side.toLowerCase().contains('left'),
+      (item) => item.side.toLowerCase().contains('left'),
       orElse: () => data.inputOutputCharacteristicsSide.first,
     );
     tableRows.add(_buildDataRow(left, font));
@@ -496,20 +497,20 @@ class PdfGenerator {
       pw.TableRow(
         children: rightHeaders
             .map((header) => pw.Padding(
-          padding: const pw.EdgeInsets.all(5),
-          child: pw.Text(
-            header,
-            style: pw.TextStyle(font: font, fontSize: 10),
-            textAlign: pw.TextAlign.center,
-          ),
-        ))
+                  padding: const pw.EdgeInsets.all(5),
+                  child: pw.Text(
+                    header,
+                    style: pw.TextStyle(font: font, fontSize: 10),
+                    textAlign: pw.TextAlign.center,
+                  ),
+                ))
             .toList(),
       ),
     );
 
     // ➤ 加入 Right 資料列
     final right = data.inputOutputCharacteristicsSide.firstWhere(
-          (item) => item.side.toLowerCase().contains('right'),
+      (item) => item.side.toLowerCase().contains('right'),
       orElse: () => data.inputOutputCharacteristicsSide.last,
     );
     tableRows.add(_buildDataRow(right, font));
@@ -537,6 +538,19 @@ class PdfGenerator {
 
   static pw.TableRow _buildDataRow(
       InputOutputCharacteristicsSide item, pw.Font font) {
+    // 獲取正確的單位
+    final spec = globalInputOutputSpec;
+    String pinUnit = '';
+    String poutUnit = '';
+
+    if (item.side == 'L') {
+      pinUnit = spec?.leftPinUnit ?? 'kVA';
+      poutUnit = spec?.leftPoutUnit ?? 'kW';
+    } else {
+      pinUnit = spec?.rightPinUnit ?? 'kVA';
+      poutUnit = spec?.rightPoutUnit ?? 'kW';
+    }
+
     return pw.TableRow(
       children: [
         pw.Padding(
@@ -547,7 +561,8 @@ class PdfGenerator {
         ),
         pw.Padding(
           padding: const pw.EdgeInsets.all(5),
-          child: pw.Text("${item.totalInputPower.value.toStringAsFixed(2)} kW",
+          child: pw.Text(
+              "${item.totalInputPower.value.toStringAsFixed(2)} $pinUnit",
               style: pw.TextStyle(font: font, fontSize: 8),
               textAlign: pw.TextAlign.center),
         ),
@@ -565,7 +580,8 @@ class PdfGenerator {
         ),
         pw.Padding(
           padding: const pw.EdgeInsets.all(5),
-          child: pw.Text("${item.totalOutputPower.value.toStringAsFixed(2)} kW",
+          child: pw.Text(
+              "${item.totalOutputPower.value.toStringAsFixed(2)} $poutUnit",
               style: pw.TextStyle(font: font, fontSize: 8),
               textAlign: pw.TextAlign.center),
         ),
@@ -939,8 +955,8 @@ class PdfGenerator {
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text(
-                      data.hiPotTestResult.insulationImpedanceTest.storedJudgement
-                          .name
+                      data.hiPotTestResult.insulationImpedanceTest
+                          .storedJudgement.name
                           .toUpperCase(),
                       style: pw.TextStyle(font: font),
                       textAlign: pw.TextAlign.center),
@@ -1063,7 +1079,8 @@ class PdfGenerator {
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text(
-                      data.hiPotTestResult.insulationVoltageTest.storedJudgement.name
+                      data.hiPotTestResult.insulationVoltageTest.storedJudgement
+                          .name
                           .toUpperCase(),
                       style: pw.TextStyle(font: font),
                       textAlign: pw.TextAlign.center),
@@ -1105,19 +1122,19 @@ class PdfGenerator {
             pw.TableRow(
               children: PackageListResult.defaultHeader
                   .map((header) => pw.Padding(
-                padding: const pw.EdgeInsets.all(5),
-                child: pw.Text(
-                  header,
-                  style: pw.TextStyle(font: font),
-                  textAlign: pw.TextAlign.center,
-                ),
-              ))
+                        padding: const pw.EdgeInsets.all(5),
+                        child: pw.Text(
+                          header,
+                          style: pw.TextStyle(font: font),
+                          textAlign: pw.TextAlign.center,
+                        ),
+                      ))
                   .toList(),
             ),
             // 動態內容
             ...List.generate(
               data.measurements.length,
-                  (index) {
+              (index) {
                 final m = data.measurements[index];
                 return pw.TableRow(
                   children: [
@@ -1158,7 +1175,6 @@ class PdfGenerator {
       ],
     );
   }
-
 
   String getSpecText(int index, PackageListSpec spec) {
     switch (index) {
