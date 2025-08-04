@@ -198,7 +198,7 @@ class _HomePageState extends State<HomePage> with LoadFileHelper<HomePage> {
             ),
           ),
           const SizedBox(height: 20),
-
+/*
           // QR 掃描按鈕
           SizedBox(
             width: 300,
@@ -287,7 +287,7 @@ class _HomePageState extends State<HomePage> with LoadFileHelper<HomePage> {
                   : Text(context.tr('qr_code_scan')),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 20),*/
 
           // 登出按鈕
           SizedBox(

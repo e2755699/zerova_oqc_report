@@ -27,7 +27,7 @@ class SoftwareVersion {
         Version(
           value: json["Primary MCU"] ?? "未找到",
           key: "Primary MCU",
-          name: "MCU",
+          name: "DCM",
         ),
         Version(
           value: json["Connector 1"] ?? "未找到",

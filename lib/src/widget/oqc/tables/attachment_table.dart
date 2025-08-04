@@ -68,8 +68,8 @@ class AttachmentTable extends StatelessWidget {
       ),
       content: ImageGrid(
         imagePath: 'Selected Photos\\$sn\\Attachment',
-        columns: 4,
-        cellHeight: 100,
+        columns: 2,
+        cellHeight: 500,
       ),
     );
   }
