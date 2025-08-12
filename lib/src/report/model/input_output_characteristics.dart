@@ -4,6 +4,7 @@ import 'package:zerova_oqc_report/src/report/spec/basic_function_test_spec.dart'
 import 'package:zerova_oqc_report/src/widget/oqc/tables/basic_function_test_table.dart';
 import 'package:zerova_oqc_report/src/report/spec/input_output_characteristics_spec.dart';
 import 'package:zerova_oqc_report/src/report/spec/basic_function_test_spec.dart';
+import 'package:intl/intl.dart';
 
 class InputOutputCharacteristics {
   final InputOutputCharacteristicsSide leftSideInputOutputCharacteristics;
@@ -62,324 +63,601 @@ class InputOutputCharacteristics {
     double thdValue = 0;
     double standbyTotalInputPowerValue = 0;
 
+    final rfc1123Format = DateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", 'en_US');
+    DateTime? leftInputVoltageUpdateTime;
+    DateTime? leftInputCurrentUpdateTime;
+    DateTime? leftTotalInputPowerUpdateTime;
+    DateTime? leftOutputVoltageUpdateTime;
+    DateTime? leftOutputCurrentUpdateTime;
+    DateTime? leftTotalOutputPowerUpdateTime;
+    DateTime? rightInputVoltageUpdateTime;
+    DateTime? rightInputCurrentUpdateTime;
+    DateTime? rightTotalInputPowerUpdateTime;
+    DateTime? rightOutputVoltageUpdateTime;
+    DateTime? rightOutputCurrentUpdateTime;
+    DateTime? rightTotalOutputPowerUpdateTime;
+    DateTime? effUpdateTime;
+    DateTime? powerFactorUpdateTime;
+    DateTime? thdUpdateTime;
+    DateTime? standbyTotalInputPowerUpdateTime;
+
+    DateTime? parseRfc1123(String? input) {
+      if (input == null) return null;
+      try {
+        return rfc1123Format.parseUtc(input);
+      } catch (e) {
+        print('解析時間失敗: $e');
+        return null;
+      }
+    }
 
     for (var item in data) {
       String? spcDesc = item['SPC_DESC'];
       String? spcValueStr = item['SPC_VALUE'];
       String? spcItem = item['SPC_ITEM'];
+      String? spcUpdateTime = item['UPDATE_TIME'];
+      DateTime? spcUpdateDateTime = parseRfc1123(spcUpdateTime);
       double spcValue = double.tryParse(spcValueStr ?? "0") ?? 0;
 
       if (spcDesc != null && spcItem != null) {
-        if (spcDesc.contains("Input_Voltage")) {
-          if (spcItem.contains("Left Plug") && leftInputVoltageCount < 3) {
-            double spec = 220;
-            double lowerBound = globalInputOutputSpec!.leftVinLowerbound;
-            double upperBound = globalInputOutputSpec!.leftVinUpperbound;
-            leftInputVoltageCount++;
-            leftInputVoltage.add(InputOutputMeasurement(
-              spec: spec,
-              value: spcValue,
-              count: leftInputVoltageCount,
-              key: spcDesc,
-              name: "Vin",
-              description: '',
-              judgement: (spcValue >= lowerBound && spcValue <= upperBound)
-                  ? Judgement.pass
-                  : Judgement.fail,
-            ));
-          } else if (spcItem.contains("Right Plug") &&
-              rightInputVoltageCount < 3) {
-            double spec = 220;
-            double lowerBound = globalInputOutputSpec!.rightVinLowerbound;
-            double upperBound = globalInputOutputSpec!.rightVinUpperbound;
-            rightInputVoltageCount++;
-            rightInputVoltage.add(InputOutputMeasurement(
-              spec: spec,
-              value: spcValue,
-              count: rightInputVoltageCount,
-              key: spcDesc,
-              name: "Vin",
-              description: '',
-              judgement: (spcValue >= lowerBound && spcValue <= upperBound)
-                  ? Judgement.pass
-                  : Judgement.fail,
-            ));
+        if (spcDesc.contains("Input_Voltage") && spcValue != 0) {
+          if (spcItem.contains("Left Plug")) {
+            if (leftInputVoltageUpdateTime == null ||
+                spcUpdateDateTime!.isAfter(leftInputVoltageUpdateTime!) ||
+                spcUpdateDateTime!.isAtSameMomentAs(leftInputVoltageUpdateTime!)
+            ) {
+              if(leftInputVoltageUpdateTime == null ||
+                  spcUpdateDateTime!.isAfter(leftInputVoltageUpdateTime!)
+              ){
+                leftInputVoltageCount = 0;
+              }
+              leftInputVoltageUpdateTime = spcUpdateDateTime; // 更新時間
+              if (leftInputVoltageCount < 3) {
+                double spec = 220;
+                double lowerBound = globalInputOutputSpec!.leftVinLowerbound;
+                double upperBound = globalInputOutputSpec!.leftVinUpperbound;
+                leftInputVoltageCount++;
+                leftInputVoltage.add(InputOutputMeasurement(
+                  spec: spec,
+                  value: spcValue,
+                  count: leftInputVoltageCount,
+                  key: spcDesc,
+                  name: "Vin",
+                  description: '',
+                  judgement: (spcValue >= lowerBound && spcValue <= upperBound)
+                      ? Judgement.pass
+                      : Judgement.fail,
+                ));
+              }
+            }
+            else {
+              print('❌ 資料較舊，不覆蓋，資料時間: $spcUpdateDateTime，現有時間: $leftInputVoltageUpdateTime');
+            }
           }
-        } else if (spcDesc.contains("Input_Current")) {
-          if (spcItem.contains("Left Plug") && leftInputCurrentCount < 3) {
-            double spec = 230;
-            double lowerBound = globalInputOutputSpec!.leftIinLowerbound;
-            double upperBound = globalInputOutputSpec!.leftIinUpperbound;
-            leftInputCurrentCount++;
-            leftInputCurrent.add(InputOutputMeasurement(
-              spec: spec,
-              value: spcValue,
-              count: leftInputCurrentCount,
-              key: spcDesc,
-              name: "Iin",
-              description: '',
-              judgement: (spcValue >= lowerBound && spcValue <= upperBound)
-                  ? Judgement.pass
-                  : Judgement.fail,
-            ));
-          } else if (spcItem.contains("Right Plug") &&
-              rightInputCurrentCount < 3) {
-            double spec = 230;
-            double lowerBound = globalInputOutputSpec!.rightIinLowerbound;
-            double upperBound = globalInputOutputSpec!.rightIinUpperbound;
-            rightInputCurrentCount++;
-            rightInputCurrent.add(InputOutputMeasurement(
-              spec: spec,
-              value: spcValue,
-              count: rightInputCurrentCount,
-              key: spcDesc,
-              name: "Iin",
-              description: '',
-              judgement: (spcValue >= lowerBound && spcValue <= upperBound)
-                  ? Judgement.pass
-                  : Judgement.fail,
-            ));
+          else if (spcItem.contains("Right Plug")) {
+            if (rightInputVoltageUpdateTime == null ||
+                spcUpdateDateTime!.isAfter(rightInputVoltageUpdateTime!) ||
+                spcUpdateDateTime!.isAtSameMomentAs(rightInputVoltageUpdateTime!)
+            ) {
+              if (rightInputVoltageUpdateTime == null ||
+                  spcUpdateDateTime!.isAfter(rightInputVoltageUpdateTime!)
+              ) {
+                rightInputVoltageCount = 0;
+              }
+              rightInputVoltageUpdateTime = spcUpdateDateTime; // 更新時間
+              if (rightInputVoltageCount < 3) {
+                double spec = 220;
+                double lowerBound = globalInputOutputSpec!.rightVinLowerbound;
+                double upperBound = globalInputOutputSpec!.rightVinUpperbound;
+                rightInputVoltageCount++;
+                rightInputVoltage.add(InputOutputMeasurement(
+                  spec: spec,
+                  value: spcValue,
+                  count: rightInputVoltageCount,
+                  key: spcDesc,
+                  name: "Vin",
+                  description: '',
+                  judgement: (spcValue >= lowerBound && spcValue <= upperBound)
+                      ? Judgement.pass
+                      : Judgement.fail,
+                ));
+              }
+            }
+            else {
+              print('❌ 資料較舊，不覆蓋，資料時間: $spcUpdateDateTime，現有時間: $rightInputVoltageUpdateTime');
+            }
+          }
+        }
+        else if (spcDesc.contains("Input_Current") && spcValue != 0) {
+          if (spcItem.contains("Left Plug")) {
+            if (leftInputCurrentUpdateTime == null ||
+                spcUpdateDateTime!.isAfter(leftInputCurrentUpdateTime!) ||
+                spcUpdateDateTime!.isAtSameMomentAs(leftInputCurrentUpdateTime!)
+            ) {
+              if (leftInputCurrentUpdateTime == null ||
+                  spcUpdateDateTime!.isAfter(leftInputCurrentUpdateTime!)
+              ) {
+                leftInputCurrentCount = 0;
+              }
+              leftInputCurrentUpdateTime = spcUpdateDateTime; // 更新時間
+              if (leftInputCurrentCount < 3) {
+                double spec = 230;
+                double lowerBound = globalInputOutputSpec!.leftIinLowerbound;
+                double upperBound = globalInputOutputSpec!.leftIinUpperbound;
+                leftInputCurrentCount++;
+                leftInputCurrent.add(InputOutputMeasurement(
+                  spec: spec,
+                  value: spcValue,
+                  count: leftInputCurrentCount,
+                  key: spcDesc,
+                  name: "Iin",
+                  description: '',
+                  judgement: (spcValue >= lowerBound && spcValue <= upperBound)
+                      ? Judgement.pass
+                      : Judgement.fail,
+                ));
+              }
+            }
+            else {
+              print('❌ 資料較舊，不覆蓋，資料時間: $spcUpdateDateTime，現有時間: $leftInputCurrentUpdateTime');
+            }
+          }
+          else if (spcItem.contains("Right Plug")) {
+            if (rightInputCurrentUpdateTime == null ||
+                spcUpdateDateTime!.isAfter(rightInputCurrentUpdateTime!) ||
+                spcUpdateDateTime!.isAtSameMomentAs(rightInputCurrentUpdateTime!)
+            ) {
+              if (rightInputCurrentUpdateTime == null ||
+                  spcUpdateDateTime!.isAfter(rightInputCurrentUpdateTime!)
+              ) {
+                rightInputCurrentCount = 0;
+              }
+              rightInputCurrentUpdateTime = spcUpdateDateTime; // 更新時間
+              if (rightInputCurrentCount < 3) {
+                double spec = 230;
+                double lowerBound = globalInputOutputSpec!.rightIinLowerbound;
+                double upperBound = globalInputOutputSpec!.rightIinUpperbound;
+                rightInputCurrentCount++;
+                rightInputCurrent.add(InputOutputMeasurement(
+                  spec: spec,
+                  value: spcValue,
+                  count: rightInputCurrentCount,
+                  key: spcDesc,
+                  name: "Iin",
+                  description: '',
+                  judgement: (spcValue >= lowerBound && spcValue <= upperBound)
+                      ? Judgement.pass
+                      : Judgement.fail,
+                ));
+              }
+            }
+            else {
+              print('❌ 資料較舊，不覆蓋，資料時間: $spcUpdateDateTime，現有時間: $rightInputCurrentUpdateTime');
+            }
           }
         }
         else if (spcDesc == "Total_Input_Power" && spcValue != 0) {
-          if (spcItem.contains("Left Plug") && leftTotalInputPowerCount < 1) {
-            double spec = 130;
-            double lowerBound = globalInputOutputSpec!.leftPinLowerbound;
-            double upperBound = globalInputOutputSpec!.leftPinUpperbound;
-            leftTotalInputPowerCount++;
+          if (spcItem.contains("Left Plug")) {
+            if (leftTotalInputPowerUpdateTime == null ||
+                spcUpdateDateTime!.isAfter(leftTotalInputPowerUpdateTime!) ||
+                spcUpdateDateTime!.isAtSameMomentAs(leftTotalInputPowerUpdateTime!)
+            ) {
+              if (leftTotalInputPowerUpdateTime == null ||
+                  spcUpdateDateTime!.isAfter(leftTotalInputPowerUpdateTime!)
+              ) {
+                leftTotalInputPowerCount = 0;
+              }
+              leftTotalInputPowerUpdateTime = spcUpdateDateTime; // 更新時間
+              if (leftTotalInputPowerCount < 1) {
+                double spec = 130;
+                double lowerBound = globalInputOutputSpec!.leftPinLowerbound;
+                double upperBound = globalInputOutputSpec!.leftPinUpperbound;
+                leftTotalInputPowerCount++;
 
-            // 數值轉換：如果大於10萬則除以1000 (W -> kW)
-            double convertedValue =
+                // 數值轉換：如果大於10萬則除以1000 (W -> kW)
+                double convertedValue =
                 spcValue > 100000 ? spcValue / 1000 : spcValue;
 
-            leftTotalInputPower = InputOutputMeasurement(
-              spec: spec,
-              value: convertedValue,
-              count: leftTotalInputPowerCount,
-              key: spcDesc,
-              name: "Pin",
-              description: '',
-              judgement:
+                leftTotalInputPower = InputOutputMeasurement(
+                  spec: spec,
+                  value: convertedValue,
+                  count: leftTotalInputPowerCount,
+                  key: spcDesc,
+                  name: "Pin",
+                  description: '',
+                  judgement:
                   (convertedValue >= lowerBound && convertedValue <= upperBound)
                       ? Judgement.pass
                       : Judgement.fail,
-            );
-          } else if (spcItem.contains("Right Plug") &&
-              rightTotalInputPowerCount < 1) {
-            double spec = 130;
-            double lowerBound = globalInputOutputSpec!.rightPinLowerbound;
-            double upperBound = globalInputOutputSpec!.rightPinUpperbound;
-            rightTotalInputPowerCount++;
+                );
+              }
+            }
+            else {
+              print('❌ 資料較舊，不覆蓋，資料時間: $spcUpdateDateTime，現有時間: $leftTotalInputPowerUpdateTime');
+            }
+          }
+          else if (spcItem.contains("Right Plug")) {
+            if (rightTotalInputPowerUpdateTime == null ||
+                spcUpdateDateTime!.isAfter(rightTotalInputPowerUpdateTime!) ||
+                spcUpdateDateTime!.isAtSameMomentAs(rightTotalInputPowerUpdateTime!)
+            ) {
+              if (rightTotalInputPowerUpdateTime == null ||
+                  spcUpdateDateTime!.isAfter(rightTotalInputPowerUpdateTime!)
+              ) {
+                rightTotalInputPowerCount = 0;
+              }
+              rightTotalInputPowerUpdateTime = spcUpdateDateTime; // 更新時間
+              if (rightTotalInputPowerCount < 1) {
+                double spec = 130;
+                double lowerBound = globalInputOutputSpec!.rightPinLowerbound;
+                double upperBound = globalInputOutputSpec!.rightPinUpperbound;
+                rightTotalInputPowerCount++;
 
-            // 數值轉換：如果大於10萬則除以1000 (W -> kW)
-            double convertedValue =
+                // 數值轉換：如果大於10萬則除以1000 (W -> kW)
+                double convertedValue =
                 spcValue > 100000 ? spcValue / 1000 : spcValue;
 
-            rightTotalInputPower = InputOutputMeasurement(
-              spec: spec,
-              value: convertedValue,
-              count: leftTotalInputPowerCount,
-              key: spcDesc,
-              name: "Pin",
-              description: '',
-              judgement:
+                rightTotalInputPower = InputOutputMeasurement(
+                  spec: spec,
+                  value: convertedValue,
+                  count: leftTotalInputPowerCount,
+                  key: spcDesc,
+                  name: "Pin",
+                  description: '',
+                  judgement:
                   (convertedValue >= lowerBound && convertedValue <= upperBound)
                       ? Judgement.pass
                       : Judgement.fail,
-            );
+                );
+              }
+            }
+            else {
+              print('❌ 資料較舊，不覆蓋，資料時間: $spcUpdateDateTime，現有時間: $rightTotalInputPowerUpdateTime');
+            }
           }
         }
         else if (spcDesc.contains("Output_Voltage") && spcValue != 0) {
-          if (spcItem.contains("Left Plug") && leftOutputVoltageCount < 1) {
-            double spec = 950;
-            double lowerBound = globalInputOutputSpec!.leftVoutLowerbound;
-            double upperBound = globalInputOutputSpec!.leftVoutUpperbound;
-            leftOutputVoltageCount++;
-            leftOutputVoltage = InputOutputMeasurement(
-              spec: spec,
-              value: spcValue,
-              count: leftOutputVoltageCount,
-              key: spcDesc,
-              name: "Vout",
-              description: '',
-              judgement: (spcValue >= lowerBound && spcValue <= upperBound)
-                  ? Judgement.pass
-                  : Judgement.fail,
-            );
-          } else if (spcItem.contains("Right Plug") &&
-              rightOutputVoltageCount < 1) {
-            double spec = 950;
-            double lowerBound = globalInputOutputSpec!.rightVoutLowerbound;
-            double upperBound = globalInputOutputSpec!.rightVoutUpperbound;
-            rightOutputVoltageCount++;
-            rightOutputVoltage = InputOutputMeasurement(
-              spec: spec,
-              value: spcValue,
-              count: rightOutputVoltageCount,
-              key: spcDesc,
-              name: "Vout",
-              description: '',
-              judgement: (spcValue >= lowerBound && spcValue <= upperBound)
-                  ? Judgement.pass
-                  : Judgement.fail,
-            );
+          if (spcItem.contains("Left Plug")) {
+            if (leftOutputVoltageUpdateTime == null ||
+                spcUpdateDateTime!.isAfter(leftOutputVoltageUpdateTime!) ||
+                spcUpdateDateTime!.isAtSameMomentAs(leftOutputVoltageUpdateTime!)
+            ) {
+              if (leftOutputVoltageUpdateTime == null ||
+                  spcUpdateDateTime!.isAfter(leftOutputVoltageUpdateTime!)
+              ) {
+                leftOutputVoltageCount = 0;
+              }
+              leftOutputVoltageUpdateTime = spcUpdateDateTime; // 更新時間
+              if (leftOutputVoltageCount < 1) {
+                double spec = 950;
+                double lowerBound = globalInputOutputSpec!.leftVoutLowerbound;
+                double upperBound = globalInputOutputSpec!.leftVoutUpperbound;
+                leftOutputVoltageCount++;
+                leftOutputVoltage = InputOutputMeasurement(
+                  spec: spec,
+                  value: spcValue,
+                  count: leftOutputVoltageCount,
+                  key: spcDesc,
+                  name: "Vout",
+                  description: '',
+                  judgement: (spcValue >= lowerBound && spcValue <= upperBound)
+                      ? Judgement.pass
+                      : Judgement.fail,
+                );
+              }
+            }
+            else {
+              print('❌ 資料較舊，不覆蓋，資料時間: $spcUpdateDateTime，現有時間: $leftOutputVoltageUpdateTime');
+            }
+          }
+          else if (spcItem.contains("Right Plug")) {
+            if (rightOutputVoltageUpdateTime == null ||
+                spcUpdateDateTime!.isAfter(rightOutputVoltageUpdateTime!) ||
+                spcUpdateDateTime!.isAtSameMomentAs(rightOutputVoltageUpdateTime!)
+            ) {
+              if (rightOutputVoltageUpdateTime == null ||
+                  spcUpdateDateTime!.isAfter(rightOutputVoltageUpdateTime!)
+              ) {
+                rightOutputVoltageCount = 0;
+              }
+              rightOutputVoltageUpdateTime = spcUpdateDateTime; // 更新時間
+              if (rightOutputVoltageCount < 1) {
+                double spec = 950;
+                double lowerBound = globalInputOutputSpec!.rightVoutLowerbound;
+                double upperBound = globalInputOutputSpec!.rightVoutUpperbound;
+                rightOutputVoltageCount++;
+                rightOutputVoltage = InputOutputMeasurement(
+                  spec: spec,
+                  value: spcValue,
+                  count: rightOutputVoltageCount,
+                  key: spcDesc,
+                  name: "Vout",
+                  description: '',
+                  judgement: (spcValue >= lowerBound && spcValue <= upperBound)
+                      ? Judgement.pass
+                      : Judgement.fail,
+                );
+              }
+            }
+            else {
+              print('❌ 資料較舊，不覆蓋，資料時間: $spcUpdateDateTime，現有時間: $rightOutputVoltageUpdateTime');
+            }
           }
         }
         else if (spcDesc.contains("Output_Current") && spcValue != 0) {
-          if (spcItem.contains("Left Plug") && leftOutputCurrentCount < 1) {
-            double spec = 126;
-            double lowerBound = globalInputOutputSpec!.leftIoutLowerbound;
-            double upperBound = globalInputOutputSpec!.leftIoutUpperbound;
-            leftOutputCurrentCount++;
-            leftOutputCurrent = InputOutputMeasurement(
-              spec: spec,
-              value: spcValue,
-              count: leftOutputCurrentCount,
-              key: spcDesc,
-              name: "Iout",
-              description: '',
-              judgement: (spcValue >= lowerBound && spcValue <= upperBound)
-                  ? Judgement.pass
-                  : Judgement.fail,
-            );
-          } else if (spcItem.contains("Right Plug") &&
-              rightOutputCurrentCount < 1) {
-            double spec = 126;
-            double lowerBound = globalInputOutputSpec!.rightIoutLowerbound;
-            double upperBound = globalInputOutputSpec!.rightIoutUpperbound;
-            rightOutputCurrentCount++;
-            rightOutputCurrent = InputOutputMeasurement(
-              spec: spec,
-              value: spcValue,
-              count: rightOutputCurrentCount,
-              key: spcDesc,
-              name: "Iout",
-              description: '',
-              judgement: (spcValue >= lowerBound && spcValue <= upperBound)
-                  ? Judgement.pass
-                  : Judgement.fail,
-            );
+          if (spcItem.contains("Left Plug")) {
+            if (leftOutputCurrentUpdateTime == null ||
+                spcUpdateDateTime!.isAfter(leftOutputCurrentUpdateTime!) ||
+                spcUpdateDateTime!.isAtSameMomentAs(leftOutputCurrentUpdateTime!)
+            ) {
+              if (leftOutputCurrentUpdateTime == null ||
+                  spcUpdateDateTime!.isAfter(leftOutputCurrentUpdateTime!)
+              ) {
+                leftOutputCurrentCount = 0;
+              }
+              leftOutputCurrentUpdateTime = spcUpdateDateTime; // 更新時間
+              if (leftOutputCurrentCount < 1) {
+                double spec = 126;
+                double lowerBound = globalInputOutputSpec!.leftIoutLowerbound;
+                double upperBound = globalInputOutputSpec!.leftIoutUpperbound;
+                leftOutputCurrentCount++;
+                leftOutputCurrent = InputOutputMeasurement(
+                  spec: spec,
+                  value: spcValue,
+                  count: leftOutputCurrentCount,
+                  key: spcDesc,
+                  name: "Iout",
+                  description: '',
+                  judgement: (spcValue >= lowerBound && spcValue <= upperBound)
+                      ? Judgement.pass
+                      : Judgement.fail,
+                );
+              }
+            }
+            else {
+              print('❌ 資料較舊，不覆蓋，資料時間: $spcUpdateDateTime，現有時間: $leftOutputCurrentUpdateTime');
+            }
+          } else if (spcItem.contains("Right Plug")) {
+            if (rightOutputCurrentUpdateTime == null ||
+                spcUpdateDateTime!.isAfter(rightOutputCurrentUpdateTime!) ||
+                spcUpdateDateTime!.isAtSameMomentAs(rightOutputCurrentUpdateTime!)
+            ) {
+              if (rightOutputCurrentUpdateTime == null ||
+                  spcUpdateDateTime!.isAfter(rightOutputCurrentUpdateTime!)
+              ) {
+                rightOutputCurrentCount = 0;
+              }
+              rightOutputCurrentUpdateTime = spcUpdateDateTime; // 更新時間
+              if (rightOutputCurrentCount < 1) {
+                double spec = 126;
+                double lowerBound = globalInputOutputSpec!.rightIoutLowerbound;
+                double upperBound = globalInputOutputSpec!.rightIoutUpperbound;
+                rightOutputCurrentCount++;
+                rightOutputCurrent = InputOutputMeasurement(
+                  spec: spec,
+                  value: spcValue,
+                  count: rightOutputCurrentCount,
+                  key: spcDesc,
+                  name: "Iout",
+                  description: '',
+                  judgement: (spcValue >= lowerBound && spcValue <= upperBound)
+                      ? Judgement.pass
+                      : Judgement.fail,
+                );
+              }
+            }
+            else {
+              print('❌ 資料較舊，不覆蓋，資料時間: $spcUpdateDateTime，現有時間: $rightOutputCurrentUpdateTime');
+            }
           }
         }
         else if (spcDesc.contains("Output_Power") && spcValue != 0) {
-          if (spcItem.contains("Left Plug") && leftTotalOutputPowerCount < 1) {
-            double spec = 120;
-            double lowerBound = globalInputOutputSpec!.leftPoutLowerbound;
-            double upperBound = globalInputOutputSpec!.leftPoutUpperbound;
-            leftTotalOutputPowerCount++;
+          if (spcItem.contains("Left Plug")) {
+            if (leftTotalOutputPowerUpdateTime == null ||
+                spcUpdateDateTime!.isAfter(leftTotalOutputPowerUpdateTime!) ||
+                spcUpdateDateTime!.isAtSameMomentAs(leftTotalOutputPowerUpdateTime!)
+            ) {
+              if (leftTotalOutputPowerUpdateTime == null ||
+                  spcUpdateDateTime!.isAfter(leftTotalOutputPowerUpdateTime!)
+              ) {
+                leftTotalOutputPowerCount = 0;
+              }
+              leftTotalOutputPowerUpdateTime = spcUpdateDateTime; // 更新時間
+              if (leftTotalOutputPowerCount < 1) {
+                double spec = 120;
+                double lowerBound = globalInputOutputSpec!.leftPoutLowerbound;
+                double upperBound = globalInputOutputSpec!.leftPoutUpperbound;
+                leftTotalOutputPowerCount++;
 
-            // 數值轉換：如果大於10萬則除以1000 (W -> kW)
-            double convertedValue =
+                // 數值轉換：如果大於10萬則除以1000 (W -> kW)
+                double convertedValue =
                 spcValue > 100000 ? spcValue / 1000 : spcValue;
 
-            leftTotalOutputPower = InputOutputMeasurement(
-              spec: spec,
-              value: convertedValue,
-              count: leftTotalOutputPowerCount,
-              key: spcDesc,
-              name: "Pout",
-              description: '',
-              judgement:
+                leftTotalOutputPower = InputOutputMeasurement(
+                  spec: spec,
+                  value: convertedValue,
+                  count: leftTotalOutputPowerCount,
+                  key: spcDesc,
+                  name: "Pout",
+                  description: '',
+                  judgement:
                   (convertedValue >= lowerBound && convertedValue <= upperBound)
                       ? Judgement.pass
                       : Judgement.fail,
-            );
-          } else if (spcItem.contains("Right Plug") &&
-              rightTotalOutputPowerCount < 1) {
-            double spec = 120;
-            double lowerBound = globalInputOutputSpec!.rightPoutLowerbound;
-            double upperBound = globalInputOutputSpec!.rightPoutUpperbound;
-            rightTotalOutputPowerCount++;
-
-            // 數值轉換：如果大於10萬則除以1000 (W -> kW)
-            double convertedValue =
-                spcValue > 100000 ? spcValue / 1000 : spcValue;
-
-            rightTotalOutputPower = InputOutputMeasurement(
-              spec: spec,
-              value: convertedValue,
-              count: rightTotalOutputPowerCount,
-              key: spcDesc,
-              name: "Pout",
-              description: '',
-              judgement:
-                  (convertedValue >= lowerBound && convertedValue <= upperBound)
-                      ? Judgement.pass
-                      : Judgement.fail,
-            );
+                );
+              }
+            }
+            else {
+              print('❌ 資料較舊，不覆蓋，資料時間: $spcUpdateDateTime，現有時間: $leftTotalOutputPowerUpdateTime');
+            }
           }
-        } else if (spcDesc.contains("EFF") && spcValue != 0) {
+          else if (spcItem.contains("Right Plug")) {
+            if (rightTotalOutputPowerUpdateTime == null ||
+                spcUpdateDateTime!.isAfter(rightTotalOutputPowerUpdateTime!) ||
+                spcUpdateDateTime!.isAtSameMomentAs(rightTotalOutputPowerUpdateTime!)
+            ) {
+              if (rightTotalOutputPowerUpdateTime == null ||
+                  spcUpdateDateTime!.isAfter(rightTotalOutputPowerUpdateTime!)
+              ) {
+                rightTotalOutputPowerCount = 0;
+              }
+              rightTotalOutputPowerUpdateTime = spcUpdateDateTime; // 更新時間
+              if (rightTotalOutputPowerCount < 1) {
+                double spec = 120;
+                double lowerBound = globalInputOutputSpec!.rightPoutLowerbound;
+                double upperBound = globalInputOutputSpec!.rightPoutUpperbound;
+                rightTotalOutputPowerCount++;
+
+                // 數值轉換：如果大於10萬則除以1000 (W -> kW)
+                double convertedValue =
+                spcValue > 100000 ? spcValue / 1000 : spcValue;
+
+                rightTotalOutputPower = InputOutputMeasurement(
+                  spec: spec,
+                  value: convertedValue,
+                  count: rightTotalOutputPowerCount,
+                  key: spcDesc,
+                  name: "Pout",
+                  description: '',
+                  judgement:
+                  (convertedValue >= lowerBound && convertedValue <= upperBound)
+                      ? Judgement.pass
+                      : Judgement.fail,
+                );
+              }
+            }
+            else {
+              print('❌ 資料較舊，不覆蓋，資料時間: $spcUpdateDateTime，現有時間: $rightTotalOutputPowerUpdateTime');
+            }
+          }
+        }
+        else if (spcDesc.contains("EFF") && spcValue != 0) {
           if (spcItem.contains("Left Plug") || spcItem.contains("Right Plug")) {
             if (spcItem.contains("Input Output Test-EFF")) {
-              double spec = globalBasicFunctionTestSpec!.eff;
-              if (effValue == 0){
-                effValue = spcValue;
+              if (effUpdateTime == null ||
+                  spcUpdateDateTime!.isAfter(effUpdateTime!) ||
+                  spcUpdateDateTime!.isAtSameMomentAs(effUpdateTime!)
+              ) {
+                if (effUpdateTime == null ||
+                    spcUpdateDateTime!.isAfter(effUpdateTime!)
+                ) {
+                  effValue = 0;
+                }
+                effUpdateTime = spcUpdateDateTime; // 更新時間
+                double spec = globalBasicFunctionTestSpec!.eff;
+                if (effValue == 0) {
+                  effValue = spcValue;
+                }
+                if (spcValue <= effValue) {
+                  effValue = spcValue;
+                  eff = BasicFunctionMeasurement(
+                    spec: spec,
+                    value: spcValue,
+                    count: effCount,
+                    key: spcDesc,
+                    name: "Efficiency",
+                    description: 'Spec: >94% \n Efficiency: {VALUE} %',
+                    judgement: spcValue > spec ? Judgement.pass : Judgement
+                        .fail,
+                    //defaultSpecText: _defaultSpec[1] ?? '>94%',
+                  );
+                }
               }
-              if (spcValue <= effValue) {
-                effValue = spcValue;
-                eff = BasicFunctionMeasurement(
-                  spec: spec,
-                  value: spcValue,
-                  count: effCount,
-                  key: spcDesc,
-                  name: "Efficiency",
-                  description: 'Spec: >94% \n Efficiency: {VALUE} %',
-                  judgement: spcValue > spec ? Judgement.pass : Judgement.fail,
-                  //defaultSpecText: _defaultSpec[1] ?? '>94%',
-                );
+              else {
+                print('❌ 資料較舊，不覆蓋，資料時間: $spcUpdateDateTime，現有時間: $effUpdateTime');
               }
             }
           }
-        } else if (spcDesc.contains("PowerFactor") && spcValue != 0) {
+        }
+        else if (spcDesc.contains("PowerFactor") && spcValue != 0) {
           if (spcItem.contains("Left Plug") || spcItem.contains("Right Plug")) {
             if (spcItem.contains("Input Output Test-PowerFactor")) {
-              double spec = globalBasicFunctionTestSpec!.pf;
-              if (powerFactorValue == 0){
-                powerFactorValue = spcValue;
+              if (powerFactorUpdateTime == null ||
+                  spcUpdateDateTime!.isAfter(powerFactorUpdateTime!) ||
+                  spcUpdateDateTime!.isAtSameMomentAs(powerFactorUpdateTime!)
+              ) {
+                if (powerFactorUpdateTime == null ||
+                    spcUpdateDateTime!.isAfter(powerFactorUpdateTime!)
+                ) {
+                  powerFactorValue = 0;
+                }
+                powerFactorUpdateTime = spcUpdateDateTime; // 更新時間
+                double spec = globalBasicFunctionTestSpec!.pf;
+                if (powerFactorValue == 0) {
+                  powerFactorValue = spcValue;
+                }
+                if (spcValue <= powerFactorValue) {
+                  powerFactorValue = spcValue;
+                  powerFactor = BasicFunctionMeasurement(
+                    spec: spec,
+                    value: spcValue,
+                    count: powerFactorCount,
+                    key: spcDesc,
+                    name: "Power Factor (PF)",
+                    description: 'Spec: ≧ 0.99 \n PF: {VALUE} %',
+                    judgement: spcValue >= spec ? Judgement.pass : Judgement
+                        .fail,
+                    // defaultSpecText: _defaultSpec[2] ?? '≧ 0.99',
+                  );
+                }
               }
-              if (spcValue <= powerFactorValue) {
-                powerFactorValue = spcValue;
-                powerFactor = BasicFunctionMeasurement(
-                  spec: spec,
-                  value: spcValue,
-                  count: powerFactorCount,
-                  key: spcDesc,
-                  name: "Power Factor (PF)",
-                  description: 'Spec: ≧ 0.99 \n PF: {VALUE} %',
-                  judgement: spcValue >= spec ? Judgement.pass : Judgement.fail,
-                  // defaultSpecText: _defaultSpec[2] ?? '≧ 0.99',
-                );
+              else {
+                print('❌ 資料較舊，不覆蓋，資料時間: $spcUpdateDateTime，現有時間: $powerFactorUpdateTime');
               }
             }
           }
-        } else if (spcDesc.contains("THD") && spcValue != 0) {
+        }
+        else if (spcDesc.contains("THD") && spcValue != 0) {
           if (spcItem.contains("Left Plug") || spcItem.contains("Right Plug")) {
             if (spcItem.contains("Input Output Test-THD_I")) {
-              double spec = globalBasicFunctionTestSpec!.thd;
-              if (powerFactorValue == 0){
-                thdValue = spcValue;
+              if (thdUpdateTime == null ||
+                  spcUpdateDateTime!.isAfter(thdUpdateTime!) ||
+                  spcUpdateDateTime!.isAtSameMomentAs(thdUpdateTime!)
+              ) {
+                if (thdUpdateTime == null ||
+                    spcUpdateDateTime!.isAfter(thdUpdateTime!)
+                ) {
+                  thdValue = 0;
+                }
+                thdUpdateTime = spcUpdateDateTime; // 更新時間
+                double spec = globalBasicFunctionTestSpec!.thd;
+                if (thdValue == 0) {
+                  thdValue = spcValue;
+                }
+                if (spcValue >= thdValue) {
+                  thdValue = spcValue;
+                  harmonic = BasicFunctionMeasurement(
+                    spec: spec,
+                    value: spcValue,
+                    count: thdCount,
+                    key: spcDesc,
+                    name: "Harmonic",
+                    description: 'Spec: <5% \n THD: {VALUE} %',
+                    judgement: spcValue < spec ? Judgement.pass : Judgement
+                        .fail,
+                    // defaultSpecText: _defaultSpec[3] ?? '<5%',
+                  );
+                }
               }
-              print('thdValue = $thdValue');
-              print('spcValue = $spcValue');
-              if (spcValue >= thdValue) {
-                thdValue = spcValue;
-                print('realValue = $thdValue');
-                harmonic = BasicFunctionMeasurement(
-                  spec: spec,
-                  value: spcValue,
-                  count: thdCount,
-                  key: spcDesc,
-                  name: "Harmonic",
-                  description: 'Spec: <5% \n THD: {VALUE} %',
-                  judgement: spcValue < spec ? Judgement.pass : Judgement.fail,
-                  // defaultSpecText: _defaultSpec[3] ?? '<5%',
-                );
+              else {
+                print('❌ 資料較舊，不覆蓋，資料時間: $spcUpdateDateTime，現有時間: $thdUpdateTime');
               }
             }
           }
-        } else if (spcDesc.contains("Comsuption_Input_Power") && spcValue != 0) {
+        }
+        else if (spcDesc.contains("Comsuption_Input_Power") && spcValue != 0) {
           if (spcItem.contains("Comsuption Power Test")) {
-            double spec = globalBasicFunctionTestSpec!.sp;
+            if (standbyTotalInputPowerUpdateTime == null ||
+                spcUpdateDateTime!.isAfter(standbyTotalInputPowerUpdateTime!) ||
+                spcUpdateDateTime!.isAtSameMomentAs(standbyTotalInputPowerUpdateTime!)
+            ) {
+              if (standbyTotalInputPowerUpdateTime == null ||
+                  spcUpdateDateTime!.isAfter(standbyTotalInputPowerUpdateTime!)
+              ) {
+                standbyTotalInputPowerCount = 0;
+              }
+              standbyTotalInputPowerUpdateTime = spcUpdateDateTime; // 更新時間
+              double spec = globalBasicFunctionTestSpec!.sp;
               standbyTotalInputPowerCount++;
               standbyTotalInputPower = BasicFunctionMeasurement(
                 spec: spec,
@@ -391,6 +669,10 @@ class InputOutputCharacteristics {
                 judgement: spcValue < spec ? Judgement.pass : Judgement.fail,
                 // defaultSpecText: _defaultSpec[4] ?? '<100W',
               );
+            }
+          }
+          else {
+            print('❌ 資料較舊，不覆蓋，資料時間: $spcUpdateDateTime，現有時間: $standbyTotalInputPowerUpdateTime');
           }
         }
       }

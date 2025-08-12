@@ -132,6 +132,47 @@ class _HomePageState extends State<HomePage> with LoadFileHelper<HomePage> {
             child: Text(context.tr('input_account_password')),
           ),
         ),
+        const SizedBox(height: 20),
+        // 離開按鈕
+        SizedBox(
+          width: 300,
+          height: 60,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              textStyle: const TextStyle(fontSize: 20),
+              backgroundColor: AppColors.primaryColor.withOpacity(0.1),
+            ),
+            onPressed: () async {
+              bool? shouldClose = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text(context.tr('exit_confirm_title')),
+                  content: Text(context.tr('exit_confirm_message')),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: Text(context.tr('cancel')),
+                    ),
+                    TextButton(
+                      style:
+                      TextButton.styleFrom(foregroundColor: Colors.red),
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: Text(context.tr('exit')),
+                    ),
+                  ],
+                ),
+              );
+
+              if (shouldClose == true) {
+                await windowManager.close();
+              }
+            },
+            child: Text(
+              context.tr('exit'),
+              style: const TextStyle(color: AppColors.darkBlueColor),
+            ),
+          ),
+        ),
       ],
     );
   }

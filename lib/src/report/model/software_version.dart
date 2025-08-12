@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 class SoftwareVersion {
   final List<Version> versions;
 
@@ -109,15 +111,39 @@ class SoftwareVersion {
       "LED Module": "未找到",
     };
 
+    final rfc1123Format = DateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", 'en_US');
+    DateTime? softwareVersionUpdateTime;
+
+    DateTime? parseRfc1123(String? input) {
+      if (input == null) return null;
+      try {
+        return rfc1123Format.parseUtc(input);
+      } catch (e) {
+        print('解析時間失敗: $e');
+        return null;
+      }
+    }
+
     for (var item in data) {
       String? spcDesc = item['SPC_DESC'];
       String? spcValue = item['SPC_VALUE'];  // 確保 spcValue 是 String 類型
+      String? spcUpdateTime = item['UPDATE_TIME'];
+      DateTime? spcUpdateDateTime = parseRfc1123(spcUpdateTime);
 
       if (spcDesc != null && spcValue != null) {
-        for (var key in results.keys) {
-          if (spcDesc.contains(key)) {
-            results[key] = spcValue.replaceAll("empty", "");  // 儲存為 String 類型
+        if (softwareVersionUpdateTime == null ||
+            spcUpdateDateTime!.isAfter(softwareVersionUpdateTime!) ||
+            spcUpdateDateTime!.isAtSameMomentAs(softwareVersionUpdateTime!)
+        ) {
+          softwareVersionUpdateTime = spcUpdateDateTime; // 更新時間
+          for (var key in results.keys) {
+            if (spcDesc.contains(key)) {
+              results[key] = spcValue.replaceAll("empty", ""); // 儲存為 String 類型
+            }
           }
+        }
+        else {
+          print('❌ 資料較舊，不覆蓋，資料時間: $spcUpdateDateTime，現有時間: $softwareVersionUpdateTime');
         }
       }
     }

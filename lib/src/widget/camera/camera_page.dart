@@ -580,6 +580,7 @@ class _CameraPageState extends State<CameraPage> with ImagePageHelper {
                       builder: (context) => ImagePickerPageNew(
                         packagingOrAttachment: widget.packagingOrAttachment,
                         sn: widget.sn,
+                        model: widget.model,
                       ),
                     ),
                   );

@@ -68,12 +68,12 @@ class _ImageGridState extends State<ImageGrid> {
           .toList();
 
       // 🖨️ 偵錯輸出：列出所有找到的檔案路徑
-      print("📂 掃描資料夾: ${directory.path}");
+      //print("📂 掃描資料夾: ${directory.path}");
       if (files.isEmpty) {
-        print("⚠️ 沒有找到任何圖片檔案");
+        //print("⚠️ 沒有找到任何圖片檔案");
       } else {
         for (var f in files) {
-          print("✅ 找到圖片: $f");
+          //print("✅ 找到圖片: $f");
         }
       }
 
@@ -114,7 +114,7 @@ class _ImageGridState extends State<ImageGrid> {
                     child: Builder(
                       builder: (context) {
                         final filePath = _imagePaths[index];
-                        print("📷 嘗試載入圖片: $filePath");
+                        //print("📷 嘗試載入圖片: $filePath");
                         return Image.file(
                           File(filePath),
                           fit: BoxFit.contain,

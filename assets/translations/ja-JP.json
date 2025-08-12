@@ -11,6 +11,7 @@
   "package_list": "梱包リスト",
   "attachment": "添付資料",
   "input_account_password": "権限管理",
+  "logout": "ログアウト",
   "input_sn_model": "SN入力",
   "qr_code_scan": "QRコードスキャン",
   "open_camera": "カメラをオンにする",

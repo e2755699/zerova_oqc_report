@@ -17,6 +17,7 @@
   "exit_confirm_title": "Confirm Exit",
   "exit_confirm_message": "Are you sure you want to exit?",
   "input_account_password": "Log in",
+  "logout": "Log out",
   "input_sn_model": "Input Information",
   "qr_code_scan": "QR Code",
   "open_camera": "Camera",
