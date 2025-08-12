@@ -11,7 +11,7 @@
   "package_list": "Kit parts",
   "attachment": "Attachment",
   "check_failed": "Failed",
-  "check_failed_message": "Some items failed (null or fail detected). \nPlease check again before submitting.",
+  "check_failed_message": "Some items failed. \nPlease check again before submitting.",
   "exit": "Exit",
   "close": "Close",
   "exit_confirm_title": "Confirm Exit",

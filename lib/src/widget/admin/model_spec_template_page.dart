@@ -13,6 +13,7 @@ import 'package:zerova_oqc_report/src/widget/admin/tabs/basic_function_test_tab.
 import 'package:zerova_oqc_report/src/widget/admin/tabs/hipot_test_tab.dart';
 import 'package:zerova_oqc_report/src/widget/admin/tabs/psu_serial_num_tab.dart';
 import 'package:zerova_oqc_report/src/widget/admin/tabs/package_list_tab.dart';
+import 'package:zerova_oqc_report/src/widget/admin/tabs/package_photo_manager_tab.dart';
 import 'package:zerova_oqc_report/src/widget/admin/tabs/photo_manager_tab.dart';
 
 class ModelSpecTemplatePage extends StatefulWidget {
@@ -43,7 +44,7 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 6, vsync: this);
+    _tabController = TabController(length: 7, vsync: this);
     _tabController!.addListener(_onTabChanged);
     _loadModelList();
   }
@@ -278,13 +279,20 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
 
       //bill4
       // 上傳比對照片
-      /*if (model != null) {
-        SharePointUploader(uploadOrDownload: 5, sn: '', model: model).startAuthorization(
+      if (model != null) {
+        await SharePointUploader(uploadOrDownload: 5, sn: '', model: model).startAuthorization(
           categoryTranslations: {
             "compare_photo": "Compare Photo ",
           },
         );
-      }*/
+      }
+      if (model != null) {
+        await SharePointUploader(uploadOrDownload: 8, sn: '', model: model).startAuthorization(
+          categoryTranslations: {
+            "compare_photo": "Compare Photo ",
+          },
+        );
+      }
 
       // 如果是新模型，添加到列表中
       if (_isNewModel && !_modelList.contains(model)) {
@@ -362,11 +370,11 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
 
       //bill5
       // 刪除比對照片
-      /*SharePointUploader(uploadOrDownload: 6, sn: '', model: _selectedModel!).startAuthorization(
+      SharePointUploader(uploadOrDownload: 6, sn: '', model: _selectedModel!).startAuthorization(
         categoryTranslations: {
           "compare_photo": "Compare Photo ",
         },
-      );*/
+      );
 
       // 檢查刪除結果
       if (deleteSpecsSuccess) {
@@ -520,6 +528,8 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
     );
   }
 
+  bool _isDuplicateModel = false; // 新增一個變數放在 State 裡
+
   Widget _buildModelSelector() {
     return Card(
       elevation: 4,
@@ -562,28 +572,62 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
                   ),
                 ] else ...[
                   Expanded(
-                    child: TextField(
-                      controller: _modelController,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: '輸入新模型名稱',
-                      ),
-                      onChanged: (value) {
-                        setState(() {
-                          // 這裡可以更新你想的變數或做其他處理
-                        });
-                      },
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextField(
+                          controller: _modelController,
+                          decoration: InputDecoration(
+                            border: const OutlineInputBorder(),
+                            labelText: '輸入新模型名稱',
+                            errorText: _isDuplicateModel ? '⚠️ 此模型已存在' : null,
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              _isDuplicateModel = _modelList.contains(value.trim());
+                            });
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 ],
                 const SizedBox(width: 16),
                 ElevatedButton.icon(
-                  onPressed: _toggleNewModelMode,
+                  onPressed: () {
+                    if (_isNewModel) {
+                      final newModel = _modelController.text.trim();
+                      final isDuplicate = _modelList.contains(newModel);
+
+                      if (isDuplicate) {
+                        setState(() {
+                          _isDuplicateModel = true;
+                        });
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('❌ 此模型名稱已存在，請輸入其他名稱'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                        return;
+                      }
+
+                      // 可以新增模型的邏輯放這邊
+                      setState(() {
+                        _modelList.add(newModel);
+                        _selectedModel = newModel;
+                        _isNewModel = false;
+                        _isDuplicateModel = false;
+                        _modelController.clear();
+                      });
+                    } else {
+                      _toggleNewModelMode();
+                    }
+                  },
                   icon: Icon(_isNewModel ? Icons.list : Icons.add),
                   label: Text(_isNewModel ? '選擇現有模型' : '新增模型'),
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   ),
                 ),
               ],
@@ -593,6 +637,7 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
       ),
     );
   }
+
 
   Widget _buildTabContent() {
     return Column(
@@ -605,7 +650,8 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
             Tab(text: '基本功能測試'),
             Tab(text: '耐壓測試'),
             Tab(text: '配件包'),
-            Tab(text: '上傳比對照片'),
+            Tab(text: '上傳配件包比對照片'),
+            Tab(text: '上傳外觀檢查比對照片'),
           ],
         ),
         SizedBox(
@@ -642,6 +688,10 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
                 onChanged: (newSpec) {
                   _packageListSpec = newSpec;
                 },
+              ),
+              PackagePhotoManagerTab(
+                selectedModel: _isNewModel ? _modelController.text : (_selectedModel ?? ''),
+                //onDeletedFilesChanged: onDeletedFilesUpdated,
               ),
               PhotoManagerTab(
                 selectedModel: _isNewModel ? _modelController.text : (_selectedModel ?? ''),

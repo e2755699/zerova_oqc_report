@@ -35,6 +35,11 @@ import 'package:zerova_oqc_report/src/report/spec/FailCountStore.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/oqc_model.dart';
 import 'package:zerova_oqc_report/src/report/spec/new_package_list_spec.dart.dart';
 import 'package:zerova_oqc_report/src/widget/common/table_failorpass.dart';
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:zerova_oqc_report/src/utils/image_path_helper.dart';
 
 class OqcReportPage extends StatefulWidget {
   const OqcReportPage({
@@ -48,7 +53,7 @@ class OqcReportPage extends StatefulWidget {
   State<OqcReportPage> createState() => _OqcReportPageState();
 }
 
-class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
+class _OqcReportPageState extends State<OqcReportPage> with WindowListener, ImagePageHelper {
   final TextEditingController _picController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
 
@@ -147,6 +152,193 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
     );
   }
 
+  Future<bool> deleteOQCField(String model, String sn) async {
+    const String projectId = 'oqcreport-87e5a';
+    const String apiKey = 'AIzaSyBzlul4mftI7HHJnj48I2aUs2nV154x0iI';
+
+    if (model.trim().isEmpty || sn.trim().isEmpty) {
+      print("❌ [deleteOQCField] model 或 sn 為空");
+      return false;
+    }
+
+    final encodedModel = Uri.encodeComponent(model.trim());
+    final encodedSn = Uri.encodeComponent(sn.trim());
+
+    final docUrl =
+        'https://firestore.googleapis.com/v1/projects/$projectId/databases/(default)/documents/todo/$encodedModel?key=$apiKey';
+
+    try {
+      // 先取得整個 document
+      final getResponse = await http.get(Uri.parse(docUrl));
+      if (getResponse.statusCode != 200) {
+        print("❌ [deleteOQCField] 取得文件失敗：${getResponse.statusCode}, ${getResponse.body}");
+        return false;
+      }
+
+      final docData = json.decode(getResponse.body);
+      final fields = docData['fields'] as Map<String, dynamic>?;
+
+      if (fields == null || fields.isEmpty) {
+        print("⚠️ [deleteOQCField] 文件已無欄位");
+        return true;
+      }
+
+      if (fields.length == 1 && fields.containsKey(sn)) {
+        // 如果是最後一筆，直接刪除整個 document
+        final deleteResponse = await http.delete(Uri.parse(docUrl));
+        if (deleteResponse.statusCode == 200) {
+          print("✅ [deleteOQCField] 已刪除整個 document：$model");
+          return true;
+        } else {
+          print("❌ [deleteOQCField] 刪除整個 document 失敗：${deleteResponse.statusCode}, ${deleteResponse.body}");
+          return false;
+        }
+      } else {
+        // 只刪除指定欄位
+        final patchUrl =
+            '$docUrl&updateMask.fieldPaths=$encodedSn';
+
+        final body = json.encode({
+          "fields": {
+            // 空代表移除該欄位
+          }
+        });
+
+        final patchResponse = await http.patch(
+          Uri.parse(patchUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: body,
+        );
+
+        if (patchResponse.statusCode == 200) {
+          print("✅ [deleteOQCField] 已刪除欄位：$sn");
+          return true;
+        } else {
+          print("❌ [deleteOQCField] 刪除欄位失敗：${patchResponse.statusCode}, ${patchResponse.body}");
+          return false;
+        }
+      }
+    } catch (e) {
+      print("❌ [deleteOQCField] 發生例外：$e");
+      return false;
+    }
+  }
+
+
+  Future<bool> areAllPhotosSelected(String sn) async {
+    // 1. 讀取配件包照片清單 (外部可直接呼叫 getUserComparePackagePath)
+    final packagePath = await getUserComparePackagePath(widget.oqcModel.model);
+    final packageDir = Directory(packagePath);
+    final packageFiles = packageDir.existsSync()
+        ? packageDir.listSync().whereType<File>().where((f) => isImageFile(f.path)).map((f) => f.path).toList()
+        : <String>[];
+
+    // 2. 讀取外觀檢查照片清單 (getUserComparePath)
+    final appearancePath = await getUserComparePath(widget.oqcModel.model);
+    final appearanceDir = Directory(appearancePath);
+    final appearanceFiles = appearanceDir.existsSync()
+        ? appearanceDir.listSync().whereType<File>().where((f) => isImageFile(f.path)).map((f) => f.path).toList()
+        : <String>[];
+
+    // 3. 讀取 SharedPreferences 的已選擇照片Map
+    final prefs = await SharedPreferences.getInstance();
+    final encoded = prefs.getString('pickedPhotoMap');
+    Map<String, String> pickedMap = {};
+    if (encoded != null) {
+      final decoded = jsonDecode(encoded);
+      pickedMap = Map<String, String>.from(decoded);
+    }
+
+    // 4. 判斷配件包照片全部都有被選
+    bool allPackageSelected = packageFiles.every((p) => pickedMap.containsKey(p));
+
+    // 5. 判斷外觀檢查照片全部都有被選
+    bool allAppearanceSelected = appearanceFiles.every((p) => pickedMap.containsKey(p));
+
+    return allPackageSelected && allAppearanceSelected;
+  }
+
+// 輔助判斷是否是圖片格式
+  bool isImageFile(String path) {
+    final ext = path.toLowerCase();
+    return ext.endsWith('.jpg') || ext.endsWith('.jpeg') || ext.endsWith('.png');
+  }
+  /// 讀取 SharedPreferences 的已選擇照片Map
+
+  Future<Map<String, String>> loadPickedPhotoMap(String model, String sn) async {
+    final prefs = await SharedPreferences.getInstance();
+    String key = 'pickedPhotoMap_${model}_$sn';  // 用 model+sn 當 key
+    final encoded = prefs.getString(key);
+    if (encoded != null) {
+      final decoded = jsonDecode(encoded);
+      return Map<String, String>.from(decoded);
+    }
+    return {};
+  }
+
+  /// 判斷配件包照片是否全部選擇
+  Future<bool> areAllPackagePhotosSelected(String model, String sn) async {
+    final packagePath = await getUserComparePackagePath(model);
+    final packageDir = Directory(packagePath);
+    final packageFiles = packageDir.existsSync()
+        ? packageDir
+        .listSync()
+        .whereType<File>()
+        .where((f) => isImageFile(f.path))
+        .map((f) => f.path)
+        .toList()
+        : <String>[];
+
+    final pickedMap = await loadPickedPhotoMap(model, sn);
+
+    return packageFiles.every((p) => pickedMap.containsKey(p));
+  }
+
+  /// 判斷外觀檢查照片是否全部選擇
+  Future<bool> areAllAppearancePhotosSelected(String model, String sn) async {
+    final appearancePath = await getUserComparePath(model);
+    final appearanceDir = Directory(appearancePath);
+    final appearanceFiles = appearanceDir.existsSync()
+        ? appearanceDir
+        .listSync()
+        .whereType<File>()
+        .where((f) => isImageFile(f.path))
+        .map((f) => f.path)
+        .toList()
+        : <String>[];
+    print('📦 需要比對的 appearanceFiles:');
+    appearanceFiles.forEach(print);
+
+    final pickedMap = await loadPickedPhotoMap(model, sn);
+
+    print('✅ pickedMap keys:');
+    pickedMap.keys.forEach(print);
+
+
+
+    return appearanceFiles.every((p) => pickedMap.containsKey(p));
+  }
+
+  Future<bool> areAllPackageCheckboxChecked(String sn) async {
+    final prefs = await SharedPreferences.getInstance();
+    final str = prefs.getString('checkbox_state_$sn');
+    if (str != null) {
+      final List decoded = jsonDecode(str);
+      for (var item in decoded) {
+        final name = item['name'];
+        final isChecked = item['isChecked'];
+        print('🔍 Checkbox "$name" isChecked = $isChecked');
+
+        if (isChecked != true) {
+          return false;
+        }
+      }
+      return true; // 所有都勾了
+    }
+    return false; // 找不到資料也視為 false
+  }
+
+
   @override
   Widget build(BuildContext context) {
     final currentLocale = context.locale;
@@ -158,7 +350,7 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
           List<String> failItems = [];
 
           //bill6
-          /*
+
           if (psuSNPassOrFail == false) {
             failItems.add(context.tr('psu_sn'));
           }
@@ -179,6 +371,17 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
           }
           if (hipotTestPassOrFail == false) {
             failItems.add(context.tr('hipot_test'));
+          }
+
+          final packagingCompleted = await areAllPackagePhotosSelected(widget.oqcModel.model, widget.oqcModel.sn);
+          final appearanceCompleted = await areAllAppearancePhotosSelected(widget.oqcModel.model, widget.oqcModel.sn);
+          final allBoxChecked = await areAllPackageCheckboxChecked(widget.oqcModel.sn);
+
+          if (!packagingCompleted || !allBoxChecked) {
+            failItems.add(context.tr('package_list'));
+          }
+          if (!appearanceCompleted) {
+            failItems.add(context.tr('attachment'));
           }
 
           if (failItems.isNotEmpty) {
@@ -204,7 +407,7 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
                 ),
                 actions: [
                   TextButton(
-                    child: const Text('OK'),
+                    child: const Text(    'OK'),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -213,11 +416,11 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
 
             return; // ❌ 不繼續執行
           }
-*/
+
 
           await _generateAndUploadPdf();
           //bill3
-          //startUpload(context);
+          startUpload(context);
           if (globalPsuSerialNumSpec != null) {
             final success = await FirebaseService().addOrUpdateSpec(
               model: widget.oqcModel.model, // 你需要確保這裡有正確的 model 名稱
@@ -365,6 +568,8 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener {
           }
 
 */
+          //bill9
+          deleteOQCField(widget.oqcModel.model, widget.oqcModel.sn);
 
           final tableNames = [
             'AppearanceStructureInspectionFunction',

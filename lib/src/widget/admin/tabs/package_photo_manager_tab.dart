@@ -4,16 +4,16 @@ import 'package:file_picker/file_picker.dart';
 import 'package:path/path.dart' as path;
 import 'package:zerova_oqc_report/src/repo/sharepoint_uploader.dart';
 
-class PhotoManagerTab extends StatefulWidget {
+class PackagePhotoManagerTab extends StatefulWidget {
   final String selectedModel;
 
-  const PhotoManagerTab({required this.selectedModel, Key? key}) : super(key: key);
+  const PackagePhotoManagerTab({required this.selectedModel, Key? key}) : super(key: key);
 
   @override
-  _PhotoManagerTabState createState() => _PhotoManagerTabState();
+  _PackagePhotoManagerTabState createState() => _PackagePhotoManagerTabState();
 }
 
-class _PhotoManagerTabState extends State<PhotoManagerTab> {
+class _PackagePhotoManagerTabState extends State<PackagePhotoManagerTab> {
   List<File> imageFiles = [];
   List<String> deletedFiles = [];
   Map<String, bool> selectedImages = {};
@@ -27,7 +27,7 @@ class _PhotoManagerTabState extends State<PhotoManagerTab> {
   }
 
   @override
-  void didUpdateWidget(PhotoManagerTab oldWidget) {
+  void didUpdateWidget(PackagePhotoManagerTab oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.selectedModel != widget.selectedModel) {
       initModelPathAndImages(); // 如果 model 有變，重新載入
@@ -54,7 +54,7 @@ class _PhotoManagerTabState extends State<PhotoManagerTab> {
     final String picturesPath = await getOrCreateUserZerovaPath();
 
     // 先嘗試用 model 建立路徑
-    String comparePath = path.join(picturesPath, 'Compare Pictures', model);
+    String comparePath = path.join(picturesPath, 'Compare Package Pictures', model);
     final directory = Directory(comparePath);
 
     // 如果資料夾不存在，直接建立
@@ -72,7 +72,7 @@ class _PhotoManagerTabState extends State<PhotoManagerTab> {
   }
 
   Future<void> downloadImages() async {
-    await SharePointUploader(uploadOrDownload: 4, sn: '', model: widget.selectedModel).startAuthorization(
+    await SharePointUploader(uploadOrDownload: 7, sn: '', model: widget.selectedModel).startAuthorization(
       categoryTranslations: {
         "packageing_photo": "Packageing Photo ",
         "appearance_photo": "Appearance Photo ",
@@ -160,7 +160,7 @@ class _PhotoManagerTabState extends State<PhotoManagerTab> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  '外觀檢查比對照片',
+                  '配件包比對照片',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 Spacer(),

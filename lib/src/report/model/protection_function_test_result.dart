@@ -4,7 +4,6 @@ import 'package:zerova_oqc_report/src/report/spec/hipot_test_spec.dart';
 class ProtectionFunctionTestResult {
   final HiPotTestResult hiPotTestResult;
   final SpecialFunctionTestResult specialFunctionTestResult;
-
   ProtectionFunctionTestResult({
     required this.hiPotTestResult,
     required this.specialFunctionTestResult,
@@ -41,7 +40,22 @@ class ProtectionFunctionTestResult {
     double emergencyFailCount = 0;
     double doorFailCount = 0;
     double groundFailCount = 0;
+    bool specialflag = true;
+    for (var item in data) {
+      String? spcDesc = item['SPC_DESC'];
+      String? spcItem = item['SPC_ITEM'];
+      String? spcValueStr = item['SPC_VALUE'];
+      String? spcResult = item['RESULT'];
+      double spcValue = double.tryParse(spcValueStr ?? "0") ?? 0;
 
+      if (spcDesc != null && spcItem != null && spcValue != 2770 && spcValue != 3310) {
+        if (spcItem.contains("Seq.4")) {
+          if (spcItem.contains("Data_5") || spcItem.contains("Data_6")) {
+            specialflag = false;
+          }
+        }
+      }
+    }
     for (var item in data) {
       String? spcDesc = item['SPC_DESC'];
       String? spcItem = item['SPC_ITEM'];
@@ -98,20 +112,53 @@ class ProtectionFunctionTestResult {
                   ? Judgement.pass
                   : Judgement.fail,
             );
-          } else if (spcItem.contains("Seq.4")) {
-            if (rightInsulationVoltageInputGroundValue > spcValue) {
-              rightInsulationVoltageInputGroundValue = spcValue/1000;
+            if(specialflag){
+              if (rightInsulationVoltageInputGroundValue > spcValue) {
+                rightInsulationVoltageInputGroundValue = spcValue / 1000;
+              }
+              rightInsulationVoltageInputGround = ProtectionFunctionMeasurement(
+                spec: spec,
+                value: rightInsulationVoltageInputGroundValue,
+                key: spcItem,
+                name: "IVIG",
+                description: '',
+                judgement: rightInsulationVoltageInputGroundValue < spec
+                    ? Judgement.pass
+                    : Judgement.fail,
+              );
             }
-            rightInsulationVoltageInputGround = ProtectionFunctionMeasurement(
-              spec: spec,
-              value: rightInsulationVoltageInputGroundValue,
-              key: spcItem,
-              name: "IVIG",
-              description: '',
-              judgement: rightInsulationVoltageInputGroundValue < spec
-                  ? Judgement.pass
-                  : Judgement.fail,
-            );
+          } else if (spcItem.contains("Seq.4")) {
+            if(specialflag) {
+              if (rightInsulationVoltageOutputGroundValue > spcValue) {
+                rightInsulationVoltageOutputGroundValue = spcValue / 1000;
+              }
+              rightInsulationVoltageOutputGround =
+                  ProtectionFunctionMeasurement(
+                    spec: spec,
+                    value: rightInsulationVoltageOutputGroundValue,
+                    key: spcItem,
+                    name: "IVOG",
+                    description: '',
+                    judgement: rightInsulationVoltageOutputGroundValue < spec
+                        ? Judgement.pass
+                        : Judgement.fail,
+                  );
+            }
+            else{
+              if (rightInsulationVoltageInputGroundValue > spcValue) {
+                rightInsulationVoltageInputGroundValue = spcValue / 1000;
+              }
+              rightInsulationVoltageInputGround = ProtectionFunctionMeasurement(
+                spec: spec,
+                value: rightInsulationVoltageInputGroundValue,
+                key: spcItem,
+                name: "IVIG",
+                description: '',
+                judgement: rightInsulationVoltageInputGroundValue < spec
+                    ? Judgement.pass
+                    : Judgement.fail,
+              );
+            }
           }
         }
         else if (spcItem.contains("Data_3")) {
@@ -131,19 +178,37 @@ class ProtectionFunctionTestResult {
                   : Judgement.fail,
             );
           } else if (spcItem.contains("Seq.4")) {
-            if (rightInsulationVoltageOutputGroundValue > spcValue) {
-              rightInsulationVoltageOutputGroundValue = spcValue/1000;
+            if(!specialflag) {
+              if (rightInsulationVoltageOutputGroundValue > spcValue) {
+                rightInsulationVoltageOutputGroundValue = spcValue / 1000;
+              }
+              rightInsulationVoltageOutputGround =
+                  ProtectionFunctionMeasurement(
+                    spec: spec,
+                    value: rightInsulationVoltageOutputGroundValue,
+                    key: spcItem,
+                    name: "IVOG",
+                    description: '',
+                    judgement: rightInsulationVoltageOutputGroundValue < spec
+                        ? Judgement.pass
+                        : Judgement.fail,
+                  );
             }
-            rightInsulationVoltageOutputGround = ProtectionFunctionMeasurement(
-              spec: spec,
-              value: rightInsulationVoltageOutputGroundValue,
-              key: spcItem,
-              name: "IVOG",
-              description: '',
-              judgement: rightInsulationVoltageOutputGroundValue < spec
-                  ? Judgement.pass
-                  : Judgement.fail,
-            );
+            else {
+              if (rightInsulationImpedanceInputOutputValue > spcValue) {
+                rightInsulationImpedanceInputOutputValue = spcValue;
+              }
+              rightInsulationImpedanceInputOutput = ProtectionFunctionMeasurement(
+                spec: spec,
+                value: rightInsulationImpedanceInputOutputValue,
+                key: spcItem,
+                name: "IIIO",
+                description: '',
+                judgement: rightInsulationImpedanceInputOutputValue > spec
+                    ? Judgement.pass
+                    : Judgement.fail,
+              );
+            }
           }
         }
         else if (spcItem.contains("Data_4")) {
@@ -163,19 +228,38 @@ class ProtectionFunctionTestResult {
                     : Judgement.fail,
               );
             } else if (spcItem.contains("Seq.4")) {
-              if (rightInsulationImpedanceInputOutputValue > spcValue) {
-                rightInsulationImpedanceInputOutputValue = spcValue;
+              if(!specialflag) {
+                if (rightInsulationImpedanceInputOutputValue > spcValue) {
+                  rightInsulationImpedanceInputOutputValue = spcValue;
+                }
+                rightInsulationImpedanceInputOutput =
+                    ProtectionFunctionMeasurement(
+                      spec: spec,
+                      value: rightInsulationImpedanceInputOutputValue,
+                      key: spcItem,
+                      name: "IIIO",
+                      description: '',
+                      judgement: rightInsulationImpedanceInputOutputValue > spec
+                          ? Judgement.pass
+                          : Judgement.fail,
+                    );
               }
-              rightInsulationImpedanceInputOutput = ProtectionFunctionMeasurement(
-                spec: spec,
-                value: rightInsulationImpedanceInputOutputValue,
-                key: spcItem,
-                name: "IIIO",
-                description: '',
-                judgement: rightInsulationImpedanceInputOutputValue > spec
-                    ? Judgement.pass
-                    : Judgement.fail,
-              );
+              else{
+                if (rightInsulationImpedanceOutputGroundValue > spcValue) {
+                  rightInsulationImpedanceOutputGroundValue = spcValue;
+                }
+                rightInsulationImpedanceOutputGround =
+                    ProtectionFunctionMeasurement(
+                      spec: spec,
+                      value: rightInsulationImpedanceOutputGroundValue,
+                      key: spcItem,
+                      name: "IIOG",
+                      description: '',
+                      judgement: rightInsulationImpedanceOutputGroundValue > spec
+                          ? Judgement.pass
+                          : Judgement.fail,
+                    );
+              }
             }
           }
         else if (spcItem.contains("Data_5")) {
@@ -194,6 +278,21 @@ class ProtectionFunctionTestResult {
                   ? Judgement.pass
                   : Judgement.fail,
             );
+            if(specialflag) {
+              if (rightInsulationImpedanceInputGroundValue > spcValue) {
+                rightInsulationImpedanceInputGroundValue = spcValue;
+              }
+              rightInsulationImpedanceInputGround = ProtectionFunctionMeasurement(
+                spec: spec,
+                value: rightInsulationImpedanceInputGroundValue,
+                key: spcItem,
+                name: "IIIG",
+                description: '',
+                judgement: rightInsulationImpedanceInputGroundValue > spec
+                    ? Judgement.pass
+                    : Judgement.fail,
+              );
+            }
           } else if (spcItem.contains("Seq.4")) {
             if (rightInsulationImpedanceInputGroundValue > spcValue) {
               rightInsulationImpedanceInputGroundValue = spcValue;
@@ -243,7 +342,7 @@ class ProtectionFunctionTestResult {
             );
           }
         }
-        else if (spcItem.contains("Emergency Test")) {
+        /*else if (spcItem.contains("Emergency Test")) {
           double spec = 3;
           if (spcResult == "FAIL") {
             emergencyFailCount++;
@@ -271,7 +370,32 @@ class ProtectionFunctionTestResult {
                 'While opening the door, the charger should stop charging immediately and shows alarm when the door open.',
             judgement: doorFailCount >= spec ? Judgement.fail : Judgement.pass,
           );
-        } else if (spcItem.contains("Ground Fault Test")) {
+        }*/
+        else if (spcItem.contains("EV Emulator Standby Power Test-Standby_Total_Input_Power")) {
+          double spec = 1;
+          if (spcResult == "FAIL") {
+            emergencyFailCount++;
+          }
+          emergencyTest = ProtectionFunctionMeasurement(
+              spec: spec,
+              value: emergencyFailCount.toDouble(),
+              key: "Emergency_Stop",
+              name: "Emergency Stop Function",
+              description:
+              'After the charger is powered on and charging normally, set the rated load to initiate charging. Once the charger reaches normal output current, press the emergency stop button. This action will disconnect the charger from the AC output and trigger an alarm.',
+              judgement:
+              emergencyFailCount >= spec ? Judgement.fail : Judgement.pass);
+          doorOpenTest = ProtectionFunctionMeasurement(
+            spec: spec,
+            value: doorFailCount.toDouble(),
+            key: "Door_Open",
+            name: "Door Open Function",
+            description:
+            'While opening the door, the charger should stop charging immediately and shows alarm when the door open.',
+            judgement: doorFailCount >= spec ? Judgement.fail : Judgement.pass,
+          );
+        }
+        else if (spcItem.contains("Ground Fault") && spcItem.contains("Test")) {
           double spec = 3;
           if (spcResult == "FAIL") {
             groundFailCount++;

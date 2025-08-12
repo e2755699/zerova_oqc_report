@@ -136,11 +136,11 @@ class PackageListTable extends StatelessWidget {
                         }
                       },
                     ),
-                  IconButton(
+                  /*IconButton(
                     icon: const Icon(Icons.cloud_download),
                     tooltip: 'Download to SharePoint',
                     onPressed: () {
-                      //someFunction();
+                      //someFunction();F
                       SharePointUploader(uploadOrDownload: 2, sn: sn, model: '').startAuthorization(
                         categoryTranslations: {
                           "packageing_photo": "Packageing Photo ",
@@ -149,7 +149,7 @@ class PackageListTable extends StatelessWidget {
                         },
                       );
                     },
-                  ),
+                  ),*/
                   CameraButton(
                     sn: sn,
                     model: model,
@@ -269,8 +269,8 @@ class PackageListTable extends StatelessWidget {
                   const SizedBox(height: 20),
                   ImageGrid(
                     imagePath: 'Selected Photos\\$sn\\Packaging',
-                    columns: 4,
-                    cellHeight: 100,
+                    columns: 2,
+                    cellHeight: 500,
                   ),
                 ],
               ),

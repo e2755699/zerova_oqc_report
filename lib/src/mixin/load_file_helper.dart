@@ -41,14 +41,20 @@ mixin LoadFileHelper<K extends StatefulWidget> on State<K> {
     }
 
     //bill2
-    /*SharePointUploader(uploadOrDownload: 1, sn: '', model: model).startAuthorization(
+    await SharePointUploader(uploadOrDownload: 1, sn: '', model: model).startAuthorization(
       categoryTranslations: {
         "packageing_photo": "Packageing Photo ",
         "appearance_photo": "Appearance Photo ",
         "oqc_report": "OQC Report ",
       },
-    );*/
-
+    );
+    await SharePointUploader(uploadOrDownload: 9, sn: '', model: model).startAuthorization(
+      categoryTranslations: {
+        "packageing_photo": "Packageing Photo ",
+        "appearance_photo": "Appearance Photo ",
+        "oqc_report": "OQC Report ",
+      },
+    );
     // 確保日誌目錄存在
     final logDirectory = Directory(logFilePath);
     if (!await logDirectory.exists()) {

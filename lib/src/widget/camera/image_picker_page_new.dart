@@ -121,7 +121,7 @@ class _ImagePickerPageNewState extends State<ImagePickerPageNew>
   @override
   Widget build(BuildContext context) {
     return MainLayout(
-      title: context.tr('select_multiple_images'),
+      title: context.tr('select_image'),
       body: Center(
         child: _imagePaths.isEmpty
             ? const CircularProgressIndicator()
@@ -156,7 +156,7 @@ class _ImagePickerPageNewState extends State<ImagePickerPageNew>
                               (context, error, stackTrace) =>
                           const Icon(Icons.error),
                         ),
-                        Positioned(
+                        /*Positioned(
                           top: 8,
                           right: 8,
                           child: Checkbox(
@@ -168,7 +168,7 @@ class _ImagePickerPageNewState extends State<ImagePickerPageNew>
                               setState(() {}); // 確保外部狀態也更新
                             },
                           ),
-                        ),
+                        ),*/
                       ],
                     ),
                   );
@@ -181,7 +181,7 @@ class _ImagePickerPageNewState extends State<ImagePickerPageNew>
           ),
         ),
       ),
-      floatingActionButton: Column(
+      /*floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
@@ -220,7 +220,7 @@ class _ImagePickerPageNewState extends State<ImagePickerPageNew>
             backgroundColor: AppColors.fabColor,
           ),
         ],
-      ),
+      ),*/
 
     );
   }

@@ -404,41 +404,45 @@ class _InputOutputCharacteristicsTableState
     for (final side
         in widget.inputOutputCharacteristics.inputOutputCharacteristicsSide) {
       debugPrint('judgement = ${side.judgement}');
+      debugPrint('outputCurrent.value = ${side.outputCurrent?.value}');
       if (side.judgement != Judgement.pass) {
         allPassed = false;
         break;
       }
     }
 
-    // 判斷是否有任何欄位為空
     bool allFieldsFilled = true;
-    final requiredKeys = [
-      'L_3',
-      'L_4',
-      'L_5',
-      'L_6',
-      'R_3',
-      'R_4',
-      'R_5',
-      'R_6'
-    ];
+    for (final side in widget.inputOutputCharacteristics.inputOutputCharacteristicsSide) {
+      final totalInputPowerValue = side.totalInputPower?.value;
+      final outputVoltageValue = side.outputVoltage?.value;
+      final outputCurrentValue = side.outputCurrent?.value;
+      final totalOutputPowerValue = side.totalOutputPower?.value;
 
-    for (final key in requiredKeys) {
-      final input = _cellInputs[key];
-      final controller = _cellControllers[key];
+      print('🔍 totalInputPower = $totalInputPowerValue');
+      print('🔍 outputVoltage = $outputVoltageValue');
+      print('🔍 outputCurrent = $outputCurrentValue');
+      print('🔍 totalOutputPower = $totalOutputPowerValue');
 
-      // 判斷來源：1. 使用者輸入的值（_cellInputs），2. 若無則讀取 TextEditingController 的文字
-      final valueStr = (input != null && input.trim().isNotEmpty)
-          ? input
-          : controller?.text ?? '';
-
-      // 去除空白後是否還是空字串（空值）
-      if (valueStr.trim().isEmpty) {
+      if (totalInputPowerValue == null) {
+        print('❌ totalInputPower 為空！');
         allFieldsFilled = false;
-        break;
+      }
+      if (outputVoltageValue == null) {
+        print('❌ outputVoltage 為空！');
+        allFieldsFilled = false;
+      }
+      if (outputCurrentValue == null) {
+        print('❌ outputCurrent 為空！');
+        allFieldsFilled = false;
+      }
+      if (totalOutputPowerValue == null) {
+        print('❌ totalOutputPower 為空！');
+        allFieldsFilled = false;
       }
     }
 
+    debugPrint('allPassed = $allPassed');
+    debugPrint('allFieldsFilled = $allFieldsFilled');
     // 更新全域變數
     ioCharacteristicsPassOrFail = allPassed && allFieldsFilled;
     debugPrint('ioCharacteristicsPassOrFail = $ioCharacteristicsPassOrFail');

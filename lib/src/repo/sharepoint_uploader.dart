@@ -144,7 +144,7 @@ class SharePointUploader {
               await downloadPhoneAttachmentPictures(token); // 下載參考照片
             }
             else if (uploadOrDownload == 4) {
-              await downloadComparePicturesForSpec(token); // 下載參考照片
+              await downloadComparePicturesForSpec(token); // 下載外觀檢查參考照片
             }
             else if (uploadOrDownload == 5) {
               // 上傳參考照片
@@ -158,6 +158,21 @@ class SharePointUploader {
             else if (uploadOrDownload == 6) {
               // 刪除比對資料夾
               await deleteModelFolderFromSharePoint(token); // 下載參考照片
+            }
+            else if (uploadOrDownload == 7) {
+              await downloadComparePackagePicturesForSpec(token); // 下載配件包參考照片
+            }
+            else if (uploadOrDownload == 8) {
+              // 上傳配件包參考照片
+              await uploadComparePackagePhotos(
+                  token,
+                      (current, total) => onProgressUpdate?.call(
+                      categoryTranslations['compare_photo'] ?? 'Compare Photo ',
+                      current,
+                      total));
+            }
+            else if (uploadOrDownload == 9) {
+              await downloadComparePackagePictures(token); // 下載參考照片
             }
             else {
               throw Exception("Didn't contain Upload Or Download");
@@ -269,7 +284,73 @@ class SharePointUploader {
       }
     }
   }
+  Future<void> uploadComparePackagePhotos(
+      String accessToken, Function(int, int) onProgressUpdate) async {
+    final String zerovaPath = await _getOrCreateUserZerovaPath();
+    final String modelFolderPath = path.join(zerovaPath, 'Compare Package Pictures', model);
+    final Directory modelDirectory = Directory(modelFolderPath);
 
+    if (!modelDirectory.existsSync()) {
+      print("資料夾不存在: $modelFolderPath");
+      return;
+    }
+
+    final List<File> files = modelDirectory
+        .listSync()
+        .whereType<File>()
+        .where((file) =>
+    file.path.toLowerCase().endsWith('.jpg') ||
+        file.path.toLowerCase().endsWith('.jpeg') ||
+        file.path.toLowerCase().endsWith('.png'))
+        .toList();
+
+    if (files.isEmpty) {
+      print("資料夾中沒有檔案: $modelFolderPath");
+      return;
+    }
+
+    // 統計檔案數量
+    int totalFiles = files.length;
+    int uploadedFiles = 0;
+    print("總共需要上傳 $totalFiles 張比對照片");
+
+    for (var file in files) {
+      String relativePath = path.relative(file.path, from: zerovaPath);
+      // 將相對路徑中的 "Compare Pictures" 替換成 "外觀參考照片"
+      relativePath = relativePath.replaceFirst('Compare Package Pictures', '配件包參考照片');
+      final String sharePointPath = "Jackalope/$relativePath";
+
+      final String uploadUrl =
+          "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/items/root:/$sharePointPath:/content";
+
+      try {
+        final response = await http.put(
+          Uri.parse(uploadUrl),
+          headers: {
+            "Authorization": "Bearer $accessToken",
+            "Content-Type": "application/octet-stream"
+          },
+          body: file.readAsBytesSync(),
+        );
+
+        // 顯示進度
+        double progress = (uploadedFiles + 1) / totalFiles * 100;
+        print(
+            "比對照片上傳進度: ${uploadedFiles + 1}/$totalFiles (${progress.toStringAsFixed(2)}%)");
+        uploadedFiles++;
+        onProgressUpdate(uploadedFiles, totalFiles);
+
+        if (response.statusCode == 201) {
+          print("檔案上傳成功: $relativePath");
+        } else {
+          print(
+              "檔案上傳失敗: $relativePath - ${response.statusCode} ${response.body}");
+        }
+      } catch (e) {
+        print("檔案上傳失敗: $relativePath - $e");
+      }
+    }
+  }
   Future<void> uploadAllPackagingPhotos(
       String accessToken, Function(int, int) onProgressUpdate) async {
     final String zerovaPath = await _getOrCreateUserZerovaPath();
@@ -536,6 +617,75 @@ class SharePointUploader {
     //記錄這個 model 已經下載過
     _downloadedModels.add(model);
   }
+  Future<void> downloadComparePackagePictures(String accessToken) async {
+    final String zerovaPath = await _getOrCreateUserZerovaPath();
+    String modelNameUsed = model; // 預設使用傳入的 model 名稱
+
+    // 建立初始要查詢的 SharePoint 路徑
+    String listFilesUrl =
+        "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/Jackalope/配件包參考照片/$model:/children";
+
+    // 發送查詢請求
+    var response = await http.get(
+      Uri.parse(listFilesUrl),
+      headers: {"Authorization": "Bearer $accessToken"},
+    );
+
+    // 如果找不到該 model 資料夾，改抓 default
+    if (response.statusCode == 404) {
+      print("找不到目錄 $model，改用 default");
+
+      modelNameUsed = "default";
+      listFilesUrl =
+      "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/Jackalope/配件包參考照片/default:/children";
+
+      response = await http.get(
+        Uri.parse(listFilesUrl),
+        headers: {"Authorization": "Bearer $accessToken"},
+      );
+
+      if (response.statusCode != 200) {
+        print("default 資料夾也找不到: ${response.statusCode} ${response.body}");
+        return;
+      }
+    }
+
+    // 成功取得檔案清單
+    final data = json.decode(response.body);
+    final List files = data['value'];
+
+    if (files.isEmpty) {
+      print("參考照片資料夾（$modelNameUsed）中沒有檔案");
+      return;
+    }
+
+    // 根據實際使用的 model 建立儲存路徑
+    final String directoryPath = path.join(zerovaPath, 'Compare Package Pictures', modelNameUsed);
+    final directory = Directory(directoryPath);
+    if (!directory.existsSync()) {
+      directory.createSync(recursive: true);
+    }
+
+    for (var file in files) {
+      final fileName = file['name'];
+      final downloadUrl = file['@microsoft.graph.downloadUrl'];
+
+      if (downloadUrl != null) {
+        try {
+          final fileResponse = await http.get(Uri.parse(downloadUrl));
+          final filePath = "${directory.path}/$fileName";
+          final localFile = File(filePath);
+          localFile.writeAsBytesSync(fileResponse.bodyBytes);
+
+          print("檔案下載成功: $fileName");
+        } catch (e) {
+          print("檔案下載失敗: $fileName - $e");
+        }
+      }
+    }
+    //記錄這個 model 已經下載過
+    _downloadedModels.add(model);
+  }
   Future<void> downloadComparePicturesForSpec(String accessToken) async {
     final String zerovaPath = await _getOrCreateUserZerovaPath();
     String modelNameUsed = model; // 預設使用傳入的 model 名稱
@@ -589,7 +739,59 @@ class SharePointUploader {
       }
     }
   }
+  Future<void> downloadComparePackagePicturesForSpec(String accessToken) async {
+    final String zerovaPath = await _getOrCreateUserZerovaPath();
+    String modelNameUsed = model; // 預設使用傳入的 model 名稱
 
+    // 建立初始要查詢的 SharePoint 路徑
+    String listFilesUrl =
+        "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/Jackalope/配件包參考照片/$model:/children";
+
+    // 發送查詢請求
+    var response = await http.get(
+      Uri.parse(listFilesUrl),
+      headers: {"Authorization": "Bearer $accessToken"},
+    );
+
+    if (response.statusCode != 200) {
+      print("找不到目錄 $model");
+      return;
+    }
+
+    // 成功取得檔案清單
+    final data = json.decode(response.body);
+    final List files = data['value'];
+
+    if (files.isEmpty) {
+      print("參考照片資料夾（$modelNameUsed）中沒有檔案");
+      return;
+    }
+
+    // 根據實際使用的 model 建立儲存路徑
+    final String directoryPath = path.join(zerovaPath, 'Compare Package Pictures', modelNameUsed);
+    final directory = Directory(directoryPath);
+    if (!directory.existsSync()) {
+      directory.createSync(recursive: true);
+    }
+
+    for (var file in files) {
+      final fileName = file['name'];
+      final downloadUrl = file['@microsoft.graph.downloadUrl'];
+
+      if (downloadUrl != null) {
+        try {
+          final fileResponse = await http.get(Uri.parse(downloadUrl));
+          final filePath = "${directory.path}/$fileName";
+          final localFile = File(filePath);
+          localFile.writeAsBytesSync(fileResponse.bodyBytes);
+
+          print("檔案下載成功: $fileName");
+        } catch (e) {
+          print("檔案下載失敗: $fileName - $e");
+        }
+      }
+    }
+  }
   Future<void> downloadPhoneAttachmentPictures(String accessToken) async {
     final String zerovaPath = await _getOrCreateUserZerovaPath();
     final String directoryPath = path.join(zerovaPath, 'All Photos/$sn/Attachment');

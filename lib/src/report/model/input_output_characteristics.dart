@@ -57,6 +57,11 @@ class InputOutputCharacteristics {
     double powerFactorCount = 0;
     double thdCount = 0;
     double standbyTotalInputPowerCount = 0;
+    double effValue = 0;
+    double powerFactorValue = 0;
+    double thdValue = 0;
+    double standbyTotalInputPowerValue = 0;
+
 
     for (var item in data) {
       String? spcDesc = item['SPC_DESC'];
@@ -66,7 +71,7 @@ class InputOutputCharacteristics {
 
       if (spcDesc != null && spcItem != null) {
         if (spcDesc.contains("Input_Voltage")) {
-          if (spcItem.contains("Left  Plug") && leftInputVoltageCount < 3) {
+          if (spcItem.contains("Left Plug") && leftInputVoltageCount < 3) {
             double spec = 220;
             double lowerBound = globalInputOutputSpec!.leftVinLowerbound;
             double upperBound = globalInputOutputSpec!.leftVinUpperbound;
@@ -101,7 +106,7 @@ class InputOutputCharacteristics {
             ));
           }
         } else if (spcDesc.contains("Input_Current")) {
-          if (spcItem.contains("Left  Plug") && leftInputCurrentCount < 3) {
+          if (spcItem.contains("Left Plug") && leftInputCurrentCount < 3) {
             double spec = 230;
             double lowerBound = globalInputOutputSpec!.leftIinLowerbound;
             double upperBound = globalInputOutputSpec!.leftIinUpperbound;
@@ -137,7 +142,7 @@ class InputOutputCharacteristics {
           }
         }
         else if (spcDesc == "Total_Input_Power" && spcValue != 0) {
-          if (spcItem.contains("Left  Plug") && leftTotalInputPowerCount < 1) {
+          if (spcItem.contains("Left Plug") && leftTotalInputPowerCount < 1) {
             double spec = 130;
             double lowerBound = globalInputOutputSpec!.leftPinLowerbound;
             double upperBound = globalInputOutputSpec!.leftPinUpperbound;
@@ -185,7 +190,7 @@ class InputOutputCharacteristics {
           }
         }
         else if (spcDesc.contains("Output_Voltage") && spcValue != 0) {
-          if (spcItem.contains("Left  Plug") && leftOutputVoltageCount < 1) {
+          if (spcItem.contains("Left Plug") && leftOutputVoltageCount < 1) {
             double spec = 950;
             double lowerBound = globalInputOutputSpec!.leftVoutLowerbound;
             double upperBound = globalInputOutputSpec!.leftVoutUpperbound;
@@ -221,7 +226,7 @@ class InputOutputCharacteristics {
           }
         }
         else if (spcDesc.contains("Output_Current") && spcValue != 0) {
-          if (spcItem.contains("Left  Plug") && leftOutputCurrentCount < 1) {
+          if (spcItem.contains("Left Plug") && leftOutputCurrentCount < 1) {
             double spec = 126;
             double lowerBound = globalInputOutputSpec!.leftIoutLowerbound;
             double upperBound = globalInputOutputSpec!.leftIoutUpperbound;
@@ -257,7 +262,7 @@ class InputOutputCharacteristics {
           }
         }
         else if (spcDesc.contains("Output_Power") && spcValue != 0) {
-          if (spcItem.contains("Left  Plug") && leftTotalOutputPowerCount < 1) {
+          if (spcItem.contains("Left Plug") && leftTotalOutputPowerCount < 1) {
             double spec = 120;
             double lowerBound = globalInputOutputSpec!.leftPoutLowerbound;
             double upperBound = globalInputOutputSpec!.leftPoutUpperbound;
@@ -303,65 +308,89 @@ class InputOutputCharacteristics {
                       : Judgement.fail,
             );
           }
-        } else if (spcDesc.contains("EFF")) {
-          double spec = globalBasicFunctionTestSpec!.eff;
-          if (effCount < 1) {
-            effCount++;
-            eff = BasicFunctionMeasurement(
-              spec: spec,
-              value: spcValue,
-              count: effCount,
-              key: spcDesc,
-              name: "Efficiency",
-              description: 'Spec: >94% \n Efficiency: {VALUE} %',
-              judgement: spcValue > spec ? Judgement.pass : Judgement.fail,
-              //defaultSpecText: _defaultSpec[1] ?? '>94%',
-            );
+        } else if (spcDesc.contains("EFF") && spcValue != 0) {
+          if (spcItem.contains("Left Plug") || spcItem.contains("Right Plug")) {
+            if (spcItem.contains("Input Output Test-EFF")) {
+              double spec = globalBasicFunctionTestSpec!.eff;
+              if (effValue == 0){
+                effValue = spcValue;
+              }
+              if (spcValue <= effValue) {
+                effValue = spcValue;
+                eff = BasicFunctionMeasurement(
+                  spec: spec,
+                  value: spcValue,
+                  count: effCount,
+                  key: spcDesc,
+                  name: "Efficiency",
+                  description: 'Spec: >94% \n Efficiency: {VALUE} %',
+                  judgement: spcValue > spec ? Judgement.pass : Judgement.fail,
+                  //defaultSpecText: _defaultSpec[1] ?? '>94%',
+                );
+              }
+            }
           }
-        } else if (spcDesc.contains("PowerFactor")) {
-          double spec = globalBasicFunctionTestSpec!.pf;
-          if (powerFactorCount < 1) {
-            powerFactorCount++;
-            powerFactor = BasicFunctionMeasurement(
-              spec: spec,
-              value: spcValue,
-              count: powerFactorCount,
-              key: spcDesc,
-              name: "Power Factor (PF)",
-              description: 'Spec: ≧ 0.99 \n PF: {VALUE} %',
-              judgement: spcValue >= spec ? Judgement.pass : Judgement.fail,
-              // defaultSpecText: _defaultSpec[2] ?? '≧ 0.99',
-            );
+        } else if (spcDesc.contains("PowerFactor") && spcValue != 0) {
+          if (spcItem.contains("Left Plug") || spcItem.contains("Right Plug")) {
+            if (spcItem.contains("Input Output Test-PowerFactor")) {
+              double spec = globalBasicFunctionTestSpec!.pf;
+              if (powerFactorValue == 0){
+                powerFactorValue = spcValue;
+              }
+              if (spcValue <= powerFactorValue) {
+                powerFactorValue = spcValue;
+                powerFactor = BasicFunctionMeasurement(
+                  spec: spec,
+                  value: spcValue,
+                  count: powerFactorCount,
+                  key: spcDesc,
+                  name: "Power Factor (PF)",
+                  description: 'Spec: ≧ 0.99 \n PF: {VALUE} %',
+                  judgement: spcValue >= spec ? Judgement.pass : Judgement.fail,
+                  // defaultSpecText: _defaultSpec[2] ?? '≧ 0.99',
+                );
+              }
+            }
           }
-        } else if (spcDesc.contains("THD")) {
-          double spec = globalBasicFunctionTestSpec!.thd;
-          if (thdCount < 1) {
-            thdCount++;
-            harmonic = BasicFunctionMeasurement(
-              spec: spec,
-              value: spcValue,
-              count: thdCount,
-              key: spcDesc,
-              name: "Harmonic",
-              description: 'Spec: <5% \n THD: {VALUE} %',
-              judgement: spcValue < spec ? Judgement.pass : Judgement.fail,
-              // defaultSpecText: _defaultSpec[3] ?? '<5%',
-            );
+        } else if (spcDesc.contains("THD") && spcValue != 0) {
+          if (spcItem.contains("Left Plug") || spcItem.contains("Right Plug")) {
+            if (spcItem.contains("Input Output Test-THD_I")) {
+              double spec = globalBasicFunctionTestSpec!.thd;
+              if (powerFactorValue == 0){
+                thdValue = spcValue;
+              }
+              print('thdValue = $thdValue');
+              print('spcValue = $spcValue');
+              if (spcValue >= thdValue) {
+                thdValue = spcValue;
+                print('realValue = $thdValue');
+                harmonic = BasicFunctionMeasurement(
+                  spec: spec,
+                  value: spcValue,
+                  count: thdCount,
+                  key: spcDesc,
+                  name: "Harmonic",
+                  description: 'Spec: <5% \n THD: {VALUE} %',
+                  judgement: spcValue < spec ? Judgement.pass : Judgement.fail,
+                  // defaultSpecText: _defaultSpec[3] ?? '<5%',
+                );
+              }
+            }
           }
-        } else if (spcDesc.contains("Standby_Total_Input_Power")) {
-          double spec = globalBasicFunctionTestSpec!.sp;
-          if (standbyTotalInputPowerCount < 1) {
-            standbyTotalInputPowerCount++;
-            standbyTotalInputPower = BasicFunctionMeasurement(
-              spec: spec,
-              value: spcValue,
-              count: standbyTotalInputPowerCount,
-              key: spcDesc,
-              name: "Standby Power",
-              description: 'Spec: <100W \n Standby Power: {VALUE} W',
-              judgement: spcValue < spec ? Judgement.pass : Judgement.fail,
-              // defaultSpecText: _defaultSpec[4] ?? '<100W',
-            );
+        } else if (spcDesc.contains("Comsuption_Input_Power") && spcValue != 0) {
+          if (spcItem.contains("Comsuption Power Test")) {
+            double spec = globalBasicFunctionTestSpec!.sp;
+              standbyTotalInputPowerCount++;
+              standbyTotalInputPower = BasicFunctionMeasurement(
+                spec: spec,
+                value: spcValue,
+                count: standbyTotalInputPowerCount,
+                key: spcDesc,
+                name: "Standby Power",
+                description: 'Spec: <100W \n Standby Power: {VALUE} W',
+                judgement: spcValue < spec ? Judgement.pass : Judgement.fail,
+                // defaultSpecText: _defaultSpec[4] ?? '<100W',
+              );
           }
         }
       }

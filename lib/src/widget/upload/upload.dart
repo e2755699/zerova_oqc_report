@@ -139,7 +139,7 @@ class _UploadProgressDialogState extends State<UploadProgressDialog> {
       actions: [
         ElevatedButton(
           onPressed: () => Navigator.pop(context), // 手動關閉視窗
-          child: Text(context.tr('close')),
+          child: Text(context.tr('ok')),
         ),
       ],
     );

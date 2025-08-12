@@ -111,12 +111,31 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
       }
     }
 
-    for (var i = 0; i < _reportValues.length; i++) {
-      final valueText = _reportValues[i][1]; // index 1 是使用者填的 value 欄位
-      if (valueText.trim().isEmpty) {
-        allFieldsFilled = false;
-        break;
-      }
+    final effValue = data.eff.value;
+    final powerFactorValue = data.powerFactor.value;
+    final harmonicValue = data.harmonic.value;
+    final standbyValue = data.standbyTotalInputPower.value;
+
+    print('🔍 effValue = $effValue');
+    print('🔍 powerFactorValue = $powerFactorValue');
+    print('🔍 harmonicValue = $harmonicValue');
+    print('🔍 standbyTotalInputPowerValue = $standbyValue');
+
+    if (effValue == null) {
+      print('❌ effValue 為空！');
+      allFieldsFilled = false;
+    }
+    if (powerFactorValue == null) {
+      print('❌ powerFactorValue 為空！');
+      allFieldsFilled = false;
+    }
+    if (harmonicValue == null) {
+      print('❌ harmonicValue 為空！');
+      allFieldsFilled = false;
+    }
+    if (standbyValue == null) {
+      print('❌ standbyTotalInputPower 為空！');
+      allFieldsFilled = false;
     }
 
     // 判斷結果
@@ -173,6 +192,7 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
         return [specValue, valueText];
       },
     );
+    _updateBasicFunctionTestPassOrFail();
   }
 
   @override

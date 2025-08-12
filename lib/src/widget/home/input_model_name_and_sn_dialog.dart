@@ -8,6 +8,12 @@ import 'package:zerova_oqc_report/src/report/model/package_list_result.dart';
 import 'package:zerova_oqc_report/src/report/spec/new_package_list_spec.dart.dart';
 import 'package:zerova_oqc_report/src/report/spec/package_list_spec.dart';
 
+enum InputMode {
+  dropdown,
+  manual,
+}
+InputMode? _selectedMode = InputMode.dropdown;
+
 class InputModelNameAndSnDialog extends StatefulWidget {
   const InputModelNameAndSnDialog({super.key});
 
@@ -249,108 +255,110 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // 🔽 Model Dropdown
-            DropdownButtonFormField<String>(
-              value: selectedModel,
-              isExpanded: true,
-              decoration: InputDecoration(
-                labelText: '選擇 Model (可選或手動輸入)',
-                prefixIcon: const Icon(Icons.list),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
-                filled: true,
-                fillColor: Colors.grey[100],
-              ),
-              items: modelToSnMap.keys.map((model) {
-                return DropdownMenuItem(
-                  value: model,
-                  child: Text(model),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedModel = value;
-                  selectedSn = null;
-                  _modelController.text = value ?? '';
-                });
-              },
+            // 🔘 切換模式按鈕
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _selectedMode = InputMode.dropdown;
+                    });
+                  },
+                  child: const Text('掃描清單'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _selectedMode = InputMode.manual;
+                    });
+                  },
+                  child: const Text('手動輸入Model/SN'),
+                ),
+              ],
             ),
             const SizedBox(height: 12),
 
-            // 🔽 SN Dropdown
-            DropdownButtonFormField<String>(
-              value: selectedSn,
-              isExpanded: true,
-              decoration: InputDecoration(
-                labelText: '選擇 SN (可選或手動輸入)',
-                prefixIcon: const Icon(Icons.numbers),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
-                filled: true,
-                fillColor: Colors.grey[100],
+            // 🔽 下拉選單模式
+            if (_selectedMode == InputMode.dropdown) ...[
+              DropdownButtonFormField<String>(
+                value: selectedModel,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  labelText: '選擇 Model',
+                  prefixIcon: const Icon(Icons.list),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
+                ),
+                items: modelToSnMap.keys.map((model) {
+                  return DropdownMenuItem(value: model, child: Text(model));
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedModel = value;
+                    selectedSn = null;
+                    _modelController.text = value ?? '';
+                  });
+                },
               ),
-              items: selectedModel == null
-                  ? []
-                  : modelToSnMap[selectedModel!]!.map((sn) {
-                return DropdownMenuItem(value: sn, child: Text(sn));
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedSn = value;
-                  _snController.text = value ?? '';
-                });
-              },
-            ),
-            const SizedBox(height: 16),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                value: selectedSn,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  labelText: '選擇 SN',
+                  prefixIcon: const Icon(Icons.numbers),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
+                ),
+                items: selectedModel == null
+                    ? []
+                    : modelToSnMap[selectedModel!]!
+                    .map((sn) => DropdownMenuItem(value: sn, child: Text(sn)))
+                    .toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedSn = value;
+                    _snController.text = value ?? '';
+                  });
+                },
+              ),
+            ],
 
-            // 📝 原本的手動輸入區塊 - Model
-            TextFormField(
-              enabled: !isLoading,
-              focusNode: _modelFocusNode,
-              controller: _modelController,
-              decoration: InputDecoration(
-                labelText: context.tr('model_name'),
-                hintText: context.tr('please_input_model_name'),
-                prefixIcon: const Icon(Icons.text_fields),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
-                filled: true,
-                fillColor: Colors.grey[200],
+            // 📝 手動輸入模式
+            if (_selectedMode == InputMode.manual) ...[
+              TextFormField(
+                enabled: !isLoading,
+                focusNode: _modelFocusNode,
+                controller: _modelController,
+                decoration: InputDecoration(
+                  labelText: context.tr('model_name'),
+                  hintText: context.tr('please_input_model_name'),
+                  prefixIcon: const Icon(Icons.text_fields),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
+                ),
+                validator: (value) =>
+                (value == null || value.isEmpty) ? context.tr('please_input_model_name') : null,
+                onFieldSubmitted: (_) => _snFocusNode.requestFocus(),
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return context.tr('please_input_model_name');
-                }
-                return null;
-              },
-              onFieldSubmitted: (value) {
-                _snFocusNode.requestFocus();
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // 📝 原本的手動輸入區塊 - SN
-            TextFormField(
-              enabled: !isLoading,
-              focusNode: _snFocusNode,
-              controller: _snController,
-              decoration: InputDecoration(
-                labelText: context.tr('sn'),
-                hintText: context.tr('please_input_sn'),
-                prefixIcon: const Icon(Icons.numbers),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
-                filled: true,
-                fillColor: Colors.grey[200],
+              const SizedBox(height: 12),
+              TextFormField(
+                enabled: !isLoading,
+                focusNode: _snFocusNode,
+                controller: _snController,
+                decoration: InputDecoration(
+                  labelText: context.tr('sn'),
+                  hintText: context.tr('please_input_sn'),
+                  prefixIcon: const Icon(Icons.numbers),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
+                ),
+                validator: (value) =>
+                (value == null || value.isEmpty) ? context.tr('please_input_sn') : null,
+                onFieldSubmitted: (_) async {
+                  if (!isLoading && _formKey.currentState!.validate()) {
+                    await _submitForm();
+                  }
+                },
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return context.tr('please_input_sn');
-                }
-                return null;
-              },
-              onFieldSubmitted: (value) async {
-                if (!isLoading && _formKey.currentState!.validate()) {
-                  await _submitForm();
-                }
-              },
-            ),
+            ],
 
             if (isLoading)
               Container(
@@ -365,28 +373,24 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
               ),
           ],
         ),
-
       ),
       actions: [
         TextButton(
-          onPressed: isLoading
-              ? null
-              : () {
-                  Navigator.of(context).pop();
-                },
+          onPressed: isLoading ? null : () => Navigator.of(context).pop(),
           child: Text(context.tr('cancel')),
         ),
         ElevatedButton(
           onPressed: isLoading
               ? null
               : () async {
-                  if (_formKey.currentState!.validate()) {
-                    await _submitForm();
-                  }
-                },
+            if (_formKey.currentState!.validate()) {
+              await _submitForm();
+            }
+          },
           child: Text(context.tr('submit')),
         ),
       ],
     );
   }
+
 }
