@@ -76,8 +76,8 @@ class ZerovaOqcReport extends StatelessWidget {
         final mq = MediaQuery.of(context);
         return MediaQuery(
           data: mq.copyWith(
-            // Lock app-wide text scaling to 125%
-            textScaler: const TextScaler.linear(1.25),
+            // Lock app-wide text scaling to 100%
+            textScaler: const TextScaler.linear(1.0),
           ),
           child: child ?? const SizedBox(),
         );

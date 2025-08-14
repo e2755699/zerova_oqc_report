@@ -164,7 +164,7 @@ class PackageListTable extends StatelessWidget {
                     valueListenable: items,
                     builder: (context, itemList, _) {
                       return Table(
-                        border: TableBorder.all(color: Colors.blue),
+                        border: TableBorder.all(color: AppColors.lightBlueColor),
                         children: [
                           const TableRow(
                             children: [

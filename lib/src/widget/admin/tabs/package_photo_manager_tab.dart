@@ -293,7 +293,7 @@ class _PackagePhotoManagerTabState extends State<PackagePhotoManagerTab> {
                                     ),
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(8),
-                                      child: Image.file(file, fit: BoxFit.cover),
+                                      child: Image.file(file, fit: BoxFit.contain),
                                     ),
                                   ),
                                 ),

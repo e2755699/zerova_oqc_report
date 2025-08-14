@@ -180,7 +180,7 @@ class _ImagePickerPageNewState extends State<ImagePickerPageNew>
                       children: [
                         Image.file(
                           File(imagePath),
-                          fit: BoxFit.cover,
+                          fit: BoxFit.contain,
                           errorBuilder: (context, error, stackTrace) =>
                           const Icon(Icons.error),
                         ),

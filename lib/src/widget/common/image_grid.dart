@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:zerova_oqc_report/src/widget/common/image_preview_dialog.dart';
+import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 import 'package:path/path.dart' as path;
 
 class ImageGrid extends StatefulWidget {
@@ -72,9 +73,7 @@ class _ImageGridState extends State<ImageGrid> {
       if (files.isEmpty) {
         //print("⚠️ 沒有找到任何圖片檔案");
       } else {
-        for (var f in files) {
-          //print("✅ 找到圖片: $f");
-        }
+        // files found; keeping silent to avoid verbose logs
       }
 
       setState(() {
@@ -97,7 +96,10 @@ class _ImageGridState extends State<ImageGrid> {
         ? (_imagePaths.length / widget.columns).ceil()
         : 2;
     return Table(
-      border: TableBorder.all(),
+      border: TableBorder.all(
+        color: AppColors.lightBlueColor,
+        width: 1,
+      ),
       children: List.generate(
         rows,
         (rowIndex) => TableRow(
@@ -122,7 +124,6 @@ class _ImageGridState extends State<ImageGrid> {
                       },
                     ),
                   ),
-
                 );
               }
               return SizedBox(height: widget.cellHeight);
