@@ -265,7 +265,7 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
                       _selectedMode = InputMode.dropdown;
                     });
                   },
-                  child: const Text('掃描清單'),
+                  child: Text(context.tr('search_list')),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -273,7 +273,7 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
                       _selectedMode = InputMode.manual;
                     });
                   },
-                  child: const Text('手動輸入Model/SN'),
+                  child: Text(context.tr('manual_input_model_sn')),
                 ),
               ],
             ),
@@ -285,7 +285,8 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
                 value: selectedModel,
                 isExpanded: true,
                 decoration: InputDecoration(
-                  labelText: '選擇 Model',
+                  labelText: context.tr('model_name'),
+                  hintText: context.tr('select_model'),
                   prefixIcon: const Icon(Icons.list),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
                 ),
@@ -305,7 +306,8 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
                 value: selectedSn,
                 isExpanded: true,
                 decoration: InputDecoration(
-                  labelText: '選擇 SN',
+                  labelText: context.tr('sn'),
+                  hintText: context.tr('select_sn'),
                   prefixIcon: const Icon(Icons.numbers),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
                 ),

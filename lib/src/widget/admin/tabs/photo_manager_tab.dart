@@ -72,6 +72,7 @@ class _PhotoManagerTabState extends State<PhotoManagerTab> {
   }
 
   Future<void> downloadImages() async {
+    //bill10
     await SharePointUploader(uploadOrDownload: 4, sn: '', model: widget.selectedModel).startAuthorization(
       categoryTranslations: {
         "packageing_photo": "Packageing Photo ",
@@ -170,7 +171,7 @@ class _PhotoManagerTabState extends State<PhotoManagerTab> {
                     ElevatedButton.icon(
                       onPressed: downloadImages,
                       icon: Icon(Icons.cloud_download),
-                      label: Text('下載照片'),
+                      label: Text('跟雲端同步'),
                     ),
                     ElevatedButton.icon(
                       onPressed: addImages,

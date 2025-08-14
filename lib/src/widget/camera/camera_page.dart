@@ -462,11 +462,11 @@ class _CameraPageState extends State<CameraPage> with ImagePageHelper {
       bool? confirm = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('‼️ 尚有未選擇的照片 ‼️', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-          content: const Text('您確定要返回上一頁嗎？'),
+          title: Text(context.tr('check_photo_message'), style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+          content: Text(context.tr('return_page_message')),
           actions: [
-            TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('否')),
-            TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('是')),
+            TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text(context.tr('no')),),
+            TextButton(onPressed: () => Navigator.of(context).pop(true), child: Text(context.tr('yes')),),
           ],
         ),
       );
@@ -532,7 +532,7 @@ class _CameraPageState extends State<CameraPage> with ImagePageHelper {
                           File(_pickedPhotoMap[_selectedImagePath]!),
                           fit: BoxFit.contain,
                         )
-                            : const Center(child: Text('尚未選擇照片')),
+                            : Center(child: Text(context.tr('no_photo_selected'))),
                       ),
                     ),
                   ),

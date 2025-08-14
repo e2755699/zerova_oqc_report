@@ -593,9 +593,17 @@ class SharePointUploader {
     // 根據實際使用的 model 建立儲存路徑
     final String directoryPath = path.join(zerovaPath, 'Compare Pictures', modelNameUsed);
     final directory = Directory(directoryPath);
-    if (!directory.existsSync()) {
-      directory.createSync(recursive: true);
+
+    // 清空舊照片（整個資料夾刪掉再重建）
+    if (directory.existsSync()) {
+      try {
+        directory.deleteSync(recursive: true);
+        print("已清空舊照片資料夾: $directoryPath");
+      } catch (e) {
+        print("清空舊照片失敗: $e");
+      }
     }
+    directory.createSync(recursive: true);
 
     for (var file in files) {
       final fileName = file['name'];
@@ -662,9 +670,17 @@ class SharePointUploader {
     // 根據實際使用的 model 建立儲存路徑
     final String directoryPath = path.join(zerovaPath, 'Compare Package Pictures', modelNameUsed);
     final directory = Directory(directoryPath);
-    if (!directory.existsSync()) {
-      directory.createSync(recursive: true);
+
+    // 清空舊照片（整個資料夾刪掉再重建）
+    if (directory.existsSync()) {
+      try {
+        directory.deleteSync(recursive: true);
+        print("已清空舊照片資料夾: $directoryPath");
+      } catch (e) {
+        print("清空舊照片失敗: $e");
+      }
     }
+    directory.createSync(recursive: true);
 
     for (var file in files) {
       final fileName = file['name'];
@@ -717,9 +733,17 @@ class SharePointUploader {
     // 根據實際使用的 model 建立儲存路徑
     final String directoryPath = path.join(zerovaPath, 'Compare Pictures', modelNameUsed);
     final directory = Directory(directoryPath);
-    if (!directory.existsSync()) {
-      directory.createSync(recursive: true);
+
+    // 清空舊照片（整個資料夾刪掉再重建）
+    if (directory.existsSync()) {
+      try {
+        directory.deleteSync(recursive: true);
+        print("已清空舊照片資料夾: $directoryPath");
+      } catch (e) {
+        print("清空舊照片失敗: $e");
+      }
     }
+    directory.createSync(recursive: true);
 
     for (var file in files) {
       final fileName = file['name'];
@@ -770,9 +794,17 @@ class SharePointUploader {
     // 根據實際使用的 model 建立儲存路徑
     final String directoryPath = path.join(zerovaPath, 'Compare Package Pictures', modelNameUsed);
     final directory = Directory(directoryPath);
-    if (!directory.existsSync()) {
-      directory.createSync(recursive: true);
+
+    // 清空舊照片（整個資料夾刪掉再重建）
+    if (directory.existsSync()) {
+      try {
+        directory.deleteSync(recursive: true);
+        print("已清空舊照片資料夾: $directoryPath");
+      } catch (e) {
+        print("清空舊照片失敗: $e");
+      }
     }
+    directory.createSync(recursive: true);
 
     for (var file in files) {
       final fileName = file['name'];
