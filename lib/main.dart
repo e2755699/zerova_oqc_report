@@ -4,9 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:zerova_oqc_report/route/app_router.dart';
-import 'package:zerova_oqc_report/src/repo/sharepoint_uploader.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
-import 'package:zerova_oqc_report/src/repo/firebase_service.dart';
 import 'src/config/config_manager.dart';
 
 void main() async {
@@ -75,7 +73,14 @@ class ZerovaOqcReport extends StatelessWidget {
       supportedLocales: context.supportedLocales,
       locale: context.locale,
       builder: (context, child) {
-        return child ?? const SizedBox();
+        final mq = MediaQuery.of(context);
+        return MediaQuery(
+          data: mq.copyWith(
+            // Lock app-wide text scaling to 125%
+            textScaler: const TextScaler.linear(1.25),
+          ),
+          child: child ?? const SizedBox(),
+        );
       },
     );
   }
