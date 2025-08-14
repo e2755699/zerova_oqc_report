@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:path/path.dart' as path;
 import '../config/config_manager.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SharePointUploader {
   final String clientId = ConfigManager.clientId;
@@ -157,7 +158,8 @@ class SharePointUploader {
             }
             else if (uploadOrDownload == 6) {
               // 刪除比對資料夾
-              await deleteModelFolderFromSharePoint(token); // 下載參考照片
+              //await deleteModelFolderFromSharePoint(token); // 刪除比對資料夾
+              await deleteTwoFoldersFromSharePoint(token); // 刪除比對資料夾
             }
             else if (uploadOrDownload == 7) {
               await downloadComparePackagePicturesForSpec(token); // 下載配件包參考照片
@@ -172,7 +174,13 @@ class SharePointUploader {
                       total));
             }
             else if (uploadOrDownload == 9) {
-              await downloadComparePackagePictures(token); // 下載參考照片
+              await downloadComparePackagePictures(token); // 下載配件包參考照片
+            }
+            else if (uploadOrDownload == 10) {
+              await deletePackageFolderFromSharePoint(token); // 刪除配件包參考照片
+            }
+            else if (uploadOrDownload == 11) {
+              await deleteAttachmentFolderFromSharePoint(token); // 刪除外觀參考照片
             }
             else {
               throw Exception("Didn't contain Upload Or Download");
@@ -585,11 +593,6 @@ class SharePointUploader {
     final data = json.decode(response.body);
     final List files = data['value'];
 
-    if (files.isEmpty) {
-      print("參考照片資料夾（$modelNameUsed）中沒有檔案");
-      return;
-    }
-
     // 根據實際使用的 model 建立儲存路徑
     final String directoryPath = path.join(zerovaPath, 'Compare Pictures', modelNameUsed);
     final directory = Directory(directoryPath);
@@ -605,20 +608,41 @@ class SharePointUploader {
     }
     directory.createSync(recursive: true);
 
+    if (files.isEmpty) {
+      print("參考照片資料夾（$modelNameUsed）中沒有檔案");
+      return;
+    }
+
     for (var file in files) {
       final fileName = file['name'];
       final downloadUrl = file['@microsoft.graph.downloadUrl'];
 
       if (downloadUrl != null) {
-        try {
-          final fileResponse = await http.get(Uri.parse(downloadUrl));
-          final filePath = "${directory.path}/$fileName";
-          final localFile = File(filePath);
-          localFile.writeAsBytesSync(fileResponse.bodyBytes);
+        int attempt = 0;
+        bool success = false;
+        while (attempt < 3 && !success) {
+          try {
+            final fileResponse = await http.get(Uri.parse(downloadUrl));
+            if (fileResponse.statusCode == 200) {
+              final filePath = "${directory.path}/$fileName";
+              final localFile = File(filePath);
+              localFile.writeAsBytesSync(fileResponse.bodyBytes);
 
-          print("檔案下載成功: $fileName");
-        } catch (e) {
-          print("檔案下載失敗: $fileName - $e");
+              print("檔案下載成功: $fileName");
+              success = true;
+            } else {
+              throw Exception("HTTP ${fileResponse.statusCode}");
+            }
+          } catch (e) {
+            attempt++;
+            print("檔案下載失敗 (第 $attempt 次重試): $fileName - $e");
+            if (attempt < 3) {
+              await Future.delayed(Duration(seconds: 2)); // 等 2 秒再重試
+            }
+          }
+        }
+        if (!success) {
+          print("檔案最終下載失敗: $fileName");
         }
       }
     }
@@ -662,11 +686,6 @@ class SharePointUploader {
     final data = json.decode(response.body);
     final List files = data['value'];
 
-    if (files.isEmpty) {
-      print("參考照片資料夾（$modelNameUsed）中沒有檔案");
-      return;
-    }
-
     // 根據實際使用的 model 建立儲存路徑
     final String directoryPath = path.join(zerovaPath, 'Compare Package Pictures', modelNameUsed);
     final directory = Directory(directoryPath);
@@ -682,20 +701,42 @@ class SharePointUploader {
     }
     directory.createSync(recursive: true);
 
+    if (files.isEmpty) {
+      print("參考照片資料夾（$modelNameUsed）中沒有檔案");
+      return;
+    }
+
     for (var file in files) {
       final fileName = file['name'];
       final downloadUrl = file['@microsoft.graph.downloadUrl'];
 
-      if (downloadUrl != null) {
-        try {
-          final fileResponse = await http.get(Uri.parse(downloadUrl));
-          final filePath = "${directory.path}/$fileName";
-          final localFile = File(filePath);
-          localFile.writeAsBytesSync(fileResponse.bodyBytes);
+      if (downloadUrl != null)
+      {
+        int attempt = 0;
+        bool success = false;
+        while (attempt < 3 && !success) {
+          try {
+            final fileResponse = await http.get(Uri.parse(downloadUrl));
 
-          print("檔案下載成功: $fileName");
-        } catch (e) {
-          print("檔案下載失敗: $fileName - $e");
+            if (fileResponse.statusCode == 200) {
+              final filePath = "${directory.path}/$fileName";
+              final localFile = File(filePath);
+              localFile.writeAsBytesSync(fileResponse.bodyBytes);
+              print("檔案下載成功: $fileName");
+              success = true;
+            } else {
+              throw Exception("HTTP ${fileResponse.statusCode}");
+            }
+          } catch (e) {
+            attempt++;
+            print("檔案下載失敗 (第 $attempt 次重試): $fileName - $e");
+            if (attempt < 3) {
+              await Future.delayed(Duration(seconds: 2)); // 等 2 秒再重試
+            }
+          }
+        }
+        if (!success) {
+          print("檔案最終下載失敗: $fileName");
         }
       }
     }
@@ -725,11 +766,6 @@ class SharePointUploader {
     final data = json.decode(response.body);
     final List files = data['value'];
 
-    if (files.isEmpty) {
-      print("參考照片資料夾（$modelNameUsed）中沒有檔案");
-      return;
-    }
-
     // 根據實際使用的 model 建立儲存路徑
     final String directoryPath = path.join(zerovaPath, 'Compare Pictures', modelNameUsed);
     final directory = Directory(directoryPath);
@@ -745,20 +781,41 @@ class SharePointUploader {
     }
     directory.createSync(recursive: true);
 
+    if (files.isEmpty) {
+      print("參考照片資料夾（$modelNameUsed）中沒有檔案");
+      return;
+    }
+
     for (var file in files) {
       final fileName = file['name'];
       final downloadUrl = file['@microsoft.graph.downloadUrl'];
 
       if (downloadUrl != null) {
-        try {
-          final fileResponse = await http.get(Uri.parse(downloadUrl));
-          final filePath = "${directory.path}/$fileName";
-          final localFile = File(filePath);
-          localFile.writeAsBytesSync(fileResponse.bodyBytes);
+        int attempt = 0;
+        bool success = false;
+        while (attempt < 3 && !success) {
+          try {
+            final fileResponse = await http.get(Uri.parse(downloadUrl));
+            if (fileResponse.statusCode == 200) {
+              final filePath = "${directory.path}/$fileName";
+              final localFile = File(filePath);
+              localFile.writeAsBytesSync(fileResponse.bodyBytes);
 
-          print("檔案下載成功: $fileName");
-        } catch (e) {
-          print("檔案下載失敗: $fileName - $e");
+              print("檔案下載成功: $fileName");
+              success = true;
+            } else {
+              throw Exception("HTTP ${fileResponse.statusCode}");
+            }
+          } catch (e) {
+            attempt++;
+            print("檔案下載失敗 (第 $attempt 次重試): $fileName - $e");
+            if (attempt < 3) {
+              await Future.delayed(Duration(seconds: 2)); // 等 2 秒再重試
+            }
+          }
+        }
+        if (!success) {
+          print("檔案最終下載失敗: $fileName");
         }
       }
     }
@@ -786,11 +843,6 @@ class SharePointUploader {
     final data = json.decode(response.body);
     final List files = data['value'];
 
-    if (files.isEmpty) {
-      print("參考照片資料夾（$modelNameUsed）中沒有檔案");
-      return;
-    }
-
     // 根據實際使用的 model 建立儲存路徑
     final String directoryPath = path.join(zerovaPath, 'Compare Package Pictures', modelNameUsed);
     final directory = Directory(directoryPath);
@@ -806,20 +858,41 @@ class SharePointUploader {
     }
     directory.createSync(recursive: true);
 
+    if (files.isEmpty) {
+      print("參考照片資料夾（$modelNameUsed）中沒有檔案");
+      return;
+    }
+
     for (var file in files) {
       final fileName = file['name'];
       final downloadUrl = file['@microsoft.graph.downloadUrl'];
 
       if (downloadUrl != null) {
-        try {
-          final fileResponse = await http.get(Uri.parse(downloadUrl));
-          final filePath = "${directory.path}/$fileName";
-          final localFile = File(filePath);
-          localFile.writeAsBytesSync(fileResponse.bodyBytes);
+        int attempt = 0;
+        bool success = false;
+        while (attempt < 3 && !success) {
+          try {
+            final fileResponse = await http.get(Uri.parse(downloadUrl));
+            if (fileResponse.statusCode == 200) {
+              final filePath = "${directory.path}/$fileName";
+              final localFile = File(filePath);
+              localFile.writeAsBytesSync(fileResponse.bodyBytes);
 
-          print("檔案下載成功: $fileName");
-        } catch (e) {
-          print("檔案下載失敗: $fileName - $e");
+              print("檔案下載成功: $fileName");
+              success = true;
+            } else {
+              throw Exception("HTTP ${fileResponse.statusCode}");
+            }
+          } catch (e) {
+            attempt++;
+            print("檔案下載失敗 (第 $attempt 次重試): $fileName - $e");
+            if (attempt < 3) {
+              await Future.delayed(Duration(seconds: 2)); // 等 2 秒再重試
+            }
+          }
+        }
+        if (!success) {
+          print("檔案最終下載失敗: $fileName");
         }
       }
     }
@@ -854,15 +927,31 @@ class SharePointUploader {
         final downloadUrl = file['@microsoft.graph.downloadUrl'];
 
         if (downloadUrl != null) {
-          try {
-            final fileResponse = await http.get(Uri.parse(downloadUrl));
-            final filePath = "${directory.path}/$fileName";
-            final localFile = File(filePath);
-            localFile.writeAsBytesSync(fileResponse.bodyBytes);
+          int attempt = 0;
+          bool success = false;
+          while (attempt < 3 && !success) {
+            try {
+              final fileResponse = await http.get(Uri.parse(downloadUrl));
+              if (fileResponse.statusCode == 200) {
+                final filePath = "${directory.path}/$fileName";
+                final localFile = File(filePath);
+                localFile.writeAsBytesSync(fileResponse.bodyBytes);
 
-            print("檔案下載成功: $fileName");
-          } catch (e) {
-            print("檔案下載失敗: $fileName - $e");
+                print("檔案下載成功: $fileName");
+                success = true;
+              } else {
+                throw Exception("HTTP ${fileResponse.statusCode}");
+              }
+            } catch (e) {
+              attempt++;
+              print("檔案下載失敗 (第 $attempt 次重試): $fileName - $e");
+              if (attempt < 3) {
+                await Future.delayed(Duration(seconds: 2)); // 等 2 秒再重試
+              }
+            }
+          }
+          if (!success) {
+            print("檔案最終下載失敗: $fileName");
           }
         }
       }
@@ -900,15 +989,31 @@ class SharePointUploader {
         final downloadUrl = file['@microsoft.graph.downloadUrl'];
 
         if (downloadUrl != null) {
-          try {
-            final fileResponse = await http.get(Uri.parse(downloadUrl));
-            final filePath = "${directory.path}/$fileName";
-            final localFile = File(filePath);
-            localFile.writeAsBytesSync(fileResponse.bodyBytes);
+          int attempt = 0;
+          bool success = false;
+          while (attempt < 3 && !success) {
+            try {
+              final fileResponse = await http.get(Uri.parse(downloadUrl));
+              if (fileResponse.statusCode == 200) {
+                final filePath = "${directory.path}/$fileName";
+                final localFile = File(filePath);
+                localFile.writeAsBytesSync(fileResponse.bodyBytes);
 
-            print("檔案下載成功: $fileName");
-          } catch (e) {
-            print("檔案下載失敗: $fileName - $e");
+                print("檔案下載成功: $fileName");
+                success = true;
+              } else {
+                throw Exception("HTTP ${fileResponse.statusCode}");
+              }
+            } catch (e) {
+              attempt++;
+              print("檔案下載失敗 (第 $attempt 次重試): $fileName - $e");
+              if (attempt < 3) {
+                await Future.delayed(Duration(seconds: 2)); // 等 2 秒再重試
+              }
+            }
+          }
+          if (!success) {
+            print("檔案最終下載失敗: $fileName");
           }
         }
       }
@@ -949,6 +1054,296 @@ class SharePointUploader {
       } catch (e) {
         print("刪除檔案發生錯誤: $sharePointPath - $e");
       }
+    }
+  }
+  Future<void> deleteTwoFoldersFromSharePoint(String accessToken) async {
+    final String folderPath1 = "Jackalope/外觀參考照片/$model";
+    final String folderPath2 = "Jackalope/配件包參考照片/$model";
+
+    final String batchUrl = "https://graph.microsoft.com/v1.0/\$batch";
+
+    final body = {
+      "requests": [
+        {
+          "id": "1",
+          "method": "DELETE",
+          "url": "/sites/$siteId/drives/$driveId/items/root:/$folderPath1"
+        },
+        {
+          "id": "2",
+          "method": "DELETE",
+          "url": "/sites/$siteId/drives/$driveId/items/root:/$folderPath2"
+        }
+      ]
+    };
+
+    int attempt = 0;
+    bool success = false;
+    while (attempt < 3 && !success) {
+      try {
+        final response = await http.post(
+          Uri.parse(batchUrl),
+          headers: {
+            "Authorization": "Bearer $accessToken",
+            "Content-Type": "application/json",
+          },
+          body: jsonEncode(body),
+        );
+
+        if (response.statusCode == 200) {
+          success = true;
+          print("批量刪除請求已發送");
+          print(response.body); // 會有兩個 DELETE 的結果
+        } else {
+          attempt++;
+          print("批量刪除失敗 (第 $attempt 次重試): ${response.statusCode} ${response.body}");
+          if (attempt < 3) await Future.delayed(Duration(seconds: 2));
+        }
+      } catch (e) {
+        attempt++;
+        print("批量刪除發生錯誤 (第 $attempt 次重試): $e");
+        if (attempt < 3) await Future.delayed(Duration(seconds: 2));
+      }
+    }
+
+  }
+  Future<void> deletePackageFolderFromSharePoint(String accessToken) async {
+    final String folderPath = "Jackalope/配件包參考照片/$model";
+
+    // Step 1: 從 SharedPreferences 撈刪除清單
+    final prefs = await SharedPreferences.getInstance();
+    List<String> fileNamesToDelete =
+        prefs.getStringList("deleted_package_photos") ?? [];
+
+    if (fileNamesToDelete.isEmpty) {
+      print("SharedPreferences 沒有要刪的檔案清單");
+      return;
+    }
+
+    // Step 2: 列出資料夾內檔案
+    final String listFilesUrl =
+        "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/$folderPath:/children";
+
+    try {
+      final listResponse = await http.get(
+        Uri.parse(listFilesUrl),
+        headers: {
+          "Authorization": "Bearer $accessToken",
+        },
+      );
+
+      if (listResponse.statusCode != 200) {
+        print("取得資料夾檔案清單失敗: ${listResponse.statusCode} ${listResponse.body}");
+        return;
+      }
+
+      final data = jsonDecode(listResponse.body);
+      final List items = data['value'];
+
+      if (items.isEmpty) {
+        print("資料夾內沒有檔案: $folderPath");
+        // 清空清單避免下次重複
+        await prefs.remove("deleted_package_photos");
+        return;
+      }
+
+      // Step 3: 篩選要刪除的檔案 ID（防呆：檔案不存在就移除）
+      final List<String> fileIdsToDelete = [];
+      final List<String> actuallyDeletedFileNames = [];
+
+      for (var fileName in List<String>.from(fileNamesToDelete)) {
+        final fileItem = items.firstWhere(
+              (item) => item['name'] == fileName,
+          orElse: () => null,
+        );
+
+        if (fileItem != null) {
+          fileIdsToDelete.add(fileItem['id']);
+          actuallyDeletedFileNames.add(fileName);
+        } else {
+          print("找不到檔案，跳過: $fileName");
+          fileNamesToDelete.remove(fileName); // 從清單移除不存在的檔案
+        }
+      }
+
+      if (fileIdsToDelete.isEmpty) {
+        print("沒有符合條件的檔案可刪除");
+        await prefs.setStringList("deleted_package_photos", fileNamesToDelete);
+        return;
+      }
+
+      // Step 4: 分批（每批最多 20 個檔案）
+      for (var i = 0; i < fileIdsToDelete.length; i += 20) {
+        final batch = fileIdsToDelete.skip(i).take(20).toList();
+        final batchRequests = {
+          "requests": List.generate(batch.length, (index) {
+            return {
+              "id": "${i + index}",
+              "method": "DELETE",
+              "url": "/sites/$siteId/drives/$driveId/items/${batch[index]}"
+            };
+          }),
+        };
+
+        // ===== 批次重試機制 =====
+        int attempt = 0;
+        bool success = false;
+        while (attempt < 3 && !success) {
+          final batchResponse = await http.post(
+            Uri.parse("https://graph.microsoft.com/v1.0/\$batch"),
+            headers: {
+              "Authorization": "Bearer $accessToken",
+              "Content-Type": "application/json",
+            },
+            body: jsonEncode(batchRequests),
+          );
+
+          if (batchResponse.statusCode == 200) {
+            success = true;
+            print("批次刪除完成: 第 ${i ~/ 20 + 1} 批");
+          } else {
+            attempt++;
+            print("批次刪除失敗 (第 $attempt 次重試): ${batchResponse.statusCode} ${batchResponse.body}");
+            if (attempt < 3) await Future.delayed(Duration(seconds: 2)); // =====  重試等待 =====
+          }
+        }
+        if (!success) {
+          print("批次刪除最終失敗: 第 ${i ~/ 20 + 1} 批"); // ===== 改動 3: 最終失敗 log =====
+        }
+      }
+
+      // Step 5: 刪除已處理過的檔案紀錄
+      fileNamesToDelete.removeWhere((name) => actuallyDeletedFileNames.contains(name));
+
+      if (fileNamesToDelete.isEmpty) {
+        await prefs.remove("deleted_package_photos");
+        print("SharedPreferences 刪除清單已清空");
+      } else {
+        await prefs.setStringList("deleted_package_photos", fileNamesToDelete);
+        print("更新 SharedPreferences 清單，剩餘未刪檔案: $fileNamesToDelete");
+      }
+
+    } catch (e) {
+      print("刪除資料夾內檔案時發生錯誤: $folderPath - $e");
+    }
+  }
+  Future<void> deleteAttachmentFolderFromSharePoint(String accessToken) async {
+    final String folderPath = "Jackalope/外觀參考照片/$model";
+
+    // Step 1: 從 SharedPreferences 撈刪除清單
+    final prefs = await SharedPreferences.getInstance();
+    List<String> fileNamesToDelete =
+        prefs.getStringList("deleted_attachment_photos") ?? [];
+
+    if (fileNamesToDelete.isEmpty) {
+      print("SharedPreferences 沒有要刪的檔案清單");
+      return;
+    }
+
+    // Step 2: 列出資料夾內檔案
+    final String listFilesUrl =
+        "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/$folderPath:/children";
+
+    try {
+      final listResponse = await http.get(
+        Uri.parse(listFilesUrl),
+        headers: {
+          "Authorization": "Bearer $accessToken",
+        },
+      );
+
+      if (listResponse.statusCode != 200) {
+        print("取得資料夾檔案清單失敗: ${listResponse.statusCode} ${listResponse.body}");
+        return;
+      }
+
+      final data = jsonDecode(listResponse.body);
+      final List items = data['value'];
+
+      if (items.isEmpty) {
+        print("資料夾內沒有檔案: $folderPath");
+        // 清空清單避免下次重複
+        await prefs.remove("deleted_attachment_photos");
+        return;
+      }
+
+      // Step 3: 篩選要刪除的檔案 ID（防呆：檔案不存在就移除）
+      final List<String> fileIdsToDelete = [];
+      final List<String> actuallyDeletedFileNames = [];
+
+      for (var fileName in List<String>.from(fileNamesToDelete)) {
+        final fileItem = items.firstWhere(
+              (item) => item['name'] == fileName,
+          orElse: () => null,
+        );
+
+        if (fileItem != null) {
+          fileIdsToDelete.add(fileItem['id']);
+          actuallyDeletedFileNames.add(fileName);
+        } else {
+          print("找不到檔案，跳過: $fileName");
+          fileNamesToDelete.remove(fileName); // 從清單移除不存在的檔案
+        }
+      }
+
+      if (fileIdsToDelete.isEmpty) {
+        print("沒有符合條件的檔案可刪除");
+        await prefs.setStringList("deleted_attachment_photos", fileNamesToDelete);
+        return;
+      }
+
+      // Step 4: 分批（每批最多 20 個檔案）
+      for (var i = 0; i < fileIdsToDelete.length; i += 20) {
+        final batch = fileIdsToDelete.skip(i).take(20).toList();
+        final batchRequests = {
+          "requests": List.generate(batch.length, (index) {
+            return {
+              "id": "${i + index}",
+              "method": "DELETE",
+              "url": "/sites/$siteId/drives/$driveId/items/${batch[index]}"
+            };
+          }),
+        };
+        // ===== 批次重試機制 =====
+        int attempt = 0;
+        bool success = false;
+        while (attempt < 3 && !success) {
+          final batchResponse = await http.post(
+            Uri.parse("https://graph.microsoft.com/v1.0/\$batch"),
+            headers: {
+              "Authorization": "Bearer $accessToken",
+              "Content-Type": "application/json",
+            },
+            body: jsonEncode(batchRequests),
+          );
+
+          if (batchResponse.statusCode == 200) {
+            success = true;
+            print("批次刪除完成: 第 ${i ~/ 20 + 1} 批");
+          } else {
+            attempt++;
+            print("批次刪除失敗 (第 $attempt 次重試): ${batchResponse.statusCode} ${batchResponse.body}");
+            if (attempt < 3) await Future.delayed(Duration(seconds: 2)); // ===== 重試等待 =====
+          }
+        }
+        if (!success) {
+          print("批次刪除最終失敗: 第 ${i ~/ 20 + 1} 批"); // ===== 最終失敗 log =====
+        }
+      }
+
+      // Step 5: 刪除已處理過的檔案紀錄
+      fileNamesToDelete.removeWhere((name) => actuallyDeletedFileNames.contains(name));
+
+      if (fileNamesToDelete.isEmpty) {
+        await prefs.remove("deleted_attachment_photos");
+        print("SharedPreferences 刪除清單已清空");
+      } else {
+        await prefs.setStringList("deleted_attachment_photos", fileNamesToDelete);
+        print("更新 SharedPreferences 清單，剩餘未刪檔案: $fileNamesToDelete");
+      }
+
+    } catch (e) {
+      print("刪除資料夾內檔案時發生錯誤: $folderPath - $e");
     }
   }
   Future<void> deleteModelFolderFromSharePoint(String accessToken) async {

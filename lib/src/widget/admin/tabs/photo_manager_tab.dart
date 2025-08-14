@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path/path.dart' as path;
 import 'package:zerova_oqc_report/src/repo/sharepoint_uploader.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PhotoManagerTab extends StatefulWidget {
   final String selectedModel;
@@ -19,6 +20,7 @@ class _PhotoManagerTabState extends State<PhotoManagerTab> {
   Map<String, bool> selectedImages = {};
 
   String? modelPath;
+  bool isDeleteMode = false; // 新增刪除模式狀態
 
   @override
   void initState() {
@@ -124,11 +126,39 @@ class _PhotoManagerTabState extends State<PhotoManagerTab> {
     for (var fileEntry in selectedImages.entries) {
       if (fileEntry.value) {
         await File(fileEntry.key).delete();
-        deletedFiles.add(path.basename(fileEntry.key));  // 累積刪除的檔名
+        deletedFiles.add(path.basename(fileEntry.key));
       }
     }
+
+    // 存到 SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    final existingList = prefs.getStringList('deleted_attachment_photos') ?? [];
+    final updatedList = {...existingList, ...deletedFiles}.toList(); // 用 Set 去重複
+    await prefs.setStringList('deleted_attachment_photos', updatedList);
+
+    // 刪除完後關閉刪除模式
+    setState(() {
+      isDeleteMode = false;
+    });
     await loadImages();
     print("累積刪除的檔案: $deletedFiles");
+
+    //bill13
+    SharePointUploader(uploadOrDownload: 11, sn: '', model: widget.selectedModel).startAuthorization(
+      categoryTranslations: {
+        "appearance_photo": "Appearance Photo ",
+      },
+    );
+  }
+
+  void toggleDeleteMode() {
+    setState(() {
+      isDeleteMode = !isDeleteMode;
+      if (!isDeleteMode) {
+        // 退出刪除模式時清空選取
+        selectedImages.updateAll((key, value) => false);
+      }
+    });
   }
 
   void selectAllImages() {
@@ -178,12 +208,19 @@ class _PhotoManagerTabState extends State<PhotoManagerTab> {
                       icon: Icon(Icons.add),
                       label: Text('新增照片'),
                     ),
-                    /*ElevatedButton.icon(
-                      onPressed: deleteSelectedImages,
-                      icon: Icon(Icons.delete),
-                      label: Text('刪除照片'),
-                    ),
                     ElevatedButton.icon(
+                      onPressed: toggleDeleteMode,
+                      icon: Icon(Icons.delete),
+                      label: Text(isDeleteMode ? '取消刪除模式' : '刪除照片'),
+                    ),
+                    if (isDeleteMode)
+                      ElevatedButton.icon(
+                        onPressed: deleteSelectedImages,
+                        icon: Icon(Icons.check),
+                        label: Text('確認刪除'),
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                      ),
+                    /*ElevatedButton.icon(
                       onPressed: selectAllImages,
                       icon: Icon(Icons.select_all),
                       label: Text('一鍵全選'),
@@ -259,8 +296,9 @@ class _PhotoManagerTabState extends State<PhotoManagerTab> {
                                     ),
                                   ),
                                 ),
-                                //照片勾選框
-                                /*Positioned(
+                                // 只在刪除模式下顯示勾選框
+                                if (isDeleteMode)
+                                Positioned(
                                   top: 5,
                                   right: 5,
                                   child: Checkbox(
@@ -276,7 +314,7 @@ class _PhotoManagerTabState extends State<PhotoManagerTab> {
                                     shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(2)),
                                   ),
-                                ),*/
+                                ),
                               ],
                             ),
                           ),
