@@ -41,7 +41,8 @@ class ImageUtils {
                       padding: const pw.EdgeInsets.all(5),
                       child: pw.Image(
                         image,
-                        fit: pw.BoxFit.fitWidth,
+                        // Use contain to preserve aspect ratio and avoid cropping
+                        fit: pw.BoxFit.contain,
                       ),
                     ),
                   ),
