@@ -19,9 +19,16 @@ import 'package:zerova_oqc_report/src/utils/image_utils.dart';
 import 'package:zerova_oqc_report/src/report/spec/psu_serial_numbers_spec.dart';
 import 'package:zerova_oqc_report/src/report/spec/input_output_characteristics_spec.dart';
 import 'package:zerova_oqc_report/src/report/spec/hipot_test_spec.dart';
-import 'package:zerova_oqc_report/src/report/spec/package_list_spec.dart';
 
 class PdfGenerator {
+  // Common constants for consistent styling
+  static const double _defaultFontSize = 12.0;
+  static const double _titleFontSize = 16.0;
+  static const double _coverTitleFontSize = 24.0;
+  static const double _coverSubtitleFontSize = 20.0;
+  static const double _coverModelFontSize = 18.0;
+  static const double _smallFontSize = 8.0;
+
   static Future<pw.Document> generateOqcReport({
     required String modelName,
     required String serialNumber,
@@ -58,7 +65,7 @@ class PdfGenerator {
               pw.Text(
                 'ZEROVA TECHNOLOGIES Co., Ltd.',
                 style: pw.TextStyle(
-                  fontSize: 24,
+                  fontSize: _coverTitleFontSize,
                   fontWeight: pw.FontWeight.bold,
                   font: font,
                 ),
@@ -68,7 +75,7 @@ class PdfGenerator {
                 'Electric Vehicle DC Charger\nOutgoing Quality Control Report',
                 textAlign: pw.TextAlign.center,
                 style: pw.TextStyle(
-                  fontSize: 20,
+                  fontSize: _coverSubtitleFontSize,
                   fontWeight: pw.FontWeight.bold,
                   font: font,
                 ),
@@ -77,7 +84,7 @@ class PdfGenerator {
               pw.Text(
                 'DS Series',
                 style: pw.TextStyle(
-                  fontSize: 18,
+                  fontSize: _coverModelFontSize,
                   fontWeight: pw.FontWeight.bold,
                   font: font,
                 ),
@@ -86,14 +93,14 @@ class PdfGenerator {
               pw.Text(
                 'Model Name: $modelName',
                 style: pw.TextStyle(
-                  fontSize: 16,
+                  fontSize: _defaultFontSize,
                   font: font,
                 ),
               ),
               pw.Text(
                 'SN: $serialNumber',
                 style: pw.TextStyle(
-                  fontSize: 16,
+                  fontSize: _defaultFontSize,
                   font: font,
                 ),
               ),
@@ -103,20 +110,32 @@ class PdfGenerator {
       ),
     );
 
-    if (psuSerialNumbers != null) {
+    if (psuSerialNumbers != null || psuSerialNumbers!.psuSN.isNotEmpty) {
       pdf.addPage(
         pw.MultiPage(
           pageFormat: PdfPageFormat.a4,
           build: (context) => [
             _buildPsuSerialNumbersTable(psuSerialNumbers, font),
-            //pw.SizedBox(height: 80),
           ],
+          footer: (context) => pw.Container(
+            alignment: pw.Alignment.center,
+            padding: const pw.EdgeInsets.only(top: 20),
+            child: pw.Text(
+              '${context.pageNumber} / ${context.pagesCount}',
+              style: pw.TextStyle(
+                fontSize: _smallFontSize,
+                font: font,
+              ),
+            ),
+          ),
         ),
       );
     }
 
-    addPage(pdf, _buildSoftwareVersionTable(softwareVersion!, font));
-    addPage(pdf, _buildAppearanceInspectionTable(testFunction!, font));
+    if (softwareVersion != null || softwareVersion!.versions.isNotEmpty) {
+      addPage(pdf, _buildSoftwareVersionTable(softwareVersion, font), font);
+    }
+    addPage(pdf, _buildAppearanceInspectionTable(testFunction!, font), font);
     addPage(
         pdf,
         pw.Column(mainAxisAlignment: pw.MainAxisAlignment.center, children: [
@@ -125,18 +144,31 @@ class PdfGenerator {
           pw.SizedBox(height: 80),
           _buildBasicFunctionTestTable(
               inputOutputCharacteristics.basicFunctionTestResult, font)
-        ]));
-    addPage(
-        pdf, _buildProtectionFunctionTestTable(protectionTestResults!, font));
+        ]),
+        font);
+    addPage(pdf,
+        _buildProtectionFunctionTestTable(protectionTestResults!, font), font);
     addPage(
       pdf,
       _buildHiPotTestTable(protectionTestResults, font),
+      font,
     );
     pdf.addPage(pw.MultiPage(
       maxPages: 20,
       build: (context) =>
           [_buildPackageListTable(packageListResult!, font, packageListImages)],
       pageFormat: PdfPageFormat.a4,
+      footer: (context) => pw.Container(
+        alignment: pw.Alignment.center,
+        padding: const pw.EdgeInsets.only(top: 20),
+        child: pw.Text(
+          '${context.pageNumber} / ${context.pagesCount}',
+          style: pw.TextStyle(
+            fontSize: _smallFontSize,
+            font: font,
+          ),
+        ),
+      ),
     ));
     pdf.addPage(pw.MultiPage(
       maxPages: 20,
@@ -146,17 +178,45 @@ class PdfGenerator {
         _buildSignatureTable(pic, date, font),
       ],
       pageFormat: PdfPageFormat.a4,
+      footer: (context) => pw.Container(
+        alignment: pw.Alignment.center,
+        padding: const pw.EdgeInsets.only(top: 20),
+        child: pw.Text(
+          '${context.pageNumber} / ${context.pagesCount}',
+          style: pw.TextStyle(
+            fontSize: _smallFontSize,
+            font: font,
+          ),
+        ),
+      ),
     ));
 
     return pdf;
   }
 
-  static void addPage(pw.Document pdf, pw.Widget child) {
+  static void addPage(pw.Document pdf, pw.Widget child, pw.Font font) {
     pdf.addPage(
       pw.Page(
         build: (pw.Context context) {
-          return pw.Center(
-            child: child,
+          return pw.Column(
+            children: [
+              pw.Expanded(
+                child: pw.Center(
+                  child: child,
+                ),
+              ),
+              pw.Container(
+                alignment: pw.Alignment.center,
+                padding: const pw.EdgeInsets.only(bottom: 20),
+                child: pw.Text(
+                  '${context.pageNumber} / ${context.pagesCount}',
+                  style: pw.TextStyle(
+                    fontSize: _smallFontSize,
+                    font: font,
+                  ),
+                ),
+              ),
+            ],
           );
         },
         pageFormat: PdfPageFormat.a4,
@@ -178,7 +238,7 @@ class PdfGenerator {
         pw.Text(
           'PSU S/N',
           style: pw.TextStyle(
-            fontSize: 16,
+            fontSize: _titleFontSize,
             fontWeight: pw.FontWeight.bold,
             font: font,
           ),
@@ -193,14 +253,15 @@ class PdfGenerator {
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text('No.',
-                      style: pw.TextStyle(font: font),
+                      style:
+                          pw.TextStyle(font: font, fontSize: _defaultFontSize),
                       textAlign: pw.TextAlign.center),
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text(
                     "S/N  Q'ty : $totalQty",
-                    style: pw.TextStyle(font: font),
+                    style: pw.TextStyle(font: font, fontSize: _defaultFontSize),
                     textAlign: pw.TextAlign.center,
                   ),
                 ),
@@ -209,9 +270,6 @@ class PdfGenerator {
           ],
         ),
         ...List.generate(totalQty, (index) {
-          // 多這一段，檢查是不是最後一列
-          final isLast = index == totalQty - 1;
-
           return pw.Table(
             columnWidths: columnWidths,
             border: pw.TableBorder.all(),
@@ -221,7 +279,8 @@ class PdfGenerator {
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
                     child: pw.Text('${index + 1}',
-                        style: pw.TextStyle(font: font),
+                        style: pw.TextStyle(
+                            font: font, fontSize: _defaultFontSize),
                         textAlign: pw.TextAlign.center),
                   ),
                   pw.Padding(
@@ -230,7 +289,8 @@ class PdfGenerator {
                         index < data.psuSN.length
                             ? data.psuSN[index].value
                             : '',
-                        style: pw.TextStyle(font: font),
+                        style: pw.TextStyle(
+                            font: font, fontSize: _defaultFontSize),
                         textAlign: pw.TextAlign.center),
                   ),
                 ],
@@ -256,7 +316,7 @@ class PdfGenerator {
         pw.Text(
           'Software Version',
           style: pw.TextStyle(
-            fontSize: 16,
+            fontSize: _titleFontSize,
             fontWeight: pw.FontWeight.bold,
             font: font,
           ),
@@ -271,19 +331,22 @@ class PdfGenerator {
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text('No.',
-                      style: pw.TextStyle(font: font),
+                      style:
+                          pw.TextStyle(font: font, fontSize: _defaultFontSize),
                       textAlign: pw.TextAlign.center),
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text('Item',
-                      style: pw.TextStyle(font: font),
+                      style:
+                          pw.TextStyle(font: font, fontSize: _defaultFontSize),
                       textAlign: pw.TextAlign.center),
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text('Version',
-                      style: pw.TextStyle(font: font),
+                      style:
+                          pw.TextStyle(font: font, fontSize: _defaultFontSize),
                       textAlign: pw.TextAlign.center),
                 ),
               ],
@@ -295,19 +358,22 @@ class PdfGenerator {
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
                     child: pw.Text('${index + 1}',
-                        style: pw.TextStyle(font: font),
+                        style: pw.TextStyle(
+                            font: font, fontSize: _defaultFontSize),
                         textAlign: pw.TextAlign.center),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
                     child: pw.Text(data.versions[index].name,
-                        style: pw.TextStyle(font: font),
+                        style: pw.TextStyle(
+                            font: font, fontSize: _defaultFontSize),
                         textAlign: pw.TextAlign.center),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
                     child: pw.Text(data.versions[index].value,
-                        style: pw.TextStyle(font: font),
+                        style: pw.TextStyle(
+                            font: font, fontSize: _defaultFontSize),
                         textAlign: pw.TextAlign.center),
                   ),
                 ],
@@ -334,7 +400,7 @@ class PdfGenerator {
         pw.Text(
           'Appearance & Structure Inspection',
           style: pw.TextStyle(
-            fontSize: 16,
+            fontSize: _titleFontSize,
             fontWeight: pw.FontWeight.bold,
             font: font,
           ),
@@ -350,7 +416,7 @@ class PdfGenerator {
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text(
                     'No.',
-                    style: pw.TextStyle(font: font),
+                    style: pw.TextStyle(font: font, fontSize: _defaultFontSize),
                     textAlign: pw.TextAlign.center,
                   ),
                 ),
@@ -358,7 +424,7 @@ class PdfGenerator {
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text(
                     'Item',
-                    style: pw.TextStyle(font: font),
+                    style: pw.TextStyle(font: font, fontSize: _defaultFontSize),
                     textAlign: pw.TextAlign.center,
                   ),
                 ),
@@ -366,7 +432,7 @@ class PdfGenerator {
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text(
                     'Details',
-                    style: pw.TextStyle(font: font),
+                    style: pw.TextStyle(font: font, fontSize: _defaultFontSize),
                     textAlign: pw.TextAlign.center,
                   ),
                 ),
@@ -374,7 +440,7 @@ class PdfGenerator {
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text(
                     'Judgement',
-                    style: pw.TextStyle(font: font),
+                    style: pw.TextStyle(font: font, fontSize: _defaultFontSize),
                     textAlign: pw.TextAlign.center,
                   ),
                 ),
@@ -388,7 +454,8 @@ class PdfGenerator {
                     padding: const pw.EdgeInsets.all(5),
                     child: pw.Text(
                       '${index + 1}',
-                      style: pw.TextStyle(font: font),
+                      style:
+                          pw.TextStyle(font: font, fontSize: _defaultFontSize),
                       textAlign: pw.TextAlign.center,
                     ),
                   ),
@@ -396,7 +463,8 @@ class PdfGenerator {
                     padding: const pw.EdgeInsets.all(5),
                     child: pw.Text(
                       data.testItems[index].name,
-                      style: pw.TextStyle(font: font, fontSize: 10),
+                      style:
+                          pw.TextStyle(font: font, fontSize: _defaultFontSize),
                       textAlign: pw.TextAlign.center,
                     ),
                   ),
@@ -406,17 +474,21 @@ class PdfGenerator {
                       AppearanceStructureInspectionFunctionResult
                               .descriptionMapping[data.testItems[index].name] ??
                           '',
-                      style: pw.TextStyle(font: font, fontSize: 8),
+                      style:
+                          pw.TextStyle(font: font, fontSize: _defaultFontSize),
                       textAlign: pw.TextAlign.left,
                       maxLines: 5,
                     ),
                   ),
-                  pw.Padding(
+                  pw.Container(
                     padding: const pw.EdgeInsets.all(5),
-                    child: pw.Text(
-                      data.testItems[index].judgement,
-                      style: pw.TextStyle(font: font),
-                      textAlign: pw.TextAlign.center,
+                    child: pw.Center(
+                      child: pw.Text(
+                        data.testItems[index].judgement,
+                        style: pw.TextStyle(
+                            font: font, fontSize: _defaultFontSize),
+                        textAlign: pw.TextAlign.center,
+                      ),
                     ),
                   ),
                 ],
@@ -485,7 +557,7 @@ class PdfGenerator {
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text(
                     header,
-                    style: pw.TextStyle(font: font, fontSize: 10),
+                    style: pw.TextStyle(font: font, fontSize: _defaultFontSize),
                     textAlign: pw.TextAlign.center,
                   ),
                 ))
@@ -508,7 +580,7 @@ class PdfGenerator {
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text(
                     header,
-                    style: pw.TextStyle(font: font, fontSize: 10),
+                    style: pw.TextStyle(font: font, fontSize: _defaultFontSize),
                     textAlign: pw.TextAlign.center,
                   ),
                 ))
@@ -529,7 +601,7 @@ class PdfGenerator {
         pw.Text(
           'Input & Output Characteristics',
           style: pw.TextStyle(
-            fontSize: 16,
+            fontSize: _titleFontSize,
             fontWeight: pw.FontWeight.bold,
             font: font,
           ),
@@ -551,40 +623,42 @@ class PdfGenerator {
         pw.Padding(
           padding: const pw.EdgeInsets.all(5),
           child: pw.Text(item.side,
-              style: pw.TextStyle(font: font, fontSize: 8),
+              style: pw.TextStyle(font: font, fontSize: _defaultFontSize),
               textAlign: pw.TextAlign.center),
         ),
         pw.Padding(
           padding: const pw.EdgeInsets.all(5),
           child: pw.Text(
               "${item.totalInputPower.value.toStringAsFixed(2)} ${pinUnit}",
-              style: pw.TextStyle(font: font, fontSize: 8),
+              style: pw.TextStyle(font: font, fontSize: _defaultFontSize),
               textAlign: pw.TextAlign.center),
         ),
         pw.Padding(
           padding: const pw.EdgeInsets.all(5),
           child: pw.Text("${item.outputVoltage.value.toStringAsFixed(2)} V",
-              style: pw.TextStyle(font: font, fontSize: 8),
+              style: pw.TextStyle(font: font, fontSize: _defaultFontSize),
               textAlign: pw.TextAlign.center),
         ),
         pw.Padding(
           padding: const pw.EdgeInsets.all(5),
           child: pw.Text("${item.outputCurrent.value.toStringAsFixed(2)} A",
-              style: pw.TextStyle(font: font, fontSize: 8),
+              style: pw.TextStyle(font: font, fontSize: _defaultFontSize),
               textAlign: pw.TextAlign.center),
         ),
         pw.Padding(
           padding: const pw.EdgeInsets.all(5),
           child: pw.Text(
               "${item.totalOutputPower.value.toStringAsFixed(2)} ${poutUnit}",
-              style: pw.TextStyle(font: font, fontSize: 8),
+              style: pw.TextStyle(font: font, fontSize: _defaultFontSize),
               textAlign: pw.TextAlign.center),
         ),
-        pw.Padding(
+        pw.Container(
           padding: const pw.EdgeInsets.all(5),
-          child: pw.Text(item.judgement.name.toUpperCase(),
-              style: pw.TextStyle(font: font, fontSize: 8),
-              textAlign: pw.TextAlign.center),
+          child: pw.Center(
+            child: pw.Text(item.judgement.name.toUpperCase(),
+                style: pw.TextStyle(font: font, fontSize: _defaultFontSize),
+                textAlign: pw.TextAlign.center),
+          ),
         ),
       ],
     );
@@ -605,7 +679,7 @@ class PdfGenerator {
         pw.Text(
           'Basic Function Test',
           style: pw.TextStyle(
-            fontSize: 16,
+            fontSize: _titleFontSize,
             fontWeight: pw.FontWeight.bold,
             font: font,
           ),
@@ -620,25 +694,29 @@ class PdfGenerator {
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text('No.',
-                      style: pw.TextStyle(font: font),
+                      style:
+                          pw.TextStyle(font: font, fontSize: _defaultFontSize),
                       textAlign: pw.TextAlign.center),
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text('Test Items',
-                      style: pw.TextStyle(font: font),
+                      style:
+                          pw.TextStyle(font: font, fontSize: _defaultFontSize),
                       textAlign: pw.TextAlign.center),
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text('Testing Record',
-                      style: pw.TextStyle(font: font),
+                      style:
+                          pw.TextStyle(font: font, fontSize: _defaultFontSize),
                       textAlign: pw.TextAlign.center),
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text('Judgement',
-                      style: pw.TextStyle(font: font),
+                      style:
+                          pw.TextStyle(font: font, fontSize: _defaultFontSize),
                       textAlign: pw.TextAlign.center),
                 ),
               ],
@@ -650,13 +728,15 @@ class PdfGenerator {
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
                     child: pw.Text('${index + 1}',
-                        style: pw.TextStyle(font: font),
+                        style: pw.TextStyle(
+                            font: font, fontSize: _defaultFontSize),
                         textAlign: pw.TextAlign.center),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
                     child: pw.Text(data.testItems[index].name,
-                        style: pw.TextStyle(font: font),
+                        style: pw.TextStyle(
+                            font: font, fontSize: _defaultFontSize),
                         textAlign: pw.TextAlign.center),
                   ),
                   pw.Padding(
@@ -664,16 +744,20 @@ class PdfGenerator {
                     child: pw.Text(
                       data.testItems[index].description.replaceAll("{VALUE}",
                           data.testItems[index].value.toStringAsFixed(2)),
-                      style: pw.TextStyle(font: font),
+                      style:
+                          pw.TextStyle(font: font, fontSize: _defaultFontSize),
                       textAlign: pw.TextAlign.start,
                     ),
                   ),
-                  pw.Padding(
+                  pw.Container(
                     padding: const pw.EdgeInsets.all(5),
-                    child: pw.Text(
-                      data.testItems[index].judgement.name.toUpperCase(),
-                      style: pw.TextStyle(font: font),
-                      textAlign: pw.TextAlign.center,
+                    child: pw.Center(
+                      child: pw.Text(
+                        data.testItems[index].judgement.name.toUpperCase(),
+                        style: pw.TextStyle(
+                            font: font, fontSize: _defaultFontSize),
+                        textAlign: pw.TextAlign.center,
+                      ),
                     ),
                   ),
                 ],
@@ -700,7 +784,7 @@ class PdfGenerator {
         pw.Text(
           'Protection Function Test',
           style: pw.TextStyle(
-            fontSize: 16,
+            fontSize: _titleFontSize,
             fontWeight: pw.FontWeight.bold,
             font: font,
           ),
@@ -715,25 +799,29 @@ class PdfGenerator {
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text('No.',
-                      style: pw.TextStyle(font: font),
+                      style:
+                          pw.TextStyle(font: font, fontSize: _defaultFontSize),
                       textAlign: pw.TextAlign.center),
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text('Test Items',
-                      style: pw.TextStyle(font: font),
+                      style:
+                          pw.TextStyle(font: font, fontSize: _defaultFontSize),
                       textAlign: pw.TextAlign.center),
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text('Testing Record',
-                      style: pw.TextStyle(font: font),
+                      style:
+                          pw.TextStyle(font: font, fontSize: _defaultFontSize),
                       textAlign: pw.TextAlign.center),
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text('Judgement',
-                      style: pw.TextStyle(font: font),
+                      style:
+                          pw.TextStyle(font: font, fontSize: _defaultFontSize),
                       textAlign: pw.TextAlign.center),
                 ),
               ],
@@ -747,27 +835,33 @@ class PdfGenerator {
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(5),
                       child: pw.Text('${index + 1}',
-                          style: pw.TextStyle(font: font),
+                          style: pw.TextStyle(
+                              font: font, fontSize: _defaultFontSize),
                           textAlign: pw.TextAlign.center),
                     ),
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(5),
                       child: pw.Text(item.name,
-                          style: pw.TextStyle(font: font),
+                          style: pw.TextStyle(
+                              font: font, fontSize: _defaultFontSize),
                           textAlign: pw.TextAlign.center),
                     ),
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(5),
                       child: pw.Text(item.description,
-                          style: pw.TextStyle(font: font),
+                          style: pw.TextStyle(
+                              font: font, fontSize: _defaultFontSize),
                           textAlign: pw.TextAlign.start),
                     ),
-                    pw.Padding(
+                    pw.Container(
                       padding: const pw.EdgeInsets.all(5),
-                      child: pw.Text(
-                        item.judgement.name.toUpperCase(),
-                        style: pw.TextStyle(font: font),
-                        textAlign: pw.TextAlign.center,
+                      child: pw.Center(
+                        child: pw.Text(
+                          item.judgement.name.toUpperCase(),
+                          style: pw.TextStyle(
+                              font: font, fontSize: _defaultFontSize),
+                          textAlign: pw.TextAlign.center,
+                        ),
                       ),
                     ),
                   ],
@@ -795,7 +889,7 @@ class PdfGenerator {
         pw.Text(
           'Hi-Pot Test',
           style: pw.TextStyle(
-            fontSize: 16,
+            fontSize: _titleFontSize,
             fontWeight: pw.FontWeight.bold,
             font: font,
           ),
@@ -811,25 +905,29 @@ class PdfGenerator {
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text('No.',
-                      style: pw.TextStyle(font: font),
+                      style:
+                          pw.TextStyle(font: font, fontSize: _defaultFontSize),
                       textAlign: pw.TextAlign.center),
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text('Test Items',
-                      style: pw.TextStyle(font: font),
+                      style:
+                          pw.TextStyle(font: font, fontSize: _defaultFontSize),
                       textAlign: pw.TextAlign.center),
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text('Testing Record',
-                      style: pw.TextStyle(font: font),
+                      style:
+                          pw.TextStyle(font: font, fontSize: _defaultFontSize),
                       textAlign: pw.TextAlign.center),
                 ),
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text('Judgement',
-                      style: pw.TextStyle(font: font),
+                      style:
+                          pw.TextStyle(font: font, fontSize: _defaultFontSize),
                       textAlign: pw.TextAlign.center),
                 ),
               ],
@@ -840,7 +938,8 @@ class PdfGenerator {
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text('1',
-                      style: pw.TextStyle(font: font),
+                      style:
+                          pw.TextStyle(font: font, fontSize: _defaultFontSize),
                       textAlign: pw.TextAlign.center),
                 ),
                 pw.Padding(
@@ -849,18 +948,22 @@ class PdfGenerator {
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
                       pw.Text('Insulation Impedance Test.',
-                          style: pw.TextStyle(font: font),
+                          style: pw.TextStyle(
+                              font: font, fontSize: _defaultFontSize),
                           textAlign: pw.TextAlign.start),
                       pw.SizedBox(height: 5),
                       pw.Text('Apply a DC Voltage:',
-                          style: pw.TextStyle(font: font),
+                          style: pw.TextStyle(
+                              font: font, fontSize: _defaultFontSize),
                           textAlign: pw.TextAlign.start),
                       pw.Text('a) Between each circuit.',
-                          style: pw.TextStyle(font: font),
+                          style: pw.TextStyle(
+                              font: font, fontSize: _defaultFontSize),
                           textAlign: pw.TextAlign.start),
                       pw.Text(
                           'b) Between each of the independent circuits and the ground.',
-                          style: pw.TextStyle(font: font),
+                          style: pw.TextStyle(
+                              font: font, fontSize: _defaultFontSize),
                           textAlign: pw.TextAlign.start),
                     ],
                   ),
@@ -872,8 +975,9 @@ class PdfGenerator {
                     children: [
                       pw.Center(
                         child: pw.Text(
-                          'Insulation impedance > ${globalHipotTestSpec?.insulationimpedancespec?.toStringAsFixed(2) ?? '10'} MΩ',
-                          style: pw.TextStyle(font: font),
+                          'Insulation impedance > ${globalHipotTestSpec?.insulationimpedancespec.toStringAsFixed(2) ?? '10'} MΩ',
+                          style: pw.TextStyle(
+                              font: font, fontSize: _defaultFontSize),
                           textAlign: pw.TextAlign.center,
                         ),
                       ),
@@ -900,15 +1004,21 @@ class PdfGenerator {
                                         textAlign: pw.TextAlign.center),
                                     pw.Text(
                                         'Input/Output: ${data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputOutput.value.toStringAsFixed(2)} MΩ',
-                                        style: pw.TextStyle(font: font),
+                                        style: pw.TextStyle(
+                                            font: font,
+                                            fontSize: _defaultFontSize),
                                         textAlign: pw.TextAlign.center),
                                     pw.Text(
                                         'Input/Ground: ${data.hiPotTestResult.insulationImpedanceTest.leftInsulationInputGround.value.toStringAsFixed(2)} MΩ',
-                                        style: pw.TextStyle(font: font),
+                                        style: pw.TextStyle(
+                                            font: font,
+                                            fontSize: _defaultFontSize),
                                         textAlign: pw.TextAlign.center),
                                     pw.Text(
                                         'Output/Ground: ${data.hiPotTestResult.insulationImpedanceTest.leftInsulationOutputGround.value.toStringAsFixed(2)} MΩ',
-                                        style: pw.TextStyle(font: font),
+                                        style: pw.TextStyle(
+                                            font: font,
+                                            fontSize: _defaultFontSize),
                                         textAlign: pw.TextAlign.center),
                                   ],
                                 ),
@@ -927,15 +1037,21 @@ class PdfGenerator {
                                         textAlign: pw.TextAlign.center),
                                     pw.Text(
                                         'Input/Output: ${data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputOutput.value.toStringAsFixed(2)} MΩ',
-                                        style: pw.TextStyle(font: font),
+                                        style: pw.TextStyle(
+                                            font: font,
+                                            fontSize: _defaultFontSize),
                                         textAlign: pw.TextAlign.center),
                                     pw.Text(
                                         'Input/Ground: ${data.hiPotTestResult.insulationImpedanceTest.rightInsulationInputGround.value.toStringAsFixed(2)} MΩ',
-                                        style: pw.TextStyle(font: font),
+                                        style: pw.TextStyle(
+                                            font: font,
+                                            fontSize: _defaultFontSize),
                                         textAlign: pw.TextAlign.center),
                                     pw.Text(
                                         'Output/Ground: ${data.hiPotTestResult.insulationImpedanceTest.rightInsulationOutputGround.value.toStringAsFixed(2)} MΩ',
-                                        style: pw.TextStyle(font: font),
+                                        style: pw.TextStyle(
+                                            font: font,
+                                            fontSize: _defaultFontSize),
                                         textAlign: pw.TextAlign.center),
                                   ],
                                 ),
@@ -947,14 +1063,17 @@ class PdfGenerator {
                     ],
                   ),
                 ),
-                pw.Padding(
+                pw.Container(
                   padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text(
-                      data.hiPotTestResult.insulationImpedanceTest
-                          .storedJudgement.name
-                          .toUpperCase(),
-                      style: pw.TextStyle(font: font),
-                      textAlign: pw.TextAlign.center),
+                  child: pw.Center(
+                    child: pw.Text(
+                        data.hiPotTestResult.insulationImpedanceTest
+                            .storedJudgement.name
+                            .toUpperCase(),
+                        style: pw.TextStyle(
+                            font: font, fontSize: _defaultFontSize),
+                        textAlign: pw.TextAlign.center),
+                  ),
                 ),
               ],
             ),
@@ -964,7 +1083,8 @@ class PdfGenerator {
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text('2',
-                      style: pw.TextStyle(font: font),
+                      style:
+                          pw.TextStyle(font: font, fontSize: _defaultFontSize),
                       textAlign: pw.TextAlign.center),
                 ),
                 pw.Padding(
@@ -973,18 +1093,22 @@ class PdfGenerator {
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
                       pw.Text('Insulation Voltage Test.',
-                          style: pw.TextStyle(font: font),
+                          style: pw.TextStyle(
+                              font: font, fontSize: _defaultFontSize),
                           textAlign: pw.TextAlign.start),
                       pw.SizedBox(height: 5),
                       pw.Text('Apply a DC Voltage:',
-                          style: pw.TextStyle(font: font),
+                          style: pw.TextStyle(
+                              font: font, fontSize: _defaultFontSize),
                           textAlign: pw.TextAlign.start),
                       pw.Text('a) Between each circuit.',
-                          style: pw.TextStyle(font: font),
+                          style: pw.TextStyle(
+                              font: font, fontSize: _defaultFontSize),
                           textAlign: pw.TextAlign.start),
                       pw.Text(
                           'b) Between each of the independent circuits and the ground.',
-                          style: pw.TextStyle(font: font),
+                          style: pw.TextStyle(
+                              font: font, fontSize: _defaultFontSize),
                           textAlign: pw.TextAlign.start),
                     ],
                   ),
@@ -996,8 +1120,9 @@ class PdfGenerator {
                     children: [
                       pw.Center(
                         child: pw.Text(
-                          'Leakage current < ${globalHipotTestSpec?.leakagecurrentspec?.toStringAsFixed(2) ?? '10'} mA',
-                          style: pw.TextStyle(font: font),
+                          'Leakage current < ${globalHipotTestSpec?.leakagecurrentspec.toStringAsFixed(2) ?? '10'} mA',
+                          style: pw.TextStyle(
+                              font: font, fontSize: _defaultFontSize),
                           textAlign: pw.TextAlign.center,
                         ),
                       ),
@@ -1024,15 +1149,21 @@ class PdfGenerator {
                                         textAlign: pw.TextAlign.center),
                                     pw.Text(
                                         'Input/Output: ${data.hiPotTestResult.insulationVoltageTest.leftInsulationInputOutput.value.toStringAsFixed(2)} mA',
-                                        style: pw.TextStyle(font: font),
+                                        style: pw.TextStyle(
+                                            font: font,
+                                            fontSize: _defaultFontSize),
                                         textAlign: pw.TextAlign.center),
                                     pw.Text(
                                         'Input/Ground: ${data.hiPotTestResult.insulationVoltageTest.leftInsulationInputGround.value.toStringAsFixed(2)} mA',
-                                        style: pw.TextStyle(font: font),
+                                        style: pw.TextStyle(
+                                            font: font,
+                                            fontSize: _defaultFontSize),
                                         textAlign: pw.TextAlign.center),
                                     pw.Text(
                                         'Output/Ground: ${data.hiPotTestResult.insulationVoltageTest.leftInsulationOutputGround.value.toStringAsFixed(2)} mA',
-                                        style: pw.TextStyle(font: font),
+                                        style: pw.TextStyle(
+                                            font: font,
+                                            fontSize: _defaultFontSize),
                                         textAlign: pw.TextAlign.center),
                                   ],
                                 ),
@@ -1051,15 +1182,21 @@ class PdfGenerator {
                                         textAlign: pw.TextAlign.center),
                                     pw.Text(
                                         'Input/Output: ${data.hiPotTestResult.insulationVoltageTest.rightInsulationInputOutput.value.toStringAsFixed(2)} mA',
-                                        style: pw.TextStyle(font: font),
+                                        style: pw.TextStyle(
+                                            font: font,
+                                            fontSize: _defaultFontSize),
                                         textAlign: pw.TextAlign.center),
                                     pw.Text(
                                         'Input/Ground: ${data.hiPotTestResult.insulationVoltageTest.rightInsulationInputGround.value.toStringAsFixed(2)} mA',
-                                        style: pw.TextStyle(font: font),
+                                        style: pw.TextStyle(
+                                            font: font,
+                                            fontSize: _defaultFontSize),
                                         textAlign: pw.TextAlign.center),
                                     pw.Text(
                                         'Output/Ground: ${data.hiPotTestResult.insulationVoltageTest.rightInsulationOutputGround.value.toStringAsFixed(2)} mA',
-                                        style: pw.TextStyle(font: font),
+                                        style: pw.TextStyle(
+                                            font: font,
+                                            fontSize: _defaultFontSize),
                                         textAlign: pw.TextAlign.center),
                                   ],
                                 ),
@@ -1071,14 +1208,17 @@ class PdfGenerator {
                     ],
                   ),
                 ),
-                pw.Padding(
+                pw.Container(
                   padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text(
-                      data.hiPotTestResult.insulationVoltageTest.storedJudgement
-                          .name
-                          .toUpperCase(),
-                      style: pw.TextStyle(font: font),
-                      textAlign: pw.TextAlign.center),
+                  child: pw.Center(
+                    child: pw.Text(
+                        data.hiPotTestResult.insulationVoltageTest
+                            .storedJudgement.name
+                            .toUpperCase(),
+                        style: pw.TextStyle(
+                            font: font, fontSize: _defaultFontSize),
+                        textAlign: pw.TextAlign.center),
+                  ),
                 ),
               ],
             ),
@@ -1103,7 +1243,7 @@ class PdfGenerator {
         pw.Text(
           'Packaging Checklist',
           style: pw.TextStyle(
-            fontSize: 16,
+            fontSize: _titleFontSize,
             fontWeight: pw.FontWeight.bold,
             font: font,
           ),
@@ -1120,7 +1260,8 @@ class PdfGenerator {
                         padding: const pw.EdgeInsets.all(5),
                         child: pw.Text(
                           header,
-                          style: pw.TextStyle(font: font),
+                          style: pw.TextStyle(
+                              font: font, fontSize: _defaultFontSize),
                           textAlign: pw.TextAlign.center,
                         ),
                       ))
@@ -1136,26 +1277,32 @@ class PdfGenerator {
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(5),
                       child: pw.Text('${index + 1}',
-                          style: pw.TextStyle(font: font),
+                          style: pw.TextStyle(
+                              font: font, fontSize: _defaultFontSize),
                           textAlign: pw.TextAlign.center),
                     ),
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(5),
                       child: pw.Text(m.itemName,
-                          style: pw.TextStyle(font: font),
+                          style: pw.TextStyle(
+                              font: font, fontSize: _defaultFontSize),
                           textAlign: pw.TextAlign.center),
                     ),
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(5),
                       child: pw.Text(m.quantity,
-                          style: pw.TextStyle(font: font),
+                          style: pw.TextStyle(
+                              font: font, fontSize: _defaultFontSize),
                           textAlign: pw.TextAlign.center),
                     ),
-                    pw.Padding(
+                    pw.Container(
                       padding: const pw.EdgeInsets.all(5),
-                      child: pw.Text(m.isCheck.value ? '✓' : '',
-                          style: pw.TextStyle(font: font),
-                          textAlign: pw.TextAlign.center),
+                      child: pw.Center(
+                        child: pw.Text(m.isCheck.value ? '✓' : '',
+                            style: pw.TextStyle(
+                                font: font, fontSize: _defaultFontSize),
+                            textAlign: pw.TextAlign.center),
+                      ),
                     ),
                   ],
                 );
@@ -1171,23 +1318,6 @@ class PdfGenerator {
     );
   }
 
-  String getSpecText(int index, PackageListSpec spec) {
-    switch (index) {
-      case 1:
-        return spec.rfidcard ?? '';
-      case 2:
-        return spec.productcertificatecard ?? '';
-      case 3:
-        return spec.screwassym4 ?? '';
-      case 4:
-        return spec.boltscover ?? '';
-      case 5:
-        return spec.usermanual ?? '';
-      default:
-        return '';
-    }
-  }
-
   static pw.Widget _buildAttachmentTable(pw.Font font, List<pw.Widget> images) {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -1195,7 +1325,7 @@ class PdfGenerator {
         pw.Text(
           'Attachment',
           style: pw.TextStyle(
-            fontSize: 16,
+            fontSize: _titleFontSize,
             fontWeight: pw.FontWeight.bold,
             font: font,
           ),
@@ -1213,7 +1343,7 @@ class PdfGenerator {
         pw.Text(
           'Signature',
           style: pw.TextStyle(
-            fontSize: 16,
+            fontSize: _titleFontSize,
             fontWeight: pw.FontWeight.bold,
             font: font,
           ),
@@ -1228,7 +1358,7 @@ class PdfGenerator {
                   child: pw.Text(
                     'PIC : ',
                     style: pw.TextStyle(
-                      fontSize: 16,
+                      fontSize: _defaultFontSize,
                       fontWeight: pw.FontWeight.bold,
                       font: font,
                     ),
@@ -1244,7 +1374,8 @@ class PdfGenerator {
                           const pw.BorderRadius.all(pw.Radius.circular(4)),
                     ),
                     child: pw.Text(pic,
-                        style: pw.TextStyle(font: font),
+                        style: pw.TextStyle(
+                            font: font, fontSize: _defaultFontSize),
                         textAlign: pw.TextAlign.center),
                   ),
                 ),
@@ -1258,7 +1389,7 @@ class PdfGenerator {
                   child: pw.Text(
                     'Date : ',
                     style: pw.TextStyle(
-                      fontSize: 16,
+                      fontSize: _defaultFontSize,
                       fontWeight: pw.FontWeight.bold,
                       font: font,
                     ),
@@ -1274,7 +1405,8 @@ class PdfGenerator {
                           const pw.BorderRadius.all(pw.Radius.circular(4)),
                     ),
                     child: pw.Text(date,
-                        style: pw.TextStyle(font: font),
+                        style: pw.TextStyle(
+                            font: font, fontSize: _defaultFontSize),
                         textAlign: pw.TextAlign.center),
                   ),
                 ),

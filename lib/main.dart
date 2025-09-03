@@ -14,7 +14,6 @@ void main() async {
     await windowManager.ensureInitialized();
 
     WindowOptions windowOptions = const WindowOptions(
-      size: Size(1920, 1080),
       center: true,
       backgroundColor: Colors.transparent,
       skipTaskbar: false,
@@ -23,8 +22,7 @@ void main() async {
     );
 
     windowManager.waitUntilReadyToShow(windowOptions, () async {
-      await windowManager.show();
-      await windowManager.focus();
+      await windowManager.maximize();
     });
   }
 
@@ -77,7 +75,6 @@ class ZerovaOqcReport extends StatelessWidget {
         return MediaQuery(
           data: mq.copyWith(
             // Lock app-wide text scaling to 100%
-            textScaler: const TextScaler.linear(1.0),
           ),
           child: child ?? const SizedBox(),
         );
