@@ -6,6 +6,7 @@ import 'package:path/path.dart' as path;
 import '../config/config_manager.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
 
 class SharePointUploader {
   final String clientId = ConfigManager.clientId;
@@ -22,7 +23,8 @@ class SharePointUploader {
 
   static final Set<String> _downloadedModels = {};
 
-  SharePointUploader({required this.uploadOrDownload, required this.sn, required this.model});
+  SharePointUploader(
+      {required this.uploadOrDownload, required this.sn, required this.model});
   /*Future<String> _getUserPicturesPath(String subDirectory) async {
     // 獲取當前使用者的根目錄
     final String userProfile = Platform.environment['USERPROFILE'] ?? '';
@@ -65,6 +67,13 @@ class SharePointUploader {
     Function(String, int, int)? onProgressUpdate,
     required Map<String, String> categoryTranslations,
   }) async {
+    // Check if in debug mode and bypass SharePoint operations
+    if (kDebugMode) {
+      print("Debug Mode: Bypassing SharePoint operations");
+      _simulateDebugProgress(onProgressUpdate, categoryTranslations);
+      return;
+    }
+
     // final token = await getAccessToken(refreshToken : "1.AXIAEnOpZTgOx0q5I043N_tALqpoaaYGC7VGvgcUU6orVCfDAFxyAA.AgABAwEAAABVrSpeuWamRam2jAF1XRQEAwDs_wUA9P8tL7d3tSQwcqZlHcX4D-r5OI1gb2KFFQsjfzH2CNsDN6XsmDHkNBb8OC4J_HVjC8SbftdAp6YNHrO6tjMnbKqiTYISkrRQTOVxQBQfxCbMBlvwJcrcbRXKVoIZuWf8EkQimNIAxWVatTT72TfEc1dKs-rpjnEUj4XR6Vjp4Gb4mC2xbXRbp47Y3nTA4VMIQh_12U9ahZsTaA61qZ8BRpxelQ3QTlKSAxOjrG1dF-kavOnV2DmtABXFUb_RPYe-PUKxaBjvqK5_48FtBjoP15f9foS1I-UHo1OSlnampXWzgACrwAkYRziqlbxKKhTja9nJcUXKZlaYZzjVGgwehji6AcQlPcwx-bfWpcNvZSPYOFt4PeYmkNoYQPlwrJElLesXOM3BvDpcn_-nZdJxa7D8wwpqNGWvPTJgg9Q_oPULOD8yvNGQZ76ufYJMWv6MIADhqLEWHlePlCa7ode9oAcTGhZtJd1gstQ7psueCX6-0k1Dv_v-UhZ51um7RrXdfc_H0ueH-0VKZmgaT_aUQ-G-fphWiN_uCw676LSadHBUP-wOwqQXbSdkOLsfKridjHtoouo6QucQZK5X4hWES8ZnKr9th4TjPduAgQ6qcyfpRZoHtCWOzYLA9oyZDiASTMRzvGBUGdlDrqn_08uz3qi7uByX4I9IsvVfyNGTrNfOhZYiK98lvJa_gmv3d5o5hqgYIt_gjHpBlIrvDcug8oHSG-N22QLV7OoGnxnmm215cg2y-UtArNvXuQg0WDmuqC56ANLNPrNnLMH8VcFeeckNkRy099ifcq3rwWsib__iWjiYrtaYUJgi33DtGMMX6_YmprSq0ySmAop-gkIV8w4GpFV1EiGykb7uqsSCQdKmYQoxExdZaCMbA5t0JQTJ0fI0a-_-seK0S1j6lB2Lav10-qqxLZUiVKOpf5kw8fQL6smLK8wXi5n-rCKB7BNfjBuhOYZf_avp63OuG8FHvvBQCP05i42s8W7txrHQqR-CFz8bsr8c7f3M26yRmUlo15sO20qq3wsll0FoVuYdX4k7fovl6dsmUGZAQF3Klb-fXPCG2J6gOXhDCzxoMBz0GEAyYxho1I2QGOb1BxUhfhHvfFEfg2sUNbi0YXMkYQE6cnpEjmz-ByIGyGXqaJfj4HU38hf5qXF2t-1ZCB8h3e7DE9AGj-yrr_Jmi0mdctlcDYppt8NYHdcYdF1mcPvgtpsch3w3nVpyOCJyusk5OjgxAaY8yiqHMB6wEvjsVsg74AoDg6rZlQXNQJ9f1kpjH9Xn26A2rpILsow4R-X5eCHrUzAFpZjF8kMigFyEKPrb4XJKc739DKO51Q36BmoMZ1LhBUrhMcRipBLVQtMSJMX3J_tNH0ua2gKXbp4tX620vam2D4s2mNJx2tG6kqd4krJAFmOd0_OLtCxwtLp9YmjfJWS-v0B_qE7V3eGsWblkqBg2O6FKjQEX18xrMdKHaLT1qKi_vd7C-xLeKIFErpT-SKAqRi15EH_sCIsUo1GwtF6kslI");
     // if (token != null) {
     //   print("Access Token 獲取成功，正在上傳/下載檔案...");
@@ -85,7 +94,6 @@ class SharePointUploader {
     if (uploadOrDownload == 1 && hasDownloaded(model)) {
       return;
     }
-
 
     final authUrl = Uri.https(
       "login.microsoftonline.com",
@@ -117,19 +125,21 @@ class SharePointUploader {
             if (uploadOrDownload == 0) {
               await uploadAllPackagingPhotos(
                   token,
-                      (current, total) => onProgressUpdate?.call(
-                      categoryTranslations['packageing_photo'] ?? 'Packageing Photo ',
+                  (current, total) => onProgressUpdate?.call(
+                      categoryTranslations['packageing_photo'] ??
+                          'Packageing Photo ',
                       current,
                       total));
               await uploadAllAttachmentPhotos(
                   token,
-                      (current, total) => onProgressUpdate?.call(
-                      categoryTranslations['appearance_photo'] ?? 'Appearance Photo ',
+                  (current, total) => onProgressUpdate?.call(
+                      categoryTranslations['appearance_photo'] ??
+                          'Appearance Photo ',
                       current,
                       total));
               await uploadOQCReport(
                   token,
-                      (current, total) => onProgressUpdate?.call(
+                  (current, total) => onProgressUpdate?.call(
                       categoryTranslations['oqc_report'] ?? 'OQC Report ',
                       current,
                       total));
@@ -137,52 +147,41 @@ class SharePointUploader {
               //await uploadSelectedAttachmentPhotos(token); // 上傳選擇的外觀檢查照片
             } else if (uploadOrDownload == 1) {
               await downloadComparePictures(token); // 下載參考照片
-            }
-            else if (uploadOrDownload == 2) {
+            } else if (uploadOrDownload == 2) {
               await downloadPhonePackagingPictures(token); // 下載參考照片
-            }
-            else if (uploadOrDownload == 3) {
+            } else if (uploadOrDownload == 3) {
               await downloadPhoneAttachmentPictures(token); // 下載參考照片
-            }
-            else if (uploadOrDownload == 4) {
+            } else if (uploadOrDownload == 4) {
               await downloadComparePicturesForSpec(token); // 下載外觀檢查參考照片
-            }
-            else if (uploadOrDownload == 5) {
+            } else if (uploadOrDownload == 5) {
               // 上傳參考照片
               await uploadComparePhotos(
                   token,
-                      (current, total) => onProgressUpdate?.call(
+                  (current, total) => onProgressUpdate?.call(
                       categoryTranslations['compare_photo'] ?? 'Compare Photo ',
                       current,
                       total));
-            }
-            else if (uploadOrDownload == 6) {
+            } else if (uploadOrDownload == 6) {
               // 刪除比對資料夾
               //await deleteModelFolderFromSharePoint(token); // 刪除比對資料夾
               await deleteTwoFoldersFromSharePoint(token); // 刪除比對資料夾
-            }
-            else if (uploadOrDownload == 7) {
+            } else if (uploadOrDownload == 7) {
               await downloadComparePackagePicturesForSpec(token); // 下載配件包參考照片
-            }
-            else if (uploadOrDownload == 8) {
+            } else if (uploadOrDownload == 8) {
               // 上傳配件包參考照片
               await uploadComparePackagePhotos(
                   token,
-                      (current, total) => onProgressUpdate?.call(
+                  (current, total) => onProgressUpdate?.call(
                       categoryTranslations['compare_photo'] ?? 'Compare Photo ',
                       current,
                       total));
-            }
-            else if (uploadOrDownload == 9) {
+            } else if (uploadOrDownload == 9) {
               await downloadComparePackagePictures(token); // 下載配件包參考照片
-            }
-            else if (uploadOrDownload == 10) {
+            } else if (uploadOrDownload == 10) {
               await deletePackageFolderFromSharePoint(token); // 刪除配件包參考照片
-            }
-            else if (uploadOrDownload == 11) {
+            } else if (uploadOrDownload == 11) {
               await deleteAttachmentFolderFromSharePoint(token); // 刪除外觀參考照片
-            }
-            else {
+            } else {
               throw Exception("Didn't contain Upload Or Download");
             }
           } else {
@@ -197,6 +196,76 @@ class SharePointUploader {
         break;
       }
     }
+  }
+
+  /// Simulate progress updates for debug mode
+  void _simulateDebugProgress(Function(String, int, int)? onProgressUpdate,
+      Map<String, String> categoryTranslations) {
+    String operation = '';
+
+    switch (uploadOrDownload) {
+      case 0: // Upload
+        print("Debug Mode: Simulating upload operations for SN: $sn");
+        operation =
+            categoryTranslations['packageing_photo'] ?? 'Packaging Photo';
+        onProgressUpdate?.call(operation, 1, 1);
+        operation =
+            categoryTranslations['appearance_photo'] ?? 'Appearance Photo';
+        onProgressUpdate?.call(operation, 1, 1);
+        operation = categoryTranslations['oqc_report'] ?? 'OQC Report';
+        onProgressUpdate?.call(operation, 1, 1);
+        break;
+      case 1: // Download compare pictures
+        print(
+            "Debug Mode: Simulating download compare pictures for model: $model");
+        break;
+      case 2: // Download phone packaging pictures
+        print(
+            "Debug Mode: Simulating download phone packaging pictures for SN: $sn");
+        break;
+      case 3: // Download phone attachment pictures
+        print(
+            "Debug Mode: Simulating download phone attachment pictures for SN: $sn");
+        break;
+      case 4: // Download compare pictures for spec
+        print(
+            "Debug Mode: Simulating download compare pictures for spec for model: $model");
+        break;
+      case 5: // Upload compare photos
+        print("Debug Mode: Simulating upload compare photos for model: $model");
+        operation = categoryTranslations['compare_photo'] ?? 'Compare Photo';
+        onProgressUpdate?.call(operation, 1, 1);
+        break;
+      case 6: // Delete model folder
+        print("Debug Mode: Simulating delete model folder for model: $model");
+        break;
+      case 7: // Download compare package pictures for spec
+        print(
+            "Debug Mode: Simulating download compare package pictures for spec for model: $model");
+        break;
+      case 8: // Upload compare package photos
+        print(
+            "Debug Mode: Simulating upload compare package photos for model: $model");
+        operation = categoryTranslations['compare_photo'] ?? 'Compare Photo';
+        onProgressUpdate?.call(operation, 1, 1);
+        break;
+      case 9: // Download compare package pictures
+        print(
+            "Debug Mode: Simulating download compare package pictures for model: $model");
+        break;
+      case 10: // Delete package folder
+        print("Debug Mode: Simulating delete package folder for model: $model");
+        break;
+      case 11: // Delete attachment folder
+        print(
+            "Debug Mode: Simulating delete attachment folder for model: $model");
+        break;
+      default:
+        print("Debug Mode: Unknown operation: $uploadOrDownload");
+        break;
+    }
+
+    print("Debug Mode: Operation completed successfully");
   }
 
   Future<String?> getAccessToken(
@@ -225,10 +294,12 @@ class SharePointUploader {
       return null;
     }
   }
+
   Future<void> uploadComparePhotos(
       String accessToken, Function(int, int) onProgressUpdate) async {
     final String zerovaPath = await _getOrCreateUserZerovaPath();
-    final String modelFolderPath = path.join(zerovaPath, 'Compare Pictures', model);
+    final String modelFolderPath =
+        path.join(zerovaPath, 'Compare Pictures', model);
     final Directory modelDirectory = Directory(modelFolderPath);
 
     if (!modelDirectory.existsSync()) {
@@ -240,9 +311,9 @@ class SharePointUploader {
         .listSync()
         .whereType<File>()
         .where((file) =>
-          file.path.toLowerCase().endsWith('.jpg') ||
-              file.path.toLowerCase().endsWith('.jpeg') ||
-              file.path.toLowerCase().endsWith('.png'))
+            file.path.toLowerCase().endsWith('.jpg') ||
+            file.path.toLowerCase().endsWith('.jpeg') ||
+            file.path.toLowerCase().endsWith('.png'))
         .toList();
 
     if (files.isEmpty) {
@@ -292,10 +363,12 @@ class SharePointUploader {
       }
     }
   }
+
   Future<void> uploadComparePackagePhotos(
       String accessToken, Function(int, int) onProgressUpdate) async {
     final String zerovaPath = await _getOrCreateUserZerovaPath();
-    final String modelFolderPath = path.join(zerovaPath, 'Compare Package Pictures', model);
+    final String modelFolderPath =
+        path.join(zerovaPath, 'Compare Package Pictures', model);
     final Directory modelDirectory = Directory(modelFolderPath);
 
     if (!modelDirectory.existsSync()) {
@@ -307,9 +380,9 @@ class SharePointUploader {
         .listSync()
         .whereType<File>()
         .where((file) =>
-    file.path.toLowerCase().endsWith('.jpg') ||
-        file.path.toLowerCase().endsWith('.jpeg') ||
-        file.path.toLowerCase().endsWith('.png'))
+            file.path.toLowerCase().endsWith('.jpg') ||
+            file.path.toLowerCase().endsWith('.jpeg') ||
+            file.path.toLowerCase().endsWith('.png'))
         .toList();
 
     if (files.isEmpty) {
@@ -325,7 +398,8 @@ class SharePointUploader {
     for (var file in files) {
       String relativePath = path.relative(file.path, from: zerovaPath);
       // 將相對路徑中的 "Compare Pictures" 替換成 "外觀參考照片"
-      relativePath = relativePath.replaceFirst('Compare Package Pictures', '配件包參考照片');
+      relativePath =
+          relativePath.replaceFirst('Compare Package Pictures', '配件包參考照片');
       final String sharePointPath = "Jackalope/$relativePath";
 
       final String uploadUrl =
@@ -359,6 +433,7 @@ class SharePointUploader {
       }
     }
   }
+
   Future<void> uploadAllPackagingPhotos(
       String accessToken, Function(int, int) onProgressUpdate) async {
     final String zerovaPath = await _getOrCreateUserZerovaPath();
@@ -576,7 +651,7 @@ class SharePointUploader {
 
       modelNameUsed = "default";
       listFilesUrl =
-      "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/Jackalope/外觀參考照片/default:/children";
+          "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/Jackalope/外觀參考照片/default:/children";
 
       response = await http.get(
         Uri.parse(listFilesUrl),
@@ -594,7 +669,8 @@ class SharePointUploader {
     final List files = data['value'];
 
     // 根據實際使用的 model 建立儲存路徑
-    final String directoryPath = path.join(zerovaPath, 'Compare Pictures', modelNameUsed);
+    final String directoryPath =
+        path.join(zerovaPath, 'Compare Pictures', modelNameUsed);
     final directory = Directory(directoryPath);
 
     // 清空舊照片（整個資料夾刪掉再重建）
@@ -649,6 +725,7 @@ class SharePointUploader {
     //記錄這個 model 已經下載過
     _downloadedModels.add(model);
   }
+
   Future<void> downloadComparePackagePictures(String accessToken) async {
     final String zerovaPath = await _getOrCreateUserZerovaPath();
     String modelNameUsed = model; // 預設使用傳入的 model 名稱
@@ -669,7 +746,7 @@ class SharePointUploader {
 
       modelNameUsed = "default";
       listFilesUrl =
-      "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/Jackalope/配件包參考照片/default:/children";
+          "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/Jackalope/配件包參考照片/default:/children";
 
       response = await http.get(
         Uri.parse(listFilesUrl),
@@ -687,7 +764,8 @@ class SharePointUploader {
     final List files = data['value'];
 
     // 根據實際使用的 model 建立儲存路徑
-    final String directoryPath = path.join(zerovaPath, 'Compare Package Pictures', modelNameUsed);
+    final String directoryPath =
+        path.join(zerovaPath, 'Compare Package Pictures', modelNameUsed);
     final directory = Directory(directoryPath);
 
     // 清空舊照片（整個資料夾刪掉再重建）
@@ -710,8 +788,7 @@ class SharePointUploader {
       final fileName = file['name'];
       final downloadUrl = file['@microsoft.graph.downloadUrl'];
 
-      if (downloadUrl != null)
-      {
+      if (downloadUrl != null) {
         int attempt = 0;
         bool success = false;
         while (attempt < 3 && !success) {
@@ -743,6 +820,7 @@ class SharePointUploader {
     //記錄這個 model 已經下載過
     _downloadedModels.add(model);
   }
+
   Future<void> downloadComparePicturesForSpec(String accessToken) async {
     final String zerovaPath = await _getOrCreateUserZerovaPath();
     String modelNameUsed = model; // 預設使用傳入的 model 名稱
@@ -767,7 +845,8 @@ class SharePointUploader {
     final List files = data['value'];
 
     // 根據實際使用的 model 建立儲存路徑
-    final String directoryPath = path.join(zerovaPath, 'Compare Pictures', modelNameUsed);
+    final String directoryPath =
+        path.join(zerovaPath, 'Compare Pictures', modelNameUsed);
     final directory = Directory(directoryPath);
 
     // 清空舊照片（整個資料夾刪掉再重建）
@@ -820,6 +899,7 @@ class SharePointUploader {
       }
     }
   }
+
   Future<void> downloadComparePackagePicturesForSpec(String accessToken) async {
     final String zerovaPath = await _getOrCreateUserZerovaPath();
     String modelNameUsed = model; // 預設使用傳入的 model 名稱
@@ -844,7 +924,8 @@ class SharePointUploader {
     final List files = data['value'];
 
     // 根據實際使用的 model 建立儲存路徑
-    final String directoryPath = path.join(zerovaPath, 'Compare Package Pictures', modelNameUsed);
+    final String directoryPath =
+        path.join(zerovaPath, 'Compare Package Pictures', modelNameUsed);
     final directory = Directory(directoryPath);
 
     // 清空舊照片（整個資料夾刪掉再重建）
@@ -897,9 +978,11 @@ class SharePointUploader {
       }
     }
   }
+
   Future<void> downloadPhoneAttachmentPictures(String accessToken) async {
     final String zerovaPath = await _getOrCreateUserZerovaPath();
-    final String directoryPath = path.join(zerovaPath, 'All Photos/$sn/Attachment');
+    final String directoryPath =
+        path.join(zerovaPath, 'All Photos/$sn/Attachment');
     final listFilesUrl =
         "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/Jackalope/Photos/$sn/Attachment:/children";
 
@@ -959,9 +1042,11 @@ class SharePointUploader {
       print("無法取得檔案清單: ${response.statusCode} ${response.body}");
     }
   }
+
   Future<void> downloadPhonePackagingPictures(String accessToken) async {
     final String zerovaPath = await _getOrCreateUserZerovaPath();
-    final String directoryPath = path.join(zerovaPath, 'All Photos/$sn/Packaging');
+    final String directoryPath =
+        path.join(zerovaPath, 'All Photos/$sn/Packaging');
     final listFilesUrl =
         "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/Jackalope/Photos/$sn/Packaging:/children";
 
@@ -1022,7 +1107,8 @@ class SharePointUploader {
     }
   }
 
-  Future<void> deleteFilesFromSharePoint(String accessToken, List<String> deletedFiles) async {
+  Future<void> deleteFilesFromSharePoint(
+      String accessToken, List<String> deletedFiles) async {
     final String zerovaPath = await _getOrCreateUserZerovaPath();
 
     for (var localFilePath in deletedFiles) {
@@ -1034,7 +1120,8 @@ class SharePointUploader {
 
       final String sharePointPath = "Jackalope/$relativePath";
 
-      final String deleteUrl = "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/items/root:/$sharePointPath";
+      final String deleteUrl =
+          "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/items/root:/$sharePointPath";
 
       try {
         final response = await http.delete(
@@ -1049,13 +1136,15 @@ class SharePointUploader {
         } else if (response.statusCode == 404) {
           print("檔案不存在（無法刪除）: $sharePointPath");
         } else {
-          print("檔案刪除失敗: $sharePointPath - ${response.statusCode} ${response.body}");
+          print(
+              "檔案刪除失敗: $sharePointPath - ${response.statusCode} ${response.body}");
         }
       } catch (e) {
         print("刪除檔案發生錯誤: $sharePointPath - $e");
       }
     }
   }
+
   Future<void> deleteTwoFoldersFromSharePoint(String accessToken) async {
     final String folderPath1 = "Jackalope/外觀參考照片/$model";
     final String folderPath2 = "Jackalope/配件包參考照片/$model";
@@ -1096,7 +1185,8 @@ class SharePointUploader {
           print(response.body); // 會有兩個 DELETE 的結果
         } else {
           attempt++;
-          print("批量刪除失敗 (第 $attempt 次重試): ${response.statusCode} ${response.body}");
+          print(
+              "批量刪除失敗 (第 $attempt 次重試): ${response.statusCode} ${response.body}");
           if (attempt < 3) await Future.delayed(Duration(seconds: 2));
         }
       } catch (e) {
@@ -1105,8 +1195,8 @@ class SharePointUploader {
         if (attempt < 3) await Future.delayed(Duration(seconds: 2));
       }
     }
-
   }
+
   Future<void> deletePackageFolderFromSharePoint(String accessToken) async {
     final String folderPath = "Jackalope/配件包參考照片/$model";
 
@@ -1153,7 +1243,7 @@ class SharePointUploader {
 
       for (var fileName in List<String>.from(fileNamesToDelete)) {
         final fileItem = items.firstWhere(
-              (item) => item['name'] == fileName,
+          (item) => item['name'] == fileName,
           orElse: () => null,
         );
 
@@ -1203,8 +1293,10 @@ class SharePointUploader {
             print("批次刪除完成: 第 ${i ~/ 20 + 1} 批");
           } else {
             attempt++;
-            print("批次刪除失敗 (第 $attempt 次重試): ${batchResponse.statusCode} ${batchResponse.body}");
-            if (attempt < 3) await Future.delayed(Duration(seconds: 2)); // =====  重試等待 =====
+            print(
+                "批次刪除失敗 (第 $attempt 次重試): ${batchResponse.statusCode} ${batchResponse.body}");
+            if (attempt < 3)
+              await Future.delayed(Duration(seconds: 2)); // =====  重試等待 =====
           }
         }
         if (!success) {
@@ -1213,7 +1305,8 @@ class SharePointUploader {
       }
 
       // Step 5: 刪除已處理過的檔案紀錄
-      fileNamesToDelete.removeWhere((name) => actuallyDeletedFileNames.contains(name));
+      fileNamesToDelete
+          .removeWhere((name) => actuallyDeletedFileNames.contains(name));
 
       if (fileNamesToDelete.isEmpty) {
         await prefs.remove("deleted_package_photos");
@@ -1222,11 +1315,11 @@ class SharePointUploader {
         await prefs.setStringList("deleted_package_photos", fileNamesToDelete);
         print("更新 SharedPreferences 清單，剩餘未刪檔案: $fileNamesToDelete");
       }
-
     } catch (e) {
       print("刪除資料夾內檔案時發生錯誤: $folderPath - $e");
     }
   }
+
   Future<void> deleteAttachmentFolderFromSharePoint(String accessToken) async {
     final String folderPath = "Jackalope/外觀參考照片/$model";
 
@@ -1273,7 +1366,7 @@ class SharePointUploader {
 
       for (var fileName in List<String>.from(fileNamesToDelete)) {
         final fileItem = items.firstWhere(
-              (item) => item['name'] == fileName,
+          (item) => item['name'] == fileName,
           orElse: () => null,
         );
 
@@ -1288,7 +1381,8 @@ class SharePointUploader {
 
       if (fileIdsToDelete.isEmpty) {
         print("沒有符合條件的檔案可刪除");
-        await prefs.setStringList("deleted_attachment_photos", fileNamesToDelete);
+        await prefs.setStringList(
+            "deleted_attachment_photos", fileNamesToDelete);
         return;
       }
 
@@ -1322,8 +1416,10 @@ class SharePointUploader {
             print("批次刪除完成: 第 ${i ~/ 20 + 1} 批");
           } else {
             attempt++;
-            print("批次刪除失敗 (第 $attempt 次重試): ${batchResponse.statusCode} ${batchResponse.body}");
-            if (attempt < 3) await Future.delayed(Duration(seconds: 2)); // ===== 重試等待 =====
+            print(
+                "批次刪除失敗 (第 $attempt 次重試): ${batchResponse.statusCode} ${batchResponse.body}");
+            if (attempt < 3)
+              await Future.delayed(Duration(seconds: 2)); // ===== 重試等待 =====
           }
         }
         if (!success) {
@@ -1332,24 +1428,27 @@ class SharePointUploader {
       }
 
       // Step 5: 刪除已處理過的檔案紀錄
-      fileNamesToDelete.removeWhere((name) => actuallyDeletedFileNames.contains(name));
+      fileNamesToDelete
+          .removeWhere((name) => actuallyDeletedFileNames.contains(name));
 
       if (fileNamesToDelete.isEmpty) {
         await prefs.remove("deleted_attachment_photos");
         print("SharedPreferences 刪除清單已清空");
       } else {
-        await prefs.setStringList("deleted_attachment_photos", fileNamesToDelete);
+        await prefs.setStringList(
+            "deleted_attachment_photos", fileNamesToDelete);
         print("更新 SharedPreferences 清單，剩餘未刪檔案: $fileNamesToDelete");
       }
-
     } catch (e) {
       print("刪除資料夾內檔案時發生錯誤: $folderPath - $e");
     }
   }
+
   Future<void> deleteModelFolderFromSharePoint(String accessToken) async {
     final String folderPath = "Jackalope/外觀參考照片/$model";
 
-    final String deleteUrl = "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/items/root:/$folderPath";
+    final String deleteUrl =
+        "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/items/root:/$folderPath";
 
     try {
       final response = await http.delete(

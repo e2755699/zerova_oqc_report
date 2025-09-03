@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'dart:io';
 import 'package:path/path.dart' as path;
@@ -36,7 +37,6 @@ import 'package:zerova_oqc_report/src/widget/oqc/oqc_model.dart';
 import 'package:zerova_oqc_report/src/report/spec/new_package_list_spec.dart.dart';
 import 'package:zerova_oqc_report/src/widget/common/table_failorpass.dart';
 import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zerova_oqc_report/src/utils/image_path_helper.dart';
@@ -53,7 +53,8 @@ class OqcReportPage extends StatefulWidget {
   State<OqcReportPage> createState() => _OqcReportPageState();
 }
 
-class _OqcReportPageState extends State<OqcReportPage> with WindowListener, ImagePageHelper {
+class _OqcReportPageState extends State<OqcReportPage>
+    with WindowListener, ImagePageHelper {
   final TextEditingController _picController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
 
@@ -138,6 +139,124 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener, Imag
     }
   }
 
+  /// Function to handle PDF generation and upload process (for byPass functionality)
+  Future<void> _handlePdfGenerationAndUpload() async {
+    await _generateAndUploadPdf();
+    //bill3
+    startUpload(context);
+    if (globalPsuSerialNumSpec != null) {
+      final success = await FirebaseService().addOrUpdateSpec(
+        model: widget.oqcModel.model, // 你需要確保這裡有正確的 model 名稱
+        tableName: 'PsuSerialNumSpec',
+        spec: globalPsuSerialNumSpec!.toJson(),
+      );
+
+      if (success) {
+        print('✅ 規格已成功上傳 Firebase');
+      } else {
+        print('❌ 上傳失敗，請檢查網路或 API Key');
+      }
+    } else {
+      print('⚠️ 尚未設定 globalPsuSerialNumSpec');
+    }
+    if (globalInputOutputSpec != null) {
+      final success = await FirebaseService().addOrUpdateSpec(
+        model: widget.oqcModel.model, // 你需要確保這裡有正確的 model 名稱
+        tableName: 'InputOutputCharacteristics',
+        spec: globalInputOutputSpec!.toJson(),
+      );
+
+      if (success) {
+        print('✅ 規格已成功上傳 ');
+      } else {
+        print('❌ 上傳失敗，請檢查網路或 API Key');
+      }
+    } else {
+      print('⚠️ 尚未設定 globalInputOutputSpec');
+    }
+    if (globalBasicFunctionTestSpec != null) {
+      final success = await FirebaseService().addOrUpdateSpec(
+        model: widget.oqcModel.model, // 你需要確保這裡有正確的 model 名稱
+        tableName: 'BasicFunctionTest',
+        spec: globalBasicFunctionTestSpec!.toJson(),
+      );
+
+      if (success) {
+        print('✅ 規格已成功上傳 Firebase');
+      } else {
+        print('❌ 上傳失敗，請檢查網路或 API Key');
+      }
+    } else {
+      print('⚠️ 尚未設定 globalBasicFunctionTestSpec');
+    }
+    if (globalHipotTestSpec != null) {
+      final success = await FirebaseService().addOrUpdateSpec(
+        model: widget.oqcModel.model, // 你需要確保這裡有正確的 model 名稱
+        tableName: 'HipotTestSpec',
+        spec: globalHipotTestSpec!.toJson(),
+      );
+
+      if (success) {
+        print('✅ 規格已成功上傳 Firebase');
+      } else {
+        print('❌ 上傳失敗，請檢查網路或 API Key');
+      }
+    } else {
+      print('⚠️ 尚未設定 globalHipotTestSpec');
+    }
+
+    var PackageListdata = PackageListSpecGlobal.get();
+
+    if (PackageListdata != null) {
+      final success = await uploadPackageListSpec(
+        model: widget.oqcModel.model,
+        tableName: 'PackageListSpec',
+        packageListResult: PackageListdata,
+      );
+
+      if (success) {
+        print('✅ 規格已成功上傳 Firebase');
+      } else {
+        print('❌ 上傳失敗，請檢查網路或 API Key');
+      }
+    } else {
+      print('⚠️ 尚未設定 globalPackageListSpec');
+    }
+
+    //bill9
+    deleteOQCField(widget.oqcModel.model, widget.oqcModel.sn);
+
+    final tableNames = [
+      'AppearanceStructureInspectionFunction',
+      'InputOutputCharacteristics',
+      'BasicFunctionTest',
+      'HipotTestSpec',
+    ];
+
+    for (final tableName in tableNames) {
+      final failCount = FailCountStore.getCount(tableName);
+
+      // 如果有值就上傳
+      if (failCount != null) {
+        // failCount 是 int，不會是 null，這裡可改成 failCount > 0 或 failCount >= 0 視需求
+        final success = await FirebaseService().addOrUpdateFailCount(
+          model: widget.oqcModel.model,
+          serialNumber: widget.oqcModel.sn,
+          tableName: tableName,
+          failCount: failCount,
+        );
+
+        if (success) {
+          print('✅ $tableName 規格已成功上傳 Firebase');
+        } else {
+          print('❌ $tableName 上傳失敗，請檢查網路或 API Key');
+        }
+      } else {
+        print('⚠️ 尚未設定 $tableName');
+      }
+    }
+  }
+
   void startUpload(BuildContext context) {
     showDialog(
       context: context,
@@ -171,7 +290,8 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener, Imag
       // 先取得整個 document
       final getResponse = await http.get(Uri.parse(docUrl));
       if (getResponse.statusCode != 200) {
-        print("❌ [deleteOQCField] 取得文件失敗：${getResponse.statusCode}, ${getResponse.body}");
+        print(
+            "❌ [deleteOQCField] 取得文件失敗：${getResponse.statusCode}, ${getResponse.body}");
         return false;
       }
 
@@ -190,13 +310,13 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener, Imag
           print("✅ [deleteOQCField] 已刪除整個 document：$model");
           return true;
         } else {
-          print("❌ [deleteOQCField] 刪除整個 document 失敗：${deleteResponse.statusCode}, ${deleteResponse.body}");
+          print(
+              "❌ [deleteOQCField] 刪除整個 document 失敗：${deleteResponse.statusCode}, ${deleteResponse.body}");
           return false;
         }
       } else {
         // 只刪除指定欄位
-        final patchUrl =
-            '$docUrl&updateMask.fieldPaths=$encodedSn';
+        final patchUrl = '$docUrl&updateMask.fieldPaths=$encodedSn';
 
         final body = json.encode({
           "fields": {
@@ -214,7 +334,8 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener, Imag
           print("✅ [deleteOQCField] 已刪除欄位：$sn");
           return true;
         } else {
-          print("❌ [deleteOQCField] 刪除欄位失敗：${patchResponse.statusCode}, ${patchResponse.body}");
+          print(
+              "❌ [deleteOQCField] 刪除欄位失敗：${patchResponse.statusCode}, ${patchResponse.body}");
           return false;
         }
       }
@@ -224,20 +345,29 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener, Imag
     }
   }
 
-
   Future<bool> areAllPhotosSelected(String sn) async {
     // 1. 讀取配件包照片清單 (外部可直接呼叫 getUserComparePackagePath)
     final packagePath = await getUserComparePackagePath(widget.oqcModel.model);
     final packageDir = Directory(packagePath);
     final packageFiles = packageDir.existsSync()
-        ? packageDir.listSync().whereType<File>().where((f) => isImageFile(f.path)).map((f) => f.path).toList()
+        ? packageDir
+            .listSync()
+            .whereType<File>()
+            .where((f) => isImageFile(f.path))
+            .map((f) => f.path)
+            .toList()
         : <String>[];
 
     // 2. 讀取外觀檢查照片清單 (getUserComparePath)
     final appearancePath = await getUserComparePath(widget.oqcModel.model);
     final appearanceDir = Directory(appearancePath);
     final appearanceFiles = appearanceDir.existsSync()
-        ? appearanceDir.listSync().whereType<File>().where((f) => isImageFile(f.path)).map((f) => f.path).toList()
+        ? appearanceDir
+            .listSync()
+            .whereType<File>()
+            .where((f) => isImageFile(f.path))
+            .map((f) => f.path)
+            .toList()
         : <String>[];
 
     // 3. 讀取 SharedPreferences 的已選擇照片Map
@@ -250,10 +380,12 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener, Imag
     }
 
     // 4. 判斷配件包照片全部都有被選
-    bool allPackageSelected = packageFiles.every((p) => pickedMap.containsKey(p));
+    bool allPackageSelected =
+        packageFiles.every((p) => pickedMap.containsKey(p));
 
     // 5. 判斷外觀檢查照片全部都有被選
-    bool allAppearanceSelected = appearanceFiles.every((p) => pickedMap.containsKey(p));
+    bool allAppearanceSelected =
+        appearanceFiles.every((p) => pickedMap.containsKey(p));
 
     return allPackageSelected && allAppearanceSelected;
   }
@@ -261,13 +393,17 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener, Imag
 // 輔助判斷是否是圖片格式
   bool isImageFile(String path) {
     final ext = path.toLowerCase();
-    return ext.endsWith('.jpg') || ext.endsWith('.jpeg') || ext.endsWith('.png');
+    return ext.endsWith('.jpg') ||
+        ext.endsWith('.jpeg') ||
+        ext.endsWith('.png');
   }
+
   /// 讀取 SharedPreferences 的已選擇照片Map
 
-  Future<Map<String, String>> loadPickedPhotoMap(String model, String sn) async {
+  Future<Map<String, String>> loadPickedPhotoMap(
+      String model, String sn) async {
     final prefs = await SharedPreferences.getInstance();
-    String key = 'pickedPhotoMap_${model}_$sn';  // 用 model+sn 當 key
+    String key = 'pickedPhotoMap_${model}_$sn'; // 用 model+sn 當 key
     final encoded = prefs.getString(key);
     if (encoded != null) {
       final decoded = jsonDecode(encoded);
@@ -282,11 +418,11 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener, Imag
     final packageDir = Directory(packagePath);
     final packageFiles = packageDir.existsSync()
         ? packageDir
-        .listSync()
-        .whereType<File>()
-        .where((f) => isImageFile(f.path))
-        .map((f) => f.path)
-        .toList()
+            .listSync()
+            .whereType<File>()
+            .where((f) => isImageFile(f.path))
+            .map((f) => f.path)
+            .toList()
         : <String>[];
 
     final pickedMap = await loadPickedPhotoMap(model, sn);
@@ -300,11 +436,11 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener, Imag
     final appearanceDir = Directory(appearancePath);
     final appearanceFiles = appearanceDir.existsSync()
         ? appearanceDir
-        .listSync()
-        .whereType<File>()
-        .where((f) => isImageFile(f.path))
-        .map((f) => f.path)
-        .toList()
+            .listSync()
+            .whereType<File>()
+            .where((f) => isImageFile(f.path))
+            .map((f) => f.path)
+            .toList()
         : <String>[];
     print('📦 需要比對的 appearanceFiles:');
     appearanceFiles.forEach(print);
@@ -313,8 +449,6 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener, Imag
 
     print('✅ pickedMap keys:');
     pickedMap.keys.forEach(print);
-
-
 
     return appearanceFiles.every((p) => pickedMap.containsKey(p));
   }
@@ -337,7 +471,6 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener, Imag
     }
     return false; // 找不到資料也視為 false
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -373,9 +506,12 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener, Imag
             failItems.add(context.tr('hipot_test'));
           }
 
-          final packagingCompleted = await areAllPackagePhotosSelected(widget.oqcModel.model, widget.oqcModel.sn);
-          final appearanceCompleted = await areAllAppearancePhotosSelected(widget.oqcModel.model, widget.oqcModel.sn);
-          final allBoxChecked = await areAllPackageCheckboxChecked(widget.oqcModel.sn);
+          final packagingCompleted = await areAllPackagePhotosSelected(
+              widget.oqcModel.model, widget.oqcModel.sn);
+          final appearanceCompleted = await areAllAppearancePhotosSelected(
+              widget.oqcModel.model, widget.oqcModel.sn);
+          final allBoxChecked =
+              await areAllPackageCheckboxChecked(widget.oqcModel.sn);
 
           if (!packagingCompleted || !allBoxChecked) {
             failItems.add(context.tr('package_list'));
@@ -407,9 +543,21 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener, Imag
                 ),
                 actions: [
                   TextButton(
-                    child: const Text(    'OK'),
+                    child: const Text('OK'),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
+                  // Only show byPass button in debug mode
+                  if (kDebugMode)
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.orange,
+                      ),
+                      child: const Text('Bypass'),
+                      onPressed: () async {
+                        Navigator.of(context).pop(); // Close dialog first
+                        await _handlePdfGenerationAndUpload(); // Execute PDF generation and upload
+                      },
+                    ),
                 ],
               ),
             );
@@ -417,189 +565,7 @@ class _OqcReportPageState extends State<OqcReportPage> with WindowListener, Imag
             return; // ❌ 不繼續執行
           }
 
-
-          await _generateAndUploadPdf();
-          //bill3
-          startUpload(context);
-          if (globalPsuSerialNumSpec != null) {
-            final success = await FirebaseService().addOrUpdateSpec(
-              model: widget.oqcModel.model, // 你需要確保這裡有正確的 model 名稱
-              tableName: 'PsuSerialNumSpec',
-              spec: globalPsuSerialNumSpec!.toJson(),
-            );
-
-            if (success) {
-              print('✅ 規格已成功上傳 Firebase');
-            } else {
-              print('❌ 上傳失敗，請檢查網路或 API Key');
-            }
-          } else {
-            print('⚠️ 尚未設定 globalPsuSerialNumSpec');
-          }
-          if (globalInputOutputSpec != null) {
-            final success = await FirebaseService().addOrUpdateSpec(
-              model: widget.oqcModel.model, // 你需要確保這裡有正確的 model 名稱
-              tableName: 'InputOutputCharacteristics',
-              spec: globalInputOutputSpec!.toJson(),
-            );
-
-            if (success) {
-              print('✅ 規格已成功上傳 ');
-            } else {
-              print('❌ 上傳失敗，請檢查網路或 API Key');
-            }
-          } else {
-            print('⚠️ 尚未設定 globalInputOutputSpec');
-          }
-          if (globalBasicFunctionTestSpec != null) {
-            final success = await FirebaseService().addOrUpdateSpec(
-              model: widget.oqcModel.model, // 你需要確保這裡有正確的 model 名稱
-              tableName: 'BasicFunctionTest',
-              spec: globalBasicFunctionTestSpec!.toJson(),
-            );
-
-            if (success) {
-              print('✅ 規格已成功上傳 Firebase');
-            } else {
-              print('❌ 上傳失敗，請檢查網路或 API Key');
-            }
-          } else {
-            print('⚠️ 尚未設定 globalBasicFunctionTestSpec');
-          }
-          if (globalHipotTestSpec != null) {
-            final success = await FirebaseService().addOrUpdateSpec(
-              model: widget.oqcModel.model, // 你需要確保這裡有正確的 model 名稱
-              tableName: 'HipotTestSpec',
-              spec: globalHipotTestSpec!.toJson(),
-            );
-
-            if (success) {
-              print('✅ 規格已成功上傳 Firebase');
-            } else {
-              print('❌ 上傳失敗，請檢查網路或 API Key');
-            }
-          } else {
-            print('⚠️ 尚未設定 globalHipotTestSpec');
-          }
-          /*if (globalPackageListSpec != null) {
-            final success = await FirebaseService().addOrUpdateSpec(
-              model: widget.oqcModel.model, // 你需要確保這裡有正確的 model 名稱
-              tableName: 'PackageListSpec',
-              spec: globalPackageListSpec!.toJson(),
-            );
-
-            if (success) {
-              print('✅ 規格已成功上傳 Firebase');
-            } else {
-              print('❌ 上傳失敗，請檢查網路或 API Key');
-            }
-          } else {
-            print('⚠️ 尚未設定 globalPackageListSpec');
-          }
-*/
-          var PackageListdata = PackageListSpecGlobal.get();
-
-          if (PackageListdata != null) {
-            final success = await uploadPackageListSpec(
-              model: widget.oqcModel.model,
-              tableName: 'PackageListSpec',
-              packageListResult: PackageListdata,
-            );
-
-            if (success) {
-              print('✅ 規格已成功上傳 Firebase');
-            } else {
-              print('❌ 上傳失敗，請檢查網路或 API Key');
-            }
-          } else {
-            print('⚠️ 尚未設定 globalPackageListSpec');
-          }
-          /*
-          void someFunction() async {
-            var tableName = 'PackageListSpec';
-
-           // var data = PackageListSpecGlobal.get(); // 你的全域變數 PackageListResult
-
-            if (PackageListdata != null) {
-              bool result = await uploadPackageListSpec(
-                model: widget.oqcModel.model,
-                tableName: tableName,
-                packageListResult: PackageListdata,
-              );
-              if (result) {
-                print('PackageListSpec 上傳成功');
-              } else {
-                print('PackageListSpec 上傳失敗');
-              }
-            }
-          }
-
-          someFunction();
-
-          void printAllMeasurements(PackageListResult data) {
-            for (int i = 0; i < data.measurements.length; i++) {
-              final m = data.measurements[i];
-              print('Index: $i');
-              print('  itemName: ${m.itemName}');
-              print('  quantity: ${m.quantity}');
-              print('  isChecked: ${m.isCheck.value}');
-              print('------------------');
-            }
-          }
-
-          var globalData = PackageListSpecGlobal.get();
-          printAllMeasurements(globalData);
-*/
-          // 也可以操作
-          //globalData.updateOrAddMeasurement(index: 0, name: "New Item", quantity: "10");
-          // FirebaseService firebaseService = FirebaseService();
-          /*void uploadExample() async {
-            final success = await uploadPackageListResult(
-              model: 'ZV123',
-              sn: 'SN0001',
-              data: '',
-            );
-
-            if (success) {
-              print('✅ 上傳成功');
-            } else {
-              print('❌ 上傳失敗');
-            }
-          }
-
-*/
-          //bill9
-          deleteOQCField(widget.oqcModel.model, widget.oqcModel.sn);
-
-          final tableNames = [
-            'AppearanceStructureInspectionFunction',
-            'InputOutputCharacteristics',
-            'BasicFunctionTest',
-            'HipotTestSpec',
-          ];
-
-          for (final tableName in tableNames) {
-            final failCount = FailCountStore.getCount(tableName);
-
-            // 如果有值就上傳
-            if (failCount != null) {
-              // failCount 是 int，不會是 null，這裡可改成 failCount > 0 或 failCount >= 0 視需求
-              final success = await FirebaseService().addOrUpdateFailCount(
-                model: widget.oqcModel.model,
-                serialNumber: widget.oqcModel.sn,
-                tableName: tableName,
-                failCount: failCount,
-              );
-
-              if (success) {
-                print('✅ $tableName 規格已成功上傳 Firebase');
-              } else {
-                print('❌ $tableName 上傳失敗，請檢查網路或 API Key');
-              }
-            } else {
-              print('⚠️ 尚未設定 $tableName');
-            }
-          }
+          await _handlePdfGenerationAndUpload();
         },
         icon: const Icon(Icons.upload_file),
         label: Text(context.tr('submit')),
