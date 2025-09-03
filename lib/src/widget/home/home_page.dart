@@ -1,8 +1,5 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:path/path.dart' as path;
 import 'package:zerova_oqc_report/src/mixin/load_file_helper.dart';
-import 'package:zerova_oqc_report/src/repo/firebase_service.dart';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -14,12 +11,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:zerova_oqc_report/src/widget/common/custom_app_bar.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:zerova_oqc_report/src/widget/common/global_state.dart';
-import 'package:zerova_oqc_report/src/report/spec/package_list_spec.dart';
-import 'package:intl/intl.dart';
-import 'package:zerova_oqc_report/src/repo/sharepoint_uploader.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:zerova_oqc_report/src/widget/common/global_state.dart';
 import 'package:zerova_oqc_report/src/report/spec/account_data.dart';
 
 class HomePage extends StatefulWidget {
@@ -35,11 +28,20 @@ class _HomePageState extends State<HomePage> with LoadFileHelper<HomePage> {
   String result = '';
   String? savedAccount;
   String? savedPassword;
+  String appVersion = ''; // 應用版本號
 
   @override
   void initState() {
     super.initState();
     loadSavedLogin();
+    loadAppVersion();
+  }
+
+  Future<void> loadAppVersion() async {
+    // 從pubspec.yaml讀取版本號，這裡暫時硬編碼為當前版本
+    setState(() {
+      appVersion = 'v2.1.0+1';
+    });
   }
 
   Future<void> loadSavedLogin() async {
@@ -49,7 +51,8 @@ class _HomePageState extends State<HomePage> with LoadFileHelper<HomePage> {
 
     if (account != null && password != null) {
       // 確認帳密正確才登入
-      if (accountList.containsKey(account) && accountList[account]!['pwd'] == password) {
+      if (accountList.containsKey(account) &&
+          accountList[account]!['pwd'] == password) {
         setState(() {
           currentAccount = account; // 設定目前登入帳號
           permissions.value = accountList[account]!['permission']; // 設定權限
@@ -64,7 +67,6 @@ class _HomePageState extends State<HomePage> with LoadFileHelper<HomePage> {
       print('沒有儲存帳密，跳過自動登入');
     }
   }
-
 
   Future<void> saveLogin(String account, String password) async {
     final prefs = await SharedPreferences.getInstance();
@@ -85,12 +87,39 @@ class _HomePageState extends State<HomePage> with LoadFileHelper<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final currentLocale = context.locale;
-
     return Scaffold(
       appBar: const CustomAppBar(),
-      body: Center(
-        child: isLoggedIn ? buildAfterLoginUI(context) : buildLoginUI(context),
+      body: Stack(
+        children: [
+          Center(
+            child:
+                isLoggedIn ? buildAfterLoginUI(context) : buildLoginUI(context),
+          ),
+          // Version display in bottom right corner
+          Positioned(
+            bottom: 16,
+            right: 16,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Colors.grey.withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Text(
+                appVersion,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -106,11 +135,10 @@ class _HomePageState extends State<HomePage> with LoadFileHelper<HomePage> {
           width: 300,
           height: 60,
           child: ElevatedButton(
-            style:
-            ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20)),
+            style: ElevatedButton.styleFrom(
+                textStyle: const TextStyle(fontSize: 20)),
             onPressed: () async {
-              final loginResult =
-              await showDialog<Map<String, dynamic>>(
+              final loginResult = await showDialog<Map<String, dynamic>>(
                 context: context,
                 builder: (context) => const InputAccountAndPassword(),
               );
@@ -121,7 +149,8 @@ class _HomePageState extends State<HomePage> with LoadFileHelper<HomePage> {
                   loginResult['success'] == true &&
                   loginResult.containsKey('account') &&
                   loginResult.containsKey('password')) {
-                await saveLogin(loginResult['account'], loginResult['password']);
+                await saveLogin(
+                    loginResult['account'], loginResult['password']);
                 setState(() {
                   isLoggedIn = true;
                   savedAccount = loginResult['account'];
@@ -154,8 +183,7 @@ class _HomePageState extends State<HomePage> with LoadFileHelper<HomePage> {
                       child: Text(context.tr('cancel')),
                     ),
                     TextButton(
-                      style:
-                      TextButton.styleFrom(foregroundColor: Colors.red),
+                      style: TextButton.styleFrom(foregroundColor: Colors.red),
                       onPressed: () => Navigator.of(context).pop(true),
                       child: Text(context.tr('exit')),
                     ),
@@ -226,15 +254,16 @@ class _HomePageState extends State<HomePage> with LoadFileHelper<HomePage> {
             width: 300,
             height: 60,
             child: ElevatedButton(
-              style: ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20)),
+              style: ElevatedButton.styleFrom(
+                  textStyle: const TextStyle(fontSize: 20)),
               onPressed: isLoading
                   ? null
                   : () {
-                showDialog(
-                  context: context,
-                  builder: (context) => const InputModelNameAndSnDialog(),
-                );
-              },
+                      showDialog(
+                        context: context,
+                        builder: (context) => const InputModelNameAndSnDialog(),
+                      );
+                    },
               child: Text(context.tr('input_sn_model')),
             ),
           ),
@@ -372,7 +401,7 @@ class _HomePageState extends State<HomePage> with LoadFileHelper<HomePage> {
                       ),
                       TextButton(
                         style:
-                        TextButton.styleFrom(foregroundColor: Colors.red),
+                            TextButton.styleFrom(foregroundColor: Colors.red),
                         onPressed: () => Navigator.of(context).pop(true),
                         child: Text(context.tr('exit')),
                       ),
@@ -416,7 +445,7 @@ class BarcodeScannerScreen extends StatelessWidget {
                   backgroundColor: Colors.black,
                   textStyle: const TextStyle(fontSize: 20, color: Colors.white),
                   padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
