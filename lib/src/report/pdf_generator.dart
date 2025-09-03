@@ -29,6 +29,53 @@ class PdfGenerator {
   static const double _coverModelFontSize = 18.0;
   static const double _smallFontSize = 8.0;
 
+  // Helper method to create consistently styled table cells
+  static pw.Widget _buildTableCell(
+    String text,
+    pw.Font font, {
+    pw.TextAlign textAlign = pw.TextAlign.center,
+    int? maxLines,
+    double? fontSize,
+  }) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(5),
+      child: pw.Center(
+        child: pw.Text(
+          text,
+          style: pw.TextStyle(
+            font: font,
+            fontSize: fontSize ?? _defaultFontSize,
+          ),
+          textAlign: textAlign,
+          maxLines: maxLines,
+        ),
+      ),
+    );
+  }
+
+  // Simple helper to replace pw.Padding with consistent centering
+  static pw.Widget _buildCenteredTableCell(
+    String text,
+    pw.Font font, {
+    pw.TextAlign textAlign = pw.TextAlign.center,
+    int? maxLines,
+    double? fontSize,
+  }) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(5),
+      alignment: pw.Alignment.center,
+      child: pw.Text(
+        text,
+        style: pw.TextStyle(
+          font: font,
+          fontSize: fontSize ?? _defaultFontSize,
+        ),
+        textAlign: textAlign,
+        maxLines: maxLines,
+      ),
+    );
+  }
+
   static Future<pw.Document> generateOqcReport({
     required String modelName,
     required String serialNumber,
@@ -54,63 +101,83 @@ class PdfGenerator {
         : List<pw.Widget>.empty();
     final attachmentImages = await _loadAttachmentImages(serialNumber);
 
+    // Load logo
+    final logoImage = await _loadLogoImage();
+
     // Cover Page
     pdf.addPage(
       pw.Page(
         pageFormat: PdfPageFormat.a4,
-        build: (context) => pw.Center(
-          child: pw.Column(
-            mainAxisAlignment: pw.MainAxisAlignment.center,
-            children: [
-              pw.Text(
-                'ZEROVA TECHNOLOGIES Co., Ltd.',
-                style: pw.TextStyle(
-                  fontSize: _coverTitleFontSize,
-                  fontWeight: pw.FontWeight.bold,
-                  font: font,
-                ),
-              ),
+        build: (context) => pw.Column(
+          children: [
+            // Logo at the top
+            if (logoImage != null) ...[
               pw.SizedBox(height: 60),
-              pw.Text(
-                'Electric Vehicle DC Charger\nOutgoing Quality Control Report',
-                textAlign: pw.TextAlign.center,
-                style: pw.TextStyle(
-                  fontSize: _coverSubtitleFontSize,
-                  fontWeight: pw.FontWeight.bold,
-                  font: font,
+              pw.Container(
+                height: 160,
+                child: pw.Image(logoImage, fit: pw.BoxFit.contain),
+              ),
+            ] else
+              pw.SizedBox(height: 80),
+
+            // Center content
+            pw.Expanded(
+              child: pw.Center(
+                child: pw.Column(
+                  mainAxisAlignment: pw.MainAxisAlignment.center,
+                  children: [
+                    pw.Text(
+                      'ZEROVA TECHNOLOGIES Co., Ltd.',
+                      style: pw.TextStyle(
+                        fontSize: _coverTitleFontSize,
+                        fontWeight: pw.FontWeight.bold,
+                        font: font,
+                      ),
+                    ),
+                    pw.SizedBox(height: 60),
+                    pw.Text(
+                      'Electric Vehicle DC Charger\nOutgoing Quality Control Report',
+                      textAlign: pw.TextAlign.center,
+                      style: pw.TextStyle(
+                        fontSize: _coverSubtitleFontSize,
+                        fontWeight: pw.FontWeight.bold,
+                        font: font,
+                      ),
+                    ),
+                    pw.SizedBox(height: 60),
+                    pw.Text(
+                      'DS Series',
+                      style: pw.TextStyle(
+                        fontSize: _coverModelFontSize,
+                        fontWeight: pw.FontWeight.bold,
+                        font: font,
+                      ),
+                    ),
+                    pw.SizedBox(height: 60),
+                    pw.Text(
+                      'Model Name: $modelName',
+                      style: pw.TextStyle(
+                        fontSize: _defaultFontSize,
+                        font: font,
+                      ),
+                    ),
+                    pw.Text(
+                      'SN: $serialNumber',
+                      style: pw.TextStyle(
+                        fontSize: _defaultFontSize,
+                        font: font,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              pw.SizedBox(height: 60),
-              pw.Text(
-                'DS Series',
-                style: pw.TextStyle(
-                  fontSize: _coverModelFontSize,
-                  fontWeight: pw.FontWeight.bold,
-                  font: font,
-                ),
-              ),
-              pw.SizedBox(height: 60),
-              pw.Text(
-                'Model Name: $modelName',
-                style: pw.TextStyle(
-                  fontSize: _defaultFontSize,
-                  font: font,
-                ),
-              ),
-              pw.Text(
-                'SN: $serialNumber',
-                style: pw.TextStyle(
-                  fontSize: _defaultFontSize,
-                  font: font,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
 
-    if (psuSerialNumbers != null || psuSerialNumbers!.psuSN.isNotEmpty) {
+    if (psuSerialNumbers != null && psuSerialNumbers.psuSN.isNotEmpty) {
       pdf.addPage(
         pw.MultiPage(
           pageFormat: PdfPageFormat.a4,
@@ -249,22 +316,10 @@ class PdfGenerator {
           border: pw.TableBorder.all(),
           children: [
             pw.TableRow(
+              verticalAlignment: pw.TableCellVerticalAlignment.middle,
               children: [
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text('No.',
-                      style:
-                          pw.TextStyle(font: font, fontSize: _defaultFontSize),
-                      textAlign: pw.TextAlign.center),
-                ),
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text(
-                    "S/N  Q'ty : $totalQty",
-                    style: pw.TextStyle(font: font, fontSize: _defaultFontSize),
-                    textAlign: pw.TextAlign.center,
-                  ),
-                ),
+                _buildTableCell('No.', font),
+                _buildTableCell("S/N  Q'ty : $totalQty", font),
               ],
             ),
           ],
@@ -275,24 +330,12 @@ class PdfGenerator {
             border: pw.TableBorder.all(),
             children: [
               pw.TableRow(
+                verticalAlignment: pw.TableCellVerticalAlignment.middle,
                 children: [
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(5),
-                    child: pw.Text('${index + 1}',
-                        style: pw.TextStyle(
-                            font: font, fontSize: _defaultFontSize),
-                        textAlign: pw.TextAlign.center),
-                  ),
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(5),
-                    child: pw.Text(
-                        index < data.psuSN.length
-                            ? data.psuSN[index].value
-                            : '',
-                        style: pw.TextStyle(
-                            font: font, fontSize: _defaultFontSize),
-                        textAlign: pw.TextAlign.center),
-                  ),
+                  _buildTableCell('${index + 1}', font),
+                  _buildTableCell(
+                      index < data.psuSN.length ? data.psuSN[index].value : '',
+                      font),
                 ],
               ),
             ],
@@ -327,55 +370,21 @@ class PdfGenerator {
           border: pw.TableBorder.all(),
           children: [
             pw.TableRow(
+              verticalAlignment: pw.TableCellVerticalAlignment.middle,
               children: [
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text('No.',
-                      style:
-                          pw.TextStyle(font: font, fontSize: _defaultFontSize),
-                      textAlign: pw.TextAlign.center),
-                ),
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text('Item',
-                      style:
-                          pw.TextStyle(font: font, fontSize: _defaultFontSize),
-                      textAlign: pw.TextAlign.center),
-                ),
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text('Version',
-                      style:
-                          pw.TextStyle(font: font, fontSize: _defaultFontSize),
-                      textAlign: pw.TextAlign.center),
-                ),
+                _buildTableCell('No.', font),
+                _buildTableCell('Item', font),
+                _buildTableCell('Version', font),
               ],
             ),
             ...List.generate(
               data.versions.length,
               (index) => pw.TableRow(
+                verticalAlignment: pw.TableCellVerticalAlignment.middle,
                 children: [
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(5),
-                    child: pw.Text('${index + 1}',
-                        style: pw.TextStyle(
-                            font: font, fontSize: _defaultFontSize),
-                        textAlign: pw.TextAlign.center),
-                  ),
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(5),
-                    child: pw.Text(data.versions[index].name,
-                        style: pw.TextStyle(
-                            font: font, fontSize: _defaultFontSize),
-                        textAlign: pw.TextAlign.center),
-                  ),
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(5),
-                    child: pw.Text(data.versions[index].value,
-                        style: pw.TextStyle(
-                            font: font, fontSize: _defaultFontSize),
-                        textAlign: pw.TextAlign.center),
-                  ),
+                  _buildTableCell('${index + 1}', font),
+                  _buildTableCell(data.versions[index].name, font),
+                  _buildTableCell(data.versions[index].value, font),
                 ],
               ),
             ),
@@ -411,86 +420,30 @@ class PdfGenerator {
           border: pw.TableBorder.all(),
           children: [
             pw.TableRow(
+              verticalAlignment: pw.TableCellVerticalAlignment.middle,
               children: [
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text(
-                    'No.',
-                    style: pw.TextStyle(font: font, fontSize: _defaultFontSize),
-                    textAlign: pw.TextAlign.center,
-                  ),
-                ),
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text(
-                    'Item',
-                    style: pw.TextStyle(font: font, fontSize: _defaultFontSize),
-                    textAlign: pw.TextAlign.center,
-                  ),
-                ),
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text(
-                    'Details',
-                    style: pw.TextStyle(font: font, fontSize: _defaultFontSize),
-                    textAlign: pw.TextAlign.center,
-                  ),
-                ),
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(5),
-                  child: pw.Text(
-                    'Judgement',
-                    style: pw.TextStyle(font: font, fontSize: _defaultFontSize),
-                    textAlign: pw.TextAlign.center,
-                  ),
-                ),
+                _buildTableCell('No.', font),
+                _buildTableCell('Item', font),
+                _buildTableCell('Details', font),
+                _buildTableCell('Judgement', font),
               ],
             ),
             ...List.generate(
               data.testItems.length,
               (index) => pw.TableRow(
+                verticalAlignment: pw.TableCellVerticalAlignment.middle,
                 children: [
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(5),
-                    child: pw.Text(
-                      '${index + 1}',
-                      style:
-                          pw.TextStyle(font: font, fontSize: _defaultFontSize),
-                      textAlign: pw.TextAlign.center,
-                    ),
+                  _buildTableCell('${index + 1}', font),
+                  _buildTableCell(data.testItems[index].name, font),
+                  _buildTableCell(
+                    AppearanceStructureInspectionFunctionResult
+                            .descriptionMapping[data.testItems[index].name] ??
+                        '',
+                    font,
+                    textAlign: pw.TextAlign.left,
+                    maxLines: 5,
                   ),
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(5),
-                    child: pw.Text(
-                      data.testItems[index].name,
-                      style:
-                          pw.TextStyle(font: font, fontSize: _defaultFontSize),
-                      textAlign: pw.TextAlign.center,
-                    ),
-                  ),
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(5),
-                    child: pw.Text(
-                      AppearanceStructureInspectionFunctionResult
-                              .descriptionMapping[data.testItems[index].name] ??
-                          '',
-                      style:
-                          pw.TextStyle(font: font, fontSize: _defaultFontSize),
-                      textAlign: pw.TextAlign.left,
-                      maxLines: 5,
-                    ),
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(5),
-                    child: pw.Center(
-                      child: pw.Text(
-                        data.testItems[index].judgement,
-                        style: pw.TextStyle(
-                            font: font, fontSize: _defaultFontSize),
-                        textAlign: pw.TextAlign.center,
-                      ),
-                    ),
-                  ),
+                  _buildTableCell(data.testItems[index].judgement, font),
                 ],
               ),
             ),
@@ -552,15 +505,17 @@ class PdfGenerator {
     // ➤ 加入 Left Header
     tableRows.add(
       pw.TableRow(
+        verticalAlignment: pw.TableCellVerticalAlignment.middle,
         children: leftHeaders
-            .map((header) => pw.Padding(
+            .map((header) => pw.Center(
+                    child: pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
                   child: pw.Text(
                     header,
                     style: pw.TextStyle(font: font, fontSize: _defaultFontSize),
                     textAlign: pw.TextAlign.center,
                   ),
-                ))
+                )))
             .toList(),
       ),
     );
@@ -619,6 +574,7 @@ class PdfGenerator {
   static pw.TableRow _buildDataRow(InputOutputCharacteristicsSide item,
       pw.Font font, String pinUnit, String poutUnit) {
     return pw.TableRow(
+      verticalAlignment: pw.TableCellVerticalAlignment.middle,
       children: [
         pw.Padding(
           padding: const pw.EdgeInsets.all(5),
@@ -690,6 +646,7 @@ class PdfGenerator {
           border: pw.TableBorder.all(),
           children: [
             pw.TableRow(
+              verticalAlignment: pw.TableCellVerticalAlignment.middle,
               children: [
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
@@ -724,6 +681,7 @@ class PdfGenerator {
             ...List.generate(
               data.testItems.length,
               (index) => pw.TableRow(
+                verticalAlignment: pw.TableCellVerticalAlignment.middle,
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(5),
@@ -795,6 +753,7 @@ class PdfGenerator {
           border: pw.TableBorder.all(),
           children: [
             pw.TableRow(
+              verticalAlignment: pw.TableCellVerticalAlignment.middle,
               children: [
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
@@ -831,6 +790,7 @@ class PdfGenerator {
               (index) {
                 final item = data.specialFunctionTestResult.testItems[index];
                 return pw.TableRow(
+                  verticalAlignment: pw.TableCellVerticalAlignment.middle,
                   children: [
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(5),
@@ -901,6 +861,7 @@ class PdfGenerator {
           children: [
             // Header Row
             pw.TableRow(
+              verticalAlignment: pw.TableCellVerticalAlignment.middle,
               children: [
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
@@ -934,6 +895,7 @@ class PdfGenerator {
             ),
             // Insulation Impedance Test Row
             pw.TableRow(
+              verticalAlignment: pw.TableCellVerticalAlignment.middle,
               children: [
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
@@ -989,6 +951,8 @@ class PdfGenerator {
                         },
                         children: [
                           pw.TableRow(
+                            verticalAlignment:
+                                pw.TableCellVerticalAlignment.middle,
                             children: [
                               pw.Container(
                                 padding: const pw.EdgeInsets.all(8),
@@ -1079,6 +1043,7 @@ class PdfGenerator {
             ),
             // Insulation Voltage Test Row
             pw.TableRow(
+              verticalAlignment: pw.TableCellVerticalAlignment.middle,
               children: [
                 pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
@@ -1134,6 +1099,8 @@ class PdfGenerator {
                         },
                         children: [
                           pw.TableRow(
+                            verticalAlignment:
+                                pw.TableCellVerticalAlignment.middle,
                             children: [
                               pw.Container(
                                 padding: const pw.EdgeInsets.all(8),
@@ -1273,6 +1240,7 @@ class PdfGenerator {
               (index) {
                 final m = data.measurements[index];
                 return pw.TableRow(
+                  verticalAlignment: pw.TableCellVerticalAlignment.middle,
                   children: [
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(5),
@@ -1468,5 +1436,28 @@ class PdfGenerator {
 
   static Future<pw.ImageProvider?> _imageFromPath(String path) async {
     return await ImageUtils.imageFromPath(path);
+  }
+
+  static Future<pw.ImageProvider?> _loadLogoImage() async {
+    try {
+      // Load logo from assets
+      const logoPath = 'assets/logo.png';
+      final logoFile = File(logoPath);
+
+      if (await logoFile.exists()) {
+        final logoBytes = await logoFile.readAsBytes();
+        return pw.MemoryImage(logoBytes);
+      } else {
+        // Try alternative path in case of different project structure
+        final logoFile2 = File('logo.png');
+        if (await logoFile2.exists()) {
+          final logoBytes = await logoFile2.readAsBytes();
+          return pw.MemoryImage(logoBytes);
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading logo image: $e');
+    }
+    return null;
   }
 }
