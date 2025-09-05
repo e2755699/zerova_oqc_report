@@ -112,13 +112,13 @@ class PdfGenerator {
           children: [
             // Logo at the top
             if (logoImage != null) ...[
-              pw.SizedBox(height: 60),
+              pw.SizedBox(height: 40),
               pw.Container(
-                height: 160,
+                height: 120,
                 child: pw.Image(logoImage, fit: pw.BoxFit.contain),
               ),
             ] else
-              pw.SizedBox(height: 80),
+              pw.SizedBox(height: 60),
 
             // Center content
             pw.Expanded(
