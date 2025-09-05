@@ -40,7 +40,7 @@ class _HomePageState extends State<HomePage> with LoadFileHelper<HomePage> {
   Future<void> loadAppVersion() async {
     // 從pubspec.yaml讀取版本號，這裡暫時硬編碼為當前版本
     setState(() {
-      appVersion = 'v2.1.0+1';
+      appVersion = 'v2.2.0+1';
     });
   }
 

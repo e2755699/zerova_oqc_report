@@ -530,6 +530,7 @@ class PdfGenerator {
     // ➤ 加入 Right Header
     tableRows.add(
       pw.TableRow(
+        verticalAlignment: pw.TableCellVerticalAlignment.middle,
         children: rightHeaders
             .map((header) => pw.Padding(
                   padding: const pw.EdgeInsets.all(5),
