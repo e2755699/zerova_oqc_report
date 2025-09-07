@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:zerova_oqc_report/route/app_router.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'src/config/config_manager.dart';
 
 void main() async {
@@ -28,6 +29,15 @@ void main() async {
 
   await EasyLocalization.ensureInitialized();
   await ConfigManager.initialize();
+  await Firebase.initializeApp(
+    options: const FirebaseOptions(
+      apiKey: 'AIzaSyAfAW6QaSjhJEcoT0kfUGqbFJaJr4L4CFE',
+      appId: '1:452230213864:android:3a9820bb02ecfaa23d995d',
+      messagingSenderId: '452230213864',
+      projectId: 'oqcreport-87e5a',
+      storageBucket: 'oqcreport-87e5a.firebasestorage.app',
+    ),
+  );
 
   /*SharePointUploader(uploadOrDownload: 1, sn: '', model: model).startAuthorization(
     categoryTranslations: {
@@ -74,8 +84,8 @@ class ZerovaOqcReport extends StatelessWidget {
         final mq = MediaQuery.of(context);
         return MediaQuery(
           data: mq.copyWith(
-            // Lock app-wide text scaling to 100%
-          ),
+              // Lock app-wide text scaling to 100%
+              ),
           child: child ?? const SizedBox(),
         );
       },
