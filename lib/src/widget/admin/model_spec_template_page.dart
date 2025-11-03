@@ -52,6 +52,7 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
   @override
   void dispose() {
     _modelController.dispose();
+    _copyTargetModelController.dispose();
     _tabController?.removeListener(_onTabChanged);
     _tabController?.dispose();
     super.dispose();
@@ -529,6 +530,288 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
   }
 
   bool _isDuplicateModel = false; // 新增一個變數放在 State 裡
+  final TextEditingController _copyTargetModelController = TextEditingController(); // 複製對話框的目標模型控制器
+
+  // 顯示複製規格對話框
+  void _showCopySpecDialog() {
+    String? sourceModel = _selectedModel;
+
+    if (sourceModel == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('請先選擇一個來源模型')),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        String? selectedSourceModel = sourceModel;
+        bool isDuplicate = false;
+
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Row(
+                children: [
+                  Icon(Icons.copy, color: Colors.blue),
+                  SizedBox(width: 8),
+                  Text('從現有模型複製規格'),
+                ],
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '來源模型：',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      value: selectedSourceModel,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: '選擇來源模型',
+                      ),
+                      items: _modelList.map((model) {
+                        return DropdownMenuItem<String>(
+                          value: model,
+                          child: Text(model),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setDialogState(() {
+                          selectedSourceModel = value;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      '目標模型名稱：',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _copyTargetModelController,
+                      decoration: InputDecoration(
+                        border: const OutlineInputBorder(),
+                        labelText: '輸入新模型名稱',
+                        hintText: '例如：EV600',
+                        errorText: isDuplicate ? '⚠️ 此模型已存在' : null,
+                      ),
+                      onChanged: (value) {
+                        setDialogState(() {
+                          isDuplicate = _modelList.contains(value.trim());
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.blue.shade200),
+                      ),
+                      child: const Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.info_outline, size: 16, color: Colors.blue),
+                              SizedBox(width: 4),
+                              Text(
+                                '將複製以下規格：',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            '• PSU序號規格\n• 輸入輸出特性規格\n• 基本功能測試規格\n• 耐壓測試規格\n• 配件包規格',
+                            style: TextStyle(fontSize: 12),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            '⚠️ 注意：照片不會被複製，需要重新上傳',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontStyle: FontStyle.italic,
+                              color: Colors.orange,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    _copyTargetModelController.clear();
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(context.tr('cancel')),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed: isDuplicate ||
+                          _copyTargetModelController.text.trim().isEmpty ||
+                          selectedSourceModel == null
+                      ? null
+                      : () {
+                          final targetModel = _copyTargetModelController.text.trim();
+                          Navigator.of(context).pop();
+                          _copyModelSpecs(
+                            sourceModel: selectedSourceModel!,
+                            targetModel: targetModel,
+                          );
+                        },
+                  child: const Text('確認複製'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // 複製模型規格
+  Future<void> _copyModelSpecs({
+    required String sourceModel,
+    required String targetModel,
+  }) async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      // 載入來源模型的規格
+      final firebaseService = FirebaseService();
+      final tableNames = [
+        'InputOutputCharacteristics',
+        'BasicFunctionTest',
+        'HipotTestSpec',
+        'PsuSerialNumSpec'
+      ];
+
+      final specs = await firebaseService.getAllSpecs(
+        model: sourceModel,
+        tableNames: tableNames,
+      );
+
+      // 載入來源模型的 PackageListSpec
+      final sourcePackageListResult = await fetchPackageListSpec(sourceModel);
+
+      // 複製規格到目標模型
+      // 1. 複製 InputOutputCharacteristics
+      final ioSpecMap = specs['InputOutputCharacteristics'];
+      if (ioSpecMap != null && ioSpecMap.isNotEmpty) {
+        await firebaseService.addOrUpdateSpec(
+          model: targetModel,
+          tableName: 'InputOutputCharacteristics',
+          spec: ioSpecMap,
+        );
+      }
+
+      // 2. 複製 BasicFunctionTest
+      final bfSpecMap = specs['BasicFunctionTest'];
+      if (bfSpecMap != null && bfSpecMap.isNotEmpty) {
+        await firebaseService.addOrUpdateSpec(
+          model: targetModel,
+          tableName: 'BasicFunctionTest',
+          spec: bfSpecMap,
+        );
+      }
+
+      // 3. 複製 HipotTestSpec
+      final htSpecMap = specs['HipotTestSpec'];
+      if (htSpecMap != null && htSpecMap.isNotEmpty) {
+        await firebaseService.addOrUpdateSpec(
+          model: targetModel,
+          tableName: 'HipotTestSpec',
+          spec: htSpecMap,
+        );
+      }
+
+      // 4. 複製 PsuSerialNumSpec
+      final psuSpecMap = specs['PsuSerialNumSpec'];
+      if (psuSpecMap != null && psuSpecMap.isNotEmpty) {
+        await firebaseService.addOrUpdateSpec(
+          model: targetModel,
+          tableName: 'PsuSerialNumSpec',
+          spec: psuSpecMap,
+        );
+      }
+
+      // 5. 複製 PackageListSpec（需要深度複製）
+      if (sourcePackageListResult != null) {
+        // 建立新的 PackageListResult 並複製所有 measurements
+        final targetPackageListResult = PackageListResult();
+        for (int i = 0; i < sourcePackageListResult.measurements.length; i++) {
+          final sourceMeasurement = sourcePackageListResult.measurements[i];
+          targetPackageListResult.updateOrAddMeasurement(
+            index: i,
+            name: sourceMeasurement.itemName,
+            quantity: sourceMeasurement.quantity,
+            isChecked: sourceMeasurement.isCheck.value,
+          );
+        }
+        await uploadPackageListSpec(
+          model: targetModel,
+          tableName: 'PackageListSpec',
+          packageListResult: targetPackageListResult,
+        );
+      }
+
+      // 更新本地狀態：將目標模型添加到列表並載入規格
+      setState(() {
+        if (!_modelList.contains(targetModel)) {
+          _modelList.add(targetModel);
+        }
+        _selectedModel = targetModel;
+        _isNewModel = false;
+        _isLoading = false;
+      });
+
+      // 載入複製後的規格到 UI
+      await _loadModelSpecs(targetModel);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('✅ 已成功從 $sourceModel 複製規格到 $targetModel'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('複製規格失敗: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      _copyTargetModelController.clear();
+    }
+  }
 
   Widget _buildModelSelector() {
     return Card(
@@ -592,7 +875,7 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
                     ),
                   ),
                 ],
-                const SizedBox(width: 16),
+                const SizedBox(width: 8),
                 ElevatedButton.icon(
                   onPressed: () {
                     if (_isNewModel) {
@@ -628,6 +911,23 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
                   label: Text(_isNewModel ? '選擇現有模型' : '新增模型'),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // 複製規格按鈕
+                Tooltip(
+                  message: '從現有模型複製規格',
+                  child: ElevatedButton.icon(
+                    onPressed: _selectedModel != null && !_isNewModel
+                        ? _showCopySpecDialog
+                        : null,
+                    icon: const Icon(Icons.copy),
+                    label: const Text('複製規格'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
                   ),
                 ),
               ],
