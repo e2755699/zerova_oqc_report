@@ -82,5 +82,10 @@
   "error": "Error",
   "api_error": "API Call Error",
   "unexpected_error": "Unexpected Error",
-  "ok": "OK"
+  "ok": "OK",
+  "delete": "Delete",
+  "delete_sn_confirm_title": "Confirm Delete Serial Number",
+  "delete_sn_confirm_message": "Are you sure you want to delete serial number \"{}\"?\n(Model: {})",
+  "delete_sn_success": "Successfully deleted serial number: {}",
+  "delete_sn_fail": "Failed to delete serial number: {}"
 }

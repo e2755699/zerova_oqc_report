@@ -78,5 +78,10 @@
   "uploading_file": "Đang tải lên tệp...",
   "downloading_file": "Đang tải xuống tệp...",
   "processing": "Đang xử lý...",
-  "qrcode_back": "trở lại"
+  "qrcode_back": "trở lại",
+  "delete": "Xóa",
+  "delete_sn_confirm_title": "Xác nhận xóa số sê-ri",
+  "delete_sn_confirm_message": "Bạn có chắc chắn muốn xóa số sê-ri \"{}\"?\n(Mô hình: {})",
+  "delete_sn_success": "Đã xóa số sê-ri thành công: {}",
+  "delete_sn_fail": "Xóa số sê-ri thất bại: {}"
 }

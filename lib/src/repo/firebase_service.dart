@@ -683,6 +683,84 @@ Future<Map<String, List<String>>> fetchModelToSnMapFromFirestore() async {
   }
 }
 
+/// Delete a specific SN from todo collection
+/// Removes the SN field from the model document
+Future<bool> deleteSnFromTodo({
+  required String model,
+  required String sn,
+}) async {
+  const projectId = 'oqcreport-87e5a';
+  const apiKey = 'AIzaSyBzlul4mftI7HHJnj48I2aUs2nV154x0iI';
+
+  if (model.trim().isEmpty || sn.trim().isEmpty) {
+    print("❌ [deleteSnFromTodo] model 或 sn 為空");
+    return false;
+  }
+
+  final encodedModel = Uri.encodeComponent(model.trim());
+  final encodedSn = Uri.encodeComponent(sn.trim());
+  final docUrl =
+      'https://firestore.googleapis.com/v1/projects/$projectId/databases/(default)/documents/todo/$encodedModel?key=$apiKey';
+
+  try {
+    // First get the document to check fields
+    final getResponse = await http.get(Uri.parse(docUrl));
+    if (getResponse.statusCode != 200) {
+      print(
+          "❌ [deleteSnFromTodo] 取得文件失敗：${getResponse.statusCode}, ${getResponse.body}");
+      return false;
+    }
+
+    final docData = json.decode(getResponse.body);
+    final fields = docData['fields'] as Map<String, dynamic>?;
+
+    if (fields == null || fields.isEmpty) {
+      print("⚠️ [deleteSnFromTodo] 文件已無欄位");
+      return true;
+    }
+
+    // If this is the last field, delete the entire document
+    if (fields.length == 1 && fields.containsKey(sn)) {
+      final deleteResponse = await http.delete(Uri.parse(docUrl));
+      if (deleteResponse.statusCode == 200 || deleteResponse.statusCode == 404) {
+        print("✅ [deleteSnFromTodo] 已刪除整個 document（最後一個欄位）：$model");
+        return true;
+      } else {
+        print(
+            "❌ [deleteSnFromTodo] 刪除整個 document 失敗：${deleteResponse.statusCode}, ${deleteResponse.body}");
+        return false;
+      }
+    } else {
+      // Delete only the specified SN field
+      final patchUrl = '$docUrl&updateMask.fieldPaths=$encodedSn';
+
+      final body = json.encode({
+        "fields": {
+          // Empty means remove the field
+        }
+      });
+
+      final patchResponse = await http.patch(
+        Uri.parse(patchUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      );
+
+      if (patchResponse.statusCode == 200) {
+        print("✅ [deleteSnFromTodo] 已刪除欄位：$sn from $model");
+        return true;
+      } else {
+        print(
+            "❌ [deleteSnFromTodo] 刪除欄位失敗：${patchResponse.statusCode}, ${patchResponse.body}");
+        return false;
+      }
+    }
+  } catch (e) {
+    print("❌ [deleteSnFromTodo] 發生例外：$e");
+    return false;
+  }
+}
+
 Map<String, dynamic> _fromFirestoreFields(Map<String, dynamic> fields) {
   final result = <String, dynamic>{};
 

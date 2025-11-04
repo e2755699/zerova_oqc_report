@@ -78,5 +78,10 @@
   "uploading_file": "ファイルをアップロード中...",
   "downloading_file": "ファイルをダウンロード中...",
   "processing": "処理中...",
-  "qrcode_back": "戻る"
+  "qrcode_back": "戻る",
+  "delete": "削除",
+  "delete_sn_confirm_title": "シリアル番号削除の確認",
+  "delete_sn_confirm_message": "シリアル番号「{}」を削除してもよろしいですか？\n（モデル：{}）",
+  "delete_sn_success": "シリアル番号を正常に削除しました：{}",
+  "delete_sn_fail": "シリアル番号の削除に失敗しました：{}"
 }

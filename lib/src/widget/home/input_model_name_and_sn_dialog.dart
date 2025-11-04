@@ -39,15 +39,106 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
   String? selectedModel;
   String? selectedSn;
 
+  @override
   void initState() {
     super.initState();
 
-    fetchModelToSnMapFromFirestore().then((map) {
+    _loadModelToSnMap();
+  }
+
+  Future<void> _loadModelToSnMap() async {
+    final map = await fetchModelToSnMapFromFirestore();
+    if (mounted) {
       setState(() {
         modelToSnMap.clear();
         modelToSnMap.addAll(map);
       });
+    }
+  }
+
+  Future<void> _confirmDeleteSn() async {
+    if (selectedModel == null || selectedSn == null) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(context.tr('delete_sn_confirm_title')),
+        content: Text(context.tr('delete_sn_confirm_message', args: [selectedSn!, selectedModel!])),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(context.tr('cancel')),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: Text(context.tr('delete')),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      await _deleteSn();
+    }
+  }
+
+  Future<void> _deleteSn() async {
+    if (selectedModel == null || selectedSn == null) return;
+
+    setState(() {
+      isLoading = true;
     });
+
+    try {
+      final success = await deleteSnFromTodo(model: selectedModel!, sn: selectedSn!);
+      if (mounted) {
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(context.tr('delete_sn_success', args: [selectedSn!])),
+              backgroundColor: Colors.green,
+            ),
+          );
+          // Reset SN selection and reload data
+          setState(() {
+            selectedSn = null;
+            _snController.clear();
+          });
+          await _loadModelToSnMap();
+          
+          // If the model has no more SNs, also clear model selection
+          if (!modelToSnMap.containsKey(selectedModel!) || modelToSnMap[selectedModel!]!.isEmpty) {
+            setState(() {
+              selectedModel = null;
+              _modelController.clear();
+            });
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(context.tr('delete_sn_fail', args: [selectedSn!])),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.tr('delete_sn_fail', args: [selectedSn ?? ''])),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -381,6 +472,12 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
           onPressed: isLoading ? null : () => Navigator.of(context).pop(),
           child: Text(context.tr('cancel')),
         ),
+        if (selectedModel != null && selectedSn != null && _selectedMode == InputMode.dropdown)
+          ElevatedButton(
+            onPressed: isLoading ? null : () => _confirmDeleteSn(),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: Text(context.tr('delete')),
+          ),
         ElevatedButton(
           onPressed: isLoading
               ? null

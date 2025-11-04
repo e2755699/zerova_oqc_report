@@ -82,5 +82,10 @@
   "error": "錯誤",
   "api_error": "API 調用錯誤",
   "unexpected_error": "意外錯誤",
-  "ok": "確認"
+  "ok": "確認",
+  "delete": "刪除",
+  "delete_sn_confirm_title": "確認刪除序號",
+  "delete_sn_confirm_message": "確定要刪除序號「{}」嗎？\n（機種：{}）",
+  "delete_sn_success": "已成功刪除序號：{}",
+  "delete_sn_fail": "刪除序號失敗：{}"
 } 
