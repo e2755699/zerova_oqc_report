@@ -114,7 +114,7 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
       return ValueListenableBuilder<int>(
           valueListenable: permissions,
           builder: (context, permission, _) {
-            final isEditable = editMode == 1 && (permission == 1 || permission == 2);
+            final isEditable = editMode == 1 && permission <= 2;
             //final isHeaderEditable = editMode == 1 && permission == 1;
             final isHeaderEditable = false;
     return SizedBox(
@@ -429,7 +429,7 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
       return ValueListenableBuilder<int>(
           valueListenable: permissions,
           builder: (context, permission, _) {
-            final isEditable = editMode == 1 && (permission == 1 || permission == 2);
+            final isEditable = editMode == 1 && permission <= 2;
             //final isHeaderEditable = editMode == 1 && permission == 1;
             final isHeaderEditable = false;
     return Column(
@@ -744,7 +744,7 @@ class _HiPotTestTableState extends State<HiPotTestTable> with TableHelper {
         return ValueListenableBuilder<int>(
           valueListenable: permissions,
           builder: (context, permission, _) {
-            final isEditable = editMode == 1 && (permission == 1 || permission == 2);
+            final isEditable = editMode == 1 && permission <= 2;
             //final isHeaderEditable = editMode == 1 && permission == 1;
             final isHeaderEditable = false;
             return TableWrapper(

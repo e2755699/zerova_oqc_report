@@ -58,7 +58,7 @@ class _AppearanceStructureInspectionTableState
           valueListenable: permissions,
           builder: (context, permission, _) {
         final isEditable =
-            editMode == 1 && (permission == 1 || permission == 2);
+            editMode == 1 && permission <= 2;
 
     return TableWrapper(
       title: context.tr('appearance_structure_inspection'),

@@ -33,8 +33,9 @@
   "exit_confirm_message": "是否確定離開應用程式？",
   "submit_success": "序號: {}, 型號: {} 已提交",
   "submit_fail": "序號: {}, 型號: {} 提交失敗",
-  "login_success_admin": "您已成功登入，權限：管理者",
-  "login_success_operator": "您已成功登入，權限：操作員",
+  "login_success_owner": "您已成功登入，權限：擁有者",
+  "login_success_admin": "您已成功登入，權限：管理員",
+  "login_success_employee": "您已成功登入，權限：一般員工",
   "login_success_guest": "您已成功登入，權限：訪客",
   "model_spec_template": "機種模板管理",
   "input_account_password": "登入",
@@ -87,5 +88,8 @@
   "delete_sn_confirm_title": "確認刪除序號",
   "delete_sn_confirm_message": "確定要刪除序號「{}」嗎？\n（機種：{}）",
   "delete_sn_success": "已成功刪除序號：{}",
-  "delete_sn_fail": "刪除序號失敗：{}"
+  "delete_sn_fail": "刪除序號失敗：{}",
+  "permission_owner": "擁有者",
+  "permission_admin": "管理員",
+  "permission_employee": "一般員工"
 } 

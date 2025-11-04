@@ -11,6 +11,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:zerova_oqc_report/src/widget/common/custom_app_bar.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:zerova_oqc_report/src/widget/common/global_state.dart';
+import 'package:zerova_oqc_report/src/utils/permission_helper.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zerova_oqc_report/src/report/spec/account_data.dart';
@@ -218,7 +219,7 @@ class _HomePageState extends State<HomePage> with LoadFileHelper<HomePage> {
           ValueListenableBuilder<int>(
             valueListenable: permissions,
             builder: (context, value, child) {
-              if (value == 1 || kDebugMode) {
+              if (PermissionHelper.canAccessAdmin(value) || kDebugMode) {
                 return Column(
                   children: [
                     SizedBox(
@@ -234,6 +235,26 @@ class _HomePageState extends State<HomePage> with LoadFileHelper<HomePage> {
                         },
                         child: Text(
                           context.tr('model_spec_template'),
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: 300,
+                      height: 60,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          textStyle: const TextStyle(fontSize: 20),
+                          backgroundColor: Colors.purple,
+                        ),
+                        onPressed: () {
+                          context.go('/account-management');
+                        },
+                        child: const Text(
+                          '帳號管理',
                           textAlign: TextAlign.center,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,

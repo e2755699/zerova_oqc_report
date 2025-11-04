@@ -54,7 +54,7 @@ class _SoftwareVersionTableState extends State<SoftwareVersionTable> {
           valueListenable: permissions,
           builder: (context, permission, _) {
             final isEditable =
-                editMode == 1 && (permission == 1 || permission == 2);
+                editMode == 1 && permission <= 2;
 
             final dataTable = StyledDataTable(
               columns: [

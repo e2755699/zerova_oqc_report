@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:zerova_oqc_report/src/report/model/package_list_result.dart';
 import 'package:zerova_oqc_report/src/widget/admin/model_spec_template_page.dart';
+import 'package:zerova_oqc_report/src/widget/admin/account_management_page.dart';
 import 'package:zerova_oqc_report/src/widget/camera/camera_page.dart';
 import 'package:zerova_oqc_report/src/widget/home/home_page.dart';
 import 'package:zerova_oqc_report/src/widget/oqc/oqc_model.dart';
@@ -40,6 +40,12 @@ final GoRouter appRouter = GoRouter(
       path: '/model-spec-template',
       builder: (BuildContext context, GoRouterState state) {
         return const ModelSpecTemplatePage();
+      },
+    ),
+    GoRoute(
+      path: '/account-management',
+      builder: (BuildContext context, GoRouterState state) {
+        return const AccountManagementPage();
       },
     ),
   ],

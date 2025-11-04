@@ -110,7 +110,7 @@ class _InputAccountAndPasswordState extends State<InputAccountAndPassword> {
                 print("登入成功：$userName，權限：${permissions.value}");
                 loginSuccess = true;
               } else {
-                permissions.value = 0;
+                permissions.value = 2; // Default to employee on failed login
                 print("登入失敗");
               }
 
@@ -119,10 +119,12 @@ class _InputAccountAndPasswordState extends State<InputAccountAndPassword> {
                   SnackBar(
                     content: Text(
                       loginSuccess
-                          ? (permissions.value == 1
+                          ? (permissions.value == 0
+                          ? context.tr('login_success_owner')
+                          : permissions.value == 1
                           ? context.tr('login_success_admin')
                           : permissions.value == 2
-                          ? context.tr('login_success_operator')
+                          ? context.tr('login_success_employee')
                           : context.tr('login_success_guest'))
                           : context.tr('login_failed'),
                     ),

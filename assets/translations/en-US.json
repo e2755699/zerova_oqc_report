@@ -37,8 +37,9 @@
   "submit": "Submit",
   "submit_success": "SN: {}, Model: {} submitted",
   "submit_fail": "SN: {}, Model: {} submission failed",
+  "login_success_owner": "Login successful. Permission: Owner",
   "login_success_admin": "Login successful. Permission: Administrator",
-  "login_success_operator": "Login successful. Permission: Operator",
+  "login_success_employee": "Login successful. Permission: Employee",
   "login_success_guest": "Login successful. Permission: Guest",
   "model_spec_template": "Model Template Management",
   "rfid_card": "RFID Card",
@@ -87,5 +88,8 @@
   "delete_sn_confirm_title": "Confirm Delete Serial Number",
   "delete_sn_confirm_message": "Are you sure you want to delete serial number \"{}\"?\n(Model: {})",
   "delete_sn_success": "Successfully deleted serial number: {}",
-  "delete_sn_fail": "Failed to delete serial number: {}"
+  "delete_sn_fail": "Failed to delete serial number: {}",
+  "permission_owner": "Owner",
+  "permission_admin": "Administrator",
+  "permission_employee": "General Employee"
 }

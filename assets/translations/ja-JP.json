@@ -37,8 +37,9 @@
   "exit_confirm_message": "アプリを終了してよろしいですか？",
   "submit_success": "SN: {}, モデル: {} が送信されました",
   "submit_fail": "SN: {}, モデル: {} の送信が失敗しました",
+  "login_success_owner": "ログイン成功。権限：オーナー",
   "login_success_admin": "ログイン成功。権限：管理者",
-  "login_success_operator": "ログイン成功。権限：オペレーター",
+  "login_success_employee": "ログイン成功。権限：一般社員",
   "login_success_guest": "ログイン成功。権限：ゲスト",
   "model_spec_template": "型番仕様管理",
   "rfid_card": "RFID Card",
@@ -83,5 +84,8 @@
   "delete_sn_confirm_title": "シリアル番号削除の確認",
   "delete_sn_confirm_message": "シリアル番号「{}」を削除してもよろしいですか？\n（モデル：{}）",
   "delete_sn_success": "シリアル番号を正常に削除しました：{}",
-  "delete_sn_fail": "シリアル番号の削除に失敗しました：{}"
+  "delete_sn_fail": "シリアル番号の削除に失敗しました：{}",
+  "permission_owner": "オーナー",
+  "permission_admin": "管理者",
+  "permission_employee": "一般社員"
 }

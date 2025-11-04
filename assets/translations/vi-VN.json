@@ -37,8 +37,9 @@
   "exit_confirm_message": "Bạn có chắc chắn muốn thoát khỏi ứng dụng không?",
   "submit_success": "SN: {}, Model: {} đã được gửi",
   "submit_fail": "SN: {}, Model: {} gửi thất bại",
+  "login_success_owner": "Đăng nhập thành công. Quyền: Chủ sở hữu",
   "login_success_admin": "Đăng nhập thành công. Quyền: Quản trị viên",
-  "login_success_operator": "Đăng nhập thành công. Quyền: Người vận hành",
+  "login_success_employee": "Đăng nhập thành công. Quyền: Nhân viên thường",
   "login_success_guest": "Đăng nhập thành công. Quyền: Khách",
   "model_spec_template": "Quản lý mẫu thông số kỹ thuật mô hình",
   "rfid_card": "RFID Card",
@@ -83,5 +84,8 @@
   "delete_sn_confirm_title": "Xác nhận xóa số sê-ri",
   "delete_sn_confirm_message": "Bạn có chắc chắn muốn xóa số sê-ri \"{}\"?\n(Mô hình: {})",
   "delete_sn_success": "Đã xóa số sê-ri thành công: {}",
-  "delete_sn_fail": "Xóa số sê-ri thất bại: {}"
+  "delete_sn_fail": "Xóa số sê-ri thất bại: {}",
+  "permission_owner": "Chủ sở hữu",
+  "permission_admin": "Quản trị viên",
+  "permission_employee": "Nhân viên thường"
 }
