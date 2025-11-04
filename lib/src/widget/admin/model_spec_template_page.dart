@@ -901,7 +901,7 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
                             child: ConstrainedBox(
                               constraints: const BoxConstraints(
                                 maxHeight: 200,
-                                maxWidth: 400,
+                                maxWidth: 700,
                               ),
                               child: ListView.builder(
                                 shrinkWrap: true,
