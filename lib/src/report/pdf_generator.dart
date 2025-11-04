@@ -114,7 +114,7 @@ class PdfGenerator {
             if (logoImage != null) ...[
               pw.SizedBox(height: 40),
               pw.Container(
-                height: 120,
+                height: 80,
                 child: pw.Image(logoImage, fit: pw.BoxFit.contain),
               ),
             ] else
@@ -144,16 +144,7 @@ class PdfGenerator {
                         font: font,
                       ),
                     ),
-                    pw.SizedBox(height: 60),
-                    pw.Text(
-                      'DS Series',
-                      style: pw.TextStyle(
-                        fontSize: _coverModelFontSize,
-                        fontWeight: pw.FontWeight.bold,
-                        font: font,
-                      ),
-                    ),
-                    pw.SizedBox(height: 60),
+                    pw.SizedBox(height: 120),
                     pw.Text(
                       'Model Name: $modelName',
                       style: pw.TextStyle(
