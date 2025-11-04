@@ -899,10 +899,7 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
                             elevation: 4.0,
                             borderRadius: BorderRadius.circular(8),
                             child: ConstrainedBox(
-                              constraints: const BoxConstraints(
-                                maxHeight: 200,
-                                maxWidth: 400,
-                              ),
+                              constraints: const BoxConstraints(maxHeight: 200),
                               child: ListView.builder(
                                 shrinkWrap: true,
                                 padding: EdgeInsets.zero,
@@ -943,7 +940,6 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
                                                     ? Colors.blue
                                                     : Colors.black87,
                                               ),
-                                              overflow: TextOverflow.ellipsis,
                                             ),
                                           ),
                                           if (isSelected)
