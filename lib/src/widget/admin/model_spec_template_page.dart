@@ -831,132 +831,25 @@ class _ModelSpecTemplatePageState extends State<ModelSpecTemplatePage>
               children: [
                 if (!_isNewModel) ...[
                   Expanded(
-                    child: Autocomplete<String>(
-                      displayStringForOption: (option) => option,
-                      optionsBuilder: (textEditingValue) {
-                        if (textEditingValue.text.isEmpty) {
-                          return _modelList;
-                        }
-                        // Filter models based on search text
-                        return _modelList.where((model) {
-                          return model
-                              .toLowerCase()
-                              .contains(textEditingValue.text.toLowerCase());
-                        });
-                      },
-                      onSelected: (value) {
+                    child: DropdownButtonFormField<String>(
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: '選擇模型',
+                      ),
+                      value: _selectedModel,
+                      items: _modelList.map((model) {
+                        return DropdownMenuItem<String>(
+                          value: model,
+                          child: Text(model),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
                         setState(() {
                           _selectedModel = value;
                         });
-                        _loadModelSpecs(value);
-                      },
-                      fieldViewBuilder: (
-                        context,
-                        textEditingController,
-                        focusNode,
-                        onFieldSubmitted,
-                      ) {
-                        return TextField(
-                          controller: textEditingController,
-                          focusNode: focusNode,
-                          decoration: InputDecoration(
-                            border: const OutlineInputBorder(),
-                            labelText: '選擇模型',
-                            hintText: '輸入模型名稱搜尋...',
-                            prefixIcon: const Icon(Icons.search),
-                            suffixIcon: textEditingController.text.isNotEmpty
-                                ? IconButton(
-                                    icon: const Icon(Icons.clear),
-                                    tooltip: '清除',
-                                    onPressed: () {
-                                      textEditingController.clear();
-                                      setState(() {
-                                        _selectedModel = null;
-                                      });
-                                    },
-                                  )
-                                : null,
-                          ),
-                          onChanged: (value) {
-                            setState(() {}); // Trigger rebuild to update clear button visibility
-                          },
-                          onSubmitted: (value) {
-                            onFieldSubmitted();
-                            // If user types exact model name and presses Enter, select it
-                            if (_modelList.contains(value) && _selectedModel != value) {
-                              setState(() {
-                                _selectedModel = value;
-                              });
-                              _loadModelSpecs(value);
-                            }
-                          },
-                        );
-                      },
-                      optionsViewBuilder: (context, onSelected, options) {
-                        return Align(
-                          alignment: Alignment.topLeft,
-                          child: Material(
-                            elevation: 4.0,
-                            borderRadius: BorderRadius.circular(8),
-                            child: ConstrainedBox(
-                              constraints: const BoxConstraints(maxHeight: 200),
-                              child: ListView.builder(
-                                shrinkWrap: true,
-                                padding: EdgeInsets.zero,
-                                itemCount: options.length,
-                                itemBuilder: (context, index) {
-                                  final option = options.elementAt(index);
-                                  final isSelected = option == _selectedModel;
-                                  return InkWell(
-                                    onTap: () {
-                                      onSelected(option);
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                        vertical: 12,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: isSelected
-                                            ? Colors.blue.shade50
-                                            : null,
-                                        border: Border(
-                                          bottom: BorderSide(
-                                            color: Colors.grey.shade200,
-                                            width: 0.5,
-                                          ),
-                                        ),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              option,
-                                              style: TextStyle(
-                                                fontWeight: isSelected
-                                                    ? FontWeight.bold
-                                                    : FontWeight.normal,
-                                                color: isSelected
-                                                    ? Colors.blue
-                                                    : Colors.black87,
-                                              ),
-                                            ),
-                                          ),
-                                          if (isSelected)
-                                            const Icon(
-                                              Icons.check,
-                                              color: Colors.blue,
-                                              size: 20,
-                                            ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        );
+                        if (value != null) {
+                          _loadModelSpecs(value);
+                        }
                       },
                     ),
                   ),
