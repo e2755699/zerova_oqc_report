@@ -5,7 +5,7 @@ import 'package:zerova_oqc_report/src/report/model/protection_function_test_resu
 import 'package:zerova_oqc_report/src/report/model/software_version.dart';
 
 class OqcApiClient {
-  final String baseUrl = "http://api.ztmn.com/zapi";
+  final String baseUrl = "http://172.21.1.110:5000/zapi";
   final String token =
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiWmVyb3ZhX09RQyJ9.-glMWnDu11Wm93OFdvRmyrwP2KnQY3J-yUS_W4QZm-k";
 
