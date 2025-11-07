@@ -274,7 +274,7 @@ git push origin vx.y.z
 
 **Windows版本:**
 ```bash
-# 清理舊建置
+# 清理舊建置（可選）
 flutter clean
 
 # 獲取依賴
@@ -283,6 +283,43 @@ flutter pub get
 # 建置Windows Release
 flutter build windows --release
 ```
+
+#### 4.1 Windows 安裝檔打包 🆕
+
+系統已提供自動化打包腳本，可將 Windows 建置檔打包成完整的安裝檔，包含所有 assets 和 config 檔案。
+
+**使用打包腳本：**
+```powershell
+# 執行打包腳本
+powershell -ExecutionPolicy Bypass -File package_windows.ps1
+```
+
+**打包內容：**
+- ✅ 主執行檔：`zerova_oqc_report.exe`
+- ✅ 所有必要的 DLL 檔案
+- ✅ Assets 資源：
+  - `config.json`（assets 和根目錄都有）
+  - `logo.png`
+  - 所有翻譯檔案（zh-TW.json, en-US.json, ja-JP.json, vi-VN.json）
+- ✅ README.txt 說明檔
+
+**打包輸出：**
+- ZIP 安裝檔：`dist/Zerova_OQC_Report_v{version}_Windows.zip`
+- 解壓縮資料夾：`dist/Zerova_OQC_Report_{version}/`
+
+**手動打包步驟：**
+1. 建置完成後，檔案位於 `build/windows/x64/runner/Release/`
+2. 複製整個 Release 目錄到打包資料夾
+3. 將根目錄的 `config.json` 複製到打包資料夾根目錄（作為備份）
+4. 確認所有 assets 檔案都在 `data/flutter_assets/assets/` 目錄下
+5. 將整個資料夾壓縮成 ZIP 檔
+
+**安裝檔使用：**
+1. 解壓縮 ZIP 檔到任意資料夾（例如 `C:\Program Files\Zerova_OQC_Report`）
+2. 執行 `zerova_oqc_report.exe` 即可啟動應用程式
+3. 配置檔案位置：
+   - 主要使用：`data/flutter_assets/assets/config.json`
+   - 備用位置：根目錄的 `config.json`
 
 **其他平台:**
 ```bash
@@ -300,7 +337,10 @@ flutter build web --release
 ```
 
 #### 5. 驗證建置結果
-- **Windows**: 檢查 `build/windows/x64/runner/Release/` 目錄
+- **Windows**: 
+  - 檢查 `build/windows/x64/runner/Release/` 目錄
+  - 檢查打包後的 `dist/Zerova_OQC_Report_v{version}/` 目錄
+  - 確認所有 assets 和 config 檔案都已包含
 - **Android**: 檢查 `build/app/outputs/` 目錄
 - **Web**: 檢查 `build/web/` 目錄
 
@@ -333,6 +373,8 @@ release/
 - [ ] 代碼已提交並推送
 - [ ] Git標籤已創建並推送
 - [ ] Windows版本建置成功
+- [ ] Windows安裝檔已打包（使用 `package_windows.ps1`）
+- [ ] 確認所有 assets 和 config 檔案已包含在安裝檔中
 - [ ] 所有依賴檔案包含完整
 - [ ] Release文檔已準備
 - [ ] GitHub Release已發布

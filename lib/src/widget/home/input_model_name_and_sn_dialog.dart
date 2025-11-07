@@ -12,6 +12,7 @@ enum InputMode {
   dropdown,
   manual,
 }
+
 InputMode? _selectedMode = InputMode.dropdown;
 
 class InputModelNameAndSnDialog extends StatefulWidget {
@@ -63,7 +64,8 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
       context: context,
       builder: (context) => AlertDialog(
         title: Text(context.tr('delete_sn_confirm_title')),
-        content: Text(context.tr('delete_sn_confirm_message', args: [selectedSn!, selectedModel!])),
+        content: Text(context.tr('delete_sn_confirm_message',
+            args: [selectedSn!, selectedModel!])),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -91,12 +93,14 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
     });
 
     try {
-      final success = await deleteSnFromTodo(model: selectedModel!, sn: selectedSn!);
+      final success =
+          await deleteSnFromTodo(model: selectedModel!, sn: selectedSn!);
       if (mounted) {
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(context.tr('delete_sn_success', args: [selectedSn!])),
+              content:
+                  Text(context.tr('delete_sn_success', args: [selectedSn!])),
               backgroundColor: Colors.green,
             ),
           );
@@ -106,9 +110,10 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
             _snController.clear();
           });
           await _loadModelToSnMap();
-          
+
           // If the model has no more SNs, also clear model selection
-          if (!modelToSnMap.containsKey(selectedModel!) || modelToSnMap[selectedModel!]!.isEmpty) {
+          if (!modelToSnMap.containsKey(selectedModel!) ||
+              modelToSnMap[selectedModel!]!.isEmpty) {
             setState(() {
               selectedModel = null;
               _modelController.clear();
@@ -127,7 +132,8 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(context.tr('delete_sn_fail', args: [selectedSn ?? ''])),
+            content:
+                Text(context.tr('delete_sn_fail', args: [selectedSn ?? ''])),
             backgroundColor: Colors.red,
           ),
         );
@@ -188,15 +194,13 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
             mode: FileMode.append);
 
         try {
-          await logFile.writeAsString(
-              '嘗試獲取 PsuSerialNumSpec...\n',
+          await logFile.writeAsString('嘗試獲取 PsuSerialNumSpec...\n',
               mode: FileMode.append);
           await fetchAndPsuSerialNumSpecs(model);
           await logFile.writeAsString('成功獲取 PsuSerialNumSpec\n',
               mode: FileMode.append);
         } catch (e, st) {
-          await logFile.writeAsString(
-              '獲取 PsuSerialNumSpec 失敗: $e\n',
+          await logFile.writeAsString('獲取 PsuSerialNumSpec 失敗: $e\n',
               mode: FileMode.append);
           await logFile.writeAsString('堆疊追蹤: $st\n', mode: FileMode.append);
         }
@@ -246,13 +250,15 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
           if (spec != null) {
             print('PackageListSpec spec (raw Map): $spec');
             final data = PackageListResult();
-            final packageListResult = packageListResultFromSpecDataWithUpdate(spec);
+            final packageListResult =
+                packageListResultFromSpecDataWithUpdate(spec);
             PackageListSpecGlobal.set(packageListResult);
             final measurements2 = PackageListSpecGlobal.get().measurements;
 
             for (int i = 0; i < measurements2.length; i++) {
               final m = measurements2[i];
-              print('itemName: ${m.itemName}, quantity: ${m.quantity}, isChecked: ${m.isCheck.value}');
+              print(
+                  'itemName: ${m.itemName}, quantity: ${m.quantity}, isChecked: ${m.isCheck.value}');
 
               data.updateOrAddMeasurement(
                 index: i,
@@ -264,7 +270,8 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
 
             final measurements = packageListResult.measurements;
             for (var m in measurements) {
-              print('itemName: ${m.itemName}, quantity: ${m.quantity}, isChecked: ${m.isCheck.value}');
+              print(
+                  'itemName: ${m.itemName}, quantity: ${m.quantity}, isChecked: ${m.isCheck.value}');
             }
           } else {
             PackageListSpecGlobal.set(PackageListResult()); // 重設為空的 result
@@ -277,8 +284,6 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
               mode: FileMode.append);
           await logFile.writeAsString('堆疊追蹤: $st\n', mode: FileMode.append);
         }
-
-
 
         try {
           await logFile.writeAsString('嘗試獲取 FailCountsForDevice...\n',
@@ -379,7 +384,8 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
                   labelText: context.tr('model_name'),
                   hintText: context.tr('select_model'),
                   prefixIcon: const Icon(Icons.list),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0)),
                 ),
                 items: modelToSnMap.keys.map((model) {
                   return DropdownMenuItem(value: model, child: Text(model));
@@ -400,13 +406,15 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
                   labelText: context.tr('sn'),
                   hintText: context.tr('select_sn'),
                   prefixIcon: const Icon(Icons.numbers),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0)),
                 ),
                 items: selectedModel == null
                     ? []
                     : modelToSnMap[selectedModel!]!
-                    .map((sn) => DropdownMenuItem(value: sn, child: Text(sn)))
-                    .toList(),
+                        .map((sn) =>
+                            DropdownMenuItem(value: sn, child: Text(sn)))
+                        .toList(),
                 onChanged: (value) {
                   setState(() {
                     selectedSn = value;
@@ -426,10 +434,12 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
                   labelText: context.tr('model_name'),
                   hintText: context.tr('please_input_model_name'),
                   prefixIcon: const Icon(Icons.text_fields),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0)),
                 ),
-                validator: (value) =>
-                (value == null || value.isEmpty) ? context.tr('please_input_model_name') : null,
+                validator: (value) => (value == null || value.isEmpty)
+                    ? context.tr('please_input_model_name')
+                    : null,
                 onFieldSubmitted: (_) => _snFocusNode.requestFocus(),
               ),
               const SizedBox(height: 12),
@@ -441,10 +451,12 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
                   labelText: context.tr('sn'),
                   hintText: context.tr('please_input_sn'),
                   prefixIcon: const Icon(Icons.numbers),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0)),
                 ),
-                validator: (value) =>
-                (value == null || value.isEmpty) ? context.tr('please_input_sn') : null,
+                validator: (value) => (value == null || value.isEmpty)
+                    ? context.tr('please_input_sn')
+                    : null,
                 onFieldSubmitted: (_) async {
                   if (!isLoading && _formKey.currentState!.validate()) {
                     await _submitForm();
@@ -472,7 +484,9 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
           onPressed: isLoading ? null : () => Navigator.of(context).pop(),
           child: Text(context.tr('cancel')),
         ),
-        if (selectedModel != null && selectedSn != null && _selectedMode == InputMode.dropdown)
+        if (selectedModel != null &&
+            selectedSn != null &&
+            _selectedMode == InputMode.dropdown)
           ElevatedButton(
             onPressed: isLoading ? null : () => _confirmDeleteSn(),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
@@ -482,14 +496,13 @@ class _InputModelNameAndSnDialogState extends State<InputModelNameAndSnDialog>
           onPressed: isLoading
               ? null
               : () async {
-            if (_formKey.currentState!.validate()) {
-              await _submitForm();
-            }
-          },
+                  if (_formKey.currentState!.validate()) {
+                    await _submitForm();
+                  }
+                },
           child: Text(context.tr('submit')),
         ),
       ],
     );
   }
-
 }
