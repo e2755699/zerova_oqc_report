@@ -47,6 +47,20 @@ android {
         versionName = flutterVersionName
     }
 
+    flavorDimensions = ["factory"]
+    productFlavors {
+        tw {
+            dimension = "factory"
+            applicationIdSuffix = ".tw"
+            resValue "string", "app_name", "Zerova OQC Report TW"
+        }
+        vn {
+            dimension = "factory"
+            applicationIdSuffix = ".vn"
+            resValue "string", "app_name", "Zerova OQC Report VN"
+        }
+    }
+
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.

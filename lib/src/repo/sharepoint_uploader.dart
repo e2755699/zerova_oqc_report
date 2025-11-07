@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:path/path.dart' as path;
 import '../config/config_manager.dart';
-import 'package:easy_localization/easy_localization.dart';
+import '../config/flavor_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 
@@ -25,6 +25,20 @@ class SharePointUploader {
 
   SharePointUploader(
       {required this.uploadOrDownload, required this.sn, required this.model});
+
+  /// Build SharePoint path with flavor segment after Jackalope
+  /// For Taiwan: "Jackalope/外觀參考照片/..."
+  /// For Vietnam: "Jackalope/vn/外觀參考照片/..."
+  String _buildSharePointPath(String path) {
+    // Path format: "Jackalope/外觀參考照片/..." or "Jackalope/All Photos/..."
+    // We need to insert flavor segment after "Jackalope/"
+    final flavorSegment = FlavorConfig.sharePointFlavorSegment;
+    if (flavorSegment.isEmpty) {
+      return path; // Taiwan: no change
+    }
+    // Vietnam: insert "vn/" after "Jackalope/"
+    return path.replaceFirst('Jackalope/', 'Jackalope/$flavorSegment');
+  }
   /*Future<String> _getUserPicturesPath(String subDirectory) async {
     // 獲取當前使用者的根目錄
     final String userProfile = Platform.environment['USERPROFILE'] ?? '';
@@ -330,7 +344,8 @@ class SharePointUploader {
       String relativePath = path.relative(file.path, from: zerovaPath);
       // 將相對路徑中的 "Compare Pictures" 替換成 "外觀參考照片"
       relativePath = relativePath.replaceFirst('Compare Pictures', '外觀參考照片');
-      final String sharePointPath = "Jackalope/$relativePath";
+      final String sharePointPath =
+          _buildSharePointPath("Jackalope/$relativePath");
 
       final String uploadUrl =
           "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/items/root:/$sharePointPath:/content";
@@ -400,7 +415,8 @@ class SharePointUploader {
       // 將相對路徑中的 "Compare Pictures" 替換成 "外觀參考照片"
       relativePath =
           relativePath.replaceFirst('Compare Package Pictures', '配件包參考照片');
-      final String sharePointPath = "Jackalope/$relativePath";
+      final String sharePointPath =
+          _buildSharePointPath("Jackalope/$relativePath");
 
       final String uploadUrl =
           "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/items/root:/$sharePointPath:/content";
@@ -468,7 +484,8 @@ class SharePointUploader {
 
     for (var file in files) {
       final String relativePath = path.relative(file.path, from: zerovaPath);
-      final String sharePointPath = "Jackalope/$relativePath";
+      final String sharePointPath =
+          _buildSharePointPath("Jackalope/$relativePath");
 
       final String uploadUrl =
           "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/items/root:/$sharePointPath:/content";
@@ -536,7 +553,8 @@ class SharePointUploader {
 
     for (var file in files) {
       final String relativePath = path.relative(file.path, from: zerovaPath);
-      final String sharePointPath = "Jackalope/$relativePath";
+      final String sharePointPath =
+          _buildSharePointPath("Jackalope/$relativePath");
 
       final String uploadUrl =
           "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/items/root:/$sharePointPath:/content";
@@ -597,7 +615,8 @@ class SharePointUploader {
 
     for (var file in files) {
       final String relativePath = path.relative(file.path, from: zerovaPath);
-      final String sharePointPath = "Jackalope/$relativePath";
+      final String sharePointPath =
+          _buildSharePointPath("Jackalope/$relativePath");
 
       final String uploadUrl =
           "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/items/root:/$sharePointPath:/content";
@@ -637,7 +656,7 @@ class SharePointUploader {
 
     // 建立初始要查詢的 SharePoint 路徑
     String listFilesUrl =
-        "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/Jackalope/外觀參考照片/$model:/children";
+        "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/${_buildSharePointPath("Jackalope/外觀參考照片/$model")}:/children";
 
     // 發送查詢請求
     var response = await http.get(
@@ -651,7 +670,7 @@ class SharePointUploader {
 
       modelNameUsed = "default";
       listFilesUrl =
-          "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/Jackalope/外觀參考照片/default:/children";
+          "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/${_buildSharePointPath("Jackalope/外觀參考照片/default")}:/children";
 
       response = await http.get(
         Uri.parse(listFilesUrl),
@@ -732,7 +751,7 @@ class SharePointUploader {
 
     // 建立初始要查詢的 SharePoint 路徑
     String listFilesUrl =
-        "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/Jackalope/配件包參考照片/$model:/children";
+        "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/${_buildSharePointPath("Jackalope/配件包參考照片/$model")}:/children";
 
     // 發送查詢請求
     var response = await http.get(
@@ -746,7 +765,7 @@ class SharePointUploader {
 
       modelNameUsed = "default";
       listFilesUrl =
-          "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/Jackalope/配件包參考照片/default:/children";
+          "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/${_buildSharePointPath("Jackalope/配件包參考照片/default")}:/children";
 
       response = await http.get(
         Uri.parse(listFilesUrl),
@@ -827,7 +846,7 @@ class SharePointUploader {
 
     // 建立初始要查詢的 SharePoint 路徑
     String listFilesUrl =
-        "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/Jackalope/外觀參考照片/$model:/children";
+        "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/${_buildSharePointPath("Jackalope/外觀參考照片/$model")}:/children";
 
     // 發送查詢請求
     var response = await http.get(
@@ -906,7 +925,7 @@ class SharePointUploader {
 
     // 建立初始要查詢的 SharePoint 路徑
     String listFilesUrl =
-        "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/Jackalope/配件包參考照片/$model:/children";
+        "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/${_buildSharePointPath("Jackalope/配件包參考照片/$model")}:/children";
 
     // 發送查詢請求
     var response = await http.get(
@@ -984,7 +1003,7 @@ class SharePointUploader {
     final String directoryPath =
         path.join(zerovaPath, 'All Photos/$sn/Attachment');
     final listFilesUrl =
-        "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/Jackalope/Photos/$sn/Attachment:/children";
+        "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/${_buildSharePointPath("Jackalope/Photos/$sn/Attachment")}:/children";
 
     final response = await http.get(
       Uri.parse(listFilesUrl),
@@ -1048,7 +1067,7 @@ class SharePointUploader {
     final String directoryPath =
         path.join(zerovaPath, 'All Photos/$sn/Packaging');
     final listFilesUrl =
-        "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/Jackalope/Photos/$sn/Packaging:/children";
+        "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/root:/${_buildSharePointPath("Jackalope/Photos/$sn/Packaging")}:/children";
 
     final response = await http.get(
       Uri.parse(listFilesUrl),
@@ -1118,7 +1137,8 @@ class SharePointUploader {
       // 將路徑中的 "Compare Pictures" 替換成 "外觀參考照片"
       relativePath = relativePath.replaceFirst('Compare Pictures', '外觀參考照片');
 
-      final String sharePointPath = "Jackalope/$relativePath";
+      final String sharePointPath =
+          _buildSharePointPath("Jackalope/$relativePath");
 
       final String deleteUrl =
           "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/items/root:/$sharePointPath";
@@ -1146,8 +1166,8 @@ class SharePointUploader {
   }
 
   Future<void> deleteTwoFoldersFromSharePoint(String accessToken) async {
-    final String folderPath1 = "Jackalope/外觀參考照片/$model";
-    final String folderPath2 = "Jackalope/配件包參考照片/$model";
+    final String folderPath1 = _buildSharePointPath("Jackalope/外觀參考照片/$model");
+    final String folderPath2 = _buildSharePointPath("Jackalope/配件包參考照片/$model");
 
     final String batchUrl = "https://graph.microsoft.com/v1.0/\$batch";
 
@@ -1198,7 +1218,7 @@ class SharePointUploader {
   }
 
   Future<void> deletePackageFolderFromSharePoint(String accessToken) async {
-    final String folderPath = "Jackalope/配件包參考照片/$model";
+    final String folderPath = _buildSharePointPath("Jackalope/配件包參考照片/$model");
 
     // Step 1: 從 SharedPreferences 撈刪除清單
     final prefs = await SharedPreferences.getInstance();
@@ -1321,7 +1341,7 @@ class SharePointUploader {
   }
 
   Future<void> deleteAttachmentFolderFromSharePoint(String accessToken) async {
-    final String folderPath = "Jackalope/外觀參考照片/$model";
+    final String folderPath = _buildSharePointPath("Jackalope/外觀參考照片/$model");
 
     // Step 1: 從 SharedPreferences 撈刪除清單
     final prefs = await SharedPreferences.getInstance();
@@ -1445,7 +1465,7 @@ class SharePointUploader {
   }
 
   Future<void> deleteModelFolderFromSharePoint(String accessToken) async {
-    final String folderPath = "Jackalope/外觀參考照片/$model";
+    final String folderPath = _buildSharePointPath("Jackalope/外觀參考照片/$model");
 
     final String deleteUrl =
         "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/items/root:/$folderPath";
@@ -1495,7 +1515,7 @@ class SharePointUploader {
 
     for (var file in files) {
       final String relativePath = path.relative(file.path, from: zerovaPath);
-      final String sharePointPath = "Jackalope/$relativePath";
+      final String sharePointPath = _buildSharePointPath("Jackalope/$relativePath");
 
       final String uploadUrl =
           "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/items/root:/$sharePointPath:/content";
@@ -1545,7 +1565,7 @@ class SharePointUploader {
 
     for (var file in files) {
       final String relativePath = path.relative(file.path, from: zerovaPath);
-      final String sharePointPath = "Jackalope/$relativePath";
+      final String sharePointPath = _buildSharePointPath("Jackalope/$relativePath");
 
       final String uploadUrl =
           "https://graph.microsoft.com/v1.0/sites/$siteId/drives/$driveId/items/root:/$sharePointPath:/content";

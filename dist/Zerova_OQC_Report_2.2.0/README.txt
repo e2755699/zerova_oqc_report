@@ -25,4 +25,4 @@ The application uses ssets/config.json from the data folder. If needed, you can
 
 2.2.0+1
 
-Build Date: 2025-11-04 09:56:33
+Build Date: 2025-11-07 10:22:39

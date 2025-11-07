@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OQC API 測試工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .config-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .result-section {
+            margin-top: 30px;
+        }
+
+        .result-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .status-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-pass {
+            background: #28a745;
+            color: white;
+        }
+
+        .status-fail {
+            background: #dc3545;
+            color: white;
+        }
+
+        .status-pending {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .response-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .validation-result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        .validation-pass {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .validation-fail {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 OQC API 測試工具</h1>
+        <p class="subtitle">測試 API 並驗證回應欄位是否符合預期</p>
+        <div style="background: #d1ecf1; border: 1px solid #bee5eb; border-radius: 5px; padding: 15px; margin-bottom: 20px; color: #0c5460;">
+            <strong>ℹ️ 使用說明：</strong>
+            <ul style="margin: 10px 0 0 20px; padding: 0;">
+                <li>所有 API 請求都會<strong>自動通過 Firebase Cloud Function 代理</strong>來解決 CORS 和 Mixed Content 問題</li>
+                <li>代理會自動處理認證，無需手動設置 Token</li>
+                <li><strong>注意</strong>：越南廠 API (172.21.1.110) 是內網 IP，即使使用代理也無法從公網訪問，需要在客戶的內網環境中使用</li>
+            </ul>
+        </div>
+
+        <div class="config-section">
+            <div class="form-group">
+                <label for="apiBaseUrl">API Base URL:</label>
+                <select id="apiBaseUrl">
+                    <option value="https://api.ztmn.com/zapi">台灣廠 (https://api.ztmn.com/zapi)</option>
+                    <option value="http://api.ztmn.com/zapi">台灣廠 (http://api.ztmn.com/zapi) - 僅內網</option>
+                    <option value="http://172.21.1.110:5000/zapi">越南廠 (http://172.21.1.110:5000/zapi) - 僅內網</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="apiEndpoint">API Endpoint:</label>
+                <select id="apiEndpoint">
+                    <option value="/OQC">OQC</option>
+                    <option value="/TEST">TEST</option>
+                    <option value="/KEYPART">KEYPART</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="serialNumber">Serial Number (SN):</label>
+                <input type="text" id="serialNumber" placeholder="輸入序號" value="T2449A003A1">
+            </div>
+
+            <div class="button-group">
+                <button id="testBtn" onclick="testAPI()">測試 API</button>
+                <button id="downloadBtn" onclick="downloadResponse()" disabled>下載 Response</button>
+                <button onclick="clearResults()">清除結果</button>
+            </div>
+        </div>
+
+        <div class="result-section" id="resultSection"></div>
+    </div>
+
+    <script>
+        let currentResponse = null;
+        let currentValidation = null;
+
+        async function testAPI() {
+            const baseUrl = document.getElementById('apiBaseUrl').value;
+            const endpoint = document.getElementById('apiEndpoint').value;
+            const serialNumber = document.getElementById('serialNumber').value;
+
+            if (!serialNumber) {
+                alert('請輸入 Serial Number');
+                return;
+            }
+
+            const testBtn = document.getElementById('testBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            testBtn.disabled = true;
+            testBtn.innerHTML = '<span class="loading"></span>測試中...';
+            downloadBtn.disabled = true;
+
+            const resultSection = document.getElementById('resultSection');
+            resultSection.innerHTML = '<div class="result-card"><div class="status-badge status-pending">測試中...</div></div>';
+
+            try {
+                // Always use proxy to avoid CORS and Mixed Content issues
+                // The proxy handles both HTTP and HTTPS APIs, and includes authentication
+                const proxyUrl = 'https://us-central1-oqcreport-87e5a.cloudfunctions.net/proxyOqcApi';
+                const url = `${proxyUrl}?baseUrl=${encodeURIComponent(baseUrl)}&endpoint=${encodeURIComponent(endpoint)}&sn=${encodeURIComponent(serialNumber)}`;
+                
+                // Check if trying to access internal network IP (warn user)
+                if (baseUrl.includes('172.21.1.110')) {
+                    console.warn('越南廠 API (172.21.1.110) 是內網 IP，即使使用代理也無法從公網訪問。請確保在客戶的內網環境中使用此工具。');
+                }
+
+                const response = await fetch(url, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'application/json',
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                currentResponse = data;
+
+                // Display response
+                const resultCard = document.createElement('div');
+                resultCard.className = 'result-card';
+                resultCard.innerHTML = `
+                    <div class="result-header">
+                        <h3>API 回應</h3>
+                        <span class="status-badge ${response.ok ? 'status-pass' : 'status-fail'}">
+                            ${response.ok ? '成功' : '失敗'} (${response.status})
+                        </span>
+                    </div>
+                    <div class="response-content">
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+
+                resultSection.innerHTML = '';
+                resultSection.appendChild(resultCard);
+
+                // Validate with Gemini (handled by backend)
+                if (response.ok) {
+                    await validateWithGemini(data, endpoint, resultCard);
+                }
+
+                downloadBtn.disabled = false;
+            } catch (error) {
+                let errorMessage = error.message;
+                let errorDetails = '';
+
+                // Check for Mixed Content errors
+                if (error.message.includes('Mixed Content') || error.message.includes('insecure resource')) {
+                    errorMessage = 'Mixed Content 錯誤 - HTTPS 無法請求 HTTP 資源';
+                    errorDetails = `
+                        <h4>問題說明：</h4>
+                        <p>此網站使用 HTTPS，但嘗試請求 HTTP 的 API，瀏覽器會自動阻擋此類請求以保護安全性。</p>
+                        <h4>解決方案：</h4>
+                        <ul>
+                            <li><strong>使用 HTTPS API</strong>：請選擇 HTTPS 版本的 API URL（如果 API 伺服器支援）</li>
+                            <li><strong>在內網環境使用</strong>：如果 API 只支援 HTTP，請在客戶的內網環境中部署此網站（使用 HTTP）</li>
+                            <li><strong>使用代理</strong>：建立後端代理服務來處理 HTTP API 請求</li>
+                        </ul>
+                        <p><strong>技術細節：</strong> ${error.message}</p>
+                    `;
+                }
+                // Check for CORS errors
+                else if (error.message.includes('Failed to fetch') || error.message.includes('CORS') || error.name === 'TypeError') {
+                    errorMessage = '網路請求失敗 - CORS 跨域問題';
+                    errorDetails = `
+                        <h4>可能的原因：</h4>
+                        <ul>
+                            <li><strong>CORS 跨域限制</strong>：API 伺服器未允許從此網站發送請求</li>
+                            <li><strong>內網 API</strong>：越南廠 API (172.21.1.110) 只能在內網環境中訪問</li>
+                            <li><strong>網路連線問題</strong>：無法連接到 API 伺服器</li>
+                        </ul>
+                        <h4>解決方案：</h4>
+                        <ul>
+                            <li>此工具需要在<strong>客戶的內網環境</strong>中使用</li>
+                            <li>確保 API 伺服器已設定 CORS 允許此網站的來源</li>
+                            <li>如果使用內網 IP，請確保在內網環境中開啟此網站</li>
+                        </ul>
+                        <p><strong>技術細節：</strong> ${error.message}</p>
+                    `;
+                }
+
+                const resultCard = document.createElement('div');
+                resultCard.className = 'result-card';
+                resultCard.innerHTML = `
+                    <div class="result-header">
+                        <h3>錯誤</h3>
+                        <span class="status-badge status-fail">失敗</span>
+                    </div>
+                    <div class="error-message">
+                        <h4>${errorMessage}</h4>
+                        ${errorDetails || `<pre>${error.message}</pre>`}
+                    </div>
+                `;
+                resultSection.innerHTML = '';
+                resultSection.appendChild(resultCard);
+            } finally {
+                testBtn.disabled = false;
+                testBtn.innerHTML = '測試 API';
+            }
+        }
+
+        async function validateWithGemini(data, endpoint, apiKey, resultCard) {
+            const validationDiv = document.createElement('div');
+            validationDiv.className = 'validation-result validation-pending';
+            validationDiv.innerHTML = '<div class="loading"></div>正在使用 Gemini AI 驗證欄位...';
+            resultCard.appendChild(validationDiv);
+
+            try {
+                // Get expected structure based on endpoint
+                const expectedStructure = getExpectedStructure(endpoint);
+
+                const prompt = `請比較以下兩個 JSON 結構，檢查實際回應的欄位是否與預期結構相符。
+
+預期結構：
+${JSON.stringify(expectedStructure, null, 2)}
+
+實際回應：
+${JSON.stringify(data, null, 2)}
+
+請檢查：
+1. 所有預期的欄位是否存在
+2. 欄位名稱是否完全一致（大小寫敏感）
+3. 資料型態是否相符（string, number, array, object 等）
+4. 陣列結構是否一致
+
+請以 JSON 格式回覆，格式如下：
+{
+  "status": "pass" 或 "fail",
+  "message": "驗證結果說明",
+  "differences": [
+    {
+      "field": "欄位路徑",
+      "expected": "預期值或型態",
+      "actual": "實際值或型態",
+      "issue": "問題說明"
+    }
+  ]
+}`;
+
+                // Call backend function to validate with Gemini (token is handled by backend)
+                const validateUrl = 'https://us-central1-oqcreport-87e5a.cloudfunctions.net/validateWithGemini';
+                
+                const validateResponse = await fetch(validateUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        prompt: prompt
+                    })
+                });
+
+                if (!validateResponse.ok) {
+                    const errorData = await validateResponse.json().catch(() => ({ message: validateResponse.statusText }));
+                    throw new Error(`驗證請求失敗: ${validateResponse.status} - ${errorData.message || validateResponse.statusText}`);
+                }
+
+                const validateData = await validateResponse.json();
+                const responseText = validateData.responseText || validateData.message || '';
+
+                // Try to parse JSON from response
+                let validationResult;
+                try {
+                    // Extract JSON from markdown code blocks if present
+                    const jsonMatch = responseText.match(/```json\n([\s\S]*?)\n```/) || 
+                                     responseText.match(/```\n([\s\S]*?)\n```/) ||
+                                     responseText.match(/\{[\s\S]*\}/);
+                    if (jsonMatch) {
+                        validationResult = JSON.parse(jsonMatch[1] || jsonMatch[0]);
+                    } else {
+                        validationResult = JSON.parse(responseText);
+                    }
+                } catch (e) {
+                    // If JSON parsing fails, create a result from the text
+                    validationResult = {
+                        status: responseText.toLowerCase().includes('pass') ? 'pass' : 'fail',
+                        message: responseText,
+                        differences: []
+                    };
+                }
+
+                currentValidation = validationResult;
+
+                validationDiv.className = `validation-result ${validationResult.status === 'pass' ? 'validation-pass' : 'validation-fail'}`;
+                validationDiv.innerHTML = `
+                    <h4>欄位驗證結果: <span class="status-badge ${validationResult.status === 'pass' ? 'status-pass' : 'status-fail'}">${validationResult.status === 'pass' ? '通過' : '失敗'}</span></h4>
+                    <p><strong>說明:</strong> ${validationResult.message || '無'}</p>
+                    ${validationResult.differences && validationResult.differences.length > 0 ? `
+                        <h5>差異列表:</h5>
+                        <ul>
+                            ${validationResult.differences.map(diff => `
+                                <li>
+                                    <strong>欄位:</strong> ${diff.field || 'N/A'}<br>
+                                    <strong>預期:</strong> ${diff.expected || 'N/A'}<br>
+                                    <strong>實際:</strong> ${diff.actual || 'N/A'}<br>
+                                    <strong>問題:</strong> ${diff.issue || 'N/A'}
+                                </li>
+                            `).join('')}
+                        </ul>
+                    ` : ''}
+                    <details style="margin-top: 10px;">
+                        <summary>完整 Gemini 回應</summary>
+                        <pre style="margin-top: 10px; background: #fff; padding: 10px; border-radius: 5px;">${responseText}</pre>
+                    </details>
+                `;
+            } catch (error) {
+                validationDiv.className = 'validation-result validation-fail';
+                validationDiv.innerHTML = `
+                    <h4>驗證錯誤</h4>
+                    <p>無法使用 Gemini 進行驗證: ${error.message}</p>
+                `;
+            }
+        }
+
+        function getExpectedStructure(endpoint) {
+            // Define expected structures for each endpoint
+            const structures = {
+                '/OQC': {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            // Add expected properties based on your OQC data structure
+                        }
+                    }
+                },
+                '/TEST': {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            // Add expected properties based on your TEST data structure
+                        }
+                    }
+                },
+                '/KEYPART': {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            // Add expected properties based on your KEYPART data structure
+                        }
+                    }
+                }
+            };
+            return structures[endpoint] || { type: 'array' };
+        }
+
+        function downloadResponse() {
+            if (!currentResponse) {
+                alert('沒有可下載的回應');
+                return;
+            }
+
+            const dataStr = JSON.stringify(currentResponse, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `api_response_${new Date().getTime()}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function clearResults() {
+            document.getElementById('resultSection').innerHTML = '';
+            currentResponse = null;
+            currentValidation = null;
+            document.getElementById('downloadBtn').disabled = true;
+        }
+    </script>
+</body>
+</html>
+
