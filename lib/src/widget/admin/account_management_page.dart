@@ -273,6 +273,195 @@ class _AccountManagementPageState extends State<AccountManagementPage> {
     }
   }
 
+  Future<void> _showEditAccountDialog(Map<String, dynamic> accountData) async {
+    final formKey = GlobalKey<FormState>();
+    final passwordController = TextEditingController();
+    final nameController =
+        TextEditingController(text: accountData['name'] ?? '');
+    final vnNameController = TextEditingController(
+        text: accountData['vn_name'] ?? accountData['vnName'] ?? '');
+    final employeeIdController = TextEditingController(
+        text: accountData['employee_id'] ?? accountData['employeeId'] ?? '');
+    int selectedPermission = accountData['permission'] as int? ?? 2;
+    final account = accountData['account'] as String;
+
+    await showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('編輯帳號'),
+          content: SizedBox(
+            width: 400,
+            child: Form(
+              key: formKey,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextFormField(
+                      initialValue: account,
+                      decoration: const InputDecoration(
+                        labelText: '帳號',
+                        border: OutlineInputBorder(),
+                      ),
+                      enabled: false,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: passwordController,
+                      decoration: const InputDecoration(
+                        labelText: '密碼（留空則不修改）',
+                        border: OutlineInputBorder(),
+                        helperText: '如需修改密碼，請輸入新密碼（至少 4 個字元）',
+                      ),
+                      obscureText: true,
+                      validator: (value) {
+                        if (value != null &&
+                            value.isNotEmpty &&
+                            value.length < 4) {
+                          return '密碼長度至少 4 個字元';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: nameController,
+                      decoration: const InputDecoration(
+                        labelText: '姓名 *',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '請輸入姓名';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: vnNameController,
+                      decoration: const InputDecoration(
+                        labelText: '越南文姓名（選填）',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: employeeIdController,
+                      decoration: const InputDecoration(
+                        labelText: '員工編號 *',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '請輸入員工編號';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<int>(
+                      value: selectedPermission,
+                      decoration: const InputDecoration(
+                        labelText: '權限 *',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: [
+                        DropdownMenuItem(
+                          value: 0,
+                          child: Text(context.tr('permission_owner')),
+                        ),
+                        DropdownMenuItem(
+                          value: 1,
+                          child: Text(context.tr('permission_admin')),
+                        ),
+                        DropdownMenuItem(
+                          value: 2,
+                          child: Text(context.tr('permission_employee')),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        setDialogState(() {
+                          selectedPermission = value ?? 2;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(context.tr('cancel')),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (formKey.currentState!.validate()) {
+                  Navigator.of(context).pop();
+                  await _updateAccount(
+                    account: account,
+                    password: passwordController.text.trim().isEmpty
+                        ? null
+                        : passwordController.text,
+                    permission: selectedPermission,
+                    name: nameController.text.trim(),
+                    vnName: vnNameController.text.trim().isEmpty
+                        ? null
+                        : vnNameController.text.trim(),
+                    employeeId: employeeIdController.text.trim(),
+                  );
+                }
+              },
+              child: Text(context.tr('submit')),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _updateAccount({
+    required String account,
+    String? password,
+    required int permission,
+    required String name,
+    String? vnName,
+    String? employeeId,
+  }) async {
+    try {
+      await _accountService.updateAccount(
+        account: account,
+        password: password,
+        permission: permission,
+        name: name,
+        vnName: vnName,
+        employeeId: employeeId,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('帳號 $account 更新成功'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+      await _loadAccounts();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('更新帳號失敗: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _deleteAccount(String account, String name) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -466,8 +655,19 @@ class _AccountManagementPageState extends State<AccountManagementPage> {
                                           account['employeeId'] ??
                                           '-')),
                                       DataCell(
-                                        canDelete
-                                            ? IconButton(
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            IconButton(
+                                              icon: const Icon(Icons.edit,
+                                                  color: Colors.blue),
+                                              onPressed: () =>
+                                                  _showEditAccountDialog(
+                                                      account),
+                                              tooltip: '編輯帳號',
+                                            ),
+                                            if (canDelete)
+                                              IconButton(
                                                 icon: const Icon(Icons.delete,
                                                     color: Colors.red),
                                                 onPressed: () => _deleteAccount(
@@ -476,10 +676,13 @@ class _AccountManagementPageState extends State<AccountManagementPage> {
                                                 ),
                                                 tooltip: '刪除帳號',
                                               )
-                                            : const Icon(
+                                            else
+                                              const Icon(
                                                 Icons.delete_outline,
                                                 color: Colors.grey,
                                               ),
+                                          ],
+                                        ),
                                       ),
                                     ],
                                   );
