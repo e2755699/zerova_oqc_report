@@ -585,7 +585,6 @@ Future<void> fetchAndPrintHipotTestSpecs(String model) async {
   }
 }
 
-
 Future<void> fetchAndPrintPackageListSpecs(String model) async {
   final firebaseService = FirebaseService();
   final tableNames = ['PackageListSpec'];
@@ -611,7 +610,8 @@ Future<void> fetchAndPrintPackageListSpecs(String model) async {
 /// 撈取 /models/{model}/PackageListSpec/spec 文件，並回傳 spec 內容 Map
 Future<PackageListResult?> fetchPackageListSpec(String model) async {
   final String projectId = 'oqcreport-87e5a';
-  final String apiKey = 'AIzaSyBzlul4mftI7HHJnj48I2aUs2nV154x0iI'; // 替換為你的 API Key
+  final String apiKey =
+      'AIzaSyBzlul4mftI7HHJnj48I2aUs2nV154x0iI'; // 替換為你的 API Key
   final url =
       'https://firestore.googleapis.com/v1/projects/$projectId/databases/(default)/documents/models/$model/PackageListSpec/spec?key=$apiKey';
 
@@ -623,14 +623,14 @@ Future<PackageListResult?> fetchPackageListSpec(String model) async {
     if (specField != null && specField is Map) {
       final fieldsMap = specField['mapValue']?['fields'];
       if (fieldsMap != null && fieldsMap is Map<String, dynamic>) {
-        final specData = _fromFirestoreFields(Map<String, dynamic>.from(fieldsMap));
+        final specData =
+            _fromFirestoreFields(Map<String, dynamic>.from(fieldsMap));
 
         // 轉換 measurements 內的 map<string, object> 到 List<Map>
         if (specData.containsKey('measurements')) {
           final measurementsRaw = specData['measurements'];
           if (measurementsRaw is Map<String, dynamic>) {
-            final measurementsList = measurementsRaw.entries
-                .toList()
+            final measurementsList = measurementsRaw.entries.toList()
               ..sort((a, b) => int.parse(a.key).compareTo(int.parse(b.key)));
             final parsedList = measurementsList.map((e) => e.value).toList();
             specData['measurements'] = parsedList;
@@ -645,7 +645,8 @@ Future<PackageListResult?> fetchPackageListSpec(String model) async {
   } else if (response.statusCode == 404) {
     return null;
   } else {
-    throw Exception('Failed to fetch PackageListSpec spec, statusCode=${response.statusCode}');
+    throw Exception(
+        'Failed to fetch PackageListSpec spec, statusCode=${response.statusCode}');
   }
 }
 
@@ -683,6 +684,85 @@ Future<Map<String, List<String>>> fetchModelToSnMapFromFirestore() async {
   }
 }
 
+/// Delete a specific SN from todo collection
+/// Removes the SN field from the model document
+Future<bool> deleteSnFromTodo({
+  required String model,
+  required String sn,
+}) async {
+  const projectId = 'oqcreport-87e5a';
+  const apiKey = 'AIzaSyBzlul4mftI7HHJnj48I2aUs2nV154x0iI';
+
+  if (model.trim().isEmpty || sn.trim().isEmpty) {
+    print("❌ [deleteSnFromTodo] model 或 sn 為空");
+    return false;
+  }
+
+  final encodedModel = Uri.encodeComponent(model.trim());
+  final encodedSn = Uri.encodeComponent(sn.trim());
+  final docUrl =
+      'https://firestore.googleapis.com/v1/projects/$projectId/databases/(default)/documents/todo/$encodedModel?key=$apiKey';
+
+  try {
+    // First get the document to check fields
+    final getResponse = await http.get(Uri.parse(docUrl));
+    if (getResponse.statusCode != 200) {
+      print(
+          "❌ [deleteSnFromTodo] 取得文件失敗：${getResponse.statusCode}, ${getResponse.body}");
+      return false;
+    }
+
+    final docData = json.decode(getResponse.body);
+    final fields = docData['fields'] as Map<String, dynamic>?;
+
+    if (fields == null || fields.isEmpty) {
+      print("⚠️ [deleteSnFromTodo] 文件已無欄位");
+      return true;
+    }
+
+    // If this is the last field, delete the entire document
+    if (fields.length == 1 && fields.containsKey(sn)) {
+      final deleteResponse = await http.delete(Uri.parse(docUrl));
+      if (deleteResponse.statusCode == 200 ||
+          deleteResponse.statusCode == 404) {
+        print("✅ [deleteSnFromTodo] 已刪除整個 document（最後一個欄位）：$model");
+        return true;
+      } else {
+        print(
+            "❌ [deleteSnFromTodo] 刪除整個 document 失敗：${deleteResponse.statusCode}, ${deleteResponse.body}");
+        return false;
+      }
+    } else {
+      // Delete only the specified SN field
+      final patchUrl = '$docUrl&updateMask.fieldPaths=$encodedSn';
+
+      final body = json.encode({
+        "fields": {
+          // Empty means remove the field
+        }
+      });
+
+      final patchResponse = await http.patch(
+        Uri.parse(patchUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      );
+
+      if (patchResponse.statusCode == 200) {
+        print("✅ [deleteSnFromTodo] 已刪除欄位：$sn from $model");
+        return true;
+      } else {
+        print(
+            "❌ [deleteSnFromTodo] 刪除欄位失敗：${patchResponse.statusCode}, ${patchResponse.body}");
+        return false;
+      }
+    }
+  } catch (e) {
+    print("❌ [deleteSnFromTodo] 發生例外：$e");
+    return false;
+  }
+}
+
 Map<String, dynamic> _fromFirestoreFields(Map<String, dynamic> fields) {
   final result = <String, dynamic>{};
 
@@ -697,10 +777,12 @@ Map<String, dynamic> _fromFirestoreFields(Map<String, dynamic> fields) {
       } else if (value.containsKey('booleanValue')) {
         result[key] = value['booleanValue'];
       } else if (value.containsKey('mapValue')) {
-        final nestedFields = value['mapValue']['fields'] as Map<String, dynamic>? ?? {};
+        final nestedFields =
+            value['mapValue']['fields'] as Map<String, dynamic>? ?? {};
         result[key] = _fromFirestoreFields(nestedFields);
       } else if (value.containsKey('arrayValue')) {
-        final arrayValues = value['arrayValue']['values'] as List<dynamic>? ?? [];
+        final arrayValues =
+            value['arrayValue']['values'] as List<dynamic>? ?? [];
         result[key] = arrayValues.map((e) {
           if (e is Map<String, dynamic>) {
             return _fromFirestoreFields(e);
@@ -719,8 +801,6 @@ Map<String, dynamic> _fromFirestoreFields(Map<String, dynamic> fields) {
   return result;
 }
 
-
-
 Future<bool> uploadPackageListSpec({
   required String model,
   required String tableName,
@@ -730,14 +810,15 @@ Future<bool> uploadPackageListSpec({
 
   // 轉成 List 格式也可以，這邊示範 Map 格式保持你原本寫法
   Map<String, dynamic> specData = {
-    "measurements": packageListResult.measurements.asMap().map((index, m) => MapEntry(
-      index.toString(),
-      {
-        "itemName": m.itemName,
-        "quantity": m.quantity,
-        "isChecked": m.isCheck.value,
-      },
-    ))
+    "measurements":
+        packageListResult.measurements.asMap().map((index, m) => MapEntry(
+              index.toString(),
+              {
+                "itemName": m.itemName,
+                "quantity": m.quantity,
+                "isChecked": m.isCheck.value,
+              },
+            ))
   };
 
   print('準備上傳資料: $specData');
@@ -751,8 +832,6 @@ Future<bool> uploadPackageListSpec({
   print('上傳結果: $success');
   return success;
 }
-
-
 
 Future<void> fetchFailCountsForDevice(String model, String serialNumber) async {
   final firebaseService = FirebaseService();

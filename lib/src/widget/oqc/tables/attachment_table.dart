@@ -6,6 +6,8 @@ import 'package:zerova_oqc_report/src/widget/common/table_wrapper.dart';
 import 'package:zerova_oqc_report/src/repo/sharepoint_uploader.dart';
 import 'package:zerova_oqc_report/src/report/spec/input_output_characteristics_spec.dart';
 import 'package:zerova_oqc_report/src/report/spec/hipot_test_spec.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 /// 附件表格
 class AttachmentTable extends StatelessWidget {
@@ -45,20 +47,6 @@ class AttachmentTable extends StatelessWidget {
       titleAction: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          IconButton(
-            icon: const Icon(Icons.cloud_download),
-            tooltip: 'Download to SharePoint',
-            onPressed: () {
-              //someFunction();
-              SharePointUploader(uploadOrDownload: 3, sn: sn, model: '').startAuthorization(
-                categoryTranslations: {
-                  //"packageing_photo": "Packageing Photo ",
-                  "appearance_photo": "Appearance Photo ",
-                  //"oqc_report": "OQC Report ",
-                },
-              );
-            },
-          ),
           CameraButton(
             sn: sn,
             model: model,
@@ -68,8 +56,8 @@ class AttachmentTable extends StatelessWidget {
       ),
       content: ImageGrid(
         imagePath: 'Selected Photos\\$sn\\Attachment',
-        columns: 4,
-        cellHeight: 100,
+        columns: 2,
+        cellHeight: 500,
       ),
     );
   }

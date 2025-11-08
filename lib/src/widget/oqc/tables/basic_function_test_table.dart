@@ -29,12 +29,7 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
   /// 存每一行兩個欄位的字串，index 0: spec, index 1: value
   late List<List<String>> _reportValues;
 
-  final defaultNames = [
-    'Efficiency',
-    'Power Factor (PF)',
-    'Harmonic',
-    'Standby Power'
-  ];
+  final defaultNames = ['Efficiency', 'Power Factor (PF)', 'Harmonic', 'Standby Power'];
 
   final List<String> valueLabels = [
     'Efficiency:',
@@ -105,104 +100,47 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
   }
 
   void _updateBasicFunctionTestPassOrFail() {
-    print('🔍 開始基本功能測試自動判斷:');
+    bool allPassed = true;
+    bool allFieldsFilled = true;
 
-    // 獲取所有測試數值（從 _reportValues 取得）
-    double effValue = double.tryParse(_reportValues[0][1]) ?? 0.0;
-    double pfValue = double.tryParse(_reportValues[1][1]) ?? 0.0;
-    double thdValue = double.tryParse(_reportValues[2][1]) ?? 0.0;
-    double spValue = double.tryParse(_reportValues[3][1]) ?? 0.0;
-
-    // 獲取規格範圍
-    final spec = globalBasicFunctionTestSpec;
-    if (spec == null) {
-      print('❌ 規格未設定，判斷為 FAIL');
-      // 🔧 更新所有項目為FAIL
-      for (int i = 0; i < data.testItems.length; i++) {
-        data.testItems[i].judgement = Judgement.fail;
+    for (var i = 0; i < data.testItems.length; i++) {
+      // 判斷 judgement
+      if (data.testItems[i].judgement != Judgement.pass) {
+        allPassed = false;
+        break;
       }
-      basicFunctionTestPassOrFail = false;
-      GlobalJudgementMonitor.updateTestResult('basicFunctionTest', false);
-      setState(() {}); // 🔧 觸發UI更新
-      return;
     }
 
-    // 個別項目判斷 (使用實際的屬性名稱)
-    final effPass = (effValue >= (spec.eff ?? 94)); // EFF >= 94%
-    final pfPass = (pfValue >= (spec.pf ?? 0.99)); // PF >= 0.99
-    final thdPass = (thdValue <= (spec.thd ?? 5)); // THD <= 5%
-    final spPass = (spValue <= (spec.sp ?? 100)); // SP <= 100W
+    final effValue = data.eff.value;
+    final powerFactorValue = data.powerFactor.value;
+    final harmonicValue = data.harmonic.value;
+    final standbyValue = data.standbyTotalInputPower.value;
 
-    // 詳細日誌輸出
-    print(
-        '  📊 EFF: $effValue (規格: >= ${spec.eff}) -> ${effPass ? "✅ PASS" : "❌ FAIL"}');
-    print(
-        '  📊 PF: $pfValue (規格: >= ${spec.pf}) -> ${pfPass ? "✅ PASS" : "❌ FAIL"}');
-    print(
-        '  📊 THD: $thdValue (規格: <= ${spec.thd}) -> ${thdPass ? "✅ PASS" : "❌ FAIL"}');
-    print(
-        '  📊 SP: $spValue (規格: <= ${spec.sp}) -> ${spPass ? "✅ PASS" : "❌ FAIL"}');
+    print('🔍 effValue = $effValue');
+    print('🔍 powerFactorValue = $powerFactorValue');
+    print('🔍 harmonicValue = $harmonicValue');
+    print('🔍 standbyTotalInputPowerValue = $standbyValue');
 
-    // 🔧 同步更新報告上的judgement欄位
-    final individualResults = [effPass, pfPass, thdPass, spPass];
-    for (int i = 0;
-        i < data.testItems.length && i < individualResults.length;
-        i++) {
-      data.testItems[i].judgement =
-          individualResults[i] ? Judgement.pass : Judgement.fail;
-      print('🔄 更新 ${data.testItems[i].name}: ${data.testItems[i].judgement}');
+    if (effValue == null) {
+      print('❌ effValue 為空！');
+      allFieldsFilled = false;
+    }
+    if (powerFactorValue == null) {
+      print('❌ powerFactorValue 為空！');
+      allFieldsFilled = false;
+    }
+    if (harmonicValue == null) {
+      print('❌ harmonicValue 為空！');
+      allFieldsFilled = false;
+    }
+    if (standbyValue == null) {
+      print('❌ standbyTotalInputPower 為空！');
+      allFieldsFilled = false;
     }
 
-    // 計算通過項目數
-    final testResults = [effPass, pfPass, thdPass, spPass];
-    final passCount = testResults.where((result) => result).length;
-    final totalItems = 4;
-
-    // 檢查是否有任何欄位為空
-    bool allFieldsFilled =
-        _reportValues.every((row) => row[1].trim().isNotEmpty);
-
-    if (!allFieldsFilled) {
-      print('❌ 有欄位未填寫，判斷為 FAIL');
-      // 🔧 更新所有項目為FAIL
-      for (int i = 0; i < data.testItems.length; i++) {
-        data.testItems[i].judgement = Judgement.fail;
-      }
-      basicFunctionTestPassOrFail = false;
-      GlobalJudgementMonitor.updateTestResult('basicFunctionTest', false);
-      setState(() {}); // 🔧 觸發UI更新
-      return;
-    }
-
-    // 🔒 強制邏輯：所有項目都必須PASS，整體才能PASS
-    final bool allItemsPass = (passCount == totalItems);
-    final bool noFailItems = testResults.every((result) => result == true);
-    final bool finalCheck = allItemsPass && noFailItems;
-
-    print(
-        '  📈 通過項目數: $passCount/$totalItems，最終判斷: ${finalCheck ? "✅ PASS" : "❌ FAIL"}');
-
-    // 🔒 強制檢查：如果是PASS但passCount < totalItems，強制設為FAIL
-    if (finalCheck && passCount < totalItems) {
-      print(
-          '🚨 發現邏輯錯誤！強制修正為FAIL (passCount: $passCount, totalItems: $totalItems)');
-      // 🔧 更新所有項目為FAIL
-      for (int i = 0; i < data.testItems.length; i++) {
-        data.testItems[i].judgement = Judgement.fail;
-      }
-      basicFunctionTestPassOrFail = false;
-      GlobalJudgementMonitor.updateTestResult('basicFunctionTest', false);
-      setState(() {}); // 🔧 觸發UI更新
-      return;
-    }
-
-    // 最終判斷結果
-    basicFunctionTestPassOrFail = finalCheck;
-    GlobalJudgementMonitor.updateTestResult('basicFunctionTest', finalCheck);
-    print('basicFunctionTestPassOrFail = $basicFunctionTestPassOrFail');
-
-    // 🔧 觸發UI更新
-    setState(() {});
+    // 判斷結果
+    basicFunctionTestPassOrFail = allPassed && allFieldsFilled;
+    debugPrint('basicFunctionTestPassOrFail = $basicFunctionTestPassOrFail');
   }
 
   @override
@@ -215,8 +153,8 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
     _reportValues = List.generate(
       data.testItems.length,
       (index) {
-        if (data.testItems[index].name == null ||
-            data.testItems[index].name.trim().isEmpty) {
+
+        if (data.testItems[index].name == null || data.testItems[index].name.trim().isEmpty) {
           if (index < defaultNames.length) {
             data.testItems[index].name = defaultNames[index];
           }
@@ -254,6 +192,7 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
         return [specValue, valueText];
       },
     );
+    _updateBasicFunctionTestPassOrFail();
   }
 
   @override
@@ -265,7 +204,7 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
           valueListenable: permissions,
           builder: (context, permission, _) {
             final isEditable =
-                editMode == 1 && (permission == 1 || permission == 2);
+                editMode == 1 && permission <= 2;
             //final isHeaderEditable = editMode == 1 && permission == 1;
             final isHeaderEditable = false;
             final dataTable = StyledDataTable(
@@ -294,181 +233,175 @@ class _BasicFunctionTestTableState extends State<BasicFunctionTestTable>
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             // 第一欄 Spec
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                  left: 12.0), // 根據需要調整左邊距
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    getSpecLabel(index),
-                                    style: TableTextStyle.contentStyle(),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  isHeaderEditable
-                                      ? Expanded(
-                                          child: OqcTextField(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 8),
-                                            initialValue: _reportValues[index]
-                                                [0],
-                                            keyboardType:
-                                                TextInputType.numberWithOptions(
-                                                    decimal: true),
-                                            inputFormatters: [
-                                              FilteringTextInputFormatter.allow(
-                                                  RegExp(r'^\d*\.?\d*')),
-                                            ],
-                                            onChanged: (value) {
-                                              final doubleValue =
-                                                  double.tryParse(value);
-                                              if (doubleValue != null) {
-                                                setState(() {
-                                                  _reportValues[index][0] =
-                                                      value;
-                                                  updateGlobalSpec(
-                                                      index, doubleValue);
-
-                                                  // 其他同步更新描述等
-                                                  final specText =
-                                                      _reportValues[index][0];
-                                                  final valueText =
-                                                      _reportValues[index][1];
-                                                  final label =
-                                                      valueLabels.length > index
-                                                          ? valueLabels[index]
-                                                          : '';
-                                                  final unit =
-                                                      valueUnits.length > index
-                                                          ? valueUnits[index]
-                                                          : '';
-
-                                                  // 指定符號 prefix
-                                                  String specPrefix;
-                                                  switch (index) {
-                                                    case 0:
-                                                      specPrefix = '> ';
-                                                      break;
-                                                    case 1:
-                                                      specPrefix = '≧ ';
-                                                      break;
-                                                    case 2:
-                                                    case 3:
-                                                      specPrefix = '< ';
-                                                      break;
-                                                    default:
-                                                      specPrefix = '';
-                                                  }
-
-                                                  data.testItems[index]
-                                                          .description =
-                                                      'Spec: $specPrefix$specText$unit\n$label $valueText$unit';
-                                                });
-                                              }
-                                              // 如果轉換失敗可以忽略或做錯誤處理
-                                            },
-                                          ),
-                                        )
-                                      : Center(
-                                          child: Text(
-                                            _reportValues[index][0],
-                                            style:
-                                                TableTextStyle.contentStyle(),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-                                  const SizedBox(width: 8),
-                                  // 單位獨立顯示
-                                  Text(
-                                    valueUnits.length > index
-                                        ? valueUnits[index]
-                                        : '',
-                                    style: TableTextStyle.contentStyle(),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            // 第二欄 Value + Label + Unit
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                  left: 12.0), // 根據需要調整左邊距
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    valueLabels.length > index
-                                        ? valueLabels[index]
-                                        : '',
-                                    style: TableTextStyle.contentStyle(),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  isEditable
-                                      ? Expanded(
-                                          child: OqcTextField(
+                        Padding(
+                        padding: const EdgeInsets.only(left: 12.0), // 根據需要調整左邊距
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Text(
+                                  getSpecLabel(index),
+                                  style: TableTextStyle.contentStyle(),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(width: 8),
+                                isHeaderEditable
+                                    ? Expanded(
+                                        child: OqcTextField(
                                           padding: const EdgeInsets.symmetric(
                                               horizontal: 8),
-                                          initialValue: _reportValues[index][1],
+                                          initialValue: _reportValues[index][0],
+                                          keyboardType:
+                                              TextInputType.numberWithOptions(
+                                                  decimal: true),
+                                          inputFormatters: [
+                                            FilteringTextInputFormatter.allow(
+                                                RegExp(r'^\d*\.?\d*')),
+                                          ],
                                           onChanged: (value) {
-                                            setState(() {
-                                              _reportValues[index][1] = value;
+                                            final doubleValue =
+                                                double.tryParse(value);
+                                            if (doubleValue != null) {
+                                              setState(() {
+                                                _reportValues[index][0] = value;
+                                                updateGlobalSpec(
+                                                    index, doubleValue);
 
-                                              // 同步更新 description
-                                              final specText =
-                                                  _reportValues[index][0];
-                                              final valueText =
-                                                  _reportValues[index][1];
-                                              final label =
-                                                  valueLabels.length > index
-                                                      ? valueLabels[index]
-                                                      : '';
-                                              final unit =
-                                                  valueUnits.length > index
-                                                      ? valueUnits[index]
-                                                      : '';
+                                                // 其他同步更新描述等
+                                                final specText =
+                                                    _reportValues[index][0];
+                                                final valueText =
+                                                    _reportValues[index][1];
+                                                final label =
+                                                    valueLabels.length > index
+                                                        ? valueLabels[index]
+                                                        : '';
+                                                final unit =
+                                                    valueUnits.length > index
+                                                        ? valueUnits[index]
+                                                        : '';
 
-                                              // 決定 spec 符號
-                                              String specPrefix;
-                                              switch (index) {
-                                                case 0:
-                                                  specPrefix = '> ';
-                                                  break;
-                                                case 1:
-                                                  specPrefix = '≧ ';
-                                                  break;
-                                                case 2:
-                                                case 3:
-                                                  specPrefix = '< ';
-                                                  break;
-                                                default:
-                                                  specPrefix = '';
-                                              }
+                                                // 指定符號 prefix
+                                                String specPrefix;
+                                                switch (index) {
+                                                  case 0:
+                                                    specPrefix = '> ';
+                                                    break;
+                                                  case 1:
+                                                    specPrefix = '≧ ';
+                                                    break;
+                                                  case 2:
+                                                  case 3:
+                                                    specPrefix = '< ';
+                                                    break;
+                                                  default:
+                                                    specPrefix = '';
+                                                }
 
-                                              data.testItems[index]
-                                                      .description =
-                                                  'Spec: $specPrefix$specText$unit\n$label $valueText$unit';
-                                            });
-                                            _updateBasicFunctionTestPassOrFail();
+                                                data.testItems[index]
+                                                        .description =
+                                                    'Spec: $specPrefix$specText$unit\n$label $valueText$unit';
+                                              });
+                                            }
+                                            // 如果轉換失敗可以忽略或做錯誤處理
                                           },
-                                        ))
-                                      : Text(
-                                          _reportValues[index][1],
+                                        ),
+                                      )
+                                    : Center(
+                                        child: Text(
+                                          _reportValues[index][0],
                                           style: TableTextStyle.contentStyle(),
                                           textAlign: TextAlign.center,
                                         ),
-                                  Text(
-                                    valueUnits.length > index
-                                        ? valueUnits[index]
-                                        : '',
-                                    style: TableTextStyle.contentStyle(),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              ),
+                                      ),
+                                const SizedBox(width: 8),
+                                // 單位獨立顯示
+                                Text(
+                                  valueUnits.length > index
+                                      ? valueUnits[index]
+                                      : '',
+                                  style: TableTextStyle.contentStyle(),
+                                ),
+                              ],
+                            ),
+                        ),
+                            const SizedBox(height: 8),
+                            // 第二欄 Value + Label + Unit
+                      Padding(
+                        padding: const EdgeInsets.only(left: 12.0), // 根據需要調整左邊距
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Text(
+                                  valueLabels.length > index
+                                      ? valueLabels[index]
+                                      : '',
+                                  style: TableTextStyle.contentStyle(),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(width: 8),
+                                isEditable
+                                    ? Expanded(
+                                        child: OqcTextField(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8),
+                                        initialValue: _reportValues[index][1],
+                                        onChanged: (value) {
+                                          setState(() {
+                                            _reportValues[index][1] = value;
+
+                                            // 同步更新 description
+                                            final specText =
+                                                _reportValues[index][0];
+                                            final valueText =
+                                                _reportValues[index][1];
+                                            final label =
+                                                valueLabels.length > index
+                                                    ? valueLabels[index]
+                                                    : '';
+                                            final unit =
+                                                valueUnits.length > index
+                                                    ? valueUnits[index]
+                                                    : '';
+
+                                            // 決定 spec 符號
+                                            String specPrefix;
+                                            switch (index) {
+                                              case 0:
+                                                specPrefix = '> ';
+                                                break;
+                                              case 1:
+                                                specPrefix = '≧ ';
+                                                break;
+                                              case 2:
+                                              case 3:
+                                                specPrefix = '< ';
+                                                break;
+                                              default:
+                                                specPrefix = '';
+                                            }
+
+                                            data.testItems[index].description =
+                                                'Spec: $specPrefix$specText$unit\n$label $valueText$unit';
+                                          });
+                                          _updateBasicFunctionTestPassOrFail();
+                                        },
+                                      ))
+                                    : Text(
+                                        _reportValues[index][1],
+                                        style: TableTextStyle.contentStyle(),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                Text(
+                                  valueUnits.length > index
+                                      ? valueUnits[index]
+                                      : '',
+                                  style: TableTextStyle.contentStyle(),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                        ),
                             ),
                           ],
                         ),

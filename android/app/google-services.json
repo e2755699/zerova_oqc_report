@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "452230213864",
+    "project_id": "oqcreport-87e5a",
+    "storage_bucket": "oqcreport-87e5a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:452230213864:android:713c44f23dab95cd3d995d",
+        "android_client_info": {
+          "package_name": "app.zerova.oqc"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAfAW6QaSjhJEcoT0kfUGqbFJaJr4L4CFE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:452230213864:android:3a9820bb02ecfaa23d995d",
+        "android_client_info": {
+          "package_name": "com.zerova.zerova_oqc_report"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAfAW6QaSjhJEcoT0kfUGqbFJaJr4L4CFE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

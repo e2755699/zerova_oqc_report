@@ -42,6 +42,7 @@ class ConfigManager {
     }
   }
 
+  static String get factory => _config?['factory'] ?? 'tw';
   static String get clientId => _config?['clientId'] ?? '';
   static String get clientSecret => _config?['clientSecret'] ?? '';
   static String get tenantId => _config?['tenantId'] ?? '';

@@ -1,5 +1,8 @@
 import 'package:flutter/foundation.dart';
 
-//bill1
+// Permission levels:
+// 0: Owner (擁有者) - Can do everything
+// 1: Admin (管理員) - Can manage accounts and templates
+// 2: Employee (一般員工) - Can only edit reports
 ValueNotifier<int> globalEditModeNotifier = ValueNotifier<int>(0);
-ValueNotifier<int> permissions = ValueNotifier<int>(1); //1:主管 2:測試人員 0:訪客?
+ValueNotifier<int> permissions = ValueNotifier<int>(2); // Default to employee

@@ -5,15 +5,19 @@ import 'package:flutter/material.dart';
 import 'package:zerova_oqc_report/src/utils/image_path_helper.dart';
 import 'package:zerova_oqc_report/src/widget/common/main_layout.dart';
 import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class ImagePickerPageNew extends StatefulWidget {
   final int packagingOrAttachment;
   final String sn;
+  final String model; // 加這個
 
   const ImagePickerPageNew({
     super.key,
     required this.packagingOrAttachment,
     required this.sn,
+    required this.model,
   });
 
   @override
@@ -24,15 +28,34 @@ class _ImagePickerPageNewState extends State<ImagePickerPageNew>
     with ImagePageHelper {
   List<String> _imagePaths = [];
   List<bool> _selectedImages = [];
+  Map<String, String> _pickedPhotoMap = {}; // 已選照片 Map
 
   @override
   void initState() {
     super.initState();
     _initializeImages();
+    _loadPickedPhotoMap(); // 讀取已選過的照片記錄
   }
 
   Future<void> _initializeImages() async {
     await _loadImages(); // 確保圖片加載完成
+    setState(() {});
+  }
+
+  Future<void> _loadPickedPhotoMap() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String key = 'pickedPhotoMap_${widget.model}_${widget.sn}'; // 如果 CameraPage 還有 model 也一起加
+    final encoded = prefs.getString(key);
+
+    //print('🔍 讀取 SharedPreferences key = $key');
+    if (encoded != null) {
+      final decoded = jsonDecode(encoded);
+      _pickedPhotoMap = Map<String, String>.from(decoded);
+      //print('✅ 讀到的 pickedPhotoMap:');
+      print(const JsonEncoder.withIndent('  ').convert(_pickedPhotoMap));
+    } else {
+      //print('⚠️ SharedPreferences 沒有資料');
+    }
     setState(() {});
   }
 
@@ -121,7 +144,7 @@ class _ImagePickerPageNewState extends State<ImagePickerPageNew>
   @override
   Widget build(BuildContext context) {
     return MainLayout(
-      title: context.tr('select_multiple_images'),
+      title: context.tr('select_image'),
       body: Center(
         child: _imagePaths.isEmpty
             ? const CircularProgressIndicator()
@@ -141,38 +164,48 @@ class _ImagePickerPageNewState extends State<ImagePickerPageNew>
                 ),
                 itemCount: _imagePaths.length,
                 itemBuilder: (context, index) {
+                  final imagePath = _imagePaths[index];
+                  final bool isPicked = _pickedPhotoMap.values.contains(imagePath);
+
+                  //print('📷 檢查圖片: $imagePath');
+                  //print('   ↳ pickedPhotoMap.values = ${_pickedPhotoMap.values}');
+                  //print('   ↳ 已選過? $isPicked');
+
                   return InkWell(
                     onTap: () {
-                      //print('點了圖片，準備傳回: ${_imagePaths[index]}');
                       Navigator.pop(context, _imagePaths[index]);
                     },
                     child: Stack(
                       fit: StackFit.expand,
                       children: [
                         Image.file(
-                          File(_imagePaths[index]),
-                          fit: BoxFit.cover,
-                          errorBuilder:
-                              (context, error, stackTrace) =>
+                          File(imagePath),
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) =>
                           const Icon(Icons.error),
                         ),
-                        Positioned(
-                          top: 8,
-                          right: 8,
-                          child: Checkbox(
-                            value: _selectedImages[index],
-                            onChanged: (bool? value) {
-                              dialogSetState(() {
-                                _selectedImages[index] = value!;
-                              });
-                              setState(() {}); // 確保外部狀態也更新
-                            },
-                          ),
-                        ),
+                        if (isPicked)
+                          Positioned(
+                            top: 4,
+                            right: 4,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.green, // 底
+                                shape: BoxShape.circle,
+                              ),
+                              padding: const EdgeInsets.all(2), // 讓白底比勾勾大一點
+                              child: Icon(
+                                Icons.check, // 勾
+                                color: Colors.white,
+                                size: 30,
+                              ),
+                            ),
+                          )
                       ],
                     ),
                   );
                 },
+
               )
                   : Center(
                 child: Text(context.tr('no_images_found')),
@@ -181,47 +214,6 @@ class _ImagePickerPageNewState extends State<ImagePickerPageNew>
           ),
         ),
       ),
-      floatingActionButton: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          FloatingActionButton.extended(
-            heroTag: 'select_all',
-            onPressed: () {
-              setState(() {
-                _selectedImages = List<bool>.filled(_selectedImages.length, true);
-              });
-            },
-            icon: const Icon(Icons.select_all),
-            label: Text(context.tr('select_all')),
-            backgroundColor: AppColors.fabColor,
-          ),
-          const SizedBox(height: 8),
-          FloatingActionButton.extended(
-            heroTag: 'deselect_all',
-            onPressed: () {
-              setState(() {
-                _selectedImages = List<bool>.filled(_selectedImages.length, false);
-              });
-            },
-            icon: const Icon(Icons.deselect),
-            label: Text(context.tr('deselect_all')),
-            backgroundColor: AppColors.fabColor,
-          ),
-          const SizedBox(height: 8),
-          FloatingActionButton.extended(
-            heroTag: 'save_selected',
-            onPressed: () async {
-              await _saveSelectedImages(); // 儲存所選影像
-              Navigator.of(context).pop(); // 返回前一頁
-            },
-            icon: const Icon(Icons.save),
-            label: Text(context.tr('save_selected_images')),
-            backgroundColor: AppColors.fabColor,
-          ),
-        ],
-      ),
-
     );
   }
 }

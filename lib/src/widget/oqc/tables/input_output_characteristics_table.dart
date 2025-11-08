@@ -142,6 +142,12 @@ class _InputOutputCharacteristicsTableState
   }
 
   void initializeGlobalSpec() {
+    // Keep existing unit settings if available
+    final existingLeftPinUnit = globalInputOutputSpec?.leftPinUnit ?? 'kVA';
+    final existingLeftPoutUnit = globalInputOutputSpec?.leftPoutUnit ?? 'kW';
+    final existingRightPinUnit = globalInputOutputSpec?.rightPinUnit ?? 'kVA';
+    final existingRightPoutUnit = globalInputOutputSpec?.rightPoutUnit ?? 'kW';
+
     globalInputOutputSpec = InputOutputCharacteristicsSpec(
       // Left Side
       leftVinLowerbound: _defaultSpec[1] ?? 187,
@@ -170,6 +176,12 @@ class _InputOutputCharacteristicsTableState
       rightIoutUpperbound: _defaultSpec[22] ?? 129,
       rightPoutLowerbound: _defaultSpec[23] ?? 118,
       rightPoutUpperbound: _defaultSpec[24] ?? 122,
+
+      // Keep existing unit settings
+      leftPinUnit: existingLeftPinUnit,
+      leftPoutUnit: existingLeftPoutUnit,
+      rightPinUnit: existingRightPinUnit,
+      rightPoutUnit: existingRightPoutUnit,
     );
   }
 
@@ -332,16 +344,20 @@ class _InputOutputCharacteristicsTableState
           : _defaultSpec[index]!.toStringAsFixed(0);
     }
 
-    // 使用 globalInputOutputSpec 中的單位設定
-    String leftPinUnit = globalInputOutputSpec?.leftPinUnit ?? 'kVA';
-    String leftPoutUnit = globalInputOutputSpec?.leftPoutUnit ?? 'kW';
+    // Use widget.spec first, then globalInputOutputSpec, then default values
+    final leftPinUnitDisplay = widget.spec?.leftPinUnit ??
+        globalInputOutputSpec?.leftPinUnit ??
+        'kVA';
+    final leftPoutUnitDisplay = widget.spec?.leftPoutUnit ??
+        globalInputOutputSpec?.leftPoutUnit ??
+        'kW';
 
     return [
       ['Item', 'Spec'],
-      ['Pin', format(5), leftPinUnit, format(6), leftPinUnit],
+      ['Pin', format(5), leftPinUnitDisplay, format(6), leftPinUnitDisplay],
       ['Vout', format(7), 'V', format(8), 'V'],
       ['Iout', format(9), 'A', format(10), 'A'],
-      ['Pout', format(11), leftPoutUnit, format(12), leftPoutUnit],
+      ['Pout', format(11), leftPoutUnitDisplay, format(12), leftPoutUnitDisplay],
       ['Judgement'],
     ];
   }
@@ -353,16 +369,20 @@ class _InputOutputCharacteristicsTableState
           : _defaultSpec[index]!.toStringAsFixed(0);
     }
 
-    // 使用 globalInputOutputSpec 中的單位設定
-    String rightPinUnit = globalInputOutputSpec?.rightPinUnit ?? 'kVA';
-    String rightPoutUnit = globalInputOutputSpec?.rightPoutUnit ?? 'kW';
+    // Use widget.spec first, then globalInputOutputSpec, then default values
+    final rightPinUnitDisplay = widget.spec?.rightPinUnit ??
+        globalInputOutputSpec?.rightPinUnit ??
+        'kVA';
+    final rightPoutUnitDisplay = widget.spec?.rightPoutUnit ??
+        globalInputOutputSpec?.rightPoutUnit ??
+        'kW';
 
     return [
       ['Item', 'Spec'],
-      ['Pin', format(17), rightPinUnit, format(18), rightPinUnit],
+      ['Pin', format(17), rightPinUnitDisplay, format(18), rightPinUnitDisplay],
       ['Vout', format(19), 'V', format(20), 'V'],
       ['Iout', format(21), 'A', format(22), 'A'],
-      ['Pout', format(23), rightPoutUnit, format(24), rightPoutUnit],
+      ['Pout', format(23), rightPoutUnitDisplay, format(24), rightPoutUnitDisplay],
       ['Judgement'],
     ];
   }
@@ -384,153 +404,52 @@ class _InputOutputCharacteristicsTableState
   void _updateIoCharacteristicsPassOrFail() {
     bool allPassed = true;
 
-    // 先重新計算個別測量項目的判斷結果
-    _recalculateIndividualJudgements();
-
     // 判斷 judgement 是否全部為 pass
     for (final side
         in widget.inputOutputCharacteristics.inputOutputCharacteristicsSide) {
       debugPrint('judgement = ${side.judgement}');
+      debugPrint('outputCurrent.value = ${side.outputCurrent?.value}');
       if (side.judgement != Judgement.pass) {
         allPassed = false;
         break;
       }
     }
 
-    // 判斷是否有任何欄位為空
     bool allFieldsFilled = true;
-    final requiredKeys = [
-      'L_3',
-      'L_4',
-      'L_5',
-      'L_6',
-      'R_3',
-      'R_4',
-      'R_5',
-      'R_6'
-    ];
+    for (final side in widget.inputOutputCharacteristics.inputOutputCharacteristicsSide) {
+      final totalInputPowerValue = side.totalInputPower?.value;
+      final outputVoltageValue = side.outputVoltage?.value;
+      final outputCurrentValue = side.outputCurrent?.value;
+      final totalOutputPowerValue = side.totalOutputPower?.value;
 
-    for (final key in requiredKeys) {
-      final input = _cellInputs[key];
-      final controller = _cellControllers[key];
+      print('🔍 totalInputPower = $totalInputPowerValue');
+      print('🔍 outputVoltage = $outputVoltageValue');
+      print('🔍 outputCurrent = $outputCurrentValue');
+      print('🔍 totalOutputPower = $totalOutputPowerValue');
 
-      // 判斷來源：1. 使用者輸入的值（_cellInputs），2. 若無則讀取 TextEditingController 的文字
-      final valueStr = (input != null && input.trim().isNotEmpty)
-          ? input
-          : controller?.text ?? '';
-
-      // 去除空白後是否還是空字串（空值）
-      if (valueStr.trim().isEmpty) {
+      if (totalInputPowerValue == null) {
+        print('❌ totalInputPower 為空！');
         allFieldsFilled = false;
-        break;
+      }
+      if (outputVoltageValue == null) {
+        print('❌ outputVoltage 為空！');
+        allFieldsFilled = false;
+      }
+      if (outputCurrentValue == null) {
+        print('❌ outputCurrent 為空！');
+        allFieldsFilled = false;
+      }
+      if (totalOutputPowerValue == null) {
+        print('❌ totalOutputPower 為空！');
+        allFieldsFilled = false;
       }
     }
 
-    // 更新全域變數和全局監聽器
-    bool finalResult = allPassed && allFieldsFilled;
-    ioCharacteristicsPassOrFail = finalResult;
-    GlobalJudgementMonitor.updateTestResult('ioCharacteristics', finalResult);
+    debugPrint('allPassed = $allPassed');
+    debugPrint('allFieldsFilled = $allFieldsFilled');
+    // 更新全域變數
+    ioCharacteristicsPassOrFail = allPassed && allFieldsFilled;
     debugPrint('ioCharacteristicsPassOrFail = $ioCharacteristicsPassOrFail');
-  }
-
-  // 新增：重新計算個別測量項目的判斷結果
-  void _recalculateIndividualJudgements() {
-    if (globalInputOutputSpec == null) return;
-
-    for (int index = 0;
-        index <
-            widget.inputOutputCharacteristics.inputOutputCharacteristicsSide
-                .length;
-        index++) {
-      final side = widget
-          .inputOutputCharacteristics.inputOutputCharacteristicsSide[index];
-
-      if (index == 0) {
-        // Left side
-        // 重新計算 Pin 判斷
-        final pinValue = side.totalInputPower.value;
-        final pinLower = globalInputOutputSpec!.leftPinLowerbound;
-        final pinUpper = globalInputOutputSpec!.leftPinUpperbound;
-        side.totalInputPower.judgement =
-            (pinValue >= pinLower && pinValue <= pinUpper)
-                ? Judgement.pass
-                : Judgement.fail;
-
-        // 重新計算 Vout 判斷
-        final voutValue = side.outputVoltage.value;
-        final voutLower = globalInputOutputSpec!.leftVoutLowerbound;
-        final voutUpper = globalInputOutputSpec!.leftVoutUpperbound;
-        side.outputVoltage.judgement =
-            (voutValue >= voutLower && voutValue <= voutUpper)
-                ? Judgement.pass
-                : Judgement.fail;
-
-        // 重新計算 Iout 判斷
-        final ioutValue = side.outputCurrent.value;
-        final ioutLower = globalInputOutputSpec!.leftIoutLowerbound;
-        final ioutUpper = globalInputOutputSpec!.leftIoutUpperbound;
-        side.outputCurrent.judgement =
-            (ioutValue >= ioutLower && ioutValue <= ioutUpper)
-                ? Judgement.pass
-                : Judgement.fail;
-
-        // 重新計算 Pout 判斷
-        final poutValue = side.totalOutputPower.value;
-        final poutLower = globalInputOutputSpec!.leftPoutLowerbound;
-        final poutUpper = globalInputOutputSpec!.leftPoutUpperbound;
-        side.totalOutputPower.judgement =
-            (poutValue >= poutLower && poutValue <= poutUpper)
-                ? Judgement.pass
-                : Judgement.fail;
-      } else if (index == 1) {
-        // Right side
-        // 重新計算 Pin 判斷
-        final pinValue = side.totalInputPower.value;
-        final pinLower = globalInputOutputSpec!.rightPinLowerbound;
-        final pinUpper = globalInputOutputSpec!.rightPinUpperbound;
-        side.totalInputPower.judgement =
-            (pinValue >= pinLower && pinValue <= pinUpper)
-                ? Judgement.pass
-                : Judgement.fail;
-
-        // 重新計算 Vout 判斷
-        final voutValue = side.outputVoltage.value;
-        final voutLower = globalInputOutputSpec!.rightVoutLowerbound;
-        final voutUpper = globalInputOutputSpec!.rightVoutUpperbound;
-        side.outputVoltage.judgement =
-            (voutValue >= voutLower && voutValue <= voutUpper)
-                ? Judgement.pass
-                : Judgement.fail;
-
-        // 重新計算 Iout 判斷
-        final ioutValue = side.outputCurrent.value;
-        final ioutLower = globalInputOutputSpec!.rightIoutLowerbound;
-        final ioutUpper = globalInputOutputSpec!.rightIoutUpperbound;
-        side.outputCurrent.judgement =
-            (ioutValue >= ioutLower && ioutValue <= ioutUpper)
-                ? Judgement.pass
-                : Judgement.fail;
-
-        // 重新計算 Pout 判斷
-        final poutValue = side.totalOutputPower.value;
-        final poutLower = globalInputOutputSpec!.rightPoutLowerbound;
-        final poutUpper = globalInputOutputSpec!.rightPoutUpperbound;
-        side.totalOutputPower.judgement =
-            (poutValue >= poutLower && poutValue <= poutUpper)
-                ? Judgement.pass
-                : Judgement.fail;
-      }
-
-      print('🔄 重新計算 ${side.side} 側判斷結果:');
-      print(
-          '  Pin: ${side.totalInputPower.value} -> ${side.totalInputPower.judgement}');
-      print(
-          '  Vout: ${side.outputVoltage.value} -> ${side.outputVoltage.judgement}');
-      print(
-          '  Iout: ${side.outputCurrent.value} -> ${side.outputCurrent.judgement}');
-      print(
-          '  Pout: ${side.totalOutputPower.value} -> ${side.totalOutputPower.judgement}');
-    }
   }
 
   @override
@@ -542,7 +461,7 @@ class _InputOutputCharacteristicsTableState
           valueListenable: permissions,
           builder: (context, permission, _) {
             final isEditable =
-                editMode == 1 && (permission == 1 || permission == 2);
+                editMode == 1 && permission <= 2;
             //final isHeaderEditable = editMode == 1 && permission == 1;
             final isHeaderEditable = false;
 
@@ -828,16 +747,20 @@ class _InputOutputCharacteristicsTableState
               final item = widget
                   .inputOutputCharacteristics.inputOutputCharacteristicsSide[0];
 
-              // 獲取正確的單位
-              String leftPinUnit = globalInputOutputSpec?.leftPinUnit ?? 'kVA';
-              String leftPoutUnit = globalInputOutputSpec?.leftPoutUnit ?? 'kW';
+              // Use widget.spec first, then globalInputOutputSpec, then default values
+              final leftPinUnitDisplay = widget.spec?.leftPinUnit ??
+                  globalInputOutputSpec?.leftPinUnit ??
+                  'kVA';
+              final leftPoutUnitDisplay = widget.spec?.leftPoutUnit ??
+                  globalInputOutputSpec?.leftPoutUnit ??
+                  'kW';
 
               lRow = DataRow(
                 cells: [
                   editableCell("L_0", item.side, false),
                   editableCell("L_3",
                       item.totalInputPower.value.toStringAsFixed(2), isEditable,
-                      suffix: ' $leftPinUnit'),
+                      suffix: ' $leftPinUnitDisplay'),
                   editableCell("L_4",
                       item.outputVoltage.value.toStringAsFixed(2), isEditable,
                       suffix: ' V'),
@@ -848,7 +771,7 @@ class _InputOutputCharacteristicsTableState
                       "L_6",
                       item.totalOutputPower.value.toStringAsFixed(2),
                       isEditable,
-                      suffix: ' $leftPoutUnit'),
+                      suffix: ' $leftPoutUnitDisplay'),
                   DataCell(
                     Center(
                       child: isEditable
@@ -905,18 +828,20 @@ class _InputOutputCharacteristicsTableState
               final item = widget
                   .inputOutputCharacteristics.inputOutputCharacteristicsSide[1];
 
-              // 獲取正確的單位
-              String rightPinUnit =
-                  globalInputOutputSpec?.rightPinUnit ?? 'kVA';
-              String rightPoutUnit =
-                  globalInputOutputSpec?.rightPoutUnit ?? 'kW';
+              // Use widget.spec first, then globalInputOutputSpec, then default values
+              final rightPinUnitDisplay = widget.spec?.rightPinUnit ??
+                  globalInputOutputSpec?.rightPinUnit ??
+                  'kVA';
+              final rightPoutUnitDisplay = widget.spec?.rightPoutUnit ??
+                  globalInputOutputSpec?.rightPoutUnit ??
+                  'kW';
 
               rRow = DataRow(
                 cells: [
                   editableCell("R_0", item.side, false),
                   editableCell("R_3",
                       item.totalInputPower.value.toStringAsFixed(2), isEditable,
-                      suffix: ' $rightPinUnit'),
+                      suffix: ' $rightPinUnitDisplay'),
                   editableCell("R_4",
                       item.outputVoltage.value.toStringAsFixed(2), isEditable,
                       suffix: ' V'),
@@ -927,7 +852,7 @@ class _InputOutputCharacteristicsTableState
                       "R_6",
                       item.totalOutputPower.value.toStringAsFixed(2),
                       isEditable,
-                      suffix: ' $rightPoutUnit'),
+                      suffix: ' $rightPoutUnitDisplay'),
                   DataCell(
                     Center(
                       child: isEditable

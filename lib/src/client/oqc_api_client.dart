@@ -3,13 +3,15 @@ import 'package:http/http.dart' as http;
 import 'package:zerova_oqc_report/src/report/model/input_output_characteristics.dart';
 import 'package:zerova_oqc_report/src/report/model/protection_function_test_result.dart';
 import 'package:zerova_oqc_report/src/report/model/software_version.dart';
+import 'package:zerova_oqc_report/src/config/flavor_config.dart';
 
 class OqcApiClient {
-  final String baseUrl = "http://api.ztmn.com/zapi";
+  final String baseUrl;
   final String token =
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiWmVyb3ZhX09RQyJ9.-glMWnDu11Wm93OFdvRmyrwP2KnQY3J-yUS_W4QZm-k";
 
-  OqcApiClient();
+  OqcApiClient({String? baseUrl})
+      : baseUrl = baseUrl ?? FlavorConfig.apiBaseUrl;
 
   Future<List<dynamic>> fetchAndSaveOqcData(String serialNumber) async {
     final url = Uri.parse("$baseUrl/OQC");
@@ -31,7 +33,8 @@ class OqcApiClient {
       } else {
         print("無法取得資料，狀態碼: ${response.statusCode}");
         print("回應內容: ${response.body}");
-        throw Exception("status code ${response.statusCode} response.body: ${response.body}");
+        throw Exception(
+            "status code ${response.statusCode} response.body: ${response.body}");
       }
     } catch (e) {
       print("發生錯誤: $e");
@@ -59,7 +62,8 @@ class OqcApiClient {
       } else {
         print("無法取得資料，狀態碼: ${response.statusCode}");
         print("回應內容: ${response.body}");
-        throw Exception("status code ${response.statusCode} response.body: ${response.body}");
+        throw Exception(
+            "status code ${response.statusCode} response.body: ${response.body}");
       }
     } catch (e) {
       print("發生錯誤: $e");
@@ -87,7 +91,8 @@ class OqcApiClient {
       } else {
         print("無法取得資料，狀態碼: ${response.statusCode}");
         print("回應內容: ${response.body}");
-        throw Exception("status code ${response.statusCode} response.body: ${response.body}");
+        throw Exception(
+            "status code ${response.statusCode} response.body: ${response.body}");
       }
     } catch (e) {
       print("發生錯誤: $e");

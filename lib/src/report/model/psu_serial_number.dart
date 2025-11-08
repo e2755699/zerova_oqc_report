@@ -6,18 +6,22 @@ class Psuserialnumber {
   /// 從 JSON 數據清單提取並生成多筆 PSU SN
   static Psuserialnumber fromJsonList(List<dynamic> data) {
     List<SerialNumber> serialNumbers = [];
+    Set<String> seenValues = {}; // 用來追蹤已出現過的 SN
     double spec = 12;
     for (var item in data) {
       String? spcDesc = item['ITEM_PART_SPECS'];
       String? spcValue = item['ITEM_PART_SN']; // 確保 spcValue 是 String 類型
 
       if (spcDesc != null && spcValue != null && spcDesc.contains("CHARGING MODULE")) {
-        serialNumbers.add(SerialNumber(
-          spec: spec,
-          value: spcValue,
-          key: "PSU SN",
-          name: "PSU",
-        ));
+        if (!seenValues.contains(spcValue)) {
+          seenValues.add(spcValue); // 加入已處理的 SN
+          serialNumbers.add(SerialNumber(
+            spec: spec,
+            value: spcValue,
+            key: "PSU SN",
+            name: "PSU",
+          ));
+        }
       }
     }
 

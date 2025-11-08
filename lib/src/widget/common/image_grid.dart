@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:zerova_oqc_report/src/widget/common/image_preview_dialog.dart';
+import 'package:zerova_oqc_report/src/widget/common/styled_card.dart';
 import 'package:path/path.dart' as path;
 
 class ImageGrid extends StatefulWidget {
@@ -51,6 +52,9 @@ class _ImageGridState extends State<ImageGrid> {
   }
 
   void _loadImages() async {
+    setState(() {
+      _imagePaths.clear();
+    });
     final picturesPath = await _getPicturesPath();
     final directory = Directory(path.join(picturesPath, widget.imagePath));
 
@@ -63,6 +67,15 @@ class _ImageGridState extends State<ImageGrid> {
               file.path.toLowerCase().endsWith('.png'))
           .map((file) => file.path)
           .toList();
+
+      // 🖨️ 偵錯輸出：列出所有找到的檔案路徑
+      //print("📂 掃描資料夾: ${directory.path}");
+      if (files.isEmpty) {
+        //print("⚠️ 沒有找到任何圖片檔案");
+      } else {
+        // files found; keeping silent to avoid verbose logs
+      }
+
       setState(() {
         _imagePaths.clear();
         _imagePaths.addAll(files);
@@ -83,7 +96,10 @@ class _ImageGridState extends State<ImageGrid> {
         ? (_imagePaths.length / widget.columns).ceil()
         : 2;
     return Table(
-      border: TableBorder.all(),
+      border: TableBorder.all(
+        color: AppColors.lightBlueColor,
+        width: 1,
+      ),
       children: List.generate(
         rows,
         (rowIndex) => TableRow(
@@ -97,9 +113,15 @@ class _ImageGridState extends State<ImageGrid> {
                   child: Container(
                     height: widget.cellHeight,
                     padding: const EdgeInsets.all(8),
-                    child: Image.file(
-                      File(_imagePaths[index]),
-                      fit: BoxFit.contain,
+                    child: Builder(
+                      builder: (context) {
+                        final filePath = _imagePaths[index];
+                        //print("📷 嘗試載入圖片: $filePath");
+                        return Image.file(
+                          File(filePath),
+                          fit: BoxFit.contain,
+                        );
+                      },
                     ),
                   ),
                 );

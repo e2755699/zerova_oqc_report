@@ -6,11 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:zerova_oqc_report/src/utils/image_path_helper.dart';
-import 'package:zerova_oqc_report/src/widget/camera/image_picker_page.dart';
 import 'package:zerova_oqc_report/src/widget/camera/image_picker_page_new.dart';
 import 'package:zerova_oqc_report/src/widget/common/main_layout.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
+import 'package:zerova_oqc_report/src/repo/sharepoint_uploader.dart';
+import 'package:zerova_oqc_report/src/service/compare_image_service.dart';
+import 'package:go_router/go_router.dart';
+import 'package:path/path.dart' as p;
 
 class CameraPage extends StatefulWidget {
   final int packagingOrAttachment; // 0:Packaging  1:Attachment
@@ -50,14 +51,37 @@ class _CameraPageState extends State<CameraPage> with ImagePageHelper {
   String? _selectedImagePath;
   List<String> _imagePaths = [];
   Map<String, String> _pickedPhotoMap = {};
+  final CompareImageService _compareImageService = CompareImageService();
 
   @override
   void initState() {
     super.initState();
     WidgetsFlutterBinding.ensureInitialized();
     _fetchCameras().then((_) => _initializeCamera());
-    _loadImages();
-    _loadPickedPhotoMap();  // ← 加這個
+    if (widget.packagingOrAttachment == 1) {
+      //bill7
+      SharePointUploader(uploadOrDownload: 3, sn: widget.sn, model: '')
+          .startAuthorization(
+        categoryTranslations: {
+          //"packageing_photo": "Packageing Photo ",
+          "appearance_photo": "Appearance Photo ",
+          //"oqc_report": "OQC Report ",
+        },
+      );
+      _loadImages();
+    } else if (widget.packagingOrAttachment == 0) {
+      //bill8
+      SharePointUploader(uploadOrDownload: 2, sn: widget.sn, model: '')
+          .startAuthorization(
+        categoryTranslations: {
+          "packageing_photo": "Packageing Photo ",
+          //"appearance_photo": "Appearance Photo ",
+          //"oqc_report": "OQC Report ",
+        },
+      );
+      _loadPackageImages();
+    }
+    _loadPickedPhotoMap(); // ← 加這個
   }
 
   @override
@@ -105,6 +129,36 @@ class _CameraPageState extends State<CameraPage> with ImagePageHelper {
     // Filter out the images from the directory (e.g., .jpg, .png)
     final imageFiles = files
         .where((file) {
+          if (file is File) {
+            final ext = file.path.toLowerCase();
+            return ext.endsWith('.jpg') ||
+                ext.endsWith('.jpeg') ||
+                ext.endsWith('.png');
+          }
+          return false;
+        })
+        .map((file) => file.path)
+        .toList();
+
+    if (mounted) {
+      setState(() {
+        _imagePaths = imageFiles;
+        // 如果還沒選過，預設選第一張比對圖
+        if (_selectedImagePath == null && imageFiles.isNotEmpty) {
+          _selectedImagePath = imageFiles.first;
+        }
+      });
+    }
+  }
+
+  Future<void> _loadPackageImages() async {
+    final String picturesPath = await getUserComparePackagePath(widget.model);
+    final directory = Directory(picturesPath);
+    final List<FileSystemEntity> files = directory.listSync();
+
+    // Filter out the images from the directory (e.g., .jpg, .png)
+    final imageFiles = files
+        .where((file) {
           return file is File &&
               (file.path.endsWith('.jpg') ||
                   file.path.endsWith('.jpeg') ||
@@ -125,14 +179,21 @@ class _CameraPageState extends State<CameraPage> with ImagePageHelper {
   }
 
   Future<void> _loadPickedPhotoMap() async {
-    final prefs = await SharedPreferences.getInstance();
-    final encoded = prefs.getString('pickedPhotoMap');
-    if (encoded != null) {
-      setState(() {
-        final decoded = jsonDecode(encoded);
-        _pickedPhotoMap = Map<String, String>.from(decoded);
-      });
-    }
+    final mappings = await _compareImageService.loadImageMappings(
+      widget.model,
+      widget.sn,
+    );
+    setState(() {
+      _pickedPhotoMap = mappings;
+    });
+  }
+
+  Future<void> _savePickedPhotoMap() async {
+    await _compareImageService.saveImageMappings(
+      widget.model,
+      widget.sn,
+      _pickedPhotoMap,
+    );
   }
 
   Future<void> _initializeCamera() async {
@@ -239,12 +300,6 @@ class _CameraPageState extends State<CameraPage> with ImagePageHelper {
     );
   }
 
-  Future<void> _savePickedPhotoMap() async {
-    final prefs = await SharedPreferences.getInstance();
-    final encoded = jsonEncode(_pickedPhotoMap);
-    await prefs.setString('pickedPhotoMap', encoded);
-  }
-
   Future<void> _takePicture() async {
     if (_initialized && _cameraId >= 0) {
       if (!_previewPaused) {
@@ -337,146 +392,246 @@ class _CameraPageState extends State<CameraPage> with ImagePageHelper {
   final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>();
 
+  Future<void> printOldSelectedPhoto(String model, String sn) async {
+    final mappings = await _compareImageService.loadImageMappings(model, sn);
+
+    print('🔍 查詢 Firebase 映射: model = $model, sn = $sn');
+    if (mappings.isNotEmpty) {
+      print('📷 舊的參考照片與已選照片對應:');
+      mappings.forEach((comparePhotoPath, pickedPhotoPath) {
+        print('  比對照片: $comparePhotoPath');
+        print('  選擇照片: $pickedPhotoPath');
+      });
+    } else {
+      print('⚠️ 沒有找到舊的參考照片');
+    }
+  }
+
+  Future<void> savePickedPhotoToLocalFolder(
+    String originalPath,
+    String sn,
+    int packagingOrAttachment,
+  ) async {
+    print('📁 originalPath：$originalPath');
+    final originalFile = File(originalPath);
+    final fileName = p.basename(originalPath); // 像是 123.jpg
+
+    final folderType = packagingOrAttachment == 0 ? 'Packaging' : 'Attachment';
+
+    final String picturesPath = await getOrCreateUserZerovaPath();
+    final String allPhotosPackagingPath =
+        p.join(picturesPath, 'Selected Photos', sn, folderType);
+
+    final targetDir = Directory(allPhotosPackagingPath);
+
+    await printOldSelectedPhoto(widget.model, sn);
+
+    if (!await targetDir.exists()) {
+      await targetDir.create(recursive: true);
+    }
+
+    final newFile = File(p.join(targetDir.path, fileName));
+    await originalFile.copy(newFile.path);
+
+    print('✅ 已儲存 $fileName 到 ${targetDir.path}');
+    print('📁 新檔案完整路徑：${newFile.path}'); // <--- 這行是你要的印出新路徑
+  }
+
+  Future<bool> _onWillPop() async {
+    // 假設你有 _pickedPhotoMap 紀錄選擇狀態
+    bool allSelected =
+        _imagePaths.every((path) => _pickedPhotoMap.containsKey(path));
+
+    if (allSelected) {
+      return true;
+    } else {
+      bool? confirm = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(context.tr('check_photo_message'),
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+          content: Text(context.tr('return_page_message')),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(context.tr('no')),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(context.tr('yes')),
+            ),
+          ],
+        ),
+      );
+      return confirm ?? false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MainLayout(
-      title: context.tr('camera'),
-      body: ListView(
-        children: <Widget>[
-          if (_cameras.isEmpty)
-            ElevatedButton(
-              onPressed: _fetchCameras,
-              child: Text(context.tr('recheck_cameras')),
+    return WillPopScope(
+        onWillPop: _onWillPop, // 攔截返回事件
+        child: MainLayout(
+          title: context.tr('camera'),
+          leading: FittedBox(
+            fit: BoxFit.cover,
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              icon: const Icon(Icons.arrow_back_outlined),
+              onPressed: () async {
+                bool shouldPop = await _onWillPop();
+                if (shouldPop) {
+                  context.pop();
+                }
+              },
             ),
-          if (_cameras.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Row(
-                children: <Widget>[
-                  // 左邊：比對用圖片
-                  if (_selectedImagePath != null)
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Container(
-                          constraints: const BoxConstraints(maxHeight: 500),
-                          child: Image.file(
-                            File(_selectedImagePath!),
-                            fit: BoxFit.contain,
+          ),
+          body: ListView(
+            children: <Widget>[
+              if (_cameras.isEmpty)
+                ElevatedButton(
+                  onPressed: _fetchCameras,
+                  child: Text(context.tr('recheck_cameras')),
+                ),
+              if (_cameras.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Row(
+                    children: <Widget>[
+                      // 左邊：比對用圖片
+                      if (_selectedImagePath != null)
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Container(
+                              constraints: const BoxConstraints(maxHeight: 500),
+                              child: Image.file(
+                                File(_selectedImagePath!),
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                      // 右邊：選的圖片
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                          child: Container(
+                            constraints: const BoxConstraints(maxHeight: 500),
+                            child: _pickedPhotoMap[_selectedImagePath] != null
+                                ? Image.file(
+                                    File(_pickedPhotoMap[_selectedImagePath]!),
+                                    fit: BoxFit.contain,
+                                  )
+                                : Center(
+                                    child:
+                                        Text(context.tr('no_photo_selected'))),
                           ),
                         ),
                       ),
-                    ),
-
-                  // 右邊：選的圖片
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      child: Container(
-                        constraints: const BoxConstraints(maxHeight: 500),
-                        child: _pickedPhotoMap[_selectedImagePath] != null
-                            ? Image.file(
-                          File(_pickedPhotoMap[_selectedImagePath]!),
-                          fit: BoxFit.contain,
-                        )
-                            : const Center(child: Text('尚未選擇照片')),
-                      ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-
-          // 按鈕區塊
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              if (widget.packagingOrAttachment != 0)
-                DropdownButton<String>(
-                  hint: Text(context.tr('select_image')),
-                  value: _selectedImagePath,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _selectedImagePath = newValue;
-                    });
-                  },
-                  items: _imagePaths.map<DropdownMenuItem<String>>((String path) {
-                    return DropdownMenuItem<String>(
-                      value: path,
-                      child: Text(path.split('\\').last),
-                    );
-                  }).toList(),
                 ),
-              /*ElevatedButton.icon(
-                onPressed: _initialized ? _takePicture : null,
-                icon: const Icon(Icons.camera_alt_rounded),
-                label: Text(
-                  _previewPaused
-                      ? context.tr('next_photo')
-                      : context.tr('take_photo'),
-                ),
-              ),
-              const SizedBox(width: 5),*/
-              ElevatedButton.icon(
-                onPressed: () async {
-                  final result = await Navigator.push<String>(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ImagePickerPageNew(
-                        packagingOrAttachment: widget.packagingOrAttachment,
-                        sn: widget.sn,
-                      ),
-                    ),
-                  );
 
-                  if (result != null && mounted && _selectedImagePath != null) {
-                    //print('收到選取圖片路徑: $result');
-                    setState(() {
-                      _pickedPhotoMap[_selectedImagePath!] = result;
-                      _savePickedPhotoMap();
-                    });
-                  }
-
-                },
-                icon: const Icon(Icons.photo_library),
-                label: Text(context.tr('select_image')),
-              ),
-              /*if (_previewPaused && widget.packagingOrAttachment != 0)
-                ElevatedButton.icon(
-                  onPressed: () async {
-                    await CameraPlatform.instance.resumePreview(_cameraId);
-                    if (mounted) {
+              // 按鈕區塊
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  //if (widget.packagingOrAttachment != 0)
+                  DropdownButton<String>(
+                    hint: Text(context.tr('select_image')),
+                    value: _selectedImagePath,
+                    onChanged: (String? newValue) {
                       setState(() {
-                        _previewPaused = false;
+                        _selectedImagePath = newValue;
                       });
-                    }
-                  },
-                  icon: const Icon(Icons.camera_alt_rounded),
-                  label: Text(context.tr('this_photo')),
-                ),
-              Builder(
-                builder: (BuildContext context) {
-                  return ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.push(
+                    },
+                    items: _imagePaths
+                        .map<DropdownMenuItem<String>>((String path) {
+                      final fileName = path.split('\\').last;
+                      final hasPicked = _pickedPhotoMap[path] != null;
+
+                      return DropdownMenuItem<String>(
+                        value: path,
+                        child: Row(
+                          children: [
+                            if (hasPicked)
+                              const Icon(Icons.check_circle,
+                                  color: Colors.green, size: 18),
+                            if (hasPicked) const SizedBox(width: 6),
+                            Text(fileName),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      final result = await Navigator.push<String>(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ImagePickerPage(
+                          builder: (context) => ImagePickerPageNew(
                             packagingOrAttachment: widget.packagingOrAttachment,
                             sn: widget.sn,
+                            model: widget.model,
                           ),
                         ),
                       );
+
+                      if (result != null &&
+                          mounted &&
+                          _selectedImagePath != null) {
+                        // 1. 先取出舊的照片路徑（如果有）
+                        final oldPhotoPath =
+                            _pickedPhotoMap[_selectedImagePath!];
+
+                        // 2. 如果舊照片存在，就刪除本地舊照片檔案
+                        if (oldPhotoPath != null) {
+                          // 先檢查是否有其他參考照片還在用這個檔案
+                          bool isStillUsedElsewhere =
+                              _pickedPhotoMap.entries.any((entry) {
+                            return entry.key != _selectedImagePath &&
+                                entry.value == oldPhotoPath;
+                          });
+
+                          if (!isStillUsedElsewhere) {
+                            // 把路徑中的 "All Photos" 換成 "Selected Photos"
+                            final selectedPhotoPath = oldPhotoPath.replaceFirst(
+                                'All Photos', 'Selected Photos');
+
+                            final oldFile = File(selectedPhotoPath);
+                            if (await oldFile.exists()) {
+                              await oldFile.delete();
+                              print(
+                                  '🗑️ 已刪除舊照片（Selected Photos資料夾）: $selectedPhotoPath');
+                            } else {
+                              print(
+                                  '⚠️ Selected Photos資料夾找不到要刪除的檔案: $selectedPhotoPath');
+                            }
+                          }
+                        }
+
+                        // 3. 更新 _pickedPhotoMap（用新的照片路徑）
+                        setState(() {
+                          _pickedPhotoMap[_selectedImagePath!] = result;
+                        });
+
+                        // 4. 寫入 SharedPreferences
+                        await _savePickedPhotoMap();
+
+                        // 5. 把新的照片複製到本地資料夾
+                        await savePickedPhotoToLocalFolder(
+                            result, widget.sn, widget.packagingOrAttachment);
+                      }
                     },
-                    icon: const Icon(Icons.image),
-                    label: Text(context.tr('browse_photos')),
-                  );
-                },
-              ),*/
+                    icon: const Icon(Icons.photo_library),
+                    label: Text(context.tr('select_image')),
+                  ),
+                ],
+              ),
             ],
           ),
-        ],
-      ),
-    );
+        ));
   }
 }

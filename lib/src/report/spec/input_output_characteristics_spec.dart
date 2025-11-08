@@ -1,5 +1,22 @@
-// 這邊先放你的 InputOutputCharacteristicsSpec 類別
-// 假設它長這樣（你可以換成你自己完整的實作）
+// Define power unit enum
+enum PowerUnit {
+  kW('kW'),
+  kVA('kVA');
+
+  const PowerUnit(this.displayName);
+  final String displayName;
+
+  static PowerUnit fromString(String value) {
+    switch (value) {
+      case 'kW':
+        return PowerUnit.kW;
+      case 'kVA':
+        return PowerUnit.kVA;
+      default:
+        return PowerUnit.kW; // Default value
+    }
+  }
+}
 
 class InputOutputCharacteristicsSpec {
   double leftVinLowerbound;
@@ -28,7 +45,7 @@ class InputOutputCharacteristicsSpec {
   double rightPoutLowerbound;
   double rightPoutUpperbound;
 
-  // 新增：Pin 和 Pout 的單位選擇
+  // Unit fields for Pin and Pout (separate for left and right)
   String leftPinUnit;
   String leftPoutUnit;
   String rightPinUnit;
@@ -59,7 +76,7 @@ class InputOutputCharacteristicsSpec {
     required this.rightIoutUpperbound,
     required this.rightPoutLowerbound,
     required this.rightPoutUpperbound,
-    // Pin 預設 kVA，Pout 預設 kW
+    // Default: Pin=kVA, Pout=kW
     this.leftPinUnit = 'kVA',
     this.leftPoutUnit = 'kW',
     this.rightPinUnit = 'kVA',
@@ -98,7 +115,7 @@ class InputOutputCharacteristicsSpec {
       rightIoutUpperbound: parseDouble(json['RIoutUB']),
       rightPoutLowerbound: parseDouble(json['RPoutLB']),
       rightPoutUpperbound: parseDouble(json['RPoutUB']),
-      // 讀取單位，若無則使用預設值
+      // Read units, use default if not present
       leftPinUnit: json['LPinUnit']?.toString() ?? 'kVA',
       leftPoutUnit: json['LPoutUnit']?.toString() ?? 'kW',
       rightPinUnit: json['RPinUnit']?.toString() ?? 'kVA',
@@ -169,7 +186,7 @@ class InputOutputCharacteristicsSpec {
   }
 
   Map<String, dynamic> toJson() => {
-        // 左側欄位
+        // Left side fields
         'LVinLB': leftVinLowerbound,
         'LVinUB': leftVinUpperbound,
         'LIinLB': leftIinLowerbound,
@@ -183,7 +200,7 @@ class InputOutputCharacteristicsSpec {
         'LPoutLB': leftPoutLowerbound,
         'LPoutUB': leftPoutUpperbound,
 
-        // 右側欄位
+        // Right side fields
         'RVinLB': rightVinLowerbound,
         'RVinUB': rightVinUpperbound,
         'RIinLB': rightIinLowerbound,
@@ -197,7 +214,7 @@ class InputOutputCharacteristicsSpec {
         'RPoutLB': rightPoutLowerbound,
         'RPoutUB': rightPoutUpperbound,
 
-        // 單位欄位
+        // Unit fields
         'LPinUnit': leftPinUnit,
         'LPoutUnit': leftPoutUnit,
         'RPinUnit': rightPinUnit,
@@ -223,5 +240,5 @@ class InputOutputCharacteristicsSpec {
   }
 }
 
-// 在檔案最上層宣告一個全域變數
+// Global variable declaration at top level
 InputOutputCharacteristicsSpec? globalInputOutputSpec;

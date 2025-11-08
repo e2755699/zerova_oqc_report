@@ -259,6 +259,30 @@ class _InputOutputCharacteristicsTabState
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
+
+            // 單位選擇區域
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Theme.of(context).dividerColor),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '單位設定',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 12),
+                  // Note: Unit selectors are now in left/right sections
+                  const SizedBox(height: 16),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
