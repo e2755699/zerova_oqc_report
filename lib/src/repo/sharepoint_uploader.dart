@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:path/path.dart' as path;
 import '../config/config_manager.dart';
-import '../config/flavor_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 
@@ -26,13 +25,13 @@ class SharePointUploader {
   SharePointUploader(
       {required this.uploadOrDownload, required this.sn, required this.model});
 
-  /// Build SharePoint path with flavor segment after Jackalope
+  /// Build SharePoint path with factory segment after Jackalope
   /// For Taiwan: "Jackalope/外觀參考照片/..."
   /// For Vietnam: "Jackalope/vn/外觀參考照片/..."
   String _buildSharePointPath(String path) {
     // Path format: "Jackalope/外觀參考照片/..." or "Jackalope/All Photos/..."
-    // We need to insert flavor segment after "Jackalope/"
-    final flavorSegment = FlavorConfig.sharePointFlavorSegment;
+    // We need to insert factory segment after "Jackalope/"
+    final flavorSegment = ConfigManager.sharePointFlavorSegment;
     if (flavorSegment.isEmpty) {
       return path; // Taiwan: no change
     }

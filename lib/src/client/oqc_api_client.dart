@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:zerova_oqc_report/src/report/model/input_output_characteristics.dart';
 import 'package:zerova_oqc_report/src/report/model/protection_function_test_result.dart';
 import 'package:zerova_oqc_report/src/report/model/software_version.dart';
-import 'package:zerova_oqc_report/src/config/flavor_config.dart';
+import 'package:zerova_oqc_report/src/config/config_manager.dart';
 
 class OqcApiClient {
   final String baseUrl;
@@ -11,7 +11,7 @@ class OqcApiClient {
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiWmVyb3ZhX09RQyJ9.-glMWnDu11Wm93OFdvRmyrwP2KnQY3J-yUS_W4QZm-k";
 
   OqcApiClient({String? baseUrl})
-      : baseUrl = baseUrl ?? FlavorConfig.apiBaseUrl;
+      : baseUrl = baseUrl ?? ConfigManager.apiBaseUrl;
 
   Future<List<dynamic>> fetchAndSaveOqcData(String serialNumber) async {
     final url = Uri.parse("$baseUrl/OQC");

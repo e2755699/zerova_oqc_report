@@ -15,6 +15,7 @@ import 'package:zerova_oqc_report/src/utils/permission_helper.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zerova_oqc_report/src/report/spec/account_data.dart';
+import 'package:zerova_oqc_report/src/config/config_manager.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -30,12 +31,48 @@ class _HomePageState extends State<HomePage> with LoadFileHelper<HomePage> {
   String? savedAccount;
   String? savedPassword;
   String appVersion = ''; // 應用版本號
+  String _currentFactory = 'tw'; // Factory selection
 
   @override
   void initState() {
     super.initState();
     loadSavedLogin();
     loadAppVersion();
+    _loadFactory();
+  }
+
+  Future<void> _loadFactory() async {
+    final factory = await ConfigManager.getFactory();
+    setState(() {
+      _currentFactory = factory;
+    });
+  }
+
+  Future<void> _setFactory(String factory) async {
+    try {
+      await ConfigManager.setFactory(factory);
+      await ConfigManager.refreshFactory();
+      setState(() {
+        _currentFactory = factory;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('工廠已切換至: ${factory == "tw" ? "台灣廠" : "越南廠"}'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('切換失敗: $e'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
   }
 
   Future<void> loadAppVersion() async {
@@ -130,6 +167,58 @@ class _HomePageState extends State<HomePage> with LoadFileHelper<HomePage> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        // Factory selector
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.factory, color: Colors.blue),
+              const SizedBox(width: 8),
+              Text(
+                '工廠:',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[700],
+                ),
+              ),
+              const SizedBox(width: 8),
+              DropdownButton<String>(
+                value: _currentFactory,
+                underline: Container(),
+                elevation: 4,
+                items: const [
+                  DropdownMenuItem(
+                    value: 'tw',
+                    child: Text('台灣廠 (TW)'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'vn',
+                    child: Text('越南廠 (VN)'),
+                  ),
+                ],
+                onChanged: (String? newFactory) {
+                  if (newFactory != null && newFactory != _currentFactory) {
+                    _setFactory(newFactory);
+                  }
+                },
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 40),
         Image.asset('assets/logo.png', height: 300),
         const SizedBox(height: 40),
         SizedBox(
@@ -212,6 +301,58 @@ class _HomePageState extends State<HomePage> with LoadFileHelper<HomePage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          // Factory selector
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.factory, color: Colors.blue),
+                const SizedBox(width: 8),
+                Text(
+                  '工廠:',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[700],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                DropdownButton<String>(
+                  value: _currentFactory,
+                  underline: Container(),
+                  elevation: 4,
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'tw',
+                      child: Text('台灣廠 (TW)'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'vn',
+                      child: Text('越南廠 (VN)'),
+                    ),
+                  ],
+                  onChanged: (String? newFactory) {
+                    if (newFactory != null && newFactory != _currentFactory) {
+                      _setFactory(newFactory);
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 40),
           Image.asset('assets/logo.png', height: 300),
           const SizedBox(height: 40),
 

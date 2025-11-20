@@ -1,9 +1,0 @@
-{
-  "factory": "tw",
-  "clientId": "YOUR_CLIENT_ID",
-  "clientSecret": "YOUR_CLIENT_SECRET",
-  "tenantId": "YOUR_TENANT_ID",
-  "redirectUri": "http://localhost:8000/callback",
-  "siteId": "YOUR_SITE_ID",
-  "driveId": "YOUR_DRIVE_ID"
-} 
