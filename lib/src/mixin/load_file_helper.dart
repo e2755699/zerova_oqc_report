@@ -40,7 +40,7 @@ mixin LoadFileHelper<K extends StatefulWidget> on State<K> {
           Platform.environment['HOME'] ?? '', 'Test Result', 'Zerova', 'logs');
     }
 
-    //bill2
+    //download sharepoint
     await SharePointUploader(uploadOrDownload: 1, sn: '', model: model).startAuthorization(
       categoryTranslations: {
         "packageing_photo": "Packageing Photo ",
