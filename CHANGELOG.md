@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0] - 2025-11-21
+
+### Added
+- SharePoint 檔案上傳與下載功能優化
+- 測試報告載入功能改善
+
+### Changed
+- 優化檔案處理邏輯
+- 改善 SharePoint 路徑建構機制
+
+### Fixed
+- 修正檔案載入相關問題
+- 修正 SharePoint 上傳器錯誤處理
+
 ## [2025-11-08]
 
 ### Added
