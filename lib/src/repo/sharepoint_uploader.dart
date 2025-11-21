@@ -80,13 +80,6 @@ class SharePointUploader {
     Function(String, int, int)? onProgressUpdate,
     required Map<String, String> categoryTranslations,
   }) async {
-    // Check if in debug mode and bypass SharePoint operations
-    if (kDebugMode) {
-      print("Debug Mode: Bypassing SharePoint operations");
-      _simulateDebugProgress(onProgressUpdate, categoryTranslations);
-      return;
-    }
-
     // final token = await getAccessToken(refreshToken : "1.AXIAEnOpZTgOx0q5I043N_tALqpoaaYGC7VGvgcUU6orVCfDAFxyAA.AgABAwEAAABVrSpeuWamRam2jAF1XRQEAwDs_wUA9P8tL7d3tSQwcqZlHcX4D-r5OI1gb2KFFQsjfzH2CNsDN6XsmDHkNBb8OC4J_HVjC8SbftdAp6YNHrO6tjMnbKqiTYISkrRQTOVxQBQfxCbMBlvwJcrcbRXKVoIZuWf8EkQimNIAxWVatTT72TfEc1dKs-rpjnEUj4XR6Vjp4Gb4mC2xbXRbp47Y3nTA4VMIQh_12U9ahZsTaA61qZ8BRpxelQ3QTlKSAxOjrG1dF-kavOnV2DmtABXFUb_RPYe-PUKxaBjvqK5_48FtBjoP15f9foS1I-UHo1OSlnampXWzgACrwAkYRziqlbxKKhTja9nJcUXKZlaYZzjVGgwehji6AcQlPcwx-bfWpcNvZSPYOFt4PeYmkNoYQPlwrJElLesXOM3BvDpcn_-nZdJxa7D8wwpqNGWvPTJgg9Q_oPULOD8yvNGQZ76ufYJMWv6MIADhqLEWHlePlCa7ode9oAcTGhZtJd1gstQ7psueCX6-0k1Dv_v-UhZ51um7RrXdfc_H0ueH-0VKZmgaT_aUQ-G-fphWiN_uCw676LSadHBUP-wOwqQXbSdkOLsfKridjHtoouo6QucQZK5X4hWES8ZnKr9th4TjPduAgQ6qcyfpRZoHtCWOzYLA9oyZDiASTMRzvGBUGdlDrqn_08uz3qi7uByX4I9IsvVfyNGTrNfOhZYiK98lvJa_gmv3d5o5hqgYIt_gjHpBlIrvDcug8oHSG-N22QLV7OoGnxnmm215cg2y-UtArNvXuQg0WDmuqC56ANLNPrNnLMH8VcFeeckNkRy099ifcq3rwWsib__iWjiYrtaYUJgi33DtGMMX6_YmprSq0ySmAop-gkIV8w4GpFV1EiGykb7uqsSCQdKmYQoxExdZaCMbA5t0JQTJ0fI0a-_-seK0S1j6lB2Lav10-qqxLZUiVKOpf5kw8fQL6smLK8wXi5n-rCKB7BNfjBuhOYZf_avp63OuG8FHvvBQCP05i42s8W7txrHQqR-CFz8bsr8c7f3M26yRmUlo15sO20qq3wsll0FoVuYdX4k7fovl6dsmUGZAQF3Klb-fXPCG2J6gOXhDCzxoMBz0GEAyYxho1I2QGOb1BxUhfhHvfFEfg2sUNbi0YXMkYQE6cnpEjmz-ByIGyGXqaJfj4HU38hf5qXF2t-1ZCB8h3e7DE9AGj-yrr_Jmi0mdctlcDYppt8NYHdcYdF1mcPvgtpsch3w3nVpyOCJyusk5OjgxAaY8yiqHMB6wEvjsVsg74AoDg6rZlQXNQJ9f1kpjH9Xn26A2rpILsow4R-X5eCHrUzAFpZjF8kMigFyEKPrb4XJKc739DKO51Q36BmoMZ1LhBUrhMcRipBLVQtMSJMX3J_tNH0ua2gKXbp4tX620vam2D4s2mNJx2tG6kqd4krJAFmOd0_OLtCxwtLp9YmjfJWS-v0B_qE7V3eGsWblkqBg2O6FKjQEX18xrMdKHaLT1qKi_vd7C-xLeKIFErpT-SKAqRi15EH_sCIsUo1GwtF6kslI");
     // if (token != null) {
     //   print("Access Token 獲取成功，正在上傳/下載檔案...");
