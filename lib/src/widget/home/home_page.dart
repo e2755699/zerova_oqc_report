@@ -16,6 +16,7 @@ import 'package:zerova_oqc_report/src/utils/permission_helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zerova_oqc_report/src/report/spec/account_data.dart';
 import 'package:zerova_oqc_report/src/config/config_manager.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -76,10 +77,18 @@ class _HomePageState extends State<HomePage> with LoadFileHelper<HomePage> {
   }
 
   Future<void> loadAppVersion() async {
-    // 從pubspec.yaml讀取版本號，這裡暫時硬編碼為當前版本
-    setState(() {
-      appVersion = 'v2.2.0+1';
-    });
+    // Dynamically read version from pubspec.yaml
+    try {
+      final packageInfo = await PackageInfo.fromPlatform();
+      setState(() {
+        appVersion = 'v${packageInfo.version}';
+      });
+    } catch (e) {
+      // Fallback to hardcoded version if package info fails
+      setState(() {
+        appVersion = 'v3.0.0';
+      });
+    }
   }
 
   Future<void> loadSavedLogin() async {

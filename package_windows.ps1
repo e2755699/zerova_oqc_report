@@ -20,28 +20,18 @@ if ($pubspecContent -match 'version:\s*([\d.]+)\+(\d+)') {
     Write-Host "Using default version: $fullVersion" -ForegroundColor Yellow
 }
 
-# Check if build exists
+# Always build fresh release
+Write-Host "`nBuilding fresh Windows release..." -ForegroundColor Yellow
+flutter build windows --release
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Build failed!" -ForegroundColor Red
+    exit 1
+}
+Write-Host "  ✓ Build completed successfully" -ForegroundColor Green
+
+# Define paths
 $releaseDir = "build\windows\x64\runner\Release"
-$exePath = "$releaseDir\zerova_oqc_report.exe"
-
-if (-not (Test-Path $exePath)) {
-    Write-Host "`nBuild not found. Building Windows release..." -ForegroundColor Yellow
-    flutter build windows --release
-    
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "Build failed!" -ForegroundColor Red
-        exit 1
-    }
-} else {
-    Write-Host "`nUsing existing build..." -ForegroundColor Green
-    $buildTime = (Get-Item $exePath).LastWriteTime
-    Write-Host "  Build time: $buildTime" -ForegroundColor Gray
-}
-
-# Define paths (already defined above, but ensure it's set)
-if (-not $releaseDir) {
-    $releaseDir = "build\windows\x64\runner\Release"
-}
 $packageDir = "dist\Zerova_OQC_Report_$version"
 $zipFile = "dist\Zerova_OQC_Report_v${version}_Windows.zip"
 
